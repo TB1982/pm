@@ -40,6 +40,9 @@
             background-color: white;
             border: 3px solid #38bdf8;
         }
+        .timeline-dot.easter-egg {
+             border: 3px solid #ec4899;
+        }
     </style>
 </head>
 <body class="text-slate-700">
@@ -75,35 +78,35 @@
             {
                 name: "初版",
                 description: "建立專案基礎架構與核心頁面。",
-                file: "1.html",
+                file: "01.html",
                 tag: "基礎",
                 features: 1
             },
             {
                 name: "二版",
                 description: "追加部門分類，擴充內容組織。",
-                file: "2.html",
+                file: "02.html",
                 tag: "功能",
                 features: 2
             },
             {
                 name: "二版追加",
                 description: "細化部門內容，加入「工程」及「設計」部門。",
-                file: "2-1.html",
+                file: "02-1.html",
                 tag: "功能",
                 features: 3
             },
             {
                 name: "三版",
                 description: "為部門卡片加入滑鼠懸停渲染效果，提升互動性。",
-                file: "3.html",
+                file: "03.html",
                 tag: "樣式",
                 features: 3
             },
             {
                 name: "三版追加",
                 description: "首次整合圖表，加入「迭代演進」視覺化數據。",
-                file: "3-1.html",
+                file: "03-1.html",
                 tag: "圖表",
                 features: 4
             },
@@ -129,37 +132,53 @@
                 features: 6
             },
             {
-                name: "七版",
+                name: "七版追加樣式調整",
                 description: "全面調整 UI 樣式與色彩配置，優化視覺體驗。",
                 file: "7.html",
                 tag: "樣式",
                 features: 6
+            },
+            {
+                name: "Flash彩蛋",
+                description: "一個隱藏的驚喜！探索專案中的互動 Flash 彩蛋。",
+                file: "Flash1.html",
+                tag: "彩蛋",
+                features: 6 
+            },
+            {
+                name: "彩蛋說明",
+                description: "關於 Flash 彩蛋的背景故事與技術說明。",
+                file: "Flash1-1.html",
+                tag: "說明",
+                features: 6
             }
         ];
 
-        function getTagColor(tag) {
+        function getTagInfo(tag) {
             switch (tag) {
-                case '功能': return 'bg-blue-100 text-blue-800';
-                case '樣式': return 'bg-purple-100 text-purple-800';
-                case '圖表': return 'bg-green-100 text-green-800';
-                case '優化': return 'bg-yellow-100 text-yellow-800';
-                case '重構': return 'bg-red-100 text-red-800';
-                default: return 'bg-slate-100 text-slate-800';
+                case '功能': return { class: 'bg-blue-100 text-blue-800', dotClass: '' };
+                case '樣式': return { class: 'bg-purple-100 text-purple-800', dotClass: '' };
+                case '圖表': return { class: 'bg-green-100 text-green-800', dotClass: '' };
+                case '優化': return { class: 'bg-yellow-100 text-yellow-800', dotClass: '' };
+                case '重構': return { class: 'bg-red-100 text-red-800', dotClass: '' };
+                case '彩蛋': return { class: 'bg-pink-100 text-pink-800', dotClass: 'easter-egg' };
+                case '說明': return { class: 'bg-indigo-100 text-indigo-800', dotClass: 'easter-egg' };
+                default: return { class: 'bg-slate-100 text-slate-800', dotClass: '' };
             }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             const timelineContainer = document.getElementById('timeline-container');
             versions.forEach(version => {
-                const tagColor = getTagColor(version.tag);
+                const tagInfo = getTagInfo(version.tag);
                 const item = document.createElement('div');
                 item.className = 'timeline-item relative pl-8 pb-8';
                 item.innerHTML = `
-                    <div class="timeline-dot"></div>
+                    <div class="timeline-dot ${tagInfo.dotClass}"></div>
                     <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300">
                         <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-2">
                             <h3 class="text-xl font-bold text-slate-800">${version.name}</h3>
-                            <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full ${tagColor} mt-2 sm:mt-0">${version.tag}</span>
+                            <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full ${tagInfo.class} mt-2 sm:mt-0">${version.tag}</span>
                         </div>
                         <p class="text-slate-600 mb-4">${version.description}</p>
                         <a href="${version.file}" target="_blank" class="inline-block bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">
