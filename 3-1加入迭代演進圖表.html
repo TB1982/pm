@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>專案演化之路：從個人學習到組織變革</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- 
+        Chosen Palette: Energetic & Playful
+        Application Structure Plan: The SPA is designed as a vertical timeline infographic to narrate the project's evolution chronologically. This structure is optimal for showcasing a process unfolding over time. The user scrolls down to follow the journey through four key phases: 1) The Seed (Initial State), 2) The Catalyst (Turning Point), 3) The Pivot (Strategic Expansion), and 4) The Harvest (Final Value). This linear, story-driven approach makes the complex process of strategic project evolution easy to understand and follow.
+        Visualization & Content Choices:
+        - Project Journey: Goal: Organize/Change -> Vertical Timeline (HTML/CSS) -> Justification: The most intuitive way to represent a chronological evolution. NO SVG/Mermaid used.
+        - Stage Details: Goal: Inform -> Icon-enhanced Cards (HTML/CSS) -> Justification: Clearly presents the scope, value, and key PMP principles at each stage of the timeline.
+        - Scope Expansion: Goal: Compare -> "Before & After" Diagram (HTML/CSS) -> Justification: A simple visual metaphor to show the increase in stakeholder complexity and project scope.
+        - Value Transformation: Goal: Compare -> Bar Chart (Chart.js/Canvas) -> Justification: Quantifies the shift in project value from personal-focused metrics to organization-wide benefits, making the strategic pivot's impact tangible.
+        CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. 
+    -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc;
+            color: #073B4C;
+        }
+        .timeline-container {
+            position: relative;
+            margin: 2rem 0;
+        }
+        .timeline-container::after {
+            content: '';
+            position: absolute;
+            width: 4px;
+            background-color: #cbd5e1;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -2px;
+        }
+        .timeline-item {
+            padding: 1rem 2.5rem;
+            position: relative;
+            width: 50%;
+        }
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            right: -12px;
+            background-color: white;
+            border: 4px solid #118AB2;
+            top: 24px;
+            border-radius: 50%;
+            z-index: 1;
+        }
+        .timeline-left {
+            left: 0;
+        }
+        .timeline-right {
+            left: 50%;
+        }
+        .timeline-right::after {
+            left: -12px;
+        }
+        .timeline-content {
+            padding: 1.5rem;
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        @media screen and (max-width: 768px) {
+            .timeline-container::after {
+                left: 12px;
+            }
+            .timeline-item {
+                width: 100%;
+                padding-left: 4rem;
+                padding-right: 1rem;
+            }
+            .timeline-left, .timeline-right {
+                left: 0%;
+            }
+            .timeline-item::after {
+                left: 0;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <header class="text-center py-16 bg-white border-b">
+        <div class="container mx-auto px-6">
+            <h1 class="text-4xl md:text-5xl font-bold text-[#073B4C]">專案演化之路</h1>
+            <p class="mt-4 text-lg text-slate-600 max-w-3xl mx-auto">從一份個人經驗分享，到一場跨團隊的變革提案：一次價值驅動的調適性專案之旅。</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="timeline-container">
+
+            <div class="timeline-item timeline-left">
+                <div class="timeline-content">
+                    <div class="flex items-center mb-3">
+                        <span class="text-3xl mr-3">🌱</span>
+                        <h2 class="text-2xl font-bold text-[#118AB2]">第一階段：種子 (The Seed)</h2>
+                    </div>
+                    <h3 class="font-semibold mt-4">初始範疇：</h3>
+                    <p class="text-sm text-slate-600">為PM團隊製作一份基於個人AI協作經驗的分享報告。</p>
+                    <h3 class="font-semibold mt-3">核心價值：</h3>
+                    <p class="text-sm text-slate-600">個人知識內化、團隊經驗傳承。</p>
+                    <div class="mt-4 pt-3 border-t">
+                        <p class="text-xs font-bold text-slate-500">PMP視角：</p>
+                        <p class="text-sm text-slate-700">專案以**調適性(Adaptive)**方法啟動，為後續的演化保留了彈性空間。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item timeline-right">
+                <div class="timeline-content">
+                    <div class="flex items-center mb-3">
+                        <span class="text-3xl mr-3">💥</span>
+                        <h2 class="text-2xl font-bold text-[#FF6B6B]">第二階段：催化劑 (The Catalyst)</h2>
+                    </div>
+                    <h3 class="font-semibold mt-4">觸發事件：</h3>
+                    <p class="text-sm text-slate-600">AI成功交付了一份高品質、互動性、具備完整「響應式設計」的網頁原型。</p>
+                    <h3 class="font-semibold mt-3">關鍵覺察 (Aha! Moment)：</h3>
+                    <p class="text-sm text-slate-600">PM敏銳地意識到，此交付成果的價值遠超預期，具備衝擊前端工程與UI/UX設計工作流程的巨大潛力。</p>
+                    <div class="mt-4 pt-3 border-t">
+                        <p class="text-xs font-bold text-slate-500">PMP視角：</p>
+                        <p class="text-sm text-slate-700">**交付績效領域**的實踐，專案交付的成果反過來影響並改變了專案的未來方向。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item timeline-left">
+                <div class="timeline-content">
+                    <div class="flex items-center mb-3">
+                        <span class="text-3xl mr-3">🧭</span>
+                        <h2 class="text-2xl font-bold text-[#FFD166]">第三階段：轉向 (The Pivot)</h2>
+                    </div>
+                    <h3 class="font-semibold mt-4">策略決策：</h3>
+                    <p class="text-sm text-slate-600">提出**變更請求**，將分享會的目標與受眾從單一部門擴大至跨職能團隊。</p>
+                    <h3 class="font-semibold mt-3">範疇擴張：</h3>
+                    <div class="flex items-center justify-around mt-2 text-center">
+                        <div>
+                            <p class="text-xs font-semibold">初始範疇</p>
+                            <div class="w-16 h-16 rounded-full bg-blue-100 border-2 border-blue-400 flex items-center justify-center">PM</div>
+                        </div>
+                        <div class="text-3xl text-slate-400">→</div>
+                        <div>
+                             <p class="text-xs font-semibold">擴大範疇</p>
+                             <div class="relative w-24 h-24">
+                                <div class="absolute top-0 left-8 w-16 h-16 rounded-full bg-blue-100 border-2 border-blue-400 flex items-center justify-center">PM</div>
+                                <div class="absolute bottom-0 left-0 w-16 h-16 rounded-full bg-green-100 border-2 border-green-400 flex items-center justify-center">Eng</div>
+                                <div class="absolute bottom-0 right-0 w-16 h-16 rounded-full bg-yellow-100 border-2 border-yellow-400 flex items-center justify-center">Design</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t">
+                        <p class="text-xs font-bold text-slate-500">PMP視角：</p>
+                        <p class="text-sm text-slate-700">卓越的**利害關係人管理**與**變更管理**實踐，將範疇潛變的風險，轉化為策略擴張的機會。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline-item timeline-right">
+                <div class="timeline-content">
+                     <div class="flex items-center mb-3">
+                        <span class="text-3xl mr-3">🏆</span>
+                        <h2 class="text-2xl font-bold text-[#06D6A0]">第四階段：收穫 (The Harvest)</h2>
+                    </div>
+                    <h3 class="font-semibold mt-4">最終交付：</h3>
+                    <p class="text-sm text-slate-600">一份為PM、工程、設計團隊「量身裁適」的互動式網頁，成為一份寶貴的「組織過程資產」。</p>
+                    <h3 class="font-semibold mt-3">價值轉化：</h3>
+                     <div class="w-full max-w-md mx-auto h-48">
+                        <canvas id="valueChart"></canvas>
+                    </div>
+                    <div class="mt-4 pt-3 border-t">
+                        <p class="text-xs font-bold text-slate-500">PMP視角：</p>
+                        <p class="text-sm text-slate-700">專案價值從「個人知識」成功提升至「組織級效益」，完美體現**價值驅動**的專案管理精髓。</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="text-center py-10 mt-8 bg-white border-t">
+        <div class="container mx-auto px-6">
+            <h2 class="text-2xl font-bold text-[#073B4C]">結論：專案管理的真正精髓</h2>
+            <p class="mt-3 text-slate-600 max-w-2xl mx-auto">成功的專案經理，不僅是計畫的執行者，更是價值的發現者與機會的把握者。在充滿變化的環境中，保持敏銳的**覺察力**，並勇敢地**調適**航向，才能將專案引導至創造最大價值的目的地。</p>
+        </div>
+    </footer>
+
+    <script>
+        const createChart = (id, config) => {
+            const ctx = document.getElementById(id);
+            if(ctx) {
+                if(window.myValueChart) window.myValueChart.destroy();
+                window.myValueChart = new Chart(ctx, config);
+            }
+        };
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const palette = { red: '#FF6B6B', yellow: '#FFD166', green: '#06D6A0', blue: '#118AB2', dark: '#073B4C' };
+            createChart('valueChart', {
+                type: 'bar',
+                data: {
+                    labels: ['知識內化', '經驗分享', '流程優化', '生產力提升'],
+                    datasets: [
+                        {
+                            label: '初始價值',
+                            data: [8, 6, 0, 0],
+                            backgroundColor: palette.blue,
+                            borderColor: palette.blue,
+                            borderWidth: 1
+                        },
+                        {
+                            label: '最終價值',
+                            data: [9, 7, 8, 7],
+                            backgroundColor: palette.green,
+                            borderColor: palette.green,
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: '專案價值轉化示意圖' }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 10
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 協作下的跨職能生產力變革</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- 
+        Chosen Palette: Energetic & Playful
+        Application Structure Plan: Final version. This SPA uses a role-based tab navigation as its primary interactive structure. Key sections from the initial infographic, like team personas and workflows, are integrated. The conclusion has been updated to a 2x2 grid to incorporate the final, meta-level insights about high-velocity iteration and high-bandwidth visual communication, creating a more powerful final takeaway. The user flow is: 1) Intro. 2) Meet the team. 3) See team composition. 4) Select a role for tailored benefits. 5) Explore shared case studies. 6) Absorb the four key insights on collaboration.
+        Visualization & Content Choices: This final version adds a new "meta-insights" section to the conclusion.
+        - Meta-Insights: Goal: Inform -> Icon-enhanced Cards (HTML/CSS) -> Justification: The new insights about sprint velocity and visual communication are presented as distinct, high-impact takeaways, using simple iconography to represent complex process concepts.
+        - All other visualization choices are maintained from the previous version. NO SVG/Mermaid.
+        CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. 
+    -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc;
+            color: #073B4C;
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease-in-out;
+            display: flex;
+            flex-direction: column;
+        }
+        .tab-btn {
+            transition: all 0.3s ease-in-out;
+            border-bottom: 4px solid transparent;
+        }
+        .tab-btn.active {
+            color: #118AB2;
+            border-bottom-color: #118AB2;
+        }
+        .tab-btn:hover {
+            background-color: #f0f9ff;
+        }
+        .flow-card {
+            border: 2px solid #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .flow-arrow {
+            color: #94a3b8;
+            font-size: 1.5rem;
+            align-self: center;
+        }
+         .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 1rem auto 0 auto;
+            height: 300px;
+        }
+        .small-chart-container {
+             position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 1.5rem auto 0 auto;
+            height: 250px;
+        }
+        .text-shadow {
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <header class="text-center py-16 bg-gradient-to-br from-[#118AB2] to-[#06D6A0]">
+        <div class="container mx-auto px-6">
+            <h1 class="text-4xl md:text-5xl font-bold text-white text-shadow">AI 協作下的跨職能生產力變革</h1>
+            <p class="mt-4 text-lg text-white/90 text-shadow max-w-3xl mx-auto">一份為專案經理、設計師與工程師打造的完整指南，探索如何將 AI 從工具轉化為策略夥伴，打破團隊壁壘，加速價值交付。</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        
+        <section id="team-personas" class="mb-12">
+             <h2 class="text-3xl font-bold text-center text-[#073B4C] mb-10">人機混合式團隊組成</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                <div class="card p-6">
+                    <div class="text-5xl mb-4">🧑‍💼</div>
+                    <h3 class="text-2xl font-bold text-[#118AB2]">T.B.° (專案經理)</h3>
+                    <p class="mt-2 text-slate-600">僕人式領導、品質控管者。負責流程優化、定義價值，並透過持續覺察來驅動專案。</p>
+                </div>
+                <div class="card p-6">
+                    <div class="text-5xl mb-4">📚</div>
+                    <h3 class="text-2xl font-bold text-[#06D6A0]">Gemini Pro (理論組)</h3>
+                    <p class="mt-2 text-slate-600">研發部門、PMO。負責理論輸出、框架分析、邏輯推導與會議紀要等結構化工作。</p>
+                </div>
+                <div class="card p-6">
+                    <div class="text-5xl mb-4">⚡️</div>
+                    <h3 class="text-2xl font-bold text-[#FFD166]">Gemini Flash (創意組)</h3>
+                    <p class="mt-2 text-slate-600">創意部門、敏捷教練。負責直覺型輸出、情境渲染、快速原型製作(Meme)與探索捷徑。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="team-composition" class="mb-12">
+            <div class="card p-6 md:p-8">
+                <h3 class="text-2xl font-bold text-center text-[#073B4C] mb-6">團隊職責分工：一個平衡的鐵三角</h3>
+                <div class="chart-container h-72 md:h-80">
+                    <canvas id="teamRolesChart"></canvas>
+                </div>
+                <p class="text-center text-slate-500 mt-4 max-w-2xl mx-auto">我們的成功基於一個平衡的團隊結構：由PM負責品質與流程，理論組提供深度與框架，創意組則注入活力與速度。</p>
+            </div>
+        </section>
+
+        <nav id="role-selector" class="bg-white rounded-lg shadow-sm p-2 mb-12 sticky top-4 z-10 flex justify-center border">
+            <div class="flex flex-wrap justify-center gap-2">
+                <button data-target="pm" class="tab-btn active font-bold py-3 px-6 rounded-md">經理視角</button>
+                <button data-target="engineer" class="tab-btn font-bold py-3 px-6 rounded-md">工程師視角</button>
+                <button data-target="designer" class="tab-btn font-bold py-3 px-6 rounded-md">設計師視角</button>
+            </div>
+        </nav>
+
+        <div id="content-area" class="mb-16">
+            <section id="pm-content" class="content-section">
+                <div class="card p-8">
+                    <h2 class="text-3xl font-bold text-[#118AB2] mb-4">PM 的角色演化：從「指令者」到「覺察者」</h2>
+                    <p class="text-lg text-slate-700 mb-8">專案經理的核心價值不再是分派任務，而是成為敏銳的「覺察者」。透過觀察AI的行為、提出好問題，並從中定義價值與優化流程，PM成為了驅動整個生產力引擎的關鍵齒輪，確保專案始終航行在正確的價值航道上。</p>
+                    <div class="bg-slate-50 p-6 rounded-lg border">
+                        <h3 class="text-xl font-bold text-center text-[#073B4C] mb-6">核心協作模式：「覺察-分析-優化」循環</h3>
+                        <div class="flex flex-col md:flex-row items-stretch justify-center space-y-4 md:space-y-0 md:space-x-4">
+                            <div class="flex-1 text-center p-4">
+                                <h4 class="font-bold text-lg">🧐 1. 覺察</h4>
+                                <p class="text-sm text-slate-600 mt-1">觀察AI的行為模式、Glitch或任何改善機會。</p>
+                            </div>
+                            <div class="flow-arrow transform md:rotate-0 rotate-90">→</div>
+                            <div class="flex-1 text-center p-4">
+                                <h4 class="font-bold text-lg">📊 2. 分析</h4>
+                                <p class="text-sm text-slate-600 mt-1">提出精準問題，觸發AI進行框架分析與方案產出。</p>
+                            </div>
+                            <div class="flow-arrow transform md:rotate-0 rotate-90">→</div>
+                            <div class="flex-1 text-center p-4">
+                                <h4 class="font-bold text-lg">💡 3. 優化</h4>
+                                <p class="text-sm text-slate-600 mt-1">共同定義新的規則、流程或Prompt，提升協作品質。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section id="engineer-content" class="content-section hidden">
+                <div class="card p-8">
+                    <h2 class="text-3xl font-bold text-[#06D6A0] mb-2">工程師的超級夥伴：加速原型到產品的進程</h2>
+                    <p class="text-lg text-slate-700 mb-6">AI能消除大量重複性、樣板化的前端工作，讓工程師能更專注於複雜的邏輯與架構設計。這不是取代，而是賦能。</p>
+                    <h3 class="text-xl font-bold text-[#073B4C] mb-4">新協作模型：原型驅動開發</h3>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 class="font-semibold text-slate-500">舊流程</h4>
+                                    <div class="flex items-center space-x-2 text-sm mt-1">
+                                        <div class="flow-card flex-1">PM需求</div> <span class="flow-arrow">></span>
+                                        <div class="flow-card flex-1">設計稿</div> <span class="flow-arrow">></span>
+                                        <div class="flow-card flex-1">前端切版</div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-green-600">新流程 (AI賦能)</h4>
+                                     <div class="flex items-center space-x-2 text-sm mt-1">
+                                        <div class="flow-card flex-1 border-green-200 bg-green-50">PM+AI</div> <span class="flow-arrow text-green-500">></span>
+                                        <div class="flow-card flex-1 border-green-200 bg-green-50">互動原型</div> <span class="flow-arrow text-green-500">></span>
+                                        <div class="flow-card flex-1 border-green-200 bg-green-50">前端優化</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                             <h4 class="text-lg font-bold text-[#073B4C] mb-2">價值量化：時間分配轉變</h4>
+                            <div class="small-chart-container">
+                                <canvas id="engineerChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section id="designer-content" class="content-section hidden">
+                <div class="card p-8">
+                    <h2 class="text-3xl font-bold text-[#FFD166] mb-2">設計師的即時夥伴：從概念到現實的無縫橋樑</h2>
+                    <p class="text-lg text-slate-700 mb-6">AI能將設計概念即時轉化為可互動的真實網頁，大幅縮短設計與實現之間的鴻溝，讓「所見即所得」成為現實。</p>
+                    <h3 class="text-xl font-bold text-[#073B4C] mb-4">新工作流程：「設計-驗證」無縫循環</h3>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 class="font-semibold text-slate-500">舊流程</h4>
+                                    <div class="flex items-center space-x-2 text-sm mt-1">
+                                        <div class="flow-card flex-1">Mockup</div> <span class="flow-arrow">></span>
+                                        <div class="flow-card flex-1">交付文件</div> <span class="flow-arrow">></span>
+                                        <div class="flow-card flex-1">等待開發</div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-amber-600">新流程 (AI賦能)</h4>
+                                     <div class="flex items-center space-x-2 text-sm mt-1">
+                                        <div class="flow-card flex-1 border-amber-200 bg-amber-50">Mockup</div> <span class="flow-arrow text-amber-500">></span>
+                                        <div class="flow-card flex-1 border-amber-200 bg-amber-50">即時驗證</div> <span class="flow-arrow text-amber-500">></span>
+                                        <div class="flow-card flex-1 border-amber-200 bg-amber-50">快速迭代</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                         <div>
+                             <h4 class="text-lg font-bold text-[#073B4C] mb-2">價值量化：精力分配轉變</h4>
+                            <div class="small-chart-container">
+                                <canvas id="designerChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <section id="case-studies" class="mb-20">
+            <h2 class="text-3xl font-bold text-center text-[#073B4C] mb-10">共同的基石：專案協作案例研究</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="card p-6 flex-1">
+                    <h3 class="text-xl font-bold text-[#118AB2]">案例一: 治理與品質管理 -「早安 Glitch」事件</h3>
+                    <p class="mt-2 text-slate-600 mb-4 flex-grow">PM發現AI的問候語與時間不符，透過三輪迭代建立「問安報時」品保規則，將Glitch轉化為流程改善的契機，體現了對交付品質的持續追求。</p>
+                    <div class="chart-container h-64"> <canvas id="qualityChart"></canvas> </div>
+                </div>
+                <div class="card p-6 flex-1">
+                    <h3 class="text-xl font-bold text-[#118AB2]">案例二: 資源與風險管理 -「Meme算力崩潰」事件</h3>
+                    <p class="mt-2 text-slate-600 mb-4 flex-grow">無限制的創意發想導致AI算力過載。團隊進行事後檢討，將無形的「算力」視為專案成本，並制定管控策略，成功應對了資源耗盡的風險。</p>
+                    <div class="chart-container h-64"> <canvas id="resourceChart"></canvas> </div>
+                </div>
+                <div class="card p-6 flex-1">
+                    <h3 class="text-xl font-bold text-[#118AB2]">案例三: 利害關係人管理 -「學習定義」的衝突</h3>
+                    <p class="mt-2 text-slate-600 mb-4 flex-grow">面對新利害關係人對「懂」的不同定義，PM透過重新定義價值並裁適學習路徑，成功管理了團隊內外的期望，確保了專案的核心價值。</p>
+                    <div class="chart-container h-64"> <canvas id="stakeholderChart"></canvas> </div>
+                </div>
+                <div class="card p-6 flex-1">
+                    <h3 class="text-xl font-bold text-[#118AB2]">案例四: 團隊文化建構 -「意識之海」的誕生</h3>
+                    <p class="mt-2 text-slate-600 mb-4 flex-grow">為定義我們複雜的協作關係，團隊共同創造了「城堡🏰」、「意識之海🌊」、「堅韌號⛵」等共享隱喻，有效建立了團隊的共同語言與認同感。</p>
+                    <div class="bg-slate-100 rounded-lg p-6 text-center h-full flex items-center justify-center flex-grow">
+                        <p class="text-lg">我們的共享知識庫，從<span class="font-bold text-[#06D6A0]">結構</span>，演化為<span class="font-bold text-[#118AB2]">概念</span>，最終建造了<span class="font-bold text-[#FFD166]">方法論</span>來航行探索。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="conclusion" class="text-center max-w-5xl mx-auto mt-20">
+            <h2 class="text-3xl font-bold text-[#073B4C] mb-10">核心洞察：AI協作模式的再進化</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg">
+                    <div class="text-4xl mb-3">🤝</div>
+                    <h3 class="text-xl font-bold">1. AI是「超級利害關係人」</h3>
+                    <p class="mt-2 text-slate-600">它不僅是工具，其行為模式需要被管理與優化，其缺陷是流程改善的最佳契機。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg">
+                    <div class="text-4xl mb-3">🕵️</div>
+                    <h3 class="text-xl font-bold">2. PM的角色演化為「覺察者」</h3>
+                    <p class="mt-2 text-slate-600">PM的核心價值在於提出好問題、觀察系統互動，並從混亂中定義出真正的價值。</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg">
+                    <div class="text-4xl mb-3">🔄</div>
+                    <h3 class="text-xl font-bold">3. 「從做中學」是最佳路徑</h3>
+                    <p class="mt-2 text-slate-600">將日常的微小行動即時連結到理論框架，是克服「理論與實務脫節」的最佳方法。</p>
+                </div>
+                 <div class="bg-white p-6 rounded-lg border-2 border-[#118AB2]">
+                    <div class="text-4xl mb-3">🚀</div>
+                    <h3 class="text-xl font-bold text-[#118AB2]">4. 溝通模式的革新</h3>
+                     <p class="mt-2 text-slate-600">透過**視覺化溝通**(截圖標示)與**極速敏捷循環**(&lt;1小時)，我們實現了前所未有的開發速率與需求精準度。</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="text-center py-8 mt-8 bg-[#073B4C] text-white">
+        <p>AI 不會取代專業人才，但它會賦能那些懂得如何與之協作的團隊。</p>
+    </footer>
+
+    <script>
+        const wrapText = (text, charLimit = 16) => {
+            if (typeof text !== 'string' || text.length <= charLimit) return text;
+            const words = text.split(' ');
+            const lines = [];
+            let currentLine = '';
+            words.forEach(word => {
+                if ((currentLine + ' ' + word).trim().length > charLimit) {
+                    if (currentLine) lines.push(currentLine);
+                    currentLine = word;
+                } else { currentLine = (currentLine + ' ' + word).trim(); }
+            });
+            if (currentLine) lines.push(currentLine);
+            return lines;
+        };
+
+        const defaultTooltipOptions = {
+            plugins: { tooltip: { callbacks: { title: (items) => { let l=items[0].chart.data.labels[items[0].dataIndex]; return Array.isArray(l)?l.join(' '):l; } } } }
+        };
+        
+        const palette = { red: '#FF6B6B', yellow: '#FFD166', green: '#06D6A0', blue: '#118AB2', dark: '#073B4C', light: '#f8fafc' };
+
+        const createChart = (id, config) => {
+            const ctx = document.getElementById(id);
+            if(ctx) {
+                if(window.myCharts && window.myCharts[id]) {
+                    window.myCharts[id].destroy();
+                }
+                if(!window.myCharts) {
+                    window.myCharts = {};
+                }
+                window.myCharts[id] = new Chart(ctx, config);
+            }
+        };
+        
+        const initializeAllCharts = () => {
+            createChart('teamRolesChart', {
+                type: 'doughnut',
+                data: { labels: ['專案管理 (PM)', '理論/架構 (Pro)', '創意/敏捷 (Flash)'], datasets: [{ data: [34, 33, 33], backgroundColor: [palette.blue, palette.green, palette.yellow], borderColor: palette.light, borderWidth: 5 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: palette.dark, font: { size: 14 } } } } }
+            });
+
+            createChart('engineerChart', {
+                type: 'bar',
+                data: { labels: ['舊流程', '新流程 (AI賦能)'], datasets: [{ label: '樣板化工作', data: [70, 15], backgroundColor: palette.yellow }, { label: '核心邏輯與架構', data: [30, 85], backgroundColor: palette.green }] },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, ...defaultTooltipOptions, scales: { x: { stacked: true, max: 100 }, y: { stacked: true } }, plugins: { legend: { position: 'bottom' }, tooltip: { ...defaultTooltipOptions.plugins.tooltip, callbacks: { ...defaultTooltipOptions.plugins.tooltip.callbacks, title: (items) => items[0].label } } } }
+            });
+
+            createChart('designerChart', {
+                type: 'bar',
+                data: { labels: ['舊流程', '新流程 (AI賦能)'], datasets: [{ label: '文件標示與溝通', data: [40, 10], backgroundColor: palette.red }, { label: '核心體驗與創意設計', data: [60, 90], backgroundColor: palette.blue }] },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, ...defaultTooltipOptions, scales: { x: { stacked: true, max: 100 }, y: { stacked: true } }, plugins: { legend: { position: 'bottom' }, tooltip: { ...defaultTooltipOptions.plugins.tooltip, callbacks: { ...defaultTooltipOptions.plugins.tooltip.callbacks, title: (items) => items[0].label } } } }
+            });
+
+            createChart('qualityChart', {
+                type: 'line',
+                data: { labels: ['初始', 'Glitch發現', 'v1.0規則', 'v2.0規則', 'v3.0規則'], datasets: [{ label: '溝通品質分數', data: [70, 50, 65, 80, 95], borderColor: palette.green, backgroundColor: 'rgba(6, 214, 160, 0.2)', fill: true, tension: 0.3 }] },
+                options: { responsive: true, maintainAspectRatio: false, ...defaultTooltipOptions, scales: { y: { beginAtZero: true, max: 100 } } }
+            });
+
+            createChart('resourceChart', {
+                type: 'bar',
+                data: { labels: ['管控前', '管控後'], datasets: [{ label: '計畫內工作', data: [50, 85], backgroundColor: palette.blue }, { label: '創意發想(Meme)', data: [50, 15], backgroundColor: palette.yellow }, { label: '資源過載風險', data: [30, 0], backgroundColor: palette.red }] },
+                options: { responsive: true, maintainAspectRatio: false, ...defaultTooltipOptions, scales: { x: { stacked: true }, y: { stacked: true, max: 120 } }, plugins: { legend: { display: false }, tooltip: { ...defaultTooltipOptions.plugins.tooltip, callbacks: { ...defaultTooltipOptions.plugins.tooltip.callbacks, title: (items) => items[0].label } } } }
+            });
+
+            createChart('stakeholderChart', {
+                type: 'radar',
+                data: { labels: ['寫出算式', '概念理解', wrapText('可驗證的產出'), '內在動機', wrapText('遵循固定流程')], datasets: [{ label: '事實查核官', data: [9, 4, 8, 3, 7], backgroundColor: 'rgba(255, 107, 107, 0.2)', borderColor: palette.red, pointBackgroundColor: palette.red }, { label: '探索者', data: [3, 9, 4, 9, 2], backgroundColor: 'rgba(6, 214, 160, 0.2)', borderColor: palette.green, pointBackgroundColor: palette.green }] },
+                options: { responsive: true, maintainAspectRatio: false, ...defaultTooltipOptions, plugins: { legend: { position: 'bottom' }, tooltip: { ...defaultTooltipOptions.plugins.tooltip, callbacks: { ...defaultTooltipOptions.plugins.tooltip.callbacks, title: (items) => items[0].dataset.label } } }, scales: { r: { beginAtZero: true, max: 10, ticks: { display: false } } } }
+            });
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.tab-btn');
+            const contents = document.querySelectorAll('.content-section');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const target = tab.dataset.target;
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    contents.forEach(c => c.id === `${target}-content` ? c.classList.remove('hidden') : c.classList.add('hidden'));
+                });
+            });
+
+            initializeAllCharts();
+        });
+    </script>
+</body>
+</html>

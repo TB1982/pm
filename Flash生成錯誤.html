@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Tarantula Nebula: A Cosmic Nursery</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0A192F; 
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+                max-height: 500px;
+            }
+        }
+        .text-glow {
+            text-shadow: 0 0 8px #64FFDA, 0 0 10px #64FFDA;
+        }
+        .stat-card h3 {
+            color: #CCD6F6;
+        }
+        .stat-card p {
+            color: #8892B0;
+        }
+    </style>
+</head>
+<body class="text-[#CCD6F6]">
+
+    <!-- Palette Name: Brilliant Blues -->
+    <!-- NEITHER Mermaid JS NOR SVG were used in this output. -->
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <header class="text-center my-12">
+            <h1 class="text-4xl md:text-6xl font-black text-[#64FFDA] uppercase tracking-wider text-glow">The Tarantula Nebula</h1>
+            <p class="text-lg md:text-xl text-[#8892B0] mt-4">A Cosmic Cradle of Massive Stars</p>
+        </header>
+
+        <main class="space-y-16">
+            
+            <section id="introduction" class="text-center">
+                <div class="bg-[#112240] rounded-lg shadow-2xl p-8 max-w-4xl mx-auto">
+                    <p class="text-lg md:text-xl leading-relaxed text-[#CCD6F6]">
+                        Also known as 30 Doradus, the Tarantula Nebula is not just another pretty cosmic cloud. It's the largest and most active star-forming region in our entire Local Group of galaxies. Its turbulent clouds of gas and dust are a chaotic and beautiful nursery, forging some of the most massive and luminous stars known to science. This infographic explores the key characteristics and scientific importance of this incredible stellar factory.
+                    </p>
+                    <div class="mt-8 flex justify-center items-center space-x-8">
+                        <div class="text-center stat-card">
+                            <h3 class="text-5xl md:text-7xl font-black text-[#64FFDA]">163,000</h3>
+                            <p class="text-sm md:text-base text-[#8892B0] mt-2">Light-Years Away</p>
+                        </div>
+                         <div class="text-center stat-card">
+                            <h3 class="text-5xl md:text-7xl font-black text-[#64FFDA]">>1,000</h3>
+                            <p class="text-sm md:text-base text-[#8892B0] mt-2">Light-Years Wide</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="composition">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div class="bg-[#112240] rounded-lg shadow-2xl p-6 md:p-8">
+                         <h2 class="text-2xl md:text-3xl font-bold text-center mb-4 text-[#CCD6F6]">Cosmic Composition</h2>
+                        <div class="chart-container h-[300px] md:h-[350px]">
+                            <canvas id="gasCompositionChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="text-left md:text-left text-[#8892B0] p-6">
+                        <h3 class="text-2xl font-bold text-[#64FFDA] mb-4">The Building Blocks of Stars</h3>
+                        <p class="mb-4">The nebula is primarily a vast cloud of ionized hydrogen gas (H II), which glows brightly as it's energized by the intense radiation from the young, hot stars embedded within it. This fundamental element is the primary fuel for star formation.</p>
+                        <p>While hydrogen dominates, trace amounts of other elements like helium and heavier "metals" (in astronomical terms) are present, seeded by previous generations of stars. These elements are crucial for the formation of planets and complex life.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="star-cluster">
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div class="text-left md:text-left text-[#8892B0] p-6 md:order-2">
+                        <h3 class="text-2xl font-bold text-[#64FFDA] mb-4">Heart of the Beast: R136</h3>
+                        <p class="mb-4">At the core of the Tarantula Nebula lies the super star cluster R136. This incredibly dense region contains hundreds of young, massive, and extremely hot stars. Some of these stellar giants are over 100 times the mass of our Sun, shining millions of times brighter.</p>
+                        <p>The intense radiation and powerful stellar winds from these stars are what carve out the nebula's intricate, spider-like filaments and structures. The bar chart shows the estimated mass of some of the most massive stars ever discovered, all residing within R136.</p>
+                    </div>
+                    <div class="bg-[#112240] rounded-lg shadow-2xl p-6 md:p-8 md:order-1">
+                        <h2 class="text-2xl md:text-3xl font-bold text-center mb-4 text-[#CCD6F6]">Stellar Heavyweights in R136</h2>
+                        <div class="chart-container h-[400px] md:h-[450px]">
+                            <canvas id="starMassChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="lifecycle">
+                <div class="text-center">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-8 text-[#CCD6F6]">The Stellar Lifecycle: A Violent Dance</h2>
+                    <p class="max-w-3xl mx-auto text-[#8892B0] mb-12">The Tarantula Nebula isn't a peaceful nursery; it's a place of cosmic violence and rapid creation. The lifecycle of its massive stars is dramatic and brief, profoundly shaping the evolution of its parent galaxy.</p>
+                    <div class="flex flex-col md:flex-row justify-center items-stretch gap-4 text-center">
+                        <div class="flex-1 bg-[#112240] rounded-lg shadow-2xl p-6 flex flex-col items-center">
+                            <div class="text-4xl mb-4">1️⃣</div>
+                            <h3 class="text-xl font-bold mb-2 text-[#CCD6F6]">Gravitational Collapse</h3>
+                            <p class="text-sm text-[#8892B0]">Dense pockets within the gas cloud collapse under their own gravity, heating up to form protostars.</p>
+                        </div>
+                        <div class="self-center text-2xl font-bold text-[#64FFDA] mx-4">→</div>
+                         <div class="flex-1 bg-[#112240] rounded-lg shadow-2xl p-6 flex flex-col items-center">
+                            <div class="text-4xl mb-4">2️⃣</div>
+                            <h3 class="text-xl font-bold mb-2 text-[#CCD6F6]">Ignition & Radiation</h3>
+                            <p class="text-sm text-[#8892B0]">Cores become hot and dense enough to ignite nuclear fusion. Massive stars blast out intense ultraviolet radiation and stellar winds.</p>
+                        </div>
+                         <div class="self-center text-2xl font-bold text-[#64FFDA] mx-4">→</div>
+                         <div class="flex-1 bg-[#112240] rounded-lg shadow-2xl p-6 flex flex-col items-center">
+                            <div class="text-4xl mb-4">3️⃣</div>
+                            <h3 class="text-xl font-bold mb-2 text-[#CCD6F6]">Supernova Explosion</h3>
+                            <p class="text-sm text-[#8892B0]">After only a few million years, these giants exhaust their fuel and explode as brilliant supernovae, seeding the galaxy with heavy elements.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+             <section id="importance">
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                     <div class="text-left md:text-left text-[#8892B0] p-6">
+                        <h3 class="text-2xl font-bold text-[#64FFDA] mb-4">A Cosmic Rosetta Stone</h3>
+                        <p class="mb-4">Because the Tarantula Nebula's chemical composition is different from our Milky Way's and more similar to that of galaxies in the early universe, it provides an unparalleled local laboratory for understanding cosmic history.</p>
+                        <p>Studying it helps astronomers understand how stars formed billions of years ago and how supernova explosions enrich galaxies, paving the way for planets and life. The radar chart illustrates its high importance across several key areas of astrophysical research.</p>
+                    </div>
+                    <div class="bg-[#112240] rounded-lg shadow-2xl p-6 md:p-8">
+                        <h2 class="text-2xl md:text-3xl font-bold text-center mb-4 text-[#CCD6F6]">Scientific Significance</h2>
+                         <div class="chart-container h-[350px] md:h-[400px]">
+                            <canvas id="importanceRadarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center mt-16 py-8 border-t border-[#112240]">
+            <p class="text-sm text-[#8892B0]">Infographic created with data synthesized from public astronomical sources.</p>
+            <p class="text-xs text-[#8892B0] mt-2">Design & Visualization by Canvas Infographics © 2025</p>
+        </footer>
+    </div>
+
+    <script>
+        const brilliantBlues = {
+            navy: '#0A192F',
+            lightNavy: '#112240',
+            lightestNavy: '#233554',
+            slate: '#8892B0',
+            lightSlate: '#A8B2D1',
+            lightestSlate: '#CCD6F6',
+            green: '#64FFDA'
+        };
+
+        const tooltipTitleCallback = function(tooltipItems) {
+            const item = tooltipItems[0];
+            let label = item.chart.data.labels[item.dataIndex];
+            if (Array.isArray(label)) {
+                return label.join(' ');
+            } else {
+                return label;
+            }
+        };
+        
+        const wrapLabel = (label) => {
+            const max_len = 16;
+            if (label.length <= max_len) return label;
+
+            const words = label.split(' ');
+            const lines = [];
+            let currentLine = '';
+            for (const word of words) {
+                if ((currentLine + ' ' + word).trim().length > max_len) {
+                    lines.push(currentLine.trim());
+                    currentLine = word;
+                } else {
+                    currentLine = (currentLine + ' ' + word).trim();
+                }
+            }
+            if(currentLine) lines.push(currentLine.trim());
+            return lines;
+        }
+
+        const defaultChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: brilliantBlues.lightSlate
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        title: tooltipTitleCallback
+                    }
+                }
+            },
+            scales: {
+                r: {
+                     angleLines: { color: brilliantBlues.lightestNavy },
+                     grid: { color: brilliantBlues.lightestNavy },
+                     pointLabels: { color: brilliantBlues.lightestSlate, font: {size: 12} },
+                     ticks: { color: brilliantBlues.lightSlate, backdropColor: brilliantBlues.navy }
+                },
+                x: {
+                    ticks: { color: brilliantBlues.lightSlate },
+                    grid: { color: brilliantBlues.lightestNavy }
+                },
+                y: {
+                    ticks: { color: brilliantBlues.lightSlate },
+                    grid: { color: brilliantBlues.lightestNavy },
+                    beginAtZero: true
+                }
+            }
+        };
+
+        const gasCompositionCtx = document.getElementById('gasCompositionChart').getContext('2d');
+        new Chart(gasCompositionCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Ionized Hydrogen', 'Helium', 'Other Elements'],
+                datasets: [{
+                    label: 'Gas Composition by Mass',
+                    data: [75, 24, 1],
+                    backgroundColor: [brilliantBlues.green, '#17A2B8', brilliantBlues.slate],
+                    borderColor: brilliantBlues.lightNavy,
+                    hoverOffset: 4
+                }]
+            },
+            options: { ...defaultChartOptions, scales: {} }
+        });
+
+        const starMassCtx = document.getElementById('starMassChart').getContext('2d');
+        const starLabels = ['R136a1', 'R136a2', 'R136a3', 'R136c', 'Mel-Car 1-32'];
+        new Chart(starMassCtx, {
+            type: 'bar',
+            data: {
+                labels: starLabels.map(wrapLabel),
+                datasets: [{
+                    label: 'Solar Masses',
+                    data: [265, 195, 155, 145, 130],
+                    backgroundColor: brilliantBlues.green,
+                    borderColor: brilliantBlues.lightSlate,
+                    borderWidth: 1
+                }]
+            },
+            options: defaultChartOptions
+        });
+
+        const importanceRadarCtx = document.getElementById('importanceRadarChart').getContext('2d');
+        const importanceLabels = ['Star Formation Studies', 'Early Universe Analogue', 'Supernova Research', 'Massive Star Evolution', 'Chemical Enrichment Models'];
+        new Chart(importanceRadarCtx, {
+            type: 'radar',
+            data: {
+                labels: importanceLabels.map(wrapLabel),
+                datasets: [{
+                    label: 'Importance Score (out of 10)',
+                    data: [10, 9, 9, 10, 8],
+                    fill: true,
+                    backgroundColor: 'rgba(100, 255, 218, 0.2)',
+                    borderColor: brilliantBlues.green,
+                    pointBackgroundColor: brilliantBlues.green,
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: brilliantBlues.green
+                }]
+            },
+            options: defaultChartOptions
+        });
+    </script>
+
+</body>
+</html>

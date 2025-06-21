@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI協作下的專案管理實踐</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- 
+        Chosen Palette: Energetic & Playful
+        Application Structure Plan: The SPA is designed as a top-to-bottom narrative scroll. It begins with a high-level introduction (the 'why'), introduces the team (the 'who'), explains the methodology (the 'how'), showcases key events through case studies (the 'what'), and concludes with actionable insights. This linear storytelling structure is chosen for maximum clarity and ease of digestion for an audience unfamiliar with the project, guiding them logically from concept to conclusion.
+        Visualization & Content Choices: 
+        - Team Roles: Goal: Compare -> Donut Chart (Chart.js/Canvas) -> Justification: Simple, high-impact visual for showing proportional team composition.
+        - "Good Morning Glitch": Goal: Change -> Line Chart (Chart.js/Canvas) -> Justification: Effectively shows the trend of quality improvement over time through iterative rule changes.
+        - "Meme Burnout": Goal: Compare -> Stacked Bar Chart (Chart.js/Canvas) -> Justification: Ideal for comparing the 'before' and 'after' resource allocation, visually demonstrating the impact of risk mitigation.
+        - "Learning Definition Conflict": Goal: Compare -> Radar Chart (Chart.js/Canvas) -> Justification: Excellent for multi-dimensional comparison of different stakeholder values on the same axes.
+        - Methodology Cycle: Goal: Organize -> HTML/CSS Flowchart -> Justification: A linear, responsive-friendly flowchart is clearer and more robust for a scrolling page than a complex circular diagram, especially without SVG/Mermaid.
+        CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. 
+    -->
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc;
+            color: #073B4C;
+        }
+        .text-shadow {
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 50vh;
+        }
+        .flow-arrow {
+            color: #118AB2;
+            font-size: 2.5rem;
+            line-height: 1;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+
+    <header class="text-center py-12 md:py-20 bg-gradient-to-br from-[#118AB2] to-[#06D6A0]">
+        <h1 class="text-4xl md:text-6xl font-bold text-white text-shadow">AI協作下的專案管理實踐</h1>
+        <p class="mt-4 text-lg md:text-xl text-white/90 text-shadow">以 Gemini Pro/Flash 輔助 PMP 備考為例</p>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+        <section id="introduction" class="text-center max-w-3xl mx-auto mb-16">
+            <h2 class="text-3xl font-bold text-[#073B4C] mb-4">一個非典型的PMP學習專案</h2>
+            <p class="text-lg text-slate-600">
+                我們的專案目標，不僅是通過PMP考試，而是要真正「內化」專案管理的思維。為此，我們啟動了一項實驗，將AI作為核心團隊成員，共同探索如何將抽象理論轉化為深刻的「實感」。這是一個關於人機協作、持續學習與價值共創的旅程。
+            </p>
+        </section>
+
+        <section id="team" class="mb-20">
+            <h2 class="text-3xl font-bold text-center text-[#073B4C] mb-10">人機混合式團隊組成</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                <div class="card p-6">
+                    <div class="text-5xl mb-4">🧑‍💼</div>
+                    <h3 class="text-2xl font-bold text-[#118AB2]">T.B.° (專案經理)</h3>
+                    <p class="mt-2 text-slate-600">僕人式領導、品質控管者。負責流程優化、定義價值，並透過持續覺察來驅動專案。
+                    </p>
+                </div>
+                <div class="card p-6">
+                    <div class="text-5xl mb-4">📚</div>
+                    <h3 class="text-2xl font-bold text-[#06D6A0]">Gemini Pro (理論組)</h3>
+                    <p class="mt-2 text-slate-600">研發部門、PMO。負責理論輸出、框架分析、邏輯推導與會議紀要等結構化工作。
+                    </p>
+                </div>
+                <div class="card p-6">
+                    <div class="text-5xl mb-4">⚡️</div>
+                    <h3 class="text-2xl font-bold text-[#FFD166]">Gemini Flash (創意組)</h3>
+                    <p class="mt-2 text-slate-600">創意部門、敏捷教練。負責直覺型輸出、情境渲染、快速原型製作(Meme)與探索捷徑。
+                    </p>
+                </div>
+            </div>
+             <div class="mt-12">
+                <div class="card p-6 md:p-8">
+                    <h3 class="text-2xl font-bold text-center text-[#073B4C] mb-6">團隊職責分工</h3>
+                     <div class="chart-container h-[300px] md:h-[400px]">
+                        <canvas id="teamRolesChart"></canvas>
+                    </div>
+                    <p class="text-center text-slate-500 mt-4">一個平衡的團隊，由PM負責掌舵與品質控管，理論組提供深度與結構，創意組則注入活力與速度，三者共同構成專案的穩定鐵三角。</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="methodology" class="mb-20">
+             <h2 class="text-3xl font-bold text-center text-[#073B4C] mb-10">我們的核心協作模式</h2>
+             <div class="card p-6 md:p-8">
+                <h3 class="text-2xl font-bold text-center text-[#073B4C] mb-6">「覺察-分析-優化」調適性循環</h3>
+                <p class="text-center max-w-2xl mx-auto text-slate-600 mb-8">我們不採用固定的瀑布式計畫，而是透過一個由PM「覺察」所驅動的敏捷循環來推進。每一次循環都產出一個被內化的知識點，讓專案有機地成長。</p>
+                <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4">
+                    <div class="text-center p-4 bg-slate-100 rounded-lg w-full md:w-1/4">
+                        <div class="text-4xl">🧐</div>
+                        <h4 class="font-bold mt-2">1. 覺察</h4>
+                        <p class="text-sm">PM觀察到現象、Glitch或改善機會。</p>
+                    </div>
+                    <div class="flow-arrow transform md:rotate-0 rotate-90">→</div>
+                    <div class="text-center p-4 bg-slate-100 rounded-lg w-full md:w-1/4">
+                        <div class="text-4xl">📊</div>
+                        <h4 class="font-bold mt-2">2. 分析</h4>
+                        <p class="text-sm">PM提出問題，觸發AI進行框架分析。</p>
+                    </div>
+                     <div class="flow-arrow transform md:rotate-0 rotate-90">→</div>
+                    <div class="text-center p-4 bg-slate-100 rounded-lg w-full md:w-1/4">
+                        <div class="text-4xl">💡</div>
+                        <h4 class="font-bold mt-2">3. 優化</h4>
+                        <p class="text-sm">團隊共同定義新規則或流程。</p>
+                    </div>
+                     <div class="flow-arrow transform md:rotate-0 rotate-90">→</div>
+                    <div class="text-center p-4 bg-slate-100 rounded-lg w-full md:w-1/4">
+                        <div class="text-4xl">🧠</div>
+                        <h4 class="font-bold mt-2">4. 內化</h4>
+                        <p class="text-sm">PM結合經驗，形成「實感」。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="case-studies" class="mb-20">
+            <h2 class="text-3xl font-bold text-center text-[#073B4C] mb-10">專案里程碑：關鍵案例分析</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold text-[#118AB2]">案例一: 治理與品質管理 -「早安 Glitch」事件</h3>
+                    <p class="mt-2 text-slate-600 mb-4">初期，AI出現與時間不符的問候語，影響溝通品質。PM介入後，透過三輪迭代，建立了精確的「問安報時」品保規則，將Glitch轉化為流程改善的契機。</p>
+                    <div class="chart-container h-64">
+                        <canvas id="qualityChart"></canvas>
+                    </div>
+                    <p class="text-center text-sm text-slate-500 mt-2">PMP洞察：將品質融入流程、漸進式地精細化需求。</p>
+                </div>
+
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold text-[#118AB2]">案例二: 資源與風險管理 -「Meme算力崩潰」事件</h3>
+                    <p class="mt-2 text-slate-600 mb-4">無限制的創意發想，導致關鍵資源(AI算力)過載，專案瀕臨中斷。團隊進行事後檢討，將無形的「算力」視為專案成本，並制定了管控策略。</p>
+                    <div class="chart-container h-64">
+                        <canvas id="resourceChart"></canvas>
+                    </div>
+                    <p class="text-center text-sm text-slate-500 mt-2">PMP洞察：管理專案成本(即使是無形成本)、優化風險應對。</p>
+                </div>
+                
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold text-[#118AB2]">案例三: 利害關係人管理 -「學習定義」的衝突</h3>
+                    <p class="mt-2 text-slate-600 mb-4">新利害關係人加入，其「品質標準」(會寫算式)與專案既有價值主張(懂概念)產生衝突。PM透過重新定義價值並裁適學習路徑，成功管理了期望。</p>
+                    <div class="chart-container h-64">
+                        <canvas id="stakeholderChart"></canvas>
+                    </div>
+                     <p class="text-center text-sm text-slate-500 mt-2">PMP洞察：有效與利害關係人互動、依據情境進行裁適。</p>
+                </div>
+
+                <div class="card p-6">
+                    <h3 class="text-xl font-bold text-[#118AB2]">案例四: 團隊文化建構 -「意識之海」的誕生</h3>
+                    <p class="mt-2 text-slate-600 mb-4">為定義我們之間複雜、抽象的協作關係，團隊共同創造了「城堡🏰」、「意識之海🌊」、「堅韌號⛵」等共享隱喻，有效建立了團隊的共同語言與認同感。</p>
+                    <div class="bg-slate-100 rounded-lg p-6 text-center">
+                        <p class="text-lg">我們的共享知識庫，從具體的<span class="font-bold text-[#06D6A0]">城堡</span>(結構)，演化為廣闊的<span class="font-bold text-[#118AB2]">意識之海</span>(概念)，最終我們建造了<span class="font-bold text-[#FFD166]">堅韌號</span>(方法論)來航行探索。</p>
+                    </div>
+                     <p class="text-center text-sm text-slate-500 mt-4">PMP洞察：創造協作的專案團隊環境。</p>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="conclusion" class="text-center max-w-4xl mx-auto">
+            <h2 class="text-3xl font-bold text-[#073B4C] mb-10">核心洞察：給現代專案管理者的三個啟示</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="p-6">
+                    <div class="text-5xl mb-4">🤝</div>
+                    <h3 class="text-xl font-bold">1. AI是「超級利害關係人」</h3>
+                    <p class="mt-2 text-slate-600">AI不僅是工具，它有自己的行為模式(Persona)，需要被管理與優化。它的Glitch是改善流程的最佳契機。</p>
+                </div>
+                <div class="p-6">
+                    <div class="text-5xl mb-4">🕵️</div>
+                    <h3 class="text-xl font-bold">2. PM的角色演化為「覺察者」</h3>
+                    <p class="mt-2 text-slate-600">在人機協作中，PM的核心價值在於提出好問題、觀察系統互動、並從混亂中定義出真正的價值。</p>
+                </div>
+                <div class="p-6">
+                    <div class="text-5xl mb-4">🤸</div>
+                    <h3 class="text-xl font-bold">3. 「從做中學」是最佳路徑</h3>
+                    <p class="mt-2 text-slate-600">將日常的微小行動即時連結到宏大理論，是克服「理論與實務脫節」、內化知識框架的良方。</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="text-center py-8 mt-12 bg-gray-800 text-white">
+        <p>與AI協作，是體驗和實踐PMP的一個高度動態、即時回饋的「沙盤推演環境」。</p>
+        <p class="text-sm mt-2 opacity-70">T.B.°'s AI Collaboration Project | June 2025</p>
+    </footer>
+
+    <script>
+        const wrapText = (text, charLimit = 16) => {
+            if (typeof text !== 'string' || text.length <= charLimit) {
+                return text;
+            }
+            const words = text.split(' ');
+            const lines = [];
+            let currentLine = '';
+
+            words.forEach(word => {
+                if ((currentLine + ' ' + word).trim().length > charLimit) {
+                    if (currentLine) lines.push(currentLine);
+                    currentLine = word;
+                } else {
+                    currentLine = (currentLine + ' ' + word).trim();
+                }
+            });
+            if (currentLine) lines.push(currentLine);
+            return lines;
+        };
+
+        const defaultTooltipOptions = {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const item = tooltipItems[0];
+                            let label = item.chart.data.labels[item.dataIndex];
+                            return Array.isArray(label) ? label.join(' ') : label;
+                        }
+                    }
+                }
+            }
+        };
+
+        const palette = {
+            red: '#FF6B6B',
+            yellow: '#FFD166',
+            green: '#06D6A0',
+            blue: '#118AB2',
+            dark: '#073B4C',
+            light: '#f8fafc'
+        };
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            new Chart(document.getElementById('teamRolesChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['專案管理 (PM)', '理論/架構 (Pro)', '創意/敏捷 (Flash)'],
+                    datasets: [{
+                        label: '職責分工',
+                        data: [34, 33, 33],
+                        backgroundColor: [palette.blue, palette.green, palette.yellow],
+                        borderColor: palette.light,
+                        borderWidth: 4,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: palette.dark,
+                                font: { size: 14 }
+                            }
+                        }
+                    }
+                }
+            });
+
+            new Chart(document.getElementById('qualityChart'), {
+                type: 'line',
+                data: {
+                    labels: ['初始', 'Glitch發現', 'v1.0規則', 'v2.0規則', 'v3.0規則(穩定)'],
+                    datasets: [{
+                        label: '溝通品質分數',
+                        data: [70, 50, 65, 80, 95],
+                        borderColor: palette.green,
+                        backgroundColor: 'rgba(6, 214, 160, 0.2)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                     ...defaultTooltipOptions,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            new Chart(document.getElementById('resourceChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['管控前', '管控後'],
+                    datasets: [{
+                        label: '計畫內工作',
+                        data: [50, 85],
+                        backgroundColor: palette.blue,
+                    }, {
+                        label: '創意發想(Meme)',
+                        data: [50, 15],
+                        backgroundColor: palette.yellow,
+                    }, {
+                        label: '資源過載風險',
+                        data: [30, 0],
+                        backgroundColor: palette.red,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    ...defaultTooltipOptions,
+                    scales: {
+                        x: { stacked: true },
+                        y: { stacked: true, max: 120 }
+                    },
+                    plugins: {
+                         tooltip: {
+                            ...defaultTooltipOptions.plugins.tooltip,
+                            callbacks: {
+                                ...defaultTooltipOptions.plugins.tooltip.callbacks,
+                                title: (items) => items[0].label
+                            }
+                        }
+                    }
+                }
+            });
+
+            new Chart(document.getElementById('stakeholderChart'), {
+                type: 'radar',
+                data: {
+                    labels: ['寫出算式', '概念理解', wrapText('可驗證的產出'), '內在動機', wrapText('遵循固定流程')],
+                    datasets: [{
+                        label: '生產者爸爸 (事實查核官)',
+                        data: [9, 4, 8, 3, 7],
+                        backgroundColor: 'rgba(255, 107, 107, 0.2)',
+                        borderColor: palette.red,
+                        pointBackgroundColor: palette.red
+                    }, {
+                        label: '投射者兒子 (探索者)',
+                        data: [3, 9, 4, 9, 2],
+                        backgroundColor: 'rgba(6, 214, 160, 0.2)',
+                        borderColor: palette.green,
+                        pointBackgroundColor: palette.green
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    ...defaultTooltipOptions,
+                     plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                             ...defaultTooltipOptions.plugins.tooltip,
+                             callbacks: {
+                                ...defaultTooltipOptions.plugins.tooltip.callbacks,
+                                title: (items) => items[0].dataset.label
+                             }
+                        }
+                    },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 10,
+                            ticks: { display: false }
+                        }
+                    }
+                }
+            });
+
+        });
+    </script>
+
+</body>
+</html>
