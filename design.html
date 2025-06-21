@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 設計樣式庫範本 v3</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #f1f5f9;
+        }
+        .component-code {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+        .component-code.show {
+            max-height: 2000px; /* Adjust as needed */
+            transition: max-height 0.7s ease-in;
+        }
+        .code-block {
+            background-color: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-900">AI 設計樣式庫 v3</h1>
+            <p class="mt-4 text-lg text-slate-600 max-w-3xl mx-auto">基於專案最終版本（含內頁）逆向工程整理而成的樣式庫。設計師可直接引用「樣式編號」，AI 即可生成對應的前端程式碼，以加速原型開發流程。</p>
+        </header>
+
+        <!-- Components Section -->
+        <div class="space-y-16">
+
+            <!-- Section: Layout -->
+            <section id="layout">
+                <h2 class="text-3xl font-bold text-slate-800 border-b-2 border-purple-300 pb-2 mb-8">版面佈局 (Layout)</h2>
+                
+                <div class="component-container mb-12">
+                    <h3 class="text-xl font-semibold mb-1">樣式 L-01: 儀表板頁首</h3>
+                    <p class="text-slate-500 mb-4">用於專案儀表板或著陸頁的主要標題。</p>
+                    <div class="bg-white p-6 rounded-xl border border-slate-200">
+                        <!-- Preview: L-01 -->
+                        <header class="text-center py-4">
+                            <h1 class="text-4xl font-bold text-slate-800">專案主標題</h1>
+                            <p class="mt-3 text-lg text-slate-500">這裡是頁面的介紹文字，闡述本頁核心目的。</p>
+                        </header>
+                    </div>
+                    <div class="mt-4">
+                        <button class="toggle-code-btn text-sm font-medium text-sky-600 hover:text-sky-800">顯示程式碼</button>
+                        <div class="component-code mt-2"></div>
+                    </div>
+                </div>
+
+                <div class="component-container mb-12">
+                    <h3 class="text-xl font-semibold mb-1">樣式 L-02: 內頁導覽列</h3>
+                    <p class="text-slate-500 mb-4">用於內容頁面，提供返回連結與麵包屑導覽。</p>
+                    <div class="bg-white p-6 rounded-xl border border-slate-200">
+                        <!-- Preview: L-02 -->
+                        <nav class="bg-slate-50 p-4 rounded-lg flex justify-between items-center">
+                            <div class="text-sm font-medium text-slate-500">
+                                <a href="#" class="hover:text-sky-600">首頁</a>
+                                <span class="mx-2">/</span>
+                                <a href="#" class="hover:text-sky-600">分類</a>
+                                <span class="mx-2">/</span>
+                                <span class="text-slate-800">目前頁面</span>
+                            </div>
+                            <a href="#" class="text-sm font-medium text-sky-600 hover:text-sky-800">← 返回上一頁</a>
+                        </nav>
+                    </div>
+                    <div class="mt-4">
+                        <button class="toggle-code-btn text-sm font-medium text-sky-600 hover:text-sky-800">顯示程式碼</button>
+                        <div class="component-code mt-2"></div>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- Section: Charts -->
+            <section id="charts">
+                <h2 class="text-3xl font-bold text-slate-800 border-b-2 border-green-300 pb-2 mb-8">圖表 (Charts)</h2>
+
+                <div class="component-container mb-12">
+                    <h3 class="text-xl font-semibold mb-1">樣式 G-01: 折線圖容器</h3>
+                    <p class="text-slate-500 mb-4">適用於展示數據隨時間的變化趨勢。</p>
+                    <div class="bg-white p-6 rounded-xl border border-slate-200">
+                        <!-- Preview: G-01 -->
+                        <div class="relative h-80 w-full max-w-3xl mx-auto"><canvas id="lineChart"></canvas></div>
+                    </div>
+                    <div class="mt-4">
+                        <button class="toggle-code-btn text-sm font-medium text-sky-600 hover:text-sky-800">顯示程式碼</button>
+                        <div class="component-code mt-2"></div>
+                    </div>
+                </div>
+
+                 <div class="component-container mb-12">
+                    <h3 class="text-xl font-semibold mb-1">樣式 G-02: 長條圖容器</h3>
+                    <p class="text-slate-500 mb-4">適用於比較不同類別的數據量。</p>
+                    <div class="bg-white p-6 rounded-xl border border-slate-200">
+                        <!-- Preview: G-02 -->
+                        <div class="relative h-80 w-full max-w-3xl mx-auto"><canvas id="barChart"></canvas></div>
+                    </div>
+                    <div class="mt-4">
+                        <button class="toggle-code-btn text-sm font-medium text-sky-600 hover:text-sky-800">顯示程式碼</button>
+                        <div class="component-code mt-2"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Core Components -->
+            <section id="components">
+                <h2 class="text-3xl font-bold text-slate-800 border-b-2 border-sky-300 pb-2 mb-8">核心元件 (Core Components)</h2>
+                
+                <div class="component-container mb-12">
+                    <h3 class="text-xl font-semibold mb-1">樣式 T-01: 時間軸項目卡片</h3>
+                    <p class="text-slate-500 mb-4">用於儀表板，展示帶有標籤、描述和行動按鈕的結構化資訊。</p>
+                    <div class="bg-white p-6 rounded-xl border border-slate-200">
+                        <!-- Preview: T-01 -->
+                         <div class="relative pl-8">
+                            <div class="absolute top-5 left-[-7px] w-4 h-4 rounded-full bg-white border-4 border-sky-500"></div>
+                            <div class="bg-white p-6 rounded-2xl shadow-md">
+                                <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-2">
+                                    <h3 class="text-xl font-bold text-slate-800">版本七：樣式調整</h3>
+                                    <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 mt-2 sm:mt-0">樣式</span>
+                                </div>
+                                <p class="text-slate-600 mb-4">全面調整 UI 樣式與色彩配置，優化視覺體驗。</p>
+                                <a href="#" class="inline-block bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">前往版本 »</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <button class="toggle-code-btn text-sm font-medium text-sky-600 hover:text-sky-800">顯示程式碼</button>
+                        <div class="component-code mt-2"></div>
+                    </div>
+                </div>
+
+                 <div class="component-container mb-12">
+                    <h3 class="text-xl font-semibold mb-1">樣式 T-02: 部門/團隊資訊卡片</h3>
+                    <p class="text-slate-500 mb-4">用於內頁，詳細介紹一個部門或團隊的資訊。</p>
+                    <div class="bg-white p-6 rounded-xl border border-slate-200">
+                        <!-- Preview: T-02 -->
+                         <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                            <div class="p-6 bg-slate-800 text-white">
+                                <h3 class="text-2xl font-bold">工程部門 (Engineering)</h3>
+                                <p class="opacity-80 mt-1">技術實現與架構核心</p>
+                            </div>
+                            <div class="p-6 space-y-4">
+                                <div>
+                                    <h4 class="font-semibold text-slate-800">核心職責：</h4>
+                                    <p class="text-slate-600">將專案需求轉化為穩定、高效能的技術產品，負責系統架構設計與程式碼實現。</p>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold text-slate-800">主要成員：</h4>
+                                    <ul class="list-disc list-inside text-slate-600">
+                                        <li>Pro 模型 (首席架構師)</li>
+                                        <li>Flash 模型 (前端開發)</li>
+                                    </ul>
+                                </div>
+                                <div class="pt-4 border-t border-slate-200">
+                                     <button class="w-full px-6 py-2.5 text-slate-700 bg-transparent hover:bg-slate-100 ring-1 ring-slate-300 font-medium rounded-lg text-sm transition-all">查看部門專案</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <button class="toggle-code-btn text-sm font-medium text-sky-600 hover:text-sky-800">顯示程式碼</button>
+                        <div class="component-code mt-2"></div>
+                    </div>
+                </div>
+
+                <div class="component-container mb-12">
+                    <h3 class="text-xl font-semibold mb-1">樣式 T-03: FAQ手風琴列表</h3>
+                    <p class="text-slate-500 mb-4">用於問答頁面，可展開和折疊的列表，節省版面空間。</p>
+                    <div class="bg-white p-6 rounded-xl border border-slate-200">
+                        <!-- Preview: T-03 -->
+                        <div class="faq-item bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+                            <button class="question w-full flex justify-between items-center text-left p-5">
+                                <span class="text-lg font-medium text-slate-800">這是一個常見問題嗎？</span>
+                                <svg class="chevron w-5 h-5 text-slate-500 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </button>
+                            <div class="answer px-5 pb-5 text-slate-600" style="max-height: 0px; overflow: hidden;">
+                                <p>是的，這是一個示範性的回答。點擊問題可以展開或折疊這段回答內容。這個組件非常適合用來製作FAQ頁面。</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <button class="toggle-code-btn text-sm font-medium text-sky-600 hover:text-sky-800">顯示程式碼</button>
+                        <div class="component-code mt-2"></div>
+                    </div>
+                </div>
+
+            </section>
+
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Code toggle functionality ---
+            document.querySelectorAll('.toggle-code-btn').forEach(button => {
+                const componentContainer = button.closest('.component-container');
+                if (!componentContainer) return;
+
+                const codeBlockContainer = componentContainer.querySelector('.component-code');
+                const previewContainer = componentContainer.querySelector('.bg-white.p-6');
+                
+                if (!codeBlockContainer || !previewContainer) return;
+
+                // Get code from preview
+                const codeContent = previewContainer.innerHTML
+                    .replace(/<!--\s*Preview:.*?-->/g, '') // Remove preview comments
+                    .trim();
+                const formattedCode = codeContent
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;");
+                
+                const codeElement = codeBlockContainer.querySelector('code');
+                if(!codeElement){
+                    const pre = document.createElement('pre');
+                    pre.className = 'code-block';
+                    const newCodeEl = document.createElement('code');
+                    newCodeEl.className = 'language-html';
+                    newCodeEl.innerHTML = formattedCode;
+                    pre.appendChild(newCodeEl);
+                    codeBlockContainer.appendChild(pre);
+                } else {
+                     codeElement.innerHTML = formattedCode;
+                }
+
+                button.addEventListener('click', () => {
+                    const isShown = codeBlockContainer.classList.contains('show');
+                    if (isShown) {
+                        codeBlockContainer.classList.remove('show');
+                        button.textContent = '顯示程式碼';
+                    } else {
+                        codeBlockContainer.classList.add('show');
+                        button.textContent = '隱藏程式碼';
+                    }
+                });
+            });
+
+            // --- Chart rendering ---
+            const renderChart = (id, type, labels, data, color) => {
+                try {
+                    const ctx = document.getElementById(id).getContext('2d');
+                    new Chart(ctx, {
+                        type: type,
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: '數據集',
+                                data: data,
+                                borderColor: color,
+                                backgroundColor: `${color}33`, // a bit of alpha
+                                fill: true,
+                                tension: type === 'line' ? 0.3 : 0,
+                                pointBackgroundColor: color,
+                                pointHoverRadius: 7,
+                                borderWidth: type === 'bar' ? 1 : 2,
+                            }]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            plugins: { legend: { display: false } },
+                            scales: { y: { beginAtZero: true } }
+                        }
+                    });
+                } catch (e) { console.error(`Could not render chart #${id}:`, e); }
+            };
+            
+            renderChart('lineChart', 'line', ['版本1', '版本2', '版本3', '版本4', '版本5'], [1, 3, 4, 5, 6], '#38bdf8');
+            renderChart('barChart', 'bar', ['工程部', '設計部', 'PM部', '人機部'], [8, 5, 3, 2], '#4ade80');
+
+            // --- FAQ Accordion ---
+            document.querySelectorAll('.faq-item .question').forEach(button => {
+                button.addEventListener('click', () => {
+                    const answer = button.nextElementSibling;
+                    const item = button.parentElement;
+                    const currentlyActive = item.classList.contains('active');
+                    
+                    document.querySelectorAll('.faq-item.active').forEach(activeItem => {
+                        activeItem.classList.remove('active');
+                        activeItem.querySelector('.answer').style.maxHeight = '0px';
+                        activeItem.querySelector('.chevron').style.transform = 'rotate(0deg)';
+                    });
+
+                    if(!currentlyActive){
+                       item.classList.add('active');
+                       answer.style.maxHeight = answer.scrollHeight + 'px';
+                       button.querySelector('.chevron').style.transform = 'rotate(180deg)';
+                    }
+                });
+            });
+
+        });
+    </script>
+</body>
+</html>

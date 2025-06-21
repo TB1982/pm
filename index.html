@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>專案迭代互動時間軸</title>
+    <title>專案迭代互動儀表板 v2.1</title>
     <!-- Chosen Palette: Slate Gray & Sky Blue -->
-    <!-- Application Structure Plan: The SPA is designed as a vertical interactive timeline. This structure is ideal for showcasing chronological project evolution, which is the core story of the source material (the list of versioned files). A summary chart at the top provides an immediate quantitative overview of progress, followed by the detailed timeline for exploration. This top-down flow (summary -> detail) is highly intuitive for users. Each timeline item acts as a self-contained section with a clear call-to-action (linking to the specific HTML file), making navigation seamless. -->
-    <!-- Visualization & Content Choices: 1. Project Growth (Change): Report Info: Version names implying new features. -> Goal: Show cumulative growth. -> Viz: Line Chart (Chart.js) showing "Key Features Added" over versions. -> Interaction: Hover to see data points. -> Justification: Provides a quick, high-level quantitative summary of the project's progress. -> Library: Chart.js. 2. Version Details (Organize/Inform): Report Info: List of versioned files with descriptions. -> Goal: Detail each version's changes and provide access. -> Presentation: Vertical Timeline (HTML/Tailwind CSS). -> Interaction: Each timeline node has a clickable link to the corresponding HTML file. -> Justification: A timeline is the most intuitive way to present chronological data. Using HTML/CSS is efficient and avoids library overhead for a structural element. -> Method: HTML/Tailwind. -->
+    <!-- Application Structure Plan: The SPA is designed as a vertical interactive timeline. This structure is ideal for showcasing chronological project evolution. Based on user feedback, the layout is updated to prioritize navigation. The timeline is now the primary element, split into two columns: main project iterations on the left, and supplementary artifacts (easter eggs, docs) on the right. This enhances usability by presenting the most critical navigation paths first. -->
+    <!-- Visualization & Content Choices: 1. Project Growth (Change): Line Chart (Chart.js) now serves as a summary at the end. 2. Version Details (Organize/Inform): A two-column vertical timeline (HTML/Tailwind) now separates primary versions from secondary artifacts, improving content discoverability. Each node remains a clickable link. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -43,30 +43,43 @@
         .timeline-dot.easter-egg {
              border: 3px solid #ec4899;
         }
+        .timeline-dot.docs {
+             border: 3px solid #6b7280;
+        }
     </style>
 </head>
 <body class="text-slate-700">
 
-    <div class="container mx-auto p-4 md:p-8 max-w-4xl">
+    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
 
         <header class="text-center mb-10 md:mb-16">
-            <h1 class="text-4xl md:text-5xl font-bold text-slate-800">專案迭代互動時間軸</h1>
-            <p class="mt-4 text-lg text-slate-500">視覺化呈現專案從無到有的完整演進歷程。</p>
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-800">專案迭代儀表板</h1>
+            <p class="mt-4 text-lg text-slate-500">視覺化呈現專案從無到有的完整演進歷程、文件與彩蛋。</p>
         </header>
 
-        <section class="mb-12 md:mb-16 bg-white p-6 rounded-2xl shadow-lg">
-            <h2 class="text-2xl font-bold text-slate-800 mb-1 text-center">功能演進趨勢圖</h2>
-            <p class="text-center text-slate-500 mb-6">圖表展示了隨版本迭代，核心功能的累積數量。</p>
+        <section class="mb-12 md:mb-16">
+            <div class="grid grid-cols-1 lg:grid-cols-2 lg:gap-x-12 gap-y-12">
+                <!-- Left Column: Main Iterations -->
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800 mb-8 text-center">迭代版本 (主線)</h2>
+                    <div id="timeline-main" class="relative ml-6 md:ml-4"></div>
+                </div>
+                <!-- Right Column: Docs & Easter Eggs -->
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800 mb-8 text-center">參考文件 & 彩蛋 (支線)</h2>
+                    <div id="timeline-side" class="relative ml-6 md:ml-4"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white p-6 rounded-2xl shadow-lg mt-16">
+            <h2 class="text-2xl font-bold text-slate-800 mb-1 text-center">功能演進趨勢圖 (參考)</h2>
+            <p class="text-center text-slate-500 mb-6">圖表展示了隨主線版本迭代，核心功能的累積數量。</p>
             <div class="chart-container relative h-64 md:h-80 w-full max-w-3xl mx-auto">
                 <canvas id="evolutionChart"></canvas>
             </div>
         </section>
 
-        <section>
-            <h2 class="text-2xl font-bold text-slate-800 mb-8 text-center">版本時間軸</h2>
-            <div id="timeline-container" class="relative ml-6 md:ml-0">
-            </div>
-        </section>
 
         <footer class="text-center mt-16">
             <p class="text-slate-400 text-sm">由 GitHub Pages 部署 | 最後更新於 2025</p>
@@ -75,83 +88,23 @@
 
     <script>
         const versions = [
-            {
-                name: "初版",
-                description: "建立專案基礎架構與核心頁面。",
-                file: "01.html",
-                tag: "基礎",
-                features: 1
-            },
-            {
-                name: "二版",
-                description: "追加部門分類，擴充內容組織。",
-                file: "02.html",
-                tag: "功能",
-                features: 2
-            },
-            {
-                name: "二版追加",
-                description: "細化部門內容，加入「工程」及「設計」部門。",
-                file: "02-1.html",
-                tag: "功能",
-                features: 3
-            },
-            {
-                name: "三版",
-                description: "為部門卡片加入滑鼠懸停渲染效果，提升互動性。",
-                file: "03.html",
-                tag: "樣式",
-                features: 3
-            },
-            {
-                name: "三版追加",
-                description: "首次整合圖表，加入「迭代演進」視覺化數據。",
-                file: "03-1.html",
-                tag: "圖表",
-                features: 4
-            },
-            {
-                name: "四版",
-                description: "調整頁首佈局，並新增「人機互動」部門。",
-                file: "4.html",
-                tag: "優化",
-                features: 5
-            },
-            {
-                name: "五版",
-                description: "再次追加新的迭代圖表，豐富數據呈現。",
-                file: "5.html",
-                tag: "圖表",
-                features: 6
-            },
-            {
-                name: "六版",
-                description: "進行整體架構與程式碼重構，提升穩定性。",
-                file: "6.html",
-                tag: "重構",
-                features: 6
-            },
-            {
-                name: "七版追加樣式調整",
-                description: "全面調整 UI 樣式與色彩配置，優化視覺體驗。",
-                file: "7.html",
-                tag: "樣式",
-                features: 6
-            },
-            {
-                name: "Flash彩蛋",
-                description: "一個隱藏的驚喜！探索專案中的互動 Flash 彩蛋。",
-                file: "Flash1.html",
-                tag: "彩蛋",
-                features: 6 
-            },
-            {
-                name: "彩蛋說明",
-                description: "關於 Flash 彩蛋的背景故事與技術說明。",
-                file: "Flash1-1.html",
-                tag: "說明",
-                features: 6
-            }
+            // Main Timeline
+            { name: "初版", description: "建立專案基礎架構與核心頁面。", file: "01.html", tag: "基礎", features: 1, column: 'main' },
+            { name: "二版", description: "追加部門分類，擴充內容組織。", file: "02.html", tag: "功能", features: 2, column: 'main' },
+            { name: "二版追加", description: "細化部門內容，加入「工程」及「設計」部門。", file: "02-1.html", tag: "功能", features: 3, column: 'main' },
+            { name: "三版", description: "為部門卡片加入滑鼠懸停渲染效果，提升互動性。", file: "03.html", tag: "樣式", features: 3, column: 'main' },
+            { name: "三版追加", description: "首次整合圖表，加入「迭代演進」視覺化數據。", file: "03-1.html", tag: "圖表", features: 4, column: 'main' },
+            { name: "四版", description: "調整頁首佈局，並新增「人機互動」部門。", file: "4.html", tag: "優化", features: 5, column: 'main' },
+            { name: "五版", description: "再次追加新的迭代圖表，豐富數據呈現。", file: "5.html", tag: "圖表", features: 6, column: 'main' },
+            { name: "六版", description: "進行整體架構與程式碼重構，提升穩定性。", file: "6.html", tag: "重構", features: 6, column: 'main' },
+            { name: "七版追加樣式調整", description: "全面調整 UI 樣式與色彩配置，優化視覺體驗。", file: "7.html", tag: "樣式", features: 6, column: 'main' },
+            
+            // Side Timeline
+            { name: "設計樣式庫", description: "基於專案成果逆向工程整理的設計規範與元件庫。", file: "design.html", tag: "文件", column: 'side' },
+            { name: "專案 FAQ", description: "解答在人機協作專案中，各團隊最關心的問題。", file: "faq.html", tag: "文件", column: 'side' },
+            { name: "Flash彩蛋預期效果", description: "做做手工藝以迴避版權無法生成問題（欸嘿", file: "rewrite.html", tag: "預告", column: 'side' },
+            { name: "Flash彩蛋實際情形", description: "Flash自己生出來的蜘蛛星雲網頁，請各位笑納XD", file: "Flash1.html", tag: "彩蛋", column: 'side' },
+            { name: "彩蛋說明", description: "關於 Flash 彩蛋的背景故事與技術說明。", file: "Flash1-1.html", tag: "說明", column: 'side' }
         ];
 
         function getTagInfo(tag) {
@@ -161,14 +114,18 @@
                 case '圖表': return { class: 'bg-green-100 text-green-800', dotClass: '' };
                 case '優化': return { class: 'bg-yellow-100 text-yellow-800', dotClass: '' };
                 case '重構': return { class: 'bg-red-100 text-red-800', dotClass: '' };
+                case '預告': return { class: 'bg-orange-100 text-orange-800', dotClass: 'easter-egg' };
                 case '彩蛋': return { class: 'bg-pink-100 text-pink-800', dotClass: 'easter-egg' };
                 case '說明': return { class: 'bg-indigo-100 text-indigo-800', dotClass: 'easter-egg' };
+                case '文件': return { class: 'bg-slate-200 text-slate-800', dotClass: 'docs' };
                 default: return { class: 'bg-slate-100 text-slate-800', dotClass: '' };
             }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            const timelineContainer = document.getElementById('timeline-container');
+            const mainTimeline = document.getElementById('timeline-main');
+            const sideTimeline = document.getElementById('timeline-side');
+            
             versions.forEach(version => {
                 const tagInfo = getTagInfo(version.tag);
                 const item = document.createElement('div');
@@ -182,21 +139,26 @@
                         </div>
                         <p class="text-slate-600 mb-4">${version.description}</p>
                         <a href="${version.file}" target="_blank" class="inline-block bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">
-                            前往版本 »
+                            前往 »
                         </a>
                     </div>
                 `;
-                timelineContainer.appendChild(item);
+                if(version.column === 'main') {
+                    mainTimeline.appendChild(item);
+                } else {
+                    sideTimeline.appendChild(item);
+                }
             });
 
+            const mainVersions = versions.filter(v => v.column === 'main');
             const ctx = document.getElementById('evolutionChart').getContext('2d');
             new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: versions.map(v => v.name),
+                    labels: mainVersions.map(v => v.name),
                     datasets: [{
                         label: '累積功能數量',
-                        data: versions.map(v => v.features),
+                        data: mainVersions.map(v => v.features),
                         borderColor: '#38bdf8',
                         backgroundColor: 'rgba(56, 189, 248, 0.1)',
                         fill: true,
@@ -207,39 +169,17 @@
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 1
-                            },
-                            grid: {
-                                color: '#e2e8f0'
-                            }
-                        },
-                        x: {
-                             grid: {
-                                display: false
-                            }
-                        }
-                    },
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } }, x: { grid: { display: false } } },
                     plugins: {
-                        legend: {
-                            display: false
-                        },
+                        legend: { display: false },
                         tooltip: {
                             backgroundColor: '#0f172a',
                             titleFont: { size: 16 },
                             bodyFont: { size: 14 },
                             padding: 12,
                             boxPadding: 4,
-                            callbacks: {
-                                label: function(context) {
-                                    return `累積功能: ${context.parsed.y}`;
-                                }
-                            }
+                            callbacks: { label: (context) => `累積功能: ${context.parsed.y}` }
                         }
                     }
                 }

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 協作專案 FAQ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc;
+        }
+        .faq-item .answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0, 1, 0, 1);
+        }
+        .faq-item.active .answer {
+            max-height: 1000px; /* A large enough value */
+            transition: max-height 1s ease-in-out;
+        }
+        .faq-item.active .chevron {
+            transform: rotate(180deg);
+        }
+        .prose p {
+            margin-bottom: 1em;
+        }
+        .prose ul {
+            list-style-position: inside;
+            padding-left: 1em;
+        }
+        .prose li {
+            margin-bottom: 0.5em;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-4xl">
+
+        <header class="text-center mb-10 md:mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-900">AI 協作專案 FAQ</h1>
+            <p class="mt-4 text-lg text-slate-600">解答在人機協作專案中，各團隊最關心的問題。</p>
+        </header>
+
+        <div id="faq-container" class="space-y-4">
+
+            <!-- FAQ Item 1: Designer -->
+            <div class="faq-item bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <button class="question w-full flex justify-between items-center text-left p-6">
+                    <div class="flex items-center">
+                        <span class="text-xl font-semibold text-sky-600 mr-4">Q1</span>
+                        <span class="text-lg font-medium text-slate-800">【設計團隊】AI 能直接讀取 Figma 設計稿，生成網頁原型嗎？</span>
+                    </div>
+                    <svg class="chevron w-6 h-6 text-slate-500 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div class="answer px-6 pb-6 text-slate-700">
+                    <div class="prose max-w-none">
+                        <p><strong>簡短回答：</strong>目前，我們尚無法「直接且完美地」依照 Figma 設計，自動生成可直接上線的網頁原型。</p>
+                        <p><strong>詳細說明：</strong>這是一個被稱為「設計轉程式碼 (Design to Code)」的前沿研究領域。雖然現有工具可以透過圖像識別，生成初步的 HTML/CSS 草稿，但在理解複雜的設計意圖、產生高品質的響應式程式碼、以及處理互動邏輯方面，仍有巨大的技術鴻溝。目前的 AI 更像是一個「草稿生成器」，產出的程式碼仍需人類工程師進行大量的修改與優化。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ Item 2: Solution -->
+            <div class="faq-item bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <button class="question w-full flex justify-between items-center text-left p-6">
+                    <div class="flex items-center">
+                        <span class="text-xl font-semibold text-sky-600 mr-4">Q2</span>
+                        <span class="text-lg font-medium text-slate-800">【解決方案】在完全自動化前，有什麼務實的中間方案嗎？</span>
+                    </div>
+                    <svg class="chevron w-6 h-6 text-slate-500 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div class="answer px-6 pb-6 text-slate-700">
+                    <div class="prose max-w-none">
+                        <p><strong>是的，我們提出一個名為「設計樣板規範」的務實策略。</strong></p>
+                        <p>這個策略的核心是建立一個「設計與程式碼的共同語言」：</p>
+                        <ul>
+                            <li><strong>AI 提供樣式庫：</strong>由 AI 提供一份經優化的、常見的網頁「設計樣式庫」（如卡片、導航欄等），並為每個樣式提供唯一的「對應編號」。</li>
+                            <li><strong>設計師選擇與組合：</strong>設計師在 Figma 中，不再是從零創造，而是像「玩積木」一樣，直接選用這些帶有編號的標準樣式來進行組合設計。</li>
+                            <li><strong>AI 精準生成程式碼：</strong>當設計師提交帶有「樣式編號」的設計稿時，AI 就能根據編號，精準地調用對應的程式碼模板，快速生成高品質的網頁原型。</li>
+                        </ul>
+                        <p>這個方案大幅降低了溝通成本與技術門檻，是現階段彌合設計與開發鴻溝的最佳橋樑。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ Item 3: Engineer -->
+            <div class="faq-item bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <button class="question w-full flex justify-between items-center text-left p-6">
+                    <div class="flex items-center">
+                        <span class="text-xl font-semibold text-sky-600 mr-4">Q3</span>
+                        <span class="text-lg font-medium text-slate-800">【工程團隊】AI 能協助後端工程師，從無到有打造網站後台嗎？</span>
+                    </div>
+                    <svg class="chevron w-6 h-6 text-slate-500 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div class="answer px-6 pb-6 text-slate-700">
+                    <div class="prose max-w-none">
+                        <p><strong>簡短回答：</strong>AI 尚無法獨立完成一個複雜的後台系統，但它已經能成為後端工程師強大的「副駕駛」。</p>
+                        <p>AI 的主要協助體現在：</p>
+                        <ul>
+                            <li><strong>架構設計：</strong>根據需求，提供多種後端架構模式（如 RESTful API, 微服務）的建議與優劣分析。</li>
+                            <li><strong>程式碼生成：</strong>快速生成重複性的樣板程式碼（如用戶認證、CRUD操作），以及特定功能的程式碼片段。</li>
+                            <li><strong>數據庫設計：</strong>根據前端需求，建議數據庫的表結構(Schema)。</li>
+                            <li><strong>錯誤排查與優化：</strong>協助排查錯誤、提供效能優化建議、識別潛在安全漏洞。</li>
+                        </ul>
+                        <p>總之，AI 能將工程師從繁瑣的基礎工作中解放，讓他們能專注於更複雜的業務邏輯與架構決策。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ Item 4: PM -->
+            <div class="faq-item bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <button class="question w-full flex justify-between items-center text-left p-6">
+                    <div class="flex items-center">
+                        <span class="text-xl font-semibold text-sky-600 mr-4">Q4</span>
+                        <span class="text-lg font-medium text-slate-800">【PM團隊】如何緩解團隊對這套新模式的學習焦慮？</span>
+                    </div>
+                    <svg class="chevron w-6 h-6 text-slate-500 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                <div class="answer px-6 pb-6 text-slate-700">
+                    <div class="prose max-w-none">
+                        <p>緩解焦慮的關鍵在於將焦點從「取代」轉為「賦能」，並運用**「原子習慣」**的框架，將巨大的學習曲線，分解為微小、無痛的每日行動。</p>
+                        <p><strong>PM 的原子習慣賦能方案：</strong></p>
+                        <ul>
+                            <li><strong>提示（使其顯而易見）：</strong>將「與AI協作」的提示，融入現有工作流。例如，在會議紀錄模板中，加入一個欄位：「今日可嘗試用AI優化的一件事？」</li>
+                            <li><strong>渴望（使其有吸引力）：</strong>將學習與「賦能」的願景掛鉤。強調 AI 是讓你從繁瑣中解脫、提升策略價值的「數位副駕駛」，而非取代者。分享成功案例，展示 AI 如何將1小時的工作縮短為5分鐘。</li>
+                            <li><strong>回應（使其輕而易舉）：</strong>將學習門檻降到最低。推廣「兩分鐘法則」——「用AI優化會議摘要」這個習慣，可以在兩分鐘內完成。提供現成的、可直接複製使用的「提問模板 (Prompt)」，讓團隊成員無需思考如何提問，即可獲得高品質的AI協助。</li>
+                            <li><strong>獎賞（使其令人滿足）：</strong>建立即時的正回饋機制。當團隊成員使用 AI 完成一項任務時，在公開頻道給予肯定與讚賞。鼓勵他們分享自己的「小勝利」，例如「今天用AI節省了半小時，我把時間拿去思考下個季度的策略了」。這能創造一種正向的、共同學習的團隊文化。</li>
+                        </ul>
+                        <p>透過這個方案，我們將龐大的變革，轉化為一系列微小、可控且充滿正回饋的習慣，從而溫和且有效地消除團隊的焦慮感。</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const faqContainer = document.getElementById('faq-container');
+
+            faqContainer.addEventListener('click', (e) => {
+                const questionButton = e.target.closest('.question');
+                if (questionButton) {
+                    const faqItem = questionButton.parentElement;
+                    
+                    // Close other items
+                    faqContainer.querySelectorAll('.faq-item').forEach(item => {
+                        if (item !== faqItem && item.classList.contains('active')) {
+                            item.classList.remove('active');
+                        }
+                    });
+
+                    // Toggle current item
+                    faqItem.classList.toggle('active');
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
