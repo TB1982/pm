@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>專案版本導覽</title>
+    <!-- 載入 Tailwind CSS，提供現代化的樣式 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- 使用 Google Fonts 的 "Inter" 字體，讓文字更美觀 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* 自訂字體 */
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800">
+    <!-- 主容器，使用 flexbox 讓內容垂直和水平置中 -->
+    <div class="min-h-screen flex flex-col items-center justify-center p-4">
+
+        <!-- 卡片式佈局 -->
+        <div class="w-full max-w-2xl bg-white rounded-xl shadow-lg p-8">
+            
+            <!-- 頁面主標題 -->
+            <header class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-slate-900">專案迭代版本總覽</h1>
+                <p class="text-slate-500 mt-2">點擊下方連結以瀏覽不同階段的網頁版本。</p>
+            </header>
+
+            <!-- 連結列表 -->
+            <div class="space-y-3">
+                
+                <!-- 連結項目模板 -->
+                <!-- 使用 flex 讓標題和描述分開對齊 -->
+                <!-- transition 和 hover 效果增加互動感 -->
+
+                <a href="index.html" class="flex justify-between items-center p-4 bg-slate-50 hover:bg-blue-100 rounded-lg transition-all duration-200 shadow-sm border border-slate-200">
+                    <span class="font-semibold text-blue-600">首頁</span>
+                    <span class="text-sm text-slate-500">(目前頁面)</span>
+                </a>
+
+                <a href="1.html" class="flex justify-between items-center p-4 bg-white hover:bg-slate-50 rounded-lg transition-all duration-200 shadow-sm border border-slate-200">
+                    <span class="font-medium text-slate-700">初版</span>
+                    <span class="text-sm text-slate-400">→</span>
+                </a>
+
+                <a href="2.html" class="flex justify-between items-center p-4 bg-white hover:bg-slate-50 rounded-lg transition-all duration-200 shadow-sm border border-slate-200">
+                    <span class="font-medium text-slate-700">二版追加部門</span>
+                    <span class="text-sm text-slate-400">→</span>
+                </a>
+
+                <a href="2-1.html" class="flex justify-between items-center p-4 bg-white hover:bg-slate-50 rounded-lg transition-all duration-200 shadow-sm border border-slate-200">
+                    <span class="font-medium text-slate-700">二版加入工程及設計部門</span>
+                    <span class="text-sm text-slate-400">→</span>
+                </a>
+
+                <a href="3.html" class="flex justify-between items-center p-4 bg-white hover:bg-slate-50 rounded-lg transition-all duration-200 shadow-sm border border-slate-200">
+                    <span class="font-medium text-slate-700">三版追加部門渲染效果</span>
+                    <span class="text-sm text-slate-400">→</span>
+                </a>
+
+                <a href="3-1.html" class="flex justify-between items-center p-4 bg-white hover:bg-slate-50 rounded-lg transition-all duration-200 shadow-sm border border-slate-200">
+                    <span class="font-medium text-slate-700">三版加入迭代演進圖表</span>
+                    <span class="text-sm text-slate-400">→</span>
+                </a>
+                
+                <a href="4.html" class="flex justify-between items-center p-4 bg-white hover:bg-slate-50 rounded-lg transition-all duration-200 shadow-sm border border-slate-200">
+                    <span class="font-medium text-slate-700">四版追加部門調整頁首/追加人機部門</span>
+                    <span class="text-sm text-slate-400">→</span>
+                </a>
+                
+                <a href="5.html" class="flex justify-between items-center p-4 bg-white hover:bg-slate-50 rounded-lg transition-all duration-200 shadow-sm border border-slate-200">
+                    <span class="font-medium text-slate-700">五版追加迭代圖表</span>
+                    <span class="text-sm text-slate-400">→</span>
+                </a>
+                
+                <a href="6.html" class="flex justify-between items-center p-4 bg-white hover:bg-slate-50 rounded-lg transition-all duration-200 shadow-sm border border-slate-200">
+                    <span class="font-medium text-slate-700">六版</span>
+                    <span class="text-sm text-slate-400">→</span>
+                </a>
+                
+                <a href="7.html" class="flex justify-between items-center p-4 bg-white hover:bg-slate-50 rounded-lg transition-all duration-200 shadow-sm border border-slate-200">
+                    <span class="font-medium text-slate-700">七版追加樣式調整</span>
+                    <span class="text-sm text-slate-400">→</span>
+                </a>
+                <a href="Flash1.html" class="flex justify-between items-center p-4 bg-white hover:bg-slate-50 rounded-lg transition-all duration-200 shadow-sm border border-slate-200">
+                    <span class="font-medium text-slate-700">Flash彩蛋</span>
+                    <span class="text-sm text-slate-400">→</span>
+                </a>
+                <a href="Flash1-1.html" class="flex justify-between items-center p-4 bg-white hover:bg-slate-50 rounded-lg transition-all duration-200 shadow-sm border border-slate-200">
+                    <span class="font-medium text-slate-700">Flash彩蛋說明</span>
+                    <span class="text-sm text-slate-400">→</span>
+                </a>
+            </div>
+
+        </div>
+        
+        <!-- 頁腳 -->
+        <footer class="text-center mt-8">
+            <p class="text-slate-400 text-sm">由 GitHub Pages 部署</p>
+        </footer>
+
+    </div>
+</body>
+</html>
