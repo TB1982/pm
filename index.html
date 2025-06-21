@@ -105,7 +105,8 @@
             { name: "Flash彩蛋預期效果", description: "做做手工藝以迴避版權無法生成問題（欸嘿", file: "rewrite.html", tag: "預告", column: 'side' },
             { name: "Flash彩蛋實際情形", description: "Flash自己生出來的蜘蛛星雲網頁，請各位笑納XD", file: "Flash1.html", tag: "彩蛋", column: 'side' },
             { name: "彩蛋說明", description: "關於 Flash 彩蛋的背景故事與技術說明。", file: "Flash1-1.html", tag: "說明", column: 'side' },
-            { name: "知識蒸餾", description: "為解決跨模型上下文問題，所進行的知識蒸餾實證分析報告。", file: "distillation.html", tag: "分析", column: 'side' }
+            { name: "知識蒸餾", description: "為解決跨模型上下文問題，所進行的知識蒸餾實證分析報告。", file: "distillation.html", tag: "分析", column: 'side' },
+            { name: "PMP圖書館", description: "利用知識蒸餾打造自己的知識飛輪與RAG", file: "library.html", tag: "經驗", features: 6, column: 'side' }
         ];
 
         function getTagInfo(tag) {
@@ -120,6 +121,7 @@
                 case '說明': return { class: 'bg-indigo-100 text-indigo-800', dotClass: 'easter-egg' };
                 case '文件': return { class: 'bg-slate-200 text-slate-800', dotClass: 'docs' };
                 case '分析': return { class: 'bg-teal-100 text-teal-800', dotClass: 'docs' };
+                case '經驗': return { class: 'bg-yellow-100 text-yellow-800', dotClass: 'docs' }; // New tag styling
                 default: return { class: 'bg-slate-100 text-slate-800', dotClass: '' };
             }
         }
