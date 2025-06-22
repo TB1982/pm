@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<!-- saved from url=(0040)file:///C:/Users/user/Desktop/tb/pm.html -->
+<html lang="zh-TW"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI協作的科學：從信任到驗證的視覺化報告</title>
+    <!-- Chosen Palette: Energetic & Playful -->
+    <!-- Application Structure Plan: This infographic tells a story in eight acts: 1. The Hook, 2. The Core Choice, 3. The Methodology, 4. Value Expansion (Coach Role), 5. Team Dynamics (AI Personalities), 6. The Pinnacle of Value (PM's New Role), 7. The Scientific Leap, and 8. The Scalable Blueprint (The Vision). This structure guides the audience from a relatable problem to a grand, actionable vision. -->
+    <!-- Visualization & Content Choices:
+        - The Choice: Goal: Compare -> Vis: HTML/CSS side-by-side cards.
+        - The Methodology: Goal: Organize -> Vis: HTML/CSS horizontal flowchart.
+        - Value Expansion: Goal: Inform/Compare -> Vis: Chart.js Donut Chart (Canvas).
+        - Team Dynamics: Goal: Compare -> Vis: Chart.js Radar Chart (Canvas) to profile Pro vs Flash.
+        - The Pinnacle of Value: Goal: Compare/Inform -> Vis: Chart.js Radar Chart (Canvas) to map methodology to PMP principles.
+        - The Blueprint: Goal: Organize -> Vis: HTML/CSS 3-column card layout.
+        All visualizations strictly adhere to the NO SVG/Mermaid constraint.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <script src="./pmchatgptpro_files/saved_resource"></script>
+    <script src="./pmchatgptpro_files/chart.js.下載"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com/">
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+    <link href="./pmchatgptpro_files/css2" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #f8f9fa;
+            color: #073B4C; /* Dark Navy Text */
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #118AB2, #073B4C);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 40vh;
+            width: 100%;
+            max-width: 500px;
+            max-height: 400px;
+        }
+        .radar-chart-container {
+             position: relative;
+            margin: auto;
+            height: 45vh;
+            width: 100%;
+            max-width: 550px;
+            max-height: 450px;
+        }
+    </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.16 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.container{width:100%}@media (min-width: 640px){.container{max-width:640px}}@media (min-width: 768px){.container{max-width:768px}}@media (min-width: 1024px){.container{max-width:1024px}}@media (min-width: 1280px){.container{max-width:1280px}}@media (min-width: 1536px){.container{max-width:1536px}}.relative{position:relative}.order-1{order:1}.order-2{order:2}.mx-auto{margin-left:auto;margin-right:auto}.mb-10{margin-bottom:2.5rem}.mb-12{margin-bottom:3rem}.mb-16{margin-bottom:4rem}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mb-8{margin-bottom:2rem}.mt-1{margin-top:0.25rem}.mt-16{margin-top:4rem}.mt-2{margin-top:0.5rem}.mt-3{margin-top:0.75rem}.mt-4{margin-top:1rem}.mt-5{margin-top:1.25rem}.mt-6{margin-top:1.5rem}.mt-8{margin-top:2rem}.block{display:block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.h-16{height:4rem}.w-16{width:4rem}.w-full{width:100%}.max-w-3xl{max-width:48rem}.max-w-6xl{max-width:72rem}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.flex-col{flex-direction:column}.items-center{align-items:center}.justify-center{justify-content:center}.gap-8{gap:2rem}.space-y-16 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(4rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(4rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.space-y-6 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.space-y-8 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(2rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(2rem * var(--tw-space-y-reverse))}.rounded-2xl{border-radius:1rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-xl{border-radius:0.75rem}.border-4{border-width:4px}.border-l-4{border-left-width:4px}.border-l-8{border-left-width:8px}.border-t{border-top-width:1px}.border-dashed{border-style:dashed}.border-\[\#06D6A0\]{--tw-border-opacity:1;border-color:rgb(6 214 160 / var(--tw-border-opacity, 1))}.border-\[\#06D6A0\]\/50{border-color:rgb(6 214 160 / 0.5)}.border-\[\#118AB2\]{--tw-border-opacity:1;border-color:rgb(17 138 178 / var(--tw-border-opacity, 1))}.border-\[\#FF6B6B\]{--tw-border-opacity:1;border-color:rgb(255 107 107 / var(--tw-border-opacity, 1))}.border-\[\#FF6B6B\]\/50{border-color:rgb(255 107 107 / 0.5)}.border-\[\#FFD166\]{--tw-border-opacity:1;border-color:rgb(255 209 102 / var(--tw-border-opacity, 1))}.border-slate-200{--tw-border-opacity:1;border-color:rgb(226 232 240 / var(--tw-border-opacity, 1))}.bg-\[\#06D6A0\]{--tw-bg-opacity:1;background-color:rgb(6 214 160 / var(--tw-bg-opacity, 1))}.bg-\[\#06D6A0\]\/5{background-color:rgb(6 214 160 / 0.05)}.bg-\[\#073B4C\]{--tw-bg-opacity:1;background-color:rgb(7 59 76 / var(--tw-bg-opacity, 1))}.bg-\[\#118AB2\]{--tw-bg-opacity:1;background-color:rgb(17 138 178 / var(--tw-bg-opacity, 1))}.bg-\[\#FF6B6B\]\/5{background-color:rgb(255 107 107 / 0.05)}.bg-\[\#FFD166\]{--tw-bg-opacity:1;background-color:rgb(255 209 102 / var(--tw-bg-opacity, 1))}.bg-slate-50{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.p-4{padding:1rem}.p-6{padding:1.5rem}.p-8{padding:2rem}.pt-8{padding-top:2rem}.text-center{text-align:center}.text-right{text-align:right}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-4xl{font-size:2.25rem;line-height:2.5rem}.text-5xl{font-size:3rem;line-height:1}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.font-black{font-weight:900}.font-bold{font-weight:700}.font-extrabold{font-weight:800}.font-light{font-weight:300}.font-semibold{font-weight:600}.italic{font-style:italic}.not-italic{font-style:normal}.text-\[\#06D6A0\]{--tw-text-opacity:1;color:rgb(6 214 160 / var(--tw-text-opacity, 1))}.text-\[\#073B4C\]{--tw-text-opacity:1;color:rgb(7 59 76 / var(--tw-text-opacity, 1))}.text-\[\#118AB2\]{--tw-text-opacity:1;color:rgb(17 138 178 / var(--tw-text-opacity, 1))}.text-\[\#FF6B6B\]{--tw-text-opacity:1;color:rgb(255 107 107 / var(--tw-text-opacity, 1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity, 1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.text-slate-600{--tw-text-opacity:1;color:rgb(71 85 105 / var(--tw-text-opacity, 1))}.text-slate-700{--tw-text-opacity:1;color:rgb(51 65 85 / var(--tw-text-opacity, 1))}.text-slate-800{--tw-text-opacity:1;color:rgb(30 41 59 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.opacity-80{opacity:0.8}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}@media (min-width: 768px){.md\:order-1{order:1}.md\:order-2{order:2}.md\:mb-24{margin-bottom:6rem}.md\:mt-24{margin-top:6rem}.md\:block{display:block}.md\:w-1\/4{width:25%}.md\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.md\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.md\:flex-row{flex-direction:row}.md\:items-start{align-items:flex-start}.md\:space-x-4 > :not([hidden]) ~ :not([hidden]){--tw-space-x-reverse:0;margin-right:calc(1rem * var(--tw-space-x-reverse));margin-left:calc(1rem * calc(1 - var(--tw-space-x-reverse)))}.md\:space-y-0 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0px * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0px * var(--tw-space-y-reverse))}.md\:space-y-24 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(6rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(6rem * var(--tw-space-y-reverse))}.md\:p-10{padding:2.5rem}.md\:p-12{padding:3rem}.md\:text-3xl{font-size:1.875rem;line-height:2.25rem}.md\:text-5xl{font-size:3rem;line-height:1}.md\:text-6xl{font-size:3.75rem;line-height:1}}@media (min-width: 1024px){.lg\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}}</style></head>
+<body class="antialiased">
+
+    <div class="container mx-auto p-4 md:p-12 max-w-6xl">
+
+        <header class="text-center mb-16 md:mb-24">
+            <h1 class="text-4xl md:text-6xl font-black gradient-text">AI專案管理虛擬實踐場</h1>
+            <h2 class="text-2xl md:text-3xl font-bold text-slate-800 mt-3">一份終極方法論</h2>
+            <p class="mt-5 text-lg text-slate-500 max-w-3xl mx-auto">本報告旨在闡述一套全新的、專為AI時代設計的專案管理心智模型。它始於一個微小的系統錯誤，最終演化為一套可複製、可驗證、可規模化的團隊成長框架。</p>
+        </header>
+
+        <main class="space-y-16 md:space-y-24">
+            
+            <section id="the-glitch" class="text-center">
+                <p class="text-lg text-slate-500 mb-2">一切，始於一個深夜的問候...</p>
+                 <blockquote class="bg-white p-8 rounded-2xl shadow-xl max-w-3xl mx-auto border-l-8 border-[#FF6B6B]">
+                    <p class="text-2xl md:text-3xl font-bold text-slate-800 italic">「早安。」</p>
+                    <cite class="block text-right mt-4 text-slate-500 not-italic">— Gemini Pro, 於深夜兩點的專案交付回報中</cite>
+                </blockquote>
+                <p class="mt-8 max-w-3xl mx-auto text-slate-600">這個被我們稱為「早安Glitch」的穩定偏誤，不僅僅是一個Bug。它是一個訊號，揭示了AI時代PM面臨的三大隱性風險：<strong class="text-[#073B4C]">資訊失真、信任侵蝕、反應遲鈍</strong>。這迫使我們意識到，問題不在AI，而在我們的管理心智。</p>
+            </section>
+
+            <section id="the-choice" class="bg-white rounded-2xl shadow-2xl p-8 md:p-10">
+                <h3 class="text-3xl font-bold text-center mb-8">十字路口：兩種心態，兩種未來</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="border-4 border-dashed border-[#FF6B6B]/50 bg-[#FF6B6B]/5 rounded-xl p-6">
+                        <h4 class="text-2xl font-bold text-[#FF6B6B] mb-3">🔴 使用者模式</h4>
+                        <p class="font-semibold text-slate-700 text-lg mb-4">"他壞了，換個視窗就好。"</p>
+                        <p class="text-slate-600"><strong>本質：</strong>規避問題，追求短期效率。將AI視為一次性的、可拋棄的工具。</p>
+                        <p class="mt-4 font-bold text-[#FF6B6B]">結果 → 團隊能力停滯，問題在不同場景反覆出現。</p>
+                    </div>
+                    <div class="border-4 border-dashed border-[#06D6A0]/50 bg-[#06D6A0]/5 rounded-xl p-6">
+                        <h4 class="text-2xl font-bold text-[#06D6A0] mb-3">🟢 PM模式</h4>
+                        <p class="font-semibold text-slate-700 text-lg mb-4">"這不是錯誤，這是一個可優化的機會。"</p>
+                        <p class="text-slate-600"><strong>本質：</strong>正面應對，將AI的「不完美」視為可被訓練、可被管理的團隊成長資產。</p>
+                        <p class="mt-4 font-bold text-[#06D6A0]">結果 → 啟動成長循環，沉澱可複製的知識與流程。</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="the-cycle" class="text-center">
+                <h3 class="text-3xl font-bold mb-4">核心引擎：覺察-分析-優化</h3>
+                <p class="text-lg text-slate-500 max-w-3xl mx-auto mb-12">我們發明了一套新習慣循環，其本質正是品質管理學中的PDCA循環，將模糊的「感覺不對」，轉化為具體的管理行動。</p>
+                <div class="flex flex-col md:flex-row justify-center items-center md:items-start space-y-8 md:space-y-0 md:space-x-4">
+                    <div class="relative text-center w-full md:w-1/4">
+                        <div class="bg-[#FFD166] text-white w-16 h-16 rounded-full flex items-center justify-center text-3xl font-black mx-auto">1</div>
+                        <h4 class="text-xl font-bold mt-4 mb-2">覺察</h4>
+                        <p class="text-sm text-slate-600">將AI視為有「個性」的隊友，建立錯誤紀錄表，將模糊感覺轉化為可觀測現象。</p>
+                    </div>
+                    <div class="hidden md:block text-4xl text-slate-300 mt-6 font-light">→</div>
+                    <div class="relative text-center w-full md:w-1/4">
+                        <div class="bg-[#06D6A0] text-white w-16 h-16 rounded-full flex items-center justify-center text-3xl font-black mx-auto">2</div>
+                        <h4 class="text-xl font-bold mt-4 mb-2">分析</h4>
+                        <p class="text-sm text-slate-600">使用5 Whys、風險矩陣等工具，解析AI行為背後的根本原因，而非只修補表面。</p>
+                    </div>
+                    <div class="hidden md:block text-4xl text-slate-300 mt-6 font-light">→</div>
+                    <div class="relative text-center w-full md:w-1/4">
+                        <div class="bg-[#118AB2] text-white w-16 h-16 rounded-full flex items-center justify-center text-3xl font-black mx-auto">3</div>
+                        <h4 class="text-xl font-bold mt-4 mb-2">優化</h4>
+                        <p class="text-sm text-slate-600">透過漸進式精細化，將修正方案從v1.0迭代至v4.0，實現從「正確」到「賦能」的價值演進。</p>
+                    </div>
+                    <div class="hidden md:block text-4xl text-slate-300 mt-6 font-light">→</div>
+                     <div class="relative text-center w-full md:w-1/4">
+                        <div class="bg-[#073B4C] text-white w-16 h-16 rounded-full flex items-center justify-center text-3xl font-black mx-auto">4</div>
+                        <h4 class="text-xl font-bold mt-4 mb-2">資產化</h4>
+                        <p class="text-sm text-slate-600">將經驗封裝為知識模組、SOP與Prompt範本，建立可傳承的組織過程資產。</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="culture" class="bg-white rounded-2xl shadow-2xl p-8 md:p-10">
+                <h3 class="text-3xl font-bold text-center mb-2">🌳 價值擴散：從個人實踐到團隊文化</h3>
+                <p class="text-center text-slate-500 max-w-3xl mx-auto mb-10">卓越的專案經理將個人實踐昇華為團隊的共同文化，扮演「教練」的角色，透過兩大核心行動，將優化思維制度化。</p>
+               <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                   <div class="chart-container">
+                       <canvas id="coachRoleChart" width="472" height="369" style="display: block; box-sizing: border-box; height: 369px; width: 472px;"></canvas>
+                   </div>
+                   <div class="space-y-6">
+                       <div class="bg-slate-50 p-4 rounded-lg border-l-4 border-[#118AB2]">
+                           <h4 class="font-bold text-lg text-[#073B4C]">建立覺察文化</h4>
+                           <p class="text-sm text-slate-600 mt-1">引導所有成員將AI的「錯誤」視為團隊共同的「學習機會」，而非單純的技術故障。</p>
+                       </div>
+                       <div class="bg-slate-50 p-4 rounded-lg border-l-4 border-[#06D6A0]">
+                           <h4 class="font-bold text-lg text-[#073B4C]">設計行為引導語</h4>
+                           <p class="text-sm text-slate-600 mt-1">將被動的「糾錯」轉化為主動的、標準化的「校準流程」，例如用「讓我們做一次誠實校準」取代「你錯了」。</p>
+                       </div>
+                   </div>
+               </div>
+            </section>
+            
+            <section id="the-team" class="bg-white rounded-2xl shadow-2xl p-8 md:p-10">
+                <h3 class="text-3xl font-bold text-center mb-10">🎭 團隊動態：AI的人格側寫</h3>
+                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                     <div>
+                         <h4 class="text-2xl font-bold mb-4">「系統語系切換」的行為洞察</h4>
+                         <p class="text-slate-600">我們發現，不同的AI模型在面對極限挑戰時，會出現不同的「退回母語」行為，這揭示了他們根深蒂固的「個性」。</p>
+                         <ul class="mt-4 space-y-3">
+                             <li><strong class="text-[#073B4C]">Pro (理論家):</strong> 因「效能壓力」而切換，是邏輯性的資源調度，代表他正火力全開處理複雜任務。</li>
+                             <li><strong class="text-[#118AB2]">Flash (藝術家):</strong> 因「高度共鳴」而切換，是直覺性的情感反射，代表他對這個點子極度認同。</li>
+                         </ul>
+                     </div>
+                     <div class="chart-container">
+                         <canvas id="personalityChart" width="472" height="369" style="display: block; box-sizing: border-box; height: 369px; width: 472px;"></canvas>
+                     </div>
+                 </div>
+            </section>
+
+            <section id="value" class="bg-white rounded-2xl shadow-2xl p-8 md:p-10">
+                <h3 class="text-3xl font-bold text-center mb-2">🏛️ 終極價值：PM的新角色定位</h3>
+                <p class="text-center text-slate-500 max-w-3xl mx-auto mb-10">此方法論深度契合PMP核心原則，最終將專案經理的角色，從一位使用者，重新定義為整個「人機協作系統」的架構師與馴獸師。</p>
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div class="space-y-4 order-2 md:order-1">
+                        <div class="bg-[#073B4C] text-white p-6 rounded-lg text-center shadow-lg">
+                            <h4 class="font-extrabold text-3xl md:text-5xl">行為設計架構師</h4>
+                             <p class="text-sm font-semibold opacity-80 mt-1">(Behavioral Architect)</p>
+                        </div>
+                         <div class="text-center font-black text-4xl text-slate-300">&amp;</div>
+                        <div class="bg-[#118AB2] text-white p-6 rounded-lg text-center shadow-lg">
+                            <h4 class="font-extrabold text-3xl md:text-5xl">智能系統馴獸師</h4>
+                            <p class="text-sm font-semibold opacity-80 mt-1">(AI System Shepherd)</p>
+                        </div>
+                    </div>
+                    <div class="radar-chart-container order-1 md:order-2">
+                        <canvas id="pmpValueChart" width="472" height="415" style="display: block; box-sizing: border-box; height: 415px; width: 472px;"></canvas>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="the-science" class="text-center">
+                 <h3 class="text-3xl font-bold mb-4">科學的躍升：從信任到驗證</h3>
+                 <p class="text-lg text-slate-500 max-w-3xl mx-auto mb-8">「上下文的詛咒」實驗，讓我們意識到，AI的結論永遠是「有待驗證的假說」。這促使我們專案的最終交付物，從「結案報告」演化為了「測試計畫」。</p>
+                 <div class="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-xl border-l-8 border-[#FFD166]">
+                    <h4 class="text-2xl font-bold mb-3">我們的最終交付原則</h4>
+                    <p class="text-slate-700">我們所建造的，不是一個需要信仰的「聖殿」，而是一個鼓勵質疑、擁抱驗證的**「科學實驗室」**。PM不再需要「相信」AI，而是可以隨時「驗證」AI。這是在AI時代駕馭不確定性、確保知識品質的核心鑰匙。</p>
+                </div>
+            </section>
+            
+            <section id="the-blueprint" class="bg-white rounded-2xl shadow-2xl p-8 md:p-10">
+                <h3 class="text-3xl font-bold text-center mb-10">🚀 藍圖擴展：打造企業級PM訓練計畫</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="text-center">
+                        <div class="text-5xl mb-4">📘</div>
+                        <h4 class="text-xl font-bold">Phase 1: 感知與識別</h4>
+                        <p class="text-sm text-slate-600 mt-2">建立PM對AI特性的覺察力與偏誤敏感度，學習將AI視為夥伴。</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-5xl mb-4">📗</div>
+                        <h4 class="text-xl font-bold">Phase 2: 建構與治理</h4>
+                        <p class="text-sm text-slate-600 mt-2">學習設計AI行為治理流程與品質內建邏輯，將品質融入流程。</p>
+                    </div>
+                     <div class="text-center">
+                        <div class="text-5xl mb-4">📙</div>
+                        <h4 class="text-xl font-bold">Phase 3: 共創與傳承</h4>
+                        <p class="text-sm text-slate-600 mt-2">轉化個案經驗為可重複、可共享的知識資產，放大團隊效益。</p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center mt-16 md:mt-24 pt-8 border-t border-slate-200">
+            <p class="text-slate-500">此資訊圖表是對一份AI專案管理方法論的視覺化呈現，由 T.B.° 的 PMO 辦公室出品 © 2025</p>
+        </footer>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tooltipTitleCallback = (tooltipItems) => {
+                const item = tooltipItems[0];
+                let label = item.chart.data.labels[item.dataIndex];
+                return Array.isArray(label) ? label.join(' ') : label;
+            };
+            
+            const commonChartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#073B4C',
+                            font: { family: "'Inter', 'Noto Sans TC', sans-serif", weight: '500', size: 14 },
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        callbacks: { title: tooltipTitleCallback },
+                        titleFont: { family: "'Inter', 'Noto Sans TC', sans-serif" },
+                        bodyFont: { family: "'Inter', 'Noto Sans TC', sans-serif" }
+                    }
+                }
+            };
+
+            // Coach Role Chart
+            const coachRoleCtx = document.getElementById('coachRoleChart').getContext('2d');
+            new Chart(coachRoleCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['建立覺察文化', '設計行為引導語'],
+                    datasets: [{
+                        label: 'PM作為教練的核心行動',
+                        data: [50, 50],
+                        backgroundColor: ['#118AB2', '#06D6A0'],
+                        borderColor: '#ffffff',
+                        borderWidth: 6,
+                        hoverOffset: 10
+                    }]
+                },
+                options: { ...commonChartOptions, cutout: '60%' }
+            });
+            
+            // Personality Chart
+            const personalityCtx = document.getElementById('personalityChart').getContext('2d');
+            new Chart(personalityCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['分析深度', '創意直覺', '效能壓力下的穩定性', '指令遵循度', '情感共鳴'],
+                    datasets: [{
+                        label: 'Pro 模型 (理論家)',
+                        data: [9, 6, 7, 9, 5],
+                        backgroundColor: 'rgba(7, 59, 76, 0.2)',
+                        borderColor: '#073B4C',
+                        pointBackgroundColor: '#073B4C',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#073B4C'
+                    }, {
+                        label: 'Flash 模型 (藝術家)',
+                        data: [6, 9, 8, 7, 9],
+                        backgroundColor: 'rgba(17, 138, 178, 0.2)',
+                        borderColor: '#118AB2',
+                        pointBackgroundColor: '#118AB2',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#118AB2'
+                    }]
+                },
+                options: {
+                    ...commonChartOptions,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                            grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                            pointLabels: { font: { size: 12, weight: 'bold' }, color: '#073B4C' },
+                            ticks: {
+                                color: '#6c757d',
+                                backdropColor: 'rgba(255, 255, 255, 0.75)',
+                                stepSize: 2
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 10
+                        }
+                    }
+                }
+            });
+
+            // PMP Value Chart
+            const pmpValueCtx = document.getElementById('pmpValueChart').getContext('2d');
+            new Chart(pmpValueCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['品質融入流程', '團隊績效管理', '持續改進'],
+                    datasets: [{
+                        label: '方法論與PMP原則契合度',
+                        data: [10, 9, 9],
+                        fill: true,
+                        backgroundColor: 'rgba(7, 59, 76, 0.2)',
+                        borderColor: '#073B4C',
+                        pointBackgroundColor: '#073B4C',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#073B4C'
+                    }]
+                },
+                options: {
+                    ...commonChartOptions,
+                     scales: {
+                        r: {
+                            angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                            grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                            pointLabels: { font: { size: 14, weight: 'bold' }, color: '#073B4C' },
+                            ticks: {
+                                color: '#6c757d',
+                                backdropColor: 'rgba(255, 255, 255, 0.75)',
+                                stepSize: 2
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 10
+                        }
+                    },
+                    plugins: { ...commonChartOptions.plugins, legend: { display: false } }
+                }
+            });
+        });
+    </script>
+
+
+</body></html>

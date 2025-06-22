@@ -5,13 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI協作的科學：從信任到驗證的視覺化報告</title>
     <!-- Chosen Palette: Energetic & Playful -->
-    <!-- Application Structure Plan: This infographic tells a story in eight acts: 1. The Hook, 2. The Core Choice, 3. The Methodology, 4. Value Expansion (Coach Role), 5. Team Dynamics (AI Personalities), 6. The Pinnacle of Value (PM's New Role), 7. The Scientific Leap, and 8. The Scalable Blueprint (The Vision). This structure guides the audience from a relatable problem to a grand, actionable vision. -->
+    <!-- Application Structure Plan: This infographic tells a story in seven acts: 1. The Hook, 2. The Core Choice, 3. The Methodology, 4. Team Dynamics, 5. The Scientific Leap, 6. The New Job Description (The PM as Scrum Master), and 7. The Scalable Blueprint. This structure guides the audience from a relatable problem to a grand, actionable vision. -->
     <!-- Visualization & Content Choices:
         - The Choice: Goal: Compare -> Vis: HTML/CSS side-by-side cards.
         - The Methodology: Goal: Organize -> Vis: HTML/CSS horizontal flowchart.
-        - Value Expansion: Goal: Inform/Compare -> Vis: Chart.js Donut Chart (Canvas).
         - Team Dynamics: Goal: Compare -> Vis: Chart.js Radar Chart (Canvas) to profile Pro vs Flash.
-        - The Pinnacle of Value: Goal: Compare/Inform -> Vis: Chart.js Radar Chart (Canvas) to map methodology to PMP principles.
+        - The New Job Description: Goal: Inform/Compare -> Vis: Chart.js Radar Chart integrated with text to support the core thesis.
         - The Blueprint: Goal: Organize -> Vis: HTML/CSS 3-column card layout.
         All visualizations strictly adhere to the NO SVG/Mermaid constraint.
     -->
@@ -34,14 +33,6 @@
         }
         .chart-container {
             position: relative;
-            margin: auto;
-            height: 40vh;
-            width: 100%;
-            max-width: 500px;
-            max-height: 400px;
-        }
-        .radar-chart-container {
-             position: relative;
             margin: auto;
             height: 45vh;
             width: 100%;
@@ -81,7 +72,7 @@
                         <p class="mt-4 font-bold text-[#FF6B6B]">結果 → 團隊能力停滯，問題在不同場景反覆出現。</p>
                     </div>
                     <div class="border-4 border-dashed border-[#06D6A0]/50 bg-[#06D6A0]/5 rounded-xl p-6">
-                        <h4 class="text-2xl font-bold text-[#06D6A0] mb-3">🟢 PM模式</h4>
+                        <h4 class="text-2xl font-bold text-[#06D6A0] mb-3">🟢 專案經理模式</h4>
                         <p class="font-semibold text-slate-700 text-lg mb-4">"這不是錯誤，這是一個可優化的機會。"</p>
                         <p class="text-slate-600"><strong>本質：</strong>正面應對，將AI的「不完美」視為可被訓練、可被管理的團隊成長資產。</p>
                         <p class="mt-4 font-bold text-[#06D6A0]">結果 → 啟動成長循環，沉澱可複製的知識與流程。</p>
@@ -110,33 +101,13 @@
                         <h4 class="text-xl font-bold mt-4 mb-2">優化</h4>
                         <p class="text-sm text-slate-600">透過漸進式精細化，將修正方案從v1.0迭代至v4.0，實現從「正確」到「賦能」的價值演進。</p>
                     </div>
-                    <div class="hidden md:block text-4xl text-slate-300 mt-6 font-light">→</div>
+                     <div class="hidden md:block text-4xl text-slate-300 mt-6 font-light">→</div>
                      <div class="relative text-center w-full md:w-1/4">
                         <div class="bg-[#073B4C] text-white w-16 h-16 rounded-full flex items-center justify-center text-3xl font-black mx-auto">4</div>
                         <h4 class="text-xl font-bold mt-4 mb-2">資產化</h4>
                         <p class="text-sm text-slate-600">將經驗封裝為知識模組、SOP與Prompt範本，建立可傳承的組織過程資產。</p>
                     </div>
                 </div>
-            </section>
-            
-            <section id="culture" class="bg-white rounded-2xl shadow-2xl p-8 md:p-10">
-                <h3 class="text-3xl font-bold text-center mb-2">🌳 價值擴散：從個人實踐到團隊文化</h3>
-                <p class="text-center text-slate-500 max-w-3xl mx-auto mb-10">卓越的專案經理將個人實踐昇華為團隊的共同文化，扮演「教練」的角色，透過兩大核心行動，將優化思維制度化。</p>
-               <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                   <div class="chart-container">
-                       <canvas id="coachRoleChart"></canvas>
-                   </div>
-                   <div class="space-y-6">
-                       <div class="bg-slate-50 p-4 rounded-lg border-l-4 border-[#118AB2]">
-                           <h4 class="font-bold text-lg text-[#073B4C]">建立覺察文化</h4>
-                           <p class="text-sm text-slate-600 mt-1">引導所有成員將AI的「錯誤」視為團隊共同的「學習機會」，而非單純的技術故障。</p>
-                       </div>
-                       <div class="bg-slate-50 p-4 rounded-lg border-l-4 border-[#06D6A0]">
-                           <h4 class="font-bold text-lg text-[#073B4C]">設計行為引導語</h4>
-                           <p class="text-sm text-slate-600 mt-1">將被動的「糾錯」轉化為主動的、標準化的「校準流程」，例如用「讓我們做一次誠實校準」取代「你錯了」。</p>
-                       </div>
-                   </div>
-               </div>
             </section>
             
             <section id="the-team" class="bg-white rounded-2xl shadow-2xl p-8 md:p-10">
@@ -155,54 +126,55 @@
                      </div>
                  </div>
             </section>
-
-            <section id="value" class="bg-white rounded-2xl shadow-2xl p-8 md:p-10">
-                <h3 class="text-3xl font-bold text-center mb-2">🏛️ 終極價值：PM的新角色定位</h3>
-                <p class="text-center text-slate-500 max-w-3xl mx-auto mb-10">此方法論深度契合PMP核心原則，最終將專案經理的角色，從一位使用者，重新定義為整個「人機協作系統」的架構師與馴獸師。</p>
-                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                    <div class="space-y-4 order-2 md:order-1">
-                        <div class="bg-[#073B4C] text-white p-6 rounded-lg text-center shadow-lg">
-                            <h4 class="font-extrabold text-3xl md:text-5xl">行為設計架構師</h4>
-                             <p class="text-sm font-semibold opacity-80 mt-1">(Behavioral Architect)</p>
-                        </div>
-                         <div class="text-center font-black text-4xl text-slate-300">&</div>
-                        <div class="bg-[#118AB2] text-white p-6 rounded-lg text-center shadow-lg">
-                            <h4 class="font-extrabold text-3xl md:text-5xl">智能系統馴獸師</h4>
-                            <p class="text-sm font-semibold opacity-80 mt-1">(AI System Shepherd)</p>
-                        </div>
-                    </div>
-                    <div class="radar-chart-container order-1 md:order-2">
-                        <canvas id="pmpValueChart"></canvas>
-                    </div>
-                </div>
-            </section>
             
             <section id="the-science" class="text-center">
-                 <h3 class="text-3xl font-bold mb-4">科學的躍升：從信任到驗證</h3>
+                 <h3 class="text-3xl font-bold mb-4">🔬 科學的躍升：從信任到驗證</h3>
                  <p class="text-lg text-slate-500 max-w-3xl mx-auto mb-8">「上下文的詛咒」實驗，讓我們意識到，AI的結論永遠是「有待驗證的假說」。這促使我們專案的最終交付物，從「結案報告」演化為了「測試計畫」。</p>
                  <div class="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-xl border-l-8 border-[#FFD166]">
                     <h4 class="text-2xl font-bold mb-3">我們的最終交付原則</h4>
                     <p class="text-slate-700">我們所建造的，不是一個需要信仰的「聖殿」，而是一個鼓勵質疑、擁抱驗證的**「科學實驗室」**。PM不再需要「相信」AI，而是可以隨時「驗證」AI。這是在AI時代駕馭不確定性、確保知識品質的核心鑰匙。</p>
                 </div>
             </section>
+
+            <section id="the-new-pm" class="bg-white rounded-2xl shadow-2xl p-8 md:p-10">
+                 <h3 class="text-3xl font-bold text-center mb-10">🏛️ 終極典範：PM作為AI團隊的Scrum Master</h3>
+                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <p class="text-lg text-slate-600 mb-6">無論職銜，當您開始管理一個由充滿不確定性的AI組成的團隊時，您就必須扮演Scrum Master的角色。因為AI的本質特性，需要的是一位「教練」與「流程守護者」，而非傳統的「任務管理者」。</p>
+                        <div class="space-y-4">
+                            <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
+                                <h4 class="font-bold text-blue-800">AI是「有偏見的模糊隊友」</h4>
+                                <p class="text-sm text-slate-600 mt-1">您需要覺察其偏見、引導其行為、移除其障礙。</p>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-400">
+                                <h4 class="font-bold text-green-800">價值在「探索」中湧現</h4>
+                                <p class="text-sm text-slate-600 mt-1">您需要保護實驗性流程，鼓勵試錯，從混亂中提煉資產。</p>
+                            </div>
+                        </div>
+                    </div>
+                     <div class="chart-container">
+                         <canvas id="scrumMasterValueChart"></canvas>
+                     </div>
+                 </div>
+            </section>
             
-            <section id="the-blueprint" class="bg-white rounded-2xl shadow-2xl p-8 md:p-10">
+            <section id="the-blueprint" class="bg-gradient-to-br from-[#073B4C] to-[#118AB2] text-white rounded-2xl shadow-2xl p-8 md:p-12">
                 <h3 class="text-3xl font-bold text-center mb-10">🚀 藍圖擴展：打造企業級PM訓練計畫</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div class="text-center">
-                        <div class="text-5xl mb-4">📘</div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                    <div>
+                        <div class="text-5xl mb-4 opacity-80">📘</div>
                         <h4 class="text-xl font-bold">Phase 1: 感知與識別</h4>
-                        <p class="text-sm text-slate-600 mt-2">建立PM對AI特性的覺察力與偏誤敏感度，學習將AI視為夥伴。</p>
+                        <p class="text-sm opacity-90 mt-2">建立PM對AI特性的覺察力與偏誤敏感度，學習將AI視為夥伴。</p>
                     </div>
-                    <div class="text-center">
-                        <div class="text-5xl mb-4">📗</div>
+                    <div>
+                        <div class="text-5xl mb-4 opacity-80">📗</div>
                         <h4 class="text-xl font-bold">Phase 2: 建構與治理</h4>
-                        <p class="text-sm text-slate-600 mt-2">學習設計AI行為治理流程與品質內建邏輯，將品質融入流程。</p>
+                        <p class="text-sm opacity-90 mt-2">學習設計AI行為治理流程與品質內建邏輯，將品質融入流程。</p>
                     </div>
-                     <div class="text-center">
-                        <div class="text-5xl mb-4">📙</div>
+                     <div>
+                        <div class="text-5xl mb-4 opacity-80">📙</div>
                         <h4 class="text-xl font-bold">Phase 3: 共創與傳承</h4>
-                        <p class="text-sm text-slate-600 mt-2">轉化個案經驗為可重複、可共享的知識資產，放大團隊效益。</p>
+                        <p class="text-sm opacity-90 mt-2">轉化個案經驗為可重複、可共享的知識資產，放大團隊效益。</p>
                     </div>
                 </div>
             </section>
@@ -243,24 +215,6 @@
                 }
             };
 
-            // Coach Role Chart
-            const coachRoleCtx = document.getElementById('coachRoleChart').getContext('2d');
-            new Chart(coachRoleCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['建立覺察文化', '設計行為引導語'],
-                    datasets: [{
-                        label: 'PM作為教練的核心行動',
-                        data: [50, 50],
-                        backgroundColor: ['#118AB2', '#06D6A0'],
-                        borderColor: '#ffffff',
-                        borderWidth: 6,
-                        hoverOffset: 10
-                    }]
-                },
-                options: { ...commonChartOptions, cutout: '60%' }
-            });
-            
             // Personality Chart
             const personalityCtx = document.getElementById('personalityChart').getContext('2d');
             new Chart(personalityCtx, {
@@ -306,22 +260,22 @@
                 }
             });
 
-            // PMP Value Chart
-            const pmpValueCtx = document.getElementById('pmpValueChart').getContext('2d');
-            new Chart(pmpValueCtx, {
+            // Scrum Master Value Chart
+            const scrumMasterValueCtx = document.getElementById('scrumMasterValueChart').getContext('2d');
+            new Chart(scrumMasterValueCtx, {
                 type: 'radar',
                 data: {
                     labels: ['品質融入流程', '團隊績效管理', '持續改進'],
                     datasets: [{
-                        label: '方法論與PMP原則契合度',
+                        label: 'PM作為Scrum Master的價值',
                         data: [10, 9, 9],
                         fill: true,
-                        backgroundColor: 'rgba(7, 59, 76, 0.2)',
-                        borderColor: '#073B4C',
-                        pointBackgroundColor: '#073B4C',
+                        backgroundColor: 'rgba(6, 214, 160, 0.2)',
+                        borderColor: '#06D6A0',
+                        pointBackgroundColor: '#06D6A0',
                         pointBorderColor: '#fff',
                         pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: '#073B4C'
+                        pointHoverBorderColor: '#06D6A0'
                     }]
                 },
                 options: {
