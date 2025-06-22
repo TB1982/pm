@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>專案迭代互動儀表板 v2.5</title>
+    <title>專案迭代互動儀表板 v2.6</title>
     <!-- Chosen Palette: Slate Gray & Sky Blue -->
     <!-- Application Structure Plan: The SPA is designed as a vertical interactive timeline. This structure is ideal for showcasing chronological project evolution. Based on user feedback, the layout is updated to prioritize navigation. The timeline is now the primary element, split into two columns: main project iterations on the left, and supplementary artifacts (easter eggs, docs) on the right. A new, centered, full-width section is added below the timelines to feature the final infographic, giving it prominence as the project's capstone deliverable. -->
     <!-- Visualization & Content Choices: 1. Project Growth (Change): Line Chart (Chart.js) now serves as a summary at the end. 2. Version Details (Organize/Inform): A two-column vertical timeline (HTML/Tailwind) now separates primary versions from secondary artifacts, improving content discoverability. Each node remains a clickable link. -->
@@ -81,7 +81,7 @@
                     <h4 class="text-xl font-bold text-[#003F5C]">AI協作的科學：從信任到驗證</h4>
                     <p class="text-sm text-slate-600 mt-2">一份關於我們如何發明、驗證並確立「AI專案管理虛擬實踐場」終極方法論的互動式資訊圖表。</p>
                 </div>
-                <a href="pm.html" target="_blank" class="mt-8 inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition-transform duration-300 hover:scale-105 shadow-lg hover:shadow-blue-500/50">
+                <a href="pm.html" class="mt-8 inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition-transform duration-300 hover:scale-105 shadow-lg hover:shadow-blue-500/50">
                     查看視覺化報告
                 </a>
             </div>
@@ -159,7 +159,7 @@
                             <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full ${tagInfo.class} mt-2 sm:mt-0">${version.tag}</span>
                         </div>
                         <p class="text-slate-600 mb-4">${version.description}</p>
-                        <a href="${version.file}" target="_blank" class="inline-block bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">
+                        <a href="${version.file}" class="inline-block bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">
                             前往 »
                         </a>
                     </div>
