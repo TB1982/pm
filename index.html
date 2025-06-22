@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>專案迭代互動儀表板 v2.2</title>
+    <title>專案迭代互動儀表板 v2.3</title>
     <!-- Chosen Palette: Slate Gray & Sky Blue -->
     <!-- Application Structure Plan: The SPA is designed as a vertical interactive timeline. This structure is ideal for showcasing chronological project evolution. Based on user feedback, the layout is updated to prioritize navigation. The timeline is now the primary element, split into two columns: main project iterations on the left, and supplementary artifacts (easter eggs, docs) on the right. This enhances usability by presenting the most critical navigation paths first. -->
     <!-- Visualization & Content Choices: 1. Project Growth (Change): Line Chart (Chart.js) now serves as a summary at the end. 2. Version Details (Organize/Inform): A two-column vertical timeline (HTML/Tailwind) now separates primary versions from secondary artifacts, improving content discoverability. Each node remains a clickable link. -->
@@ -106,7 +106,7 @@
             { name: "Flash彩蛋實際情形", description: "Flash自己生出來的蜘蛛星雲網頁，請各位笑納XD", file: "Flash1.html", tag: "彩蛋", column: 'side' },
             { name: "彩蛋說明", description: "關於 Flash 彩蛋的背景故事與技術說明。", file: "Flash1-1.html", tag: "說明", column: 'side' },
             { name: "知識蒸餾", description: "為解決跨模型上下文問題，所進行的知識蒸餾實證分析報告。", file: "distillation.html", tag: "分析", column: 'side' },
-            { name: "PMP圖書館", description: "利用知識蒸餾打造自己的知識飛輪與RAG", file: "library.html", tag: "經驗", features: 6, column: 'side' }
+            { name: "PMP圖書館", description: "利用知識蒸餾打造自己的知識飛輪與RAG。", file: "library.html", tag: "經驗", column: 'side' }
         ];
 
         function getTagInfo(tag) {
@@ -121,7 +121,7 @@
                 case '說明': return { class: 'bg-indigo-100 text-indigo-800', dotClass: 'easter-egg' };
                 case '文件': return { class: 'bg-slate-200 text-slate-800', dotClass: 'docs' };
                 case '分析': return { class: 'bg-teal-100 text-teal-800', dotClass: 'docs' };
-                case '經驗': return { class: 'bg-yellow-100 text-yellow-800', dotClass: 'docs' }; // New tag styling
+                case '經驗': return { class: 'bg-cyan-100 text-cyan-800', dotClass: 'docs' };
                 default: return { class: 'bg-slate-100 text-slate-800', dotClass: '' };
             }
         }
