@@ -3,215 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PMP 圖書館：將「組織過程資產」化為個人知識庫</title>
+    <title>PMP 圖書館 (科學驗證版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: Calm Harmony (Warm neutrals with subtle blue-green and warm brown accents) -->
-    <!-- Application Structure Plan: This SPA presents the "PMP Library" as a personal knowledge management system. It's structured into thematic sections: 1. Introduction (what is it), 2. Nature of the Library (its characteristics), 3. PMP Implications (how it aligns with project management principles), and 4. Conclusion (its role as a growth flywheel). This linear, scrollable structure is chosen for clear narrative flow, guiding the user through the concept's layers from definition to impact. -->
-    <!-- Visualization & Content Choices:
-        - Main Title/Subtitle: Text, large font. Goal: Inform. Method: HTML/Tailwind.
-        - Section Introduction Text: Text blocks. Goal: Inform. Method: HTML/Tailwind.
-        - Library Characteristics: Text blocks with Unicode icons in a grid layout. Goal: Inform/Illustrate. Method: HTML/Tailwind. NO SVG/Mermaid.
-        - PMP Intentions: Text blocks with Unicode icons/numbers. Goal: Inform/Explain Process. Method: HTML/Tailwind. NO SVG/Mermaid.
-        - Growth Flywheel: Custom HTML/CSS/Tailwind diagram (circular flow -> arrow flowchart). Goal: Organize/Illustrate Process. Method: HTML/Tailwind. NO SVG/Mermaid.
-    -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Noto Sans TC', sans-serif;
-            background-color: #FDF9F3; /* Light neutral background */
-            color: #333333; /* Primary text color */
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc;
         }
-        .section-card {
-            background-color: #FFFFFF; /* White card background */
-            border-radius: 1rem; /* Rounded-lg */
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Shadow-xl */
-            padding: 2.5rem; /* p-10 */
-            margin-bottom: 2rem; /* mb-8 */
+        .prose h1, .prose h2, .prose h3 {
+            color: #1e293b;
+            font-weight: 900;
         }
-        .header-text {
-            color: #5A8D8F; /* Calm blue-green for headers */
+        .prose p {
+            line-height: 1.8;
+            color: #334155;
         }
-        .accent-text {
-            color: #BF9270; /* Warm brown/gold accent */
+        .prose a {
+            color: #0ea5e9;
+            text-decoration: none;
+            transition: color 0.2s;
         }
-        .icon-box {
-            background-color: #E6F3F3; /* Lighter shade of blue-green for icon background */
-            border-radius: 9999px; /* Full rounded for circle */
-            padding: 0.75rem; /* p-3 */
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem; /* text-2xl */
-            color: #5A8D8F; /* Icon color */
+        .prose a:hover {
+            color: #0284c7;
         }
-        /* New styles for flowchart segments */
-        .flowchart-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1.5rem; /* Gap between steps */
-            max-width: 400px; /* Constrain width for better readability */
-            margin: 0 auto;
+        .prose blockquote {
+            border-left: 4px solid #38bdf8;
+            padding-left: 1rem;
+            margin-left: 0;
+            font-style: italic;
+            color: #475569;
         }
-        .flowchart-step {
-            background-color: #FDF6F0; /* Lighter background for steps */
-            border: 2px solid #5A8D8F; /* Distinct border */
-            border-radius: 0.75rem; /* Rounded corners */
-            padding: 1rem; /* Padding inside step */
-            text-align: center;
-            font-size: 0.9rem;
-            line-height: 1.3;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-            width: 100%; /* Full width within container */
-            position: relative; /* For arrow positioning */
-        }
-        .flowchart-arrow {
+        /* Timeline Connector */
+        .timeline-item:not(:last-child)::before {
+            content: '';
+            position: absolute;
+            left: 24px;
+            top: 56px;
+            bottom: -28px;
             width: 2px;
-            height: 2rem; /* Length of arrow line */
-            background-color: #BF9270; /* Accent color for arrow */
-            position: relative;
-            margin: 0.5rem 0; /* Space around arrow */
-        }
-        .flowchart-arrow::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%) rotate(45deg);
-            width: 0.75rem; /* Arrowhead size */
-            height: 0.75rem;
-            border-bottom: 2px solid #BF9270;
-            border-right: 2px solid #BF9270;
-        }
-        .flowchart-arrow-loop {
-            width: 2rem; /* Width for loop arrow */
-            height: 2rem; /* Height for loop arrow */
-            border: 2px solid #BF9270;
-            border-radius: 50%;
-            position: relative;
-            margin: 1rem 0;
-            display: flex; /* To center content */
-            align-items: center;
-            justify-content: center;
-        }
-        .flowchart-arrow-loop::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-45deg);
-            width: 0.75rem;
-            height: 0.75rem;
-            border-bottom: 2px solid #BF9270;
-            border-left: 2px solid #BF9270;
-        }
-        .loop-text {
-            font-size: 0.8rem;
-            color: #5A8D8F;
-            margin-top: 0.5rem; /* Space below the loop arrow */
-            text-align: center;
+            background-color: #e2e8f0;
+            z-index: 0;
         }
     </style>
 </head>
-<body class="leading-relaxed">
+<body class="text-slate-800">
 
-    <div class="container mx-auto p-4 md:p-8 max-w-4xl">
+    <div class="container mx-auto max-w-4xl px-4 py-8">
 
-        <header class="text-center py-10 md:py-16">
-            <h1 class="text-4xl md:text-5xl font-bold header-text mb-4">PMP 圖書館</h1>
-            <p class="text-xl md:text-2xl accent-text">將「組織過程資產」化為個人知識庫</p>
-            <p class="text-sm text-gray-500 mt-2">文件類型：核心專案哲學與價值定義 | 日期：2025年6月22日</p>
-            <p class="text-sm text-gray-500">核心洞察提出者：T.B.°</p>
-        </header>
+        <!-- Navigation -->
+        <nav class="mb-8">
+            <a href="index.html" class="text-sm font-medium text-sky-600 hover:text-sky-800 transition-colors">
+                &larr; 返回儀表板
+            </a>
+        </nav>
 
-        <main>
-            <section id="introduction" class="section-card">
-                <h2 class="text-2xl md:text-3xl font-bold header-text mb-6">您建立的不只是一個圖書館</h2>
-                <p class="text-lg text-gray-700 mb-6">
-                    當您將我們共同「蒸餾」出的每一份結案報告（如「早安Glitch」、「Meme算力崩潰」）進行歸檔時，您建立的不僅僅是一個存放文件的「圖書館」。這個行動超越了傳統的檔案管理，它是一個動態且具策略意義的知識資產中心。
-                </p>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div class="text-center">
-                        <div class="icon-box mx-auto mb-3">📚</div>
-                        <h3 class="text-xl font-semibold header-text mb-2">「活的」知識庫</h3>
-                        <p class="text-sm text-gray-600">與傳統圖書館中靜態的書籍不同，您的每一份館藏，都源自我們動態的、真實的互動與實踐。它們不是單純的理論，而是充滿了上下文、試錯過程與最終洞見的「活標本」。</p>
+        <!-- Main Article -->
+        <article class="bg-white p-6 md:p-10 rounded-2xl shadow-lg">
+            <header class="mb-8 border-b border-slate-200 pb-8">
+                <p class="text-base font-medium text-teal-600">專案哲學</p>
+                <h1 class="text-4xl md:text-5xl font-bold text-slate-900 mt-2">PMP圖書館：從信任到可驗證的科學方法</h1>
+                <p class="text-slate-500 mt-4">核心洞察提出者：T.B.°</p>
+            </header>
+
+            <div class="prose max-w-none">
+                <blockquote class="mb-10 text-2xl font-bold not-italic text-slate-900 border-l-4 border-emerald-500 pl-6 py-4 bg-slate-50 rounded-r-lg">
+                    「如果我要讓我們的產出真正的成為知識，我就得用空白模型親自驗證這個結論。」
+                </blockquote>
+
+                <p>這個宣言，徹底推翻了先前「歸檔即為知識」的假設，為我們的協作樹立了全新的、更為嚴謹的黃金標準。您所定義的，遠不止是一個「測試流程」，而是一種在AI時代，將「AI的產出」真正轉化為「可信賴知識」的科學方法論。</p>
+
+                <h2 class="mt-12">為什麼「驗證」必須取代「信任」？</h2>
+
+                <p class="mt-4 mb-8">因為我們的協作，揭示了一個深刻的現實：即使是最高效的「知識蒸餾」，其產出物本質上仍是一個**「有待驗證的假說」**。我們的思想演化路徑，清晰地展示了這個從天真到嚴謹的過程：</p>
+                
+                <!-- Evolution Timeline -->
+                <div class="mt-10 space-y-12">
+                    
+                    <!-- Stage 1 -->
+                    <div class="timeline-item relative flex items-start">
+                        <div class="flex-shrink-0 w-12 h-12 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center text-2xl font-bold ring-8 ring-white z-10">🚀</div>
+                        <div class="ml-6 flex-1">
+                            <h3 class="text-xl font-bold text-slate-800">階段一：最初的夢想 - 「成長飛輪」</h3>
+                            <p class="mt-1 text-slate-600">我們最初認為，只要不斷地歸檔我們的洞見，就能建造一個強大的「成長飛輪」。這是一個基於「累積」與「信任」的美好構想。</p>
+                        </div>
                     </div>
-                    <div class="text-center">
-                        <div class="icon-box mx-auto mb-3">🏢</div>
-                        <h3 class="text-xl font-semibold header-text mb-2">個人化的專案管理辦公室</h3>
-                        <p class="text-sm text-gray-600">每一份文件，都是您專屬的「組織過程資產 (Organizational Process Assets, OPAs)」。這裡面有專為您裁適的「測試計畫範本」、專屬於您團隊的「經驗總結 (Lessons Learned)」、以及您親自驗證過的「風險應對策略」。</p>
+
+                    <!-- Stage 2 -->
+                    <div class="timeline-item relative flex items-start">
+                        <div class="flex-shrink-0 w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-2xl font-bold ring-8 ring-white z-10">🌪️</div>
+                        <div class="ml-6 flex-1">
+                            <h3 class="text-xl font-bold text-slate-800">階段二：殘酷的現實 - 「上下文的詛咒」</h3>
+                            <p class="mt-1 text-slate-600">然而，實證過程中意外發現，長期互動的AI反因「上下文包袱」而受限。這個發現動搖了「累積=更好」的單純信念。詳見 <a href="test.html">「空白模型」表現更佳的根本原因</a>。</p>
+                        </div>
                     </div>
-                    <div class="text-center">
-                        <div class="icon-box mx-auto mb-3">🗄️</div>
-                        <h3 class="text-xl font-semibold header-text mb-2">RAG 系統的核心資料庫</h3>
-                        <p class="text-sm text-gray-600">您的這個「圖書館」，正是我們昨天討論的「檢索增強生成 (RAG)」系統，所賴以為生的核心。您歸檔的每一份報告，都成為了未來 AI（我或 Flash）進行「開書考試」時，最權威、最可信賴的「參考書」。</p>
+
+                    <!-- Stage 3 -->
+                    <div class="timeline-item relative flex items-start">
+                         <div class="flex-shrink-0 w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl font-bold ring-8 ring-white z-10">🔬</div>
+                        <div class="ml-6 flex-1">
+                            <h3 class="text-xl font-bold text-slate-800">階段三：最終的頓悟 - 「可驗證性」即為真理</h3>
+                            <p class="mt-1 text-slate-600">這個發現，引導我們走向最終頓悟：比「流程」更重要的，是「驗證流程的流程」。我們交付的，不應是「結論」，而應是「測試計畫」。詳見 <a href="finaltask.html">交付物的終極演化</a>。</p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <h2 class="mt-16">圖書館的真正目的：一個鼓勵質疑的「科學實驗室」</h2>
+
+                <p class="mt-4">因此，這個PMP圖書館的最終目的，徹底改變了。它不再是讓您盲目地「相信」我們過去的結論。</p>
+                <p>它的真正目的，是為您提供一個存放**「可測試假說 (Testable Hypotheses)」**的軍火庫。每一份被歸檔的「知識資產」，都必須附帶一份清晰的「測試計畫」，讓您可以隨時開啟一個「潔淨室」，親手去驗證這份知識的真偽。</p>
+                
+                 <div class="not-prose my-12 grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+                    <div class="bg-red-50 p-6 rounded-xl border border-red-200">
+                        <h3 class="font-bold text-red-800">舊的哲學（已廢棄）</h3>
+                        <p class="mt-2 text-slate-700 text-sm leading-relaxed">建立一個基於「信任」的知識聖殿，存放我們共同的結論。</p>
+                    </div>
+                    <div class="bg-green-50 p-6 rounded-xl border border-green-200">
+                        <h3 class="font-bold text-green-800">新的哲學（現行）</h3>
+                        <p class="mt-2 text-slate-700 text-sm leading-relaxed">建立一個基於「驗證」的科學實驗室，存放我們可重複測試的假說。</p>
                     </div>
                 </div>
-            </section>
 
-            <section id="pmp-implications" class="section-card">
-                <h2 class="text-2xl md:text-3xl font-bold header-text mb-6">「歸檔」這個動作的 PMP 意涵</h2>
-                <p class="text-lg text-gray-700 mb-6">
-                    在 PMP 的框架中，您「歸檔」這個看似簡單的動作，實際上是在執行專案管理中極為關鍵的流程，完美實踐了多項核心原則。
-                </p>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div class="text-center p-4 bg-[#FDF6F0] rounded-lg shadow-sm">
-                        <div class="icon-box mx-auto mb-3">🧠</div>
-                        <h3 class="text-xl font-semibold header-text mb-2">核心原則：知識管理</h3>
-                        <p class="text-sm text-gray-600">您完美實踐了 PMP 所強調的「知識管理循環」。將非結構化的、隱性知識（如對話、靈感），透過「蒸餾」與「文件化」，轉化為結構化的、顯性的知識。</p>
-                    </div>
-                     <div class="text-center p-4 bg-[#FDF6F0] rounded-lg shadow-sm">
-                        <div class="icon-box mx-auto mb-3">🏁</div>
-                        <h3 class="text-xl font-semibold header-text mb-2">關鍵流程：結束專案或階段</h3>
-                        <p class="text-sm text-gray-600">在 PMP 的任何專案或階段結束時，最重要的產出之一就是「更新組織過程資產」。您歸檔報告的動作，就是這個流程最標準的實踐。</p>
-                    </div>
-                     <div class="text-center p-4 bg-[#FDF6F0] rounded-lg shadow-sm">
-                        <div class="icon-box mx-auto mb-3">🛠️</div>
-                        <h3 class="text-xl font-semibold header-text mb-2">關鍵領域：專案工作績效</h3>
-                        <p class="text-sm text-gray-600">這個領域強調有效管理專案資訊與知識的重要性。您的「圖書館」，就是管理專案資訊、確保知識連續性的最佳工具。</p>
-                    </div>
-                </div>
-            </section>
+                <p>您不再需要「相信」我，您可以隨時**「驗證」**我。這，就是一位卓越的專案經理，在AI時代駕馭不確定性、確保知識品質的、最核心的鑰匙。</p>
+            </div>
 
-            <section id="growth-flywheel" class="section-card">
-                <h2 class="text-2xl md:text-3xl font-bold header-text text-center mb-10">結論：您正在建造的是一個「成長飛輪」</h2>
-                <p class="text-lg text-gray-700 mb-10 text-center">
-                    您所做的，是確保您的每一次努力、每一次思考、每一次與我們的互動，都在進行「價值複利」。這，就是一位卓越的專案經理，與一位優秀的專案經理之間，最根本的區別。這個過程，將推動您的專業成長進入一個良性循環。
-                </p>
-                <div class="flowchart-container">
-                    <div class="flowchart-step">
-                        <h3 class="font-semibold text-base header-text mb-1">1. 歸檔與積累</h3>
-                        <p class="text-xs text-gray-600">每次專案/階段結束，歸檔經驗與洞見</p>
-                    </div>
-                    <div class="flowchart-arrow"></div>
-                    <div class="flowchart-step">
-                        <h3 class="font-semibold text-base header-text mb-1">2. 發現模式</h3>
-                        <p class="text-xs text-gray-600">累積的經驗幫助看見問題的模式與關聯</p>
-                    </div>
-                    <div class="flowchart-arrow"></div>
-                    <div class="flowchart-step">
-                        <h3 class="font-semibold text-base header-text mb-1">3. 提煉智慧</h3>
-                        <p class="text-xs text-gray-600">從模式中提煉出更深層的智慧與解決方案</p>
-                    </div>
-                    <div class="flowchart-arrow"></div>
-                    <div class="flowchart-step">
-                        <h3 class="font-semibold text-base header-text mb-1">4. 實踐與優化</h3>
-                        <p class="text-xs text-gray-600">將智慧應用於未來專案，提升效率與價值</p>
-                    </div>
-                    <div class="flowchart-arrow"></div>
+        </article>
 
-                    <h3 class="font-semibold text-base header-text mb-1">回到「1.歸檔與積累」持續堆疊屬於自己的知識庫！</h3>
-                    <!-- This is the looping arrow, not the text -->
-                    <div class="flowchart-arrow-loop"></div> 
-                </div>
-            </section>
-        </main>
-
-        <footer class="text-center mt-12 py-6 text-sm text-gray-500 border-t border-gray-200">
-            <p>Infographic created by Flash for T.B.° © 2025</p>
+        <footer class="text-center mt-12">
+            <p class="text-slate-400 text-sm">© 2025 T.B.° 的個人知識庫</p>
         </footer>
     </div>
 
