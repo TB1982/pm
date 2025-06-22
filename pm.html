@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI專案管理虛擬實踐場的終極方法論 v2.0</title>
+    <title>AI專案管理虛擬實踐場的終極方法論 v2.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,10 +12,10 @@
     <!-- Color Palette: Brilliant Blues -->
     <!-- Narrative Plan: Section 1 (The Crossroads) -> Section 2 (The Growth Engine) -> Section 3 (Scaling the Impact) -> Section 4 (The Pinnacle of Value) -->
     <!-- Visualization Plan:
-        - The Crossroads: Goal: Compare -> Visualization: Styled HTML Table/Cards (NO SVG). Justification: Clear side-by-side contrast of mindsets.
-        - The Growth Engine: Goal: Organize -> Visualization: HTML/CSS Flowchart (NO SVG, NO Mermaid JS). Justification: Intuitive representation of a top-down process.
-        - Scaling the Impact: Goal: Inform/Compare -> Visualization: Chart.js Donut Chart (Canvas). Justification: Visually breaks down the 'Coach' role into its components.
-        - The Pinnacle of Value: Goal: Compare/Inform -> Visualization: Chart.js Radar Chart (Canvas). Justification: Effectively maps the methodology against multiple PMP principles.
+         - The Crossroads: Goal: Compare -> Visualization: Styled HTML Table/Cards (NO SVG). Justification: Clear side-by-side contrast of mindsets.
+         - The Growth Engine: Goal: Organize -> Visualization: HTML/CSS Flowchart (NO SVG, NO Mermaid JS). Justification: Intuitive representation of a top-down process.
+         - Scaling the Impact: Goal: Inform/Compare -> Visualization: Chart.js Donut Chart (Canvas). Justification: Visually breaks down the 'Coach' role into its components.
+         - The Pinnacle of Value: Goal: Compare/Inform -> Visualization: Chart.js Radar Chart (Canvas). Justification: Effectively maps the methodology against multiple PMP principles.
     -->
     <!-- NEITHER Mermaid JS NOR SVG were used anywhere in this output. All visualizations are either pure HTML/CSS or rendered on a Canvas element via Chart.js. -->
     <style>
@@ -47,7 +47,7 @@
 
         <header class="text-center mb-12">
             <h1 class="text-3xl md:text-5xl font-black text-balance text-[#003F5C] mb-2">AI專案管理虛擬實踐場的終極方法論</h1>
-            <p class="text-lg md:text-xl font-bold text-[#34657F]">v2.0 - 一位現代專案經理的價值主張</p>
+            <p class="text-lg md:text-xl font-bold text-[#34657F]">v2.1 - 一位現代專案經理的價值主張</p>
             <p class="text-sm text-[#668BA4] mt-2">核心洞察提出者: T.B.° | 2025年6月22日</p>
         </header>
 
@@ -82,28 +82,33 @@
                 <h2 class="text-2xl md:text-3xl font-bold text-center mb-2 text-[#003F5C]">🔄 核心引擎：螺旋式成長循環</h2>
                 <p class="text-center text-[#34657F] max-w-3xl mx-auto text-balance mb-8">選擇PM模式，即是啟動一個由「持續反饋」驅動的價值創造循環。此流程將模糊的問題，一步步轉化為可持續改進的高效團隊流程。</p>
                 <div class="relative flex flex-col items-center space-y-4">
-                     <!-- Flowchart Connector Line -->
+                        <!-- Flowchart Connector Line -->
                     <div class="absolute top-12 bottom-12 w-1 bg-[#CCE0F0] rounded-full z-0"></div>
 
                     <div class="w-full max-w-md bg-[#f0f4f8] border-l-4 border-[#34657F] p-4 rounded-lg shadow-sm z-10">
-                        <h4 class="font-bold text-lg text-[#003F5C]">➊ 覺察 (Awareness)</h4>
-                        <p class="text-sm text-[#34657F] mt-1">將AI視為有「個性」的團隊成員，而非完美工具。價值轉化：<span class="font-semibold">被動使用者 → 主動管理者</span></p>
+                        <h4 class="font-bold text-lg text-[#003F5C]"><span class="text-xl mr-2">1.</span>覺察 (Awareness)</h4>
+                        <p class="text-sm text-[#34657F] mt-1 pl-8">將AI視為有「個性」的團隊成員，而非完美工具。價值轉化：<span class="font-semibold">被動使用者 → 主動管理者</span></p>
                     </div>
 
                     <div class="w-full max-w-md bg-[#f0f4f8] border-l-4 border-[#34657F] p-4 rounded-lg shadow-sm z-10">
-                        <h4 class="font-bold text-lg text-[#003F5C]">➋ 看到 (Seeing)</h4>
-                        <p class="text-sm text-[#34657F] mt-1">有意識地觀察，將模糊的「不對勁」識別為可重複的「模式」。價值轉化：<span class="font-semibold">模糊的問題 → 具體的現象</span></p>
+                        <h4 class="font-bold text-lg text-[#003F5C]"><span class="text-xl mr-2">2.</span>看到 (Seeing)</h4>
+                        <p class="text-sm text-[#34657F] mt-1 pl-8">有意識地觀察，將模糊的「不對勁」識別為可重複的「模式」。價值轉化：<span class="font-semibold">模糊的問題 → 具體的現象</span></p>
                     </div>
 
                     <div class="w-full max-w-md bg-[#f0f4f8] border-l-4 border-[#34657F] p-4 rounded-lg shadow-sm z-10">
-                        <h4 class="font-bold text-lg text-[#003F5C]">➌ 分析 (Analysis)</h4>
-                        <p class="text-sm text-[#34657F] mt-1">運用PM框架探究「為何」發生，找到根本原因。價值轉化：<span class="font-semibold">具體的現象 → 可理解的原因</span></p>
+                        <h4 class="font-bold text-lg text-[#003F5C]"><span class="text-xl mr-2">3.</span>分析 (Analysis)</h4>
+                        <p class="text-sm text-[#34657F] mt-1 pl-8">運用PM框架探究「為何」發生，找到根本原因。價值轉化：<span class="font-semibold">具體的現象 → 可理解的原因</span></p>
                     </div>
 
                     <div class="w-full max-w-md bg-[#f0f4f8] border-l-4 border-[#34657F] p-4 rounded-lg shadow-sm z-10">
-                        <h4 class="font-bold text-lg text-[#003F5C]">➍ 優化 (Optimization)</h4>
-                        <p class="text-sm text-[#34657F] mt-1">設計並執行新流程，如溝通規則或測試計畫。價值轉化：<span class="font-semibold">可理解的原因 → 可持續的流程</span></p>
+                        <h4 class="font-bold text-lg text-[#003F5C]"><span class="text-xl mr-2">4.</span>優化 (Optimization)</h4>
+                        <p class="text-sm text-[#34657F] mt-1 pl-8">設計並執行新流程，如溝通規則或測試計畫。價值轉化：<span class="font-semibold">可理解的原因 → 可持續的流程</span></p>
                     </div>
+
+                    <div class="mt-8 p-4 bg-sky-50 border-t-4 border-sky-300 rounded-b-lg w-full max-w-md z-10">
+                         <p class="text-center text-[#003F5C]">這個「覺察-分析-優化」的循環，其本質正是品質管理學中經典的 <strong class="font-bold">PDCA (Plan-Do-Check-Act)</strong> 循環的實踐。</p>
+                    </div>
+
                      <div class="text-center mt-6 w-full max-w-md bg-[#003F5C] text-white font-bold py-3 px-4 rounded-lg z-10">
                         🎯 終極目標：打造高效協作、持續改進的團隊
                     </div>
@@ -118,7 +123,7 @@
                     <div class="chart-container">
                         <canvas id="coachRoleChart"></canvas>
                     </div>
-                    <div class="space-y-4">
+                    <div class="space-y-6">
                         <div class="bg-slate-50 p-4 rounded-lg">
                             <h4 class="font-bold text-lg text-[#003F5C]">建立覺察文化</h4>
                             <p class="text-sm text-[#34657F] mt-1">引導所有成員將AI的「錯誤」視為團隊共同的「學習機會」，而非單純的技術故障。</p>
@@ -156,7 +161,7 @@
         </main>
 
         <footer class="text-center mt-12 py-6 border-t border-[#CCE0F0]">
-            <p class="text-[#668BA4] text-sm">&copy; 2025 T.B.° - All Rights Reserved. This infographic is a visual representation of the AI PM Methodology v2.0.</p>
+            <p class="text-[#668BA4] text-sm">&copy; 2025 T.B.° - All Rights Reserved. This infographic is a visual representation of the AI PM Methodology v2.1.</p>
         </footer>
 
     </div>
@@ -219,8 +224,8 @@
         type: 'doughnut',
         data: {
             labels: [
-                wrapText('建立覺察文化 Fostering Awareness Culture', 18),
-                wrapText('設計行為引導語 Designing Behavioral Guides', 18)
+                wrapText('建立覺察文化', 18),
+                wrapText('設計行為引導語', 18)
             ],
             datasets: [{
                 label: 'PM作為教練的核心行動',
