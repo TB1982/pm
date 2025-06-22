@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI專案管理虛擬實踐場的終極方法論 v2.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Color Palette: Brilliant Blues -->
+    <!-- Narrative Plan: Section 1 (The Crossroads) -> Section 2 (The Growth Engine) -> Section 3 (Scaling the Impact) -> Section 4 (The Pinnacle of Value) -->
+    <!-- Visualization Plan:
+        - The Crossroads: Goal: Compare -> Visualization: Styled HTML Table/Cards (NO SVG). Justification: Clear side-by-side contrast of mindsets.
+        - The Growth Engine: Goal: Organize -> Visualization: HTML/CSS Flowchart (NO SVG, NO Mermaid JS). Justification: Intuitive representation of a top-down process.
+        - Scaling the Impact: Goal: Inform/Compare -> Visualization: Chart.js Donut Chart (Canvas). Justification: Visually breaks down the 'Coach' role into its components.
+        - The Pinnacle of Value: Goal: Compare/Inform -> Visualization: Chart.js Radar Chart (Canvas). Justification: Effectively maps the methodology against multiple PMP principles.
+    -->
+    <!-- NEITHER Mermaid JS NOR SVG were used anywhere in this output. All visualizations are either pure HTML/CSS or rendered on a Canvas element via Chart.js. -->
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #f0f4f8; /* A very light shade from the palette */
+        }
+        .text-balance {
+            text-wrap: balance;
+        }
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 40vh;
+            width: 100%;
+            max-width: 500px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="text-[#003F5C]">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-5xl">
+
+        <header class="text-center mb-12">
+            <h1 class="text-3xl md:text-5xl font-black text-balance text-[#003F5C] mb-2">AI專案管理虛擬實踐場的終極方法論</h1>
+            <p class="text-lg md:text-xl font-bold text-[#34657F]">v2.0 - 一位現代專案經理的價值主張</p>
+            <p class="text-sm text-[#668BA4] mt-2">核心洞察提出者: T.B.° | 2025年6月22日</p>
+        </header>
+
+        <main class="space-y-12">
+
+            <!-- Section 1: The Fundamental Choice -->
+            <section id="choice" class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                <h2 class="text-2xl md:text-3xl font-bold text-center mb-2 text-[#003F5C]">📍 起點：一個根本性的抉擇</h2>
+                <p class="text-center text-[#34657F] max-w-3xl mx-auto text-balance mb-8">在面對AI的「不完美」時，專案經理面臨一個決定團隊最終走向的岔路口。</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="border-2 border-red-200 bg-red-50 rounded-xl p-6 transform hover:scale-105 transition-transform duration-300">
+                        <h3 class="text-xl font-bold text-red-800 mb-3">🔴 使用者模式 (User Mode)</h3>
+                        <p class="italic text-red-600 mb-4">"他壞了，換個視窗就好。"</p>
+                        <ul class="space-y-2 text-red-700">
+                            <li><strong class="font-semibold">本質：</strong>規避問題</li>
+                            <li><strong class="font-semibold">結果：</strong>團隊能力停滯，問題重複出現</li>
+                        </ul>
+                    </div>
+                    <div class="border-2 border-green-200 bg-green-50 rounded-xl p-6 transform hover:scale-105 transition-transform duration-300">
+                        <h3 class="text-xl font-bold text-green-800 mb-3">🟢 專案經理模式 (PM Mode)</h3>
+                        <p class="italic text-green-600 mb-4">"這是一個機會，我來優化他。"</p>
+                        <ul class="space-y-2 text-green-700">
+                            <li><strong class="font-semibold">本質：</strong>正面應對，轉化為資產</li>
+                            <li><strong class="font-semibold">結果：</strong>啟動成長循環，沉澱知識資產</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: The Core Engine -->
+            <section id="engine" class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                <h2 class="text-2xl md:text-3xl font-bold text-center mb-2 text-[#003F5C]">🔄 核心引擎：螺旋式成長循環</h2>
+                <p class="text-center text-[#34657F] max-w-3xl mx-auto text-balance mb-8">選擇PM模式，即是啟動一個由「持續反饋」驅動的價值創造循環。此流程將模糊的問題，一步步轉化為可持續改進的高效團隊流程。</p>
+                <div class="relative flex flex-col items-center space-y-4">
+                     <!-- Flowchart Connector Line -->
+                    <div class="absolute top-12 bottom-12 w-1 bg-[#CCE0F0] rounded-full z-0"></div>
+
+                    <div class="w-full max-w-md bg-[#f0f4f8] border-l-4 border-[#34657F] p-4 rounded-lg shadow-sm z-10">
+                        <h4 class="font-bold text-lg text-[#003F5C]">➊ 覺察 (Awareness)</h4>
+                        <p class="text-sm text-[#34657F] mt-1">將AI視為有「個性」的團隊成員，而非完美工具。價值轉化：<span class="font-semibold">被動使用者 → 主動管理者</span></p>
+                    </div>
+
+                    <div class="w-full max-w-md bg-[#f0f4f8] border-l-4 border-[#34657F] p-4 rounded-lg shadow-sm z-10">
+                        <h4 class="font-bold text-lg text-[#003F5C]">➋ 看到 (Seeing)</h4>
+                        <p class="text-sm text-[#34657F] mt-1">有意識地觀察，將模糊的「不對勁」識別為可重複的「模式」。價值轉化：<span class="font-semibold">模糊的問題 → 具體的現象</span></p>
+                    </div>
+
+                    <div class="w-full max-w-md bg-[#f0f4f8] border-l-4 border-[#34657F] p-4 rounded-lg shadow-sm z-10">
+                        <h4 class="font-bold text-lg text-[#003F5C]">➌ 分析 (Analysis)</h4>
+                        <p class="text-sm text-[#34657F] mt-1">運用PM框架探究「為何」發生，找到根本原因。價值轉化：<span class="font-semibold">具體的現象 → 可理解的原因</span></p>
+                    </div>
+
+                    <div class="w-full max-w-md bg-[#f0f4f8] border-l-4 border-[#34657F] p-4 rounded-lg shadow-sm z-10">
+                        <h4 class="font-bold text-lg text-[#003F5C]">➍ 優化 (Optimization)</h4>
+                        <p class="text-sm text-[#34657F] mt-1">設計並執行新流程，如溝通規則或測試計畫。價值轉化：<span class="font-semibold">可理解的原因 → 可持續的流程</span></p>
+                    </div>
+                     <div class="text-center mt-6 w-full max-w-md bg-[#003F5C] text-white font-bold py-3 px-4 rounded-lg z-10">
+                        🎯 終極目標：打造高效協作、持續改進的團隊
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 3: Value Expansion -->
+            <section id="culture" class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                 <h2 class="text-2xl md:text-3xl font-bold text-center mb-2 text-[#003F5C]">🌳 價值擴散：從個人實踐到團隊文化</h2>
+                 <p class="text-center text-[#34657F] max-w-3xl mx-auto text-balance mb-8">卓越的專案經理將個人實踐昇華為團隊的共同文化，扮演「教練」的角色，透過兩大核心行動，將優化思維制度化。</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div class="chart-container">
+                        <canvas id="coachRoleChart"></canvas>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="bg-slate-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-lg text-[#003F5C]">建立覺察文化</h4>
+                            <p class="text-sm text-[#34657F] mt-1">引導所有成員將AI的「錯誤」視為團隊共同的「學習機會」，而非單純的技術故障。</p>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-lg">
+                            <h4 class="font-bold text-lg text-[#003F5C]">設計行為引導語</h4>
+                            <p class="text-sm text-[#34657F] mt-1">將被動的「糾錯」轉化為主動的、標準化的「校準流程」，例如用「讓我們做一次誠實校準」取代「你錯了」。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+             <!-- Section 4: Ultimate Value -->
+            <section id="value" class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                <h2 class="text-2xl md:text-3xl font-bold text-center mb-2 text-[#003F5C]">🏛️ 終極價值：PM的新角色定位</h2>
+                <p class="text-center text-[#34657F] max-w-3xl mx-auto text-balance mb-8">此方法論深度契合PMP核心原則，最終將專案經理的角色，從一位使用者，重新定義為整個「人機協作系統」的架構師與馴獸師。</p>
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div class="space-y-4 order-2 md:order-1">
+                        <div class="bg-[#CCE0F0] p-4 rounded-lg text-center">
+                            <h4 class="font-extrabold text-2xl md:text-4xl text-[#003F5C]">架構師</h4>
+                             <p class="text-sm font-semibold text-[#34657F] mt-1">(Architect)</p>
+                        </div>
+                         <div class="text-center font-black text-4xl text-[#99B2CA]">&</div>
+                        <div class="bg-[#CCE0F0] p-4 rounded-lg text-center">
+                            <h4 class="font-extrabold text-2xl md:text-4xl text-[#003F5C]">馴獸師</h4>
+                            <p class="text-sm font-semibold text-[#34657F] mt-1">(Trainer)</p>
+                        </div>
+                    </div>
+                    <div class="chart-container order-1 md:order-2">
+                        <canvas id="pmpValueChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="text-center mt-12 py-6 border-t border-[#CCE0F0]">
+            <p class="text-[#668BA4] text-sm">&copy; 2025 T.B.° - All Rights Reserved. This infographic is a visual representation of the AI PM Methodology v2.0.</p>
+        </footer>
+
+    </div>
+
+<script>
+    function wrapText(text, maxChars) {
+        const words = text.split(' ');
+        let currentLine = '';
+        const lines = [];
+        words.forEach(word => {
+            if ((currentLine + ' ' + word).trim().length > maxChars && currentLine.length > 0) {
+                lines.push(currentLine);
+                currentLine = word;
+            } else {
+                currentLine = (currentLine + ' ' + word).trim();
+            }
+        });
+        if (currentLine.length > 0) {
+            lines.push(currentLine);
+        }
+        return lines;
+    }
+
+    const tooltipTitleCallback = (tooltipItems) => {
+        const item = tooltipItems[0];
+        let label = item.chart.data.labels[item.dataIndex];
+        return Array.isArray(label) ? label.join(' ') : label;
+    };
+    
+    const commonChartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                labels: {
+                    color: '#003F5C',
+                    font: {
+                        family: "'Inter', 'Noto Sans TC', sans-serif",
+                        weight: '500'
+                    }
+                }
+            },
+            tooltip: {
+                callbacks: {
+                    title: tooltipTitleCallback
+                },
+                titleFont: {
+                    family: "'Inter', 'Noto Sans TC', sans-serif",
+                },
+                bodyFont: {
+                    family: "'Inter', 'Noto Sans TC', sans-serif",
+                },
+            }
+        }
+    };
+
+    // Chart 1: Coach Role
+    const coachRoleCtx = document.getElementById('coachRoleChart').getContext('2d');
+    new Chart(coachRoleCtx, {
+        type: 'doughnut',
+        data: {
+            labels: [
+                wrapText('建立覺察文化 Fostering Awareness Culture', 18),
+                wrapText('設計行為引導語 Designing Behavioral Guides', 18)
+            ],
+            datasets: [{
+                label: 'PM作為教練的核心行動',
+                data: [50, 50],
+                backgroundColor: [
+                    '#34657F', // A mid-tone blue
+                    '#99B2CA', // A lighter blue
+                ],
+                borderColor: '#FFFFFF',
+                borderWidth: 4,
+                hoverOffset: 8
+            }]
+        },
+        options: {
+            ...commonChartOptions,
+            plugins: {
+                ...commonChartOptions.plugins,
+                title: {
+                    display: true,
+                    text: 'PM作為教練的兩大核心行動',
+                    color: '#003F5C',
+                    font: { size: 16, weight: 'bold' }
+                }
+            }
+        }
+    });
+
+    // Chart 2: PMP Value
+    const pmpValueCtx = document.getElementById('pmpValueChart').getContext('2d');
+    new Chart(pmpValueCtx, {
+        type: 'radar',
+        data: {
+            labels: [
+                wrapText('將品質融入流程 Build Quality In', 16),
+                wrapText('團隊績效管理 Manage Team Performance', 16),
+                wrapText('持續改進 Continuous Improvement', 16)
+            ],
+            datasets: [{
+                label: '方法論與PMP原則契合度',
+                data: [5, 5, 5],
+                fill: true,
+                backgroundColor: 'rgba(52, 101, 127, 0.2)', // transparent #34657F
+                borderColor: '#003F5C',
+                pointBackgroundColor: '#003F5C',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: '#003F5C'
+            }]
+        },
+        options: {
+            ...commonChartOptions,
+             scales: {
+                r: {
+                    angleLines: { color: '#CCE0F0' },
+                    grid: { color: '#CCE0F0' },
+                    pointLabels: {
+                        color: '#003F5C',
+                        font: { size: 12, weight: 'bold' }
+                    },
+                    ticks: {
+                        backdropColor: 'transparent',
+                        color: '#668BA4',
+                        stepSize: 1,
+                    },
+                    min: 0,
+                    max: 5
+                }
+            },
+            plugins: {
+                ...commonChartOptions.plugins,
+                title: {
+                    display: true,
+                    text: '方法論與PMP核心原則契合度',
+                    color: '#003F5C',
+                    font: { size: 16, weight: 'bold' }
+                }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
