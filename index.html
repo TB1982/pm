@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>專案迭代互動儀表板 v3.3 (Final)</title>
+    <title>專案迭代互動儀表板 v3.4 (Final)</title>
     <!-- Chosen Palette: Slate Gray & Sky Blue -->
     <!-- Application Structure Plan: The SPA is designed as a vertical interactive timeline. A new DYNAMIC KPI dashboard section is added at the top to immediately convey the project's velocity by fetching live data from GitHub. The main timeline is split into two columns: main project iterations on the left, and supplementary artifacts (easter eggs, docs) on the right. A new, centered, full-width section is added below the timelines to feature the final infographic, giving it prominence as the project's capstone deliverable. -->
     <!-- Visualization & Content Choices: 1. Project Growth (Change): The line chart is updated to "Knowledge Asset Accumulation", tracking the cumulative count of all items (including implicit conversational assets) against a real day-by-day timeline to showcase the true velocity. 2. Version Details (Organize/Inform): A two-column vertical timeline. 3. KPIs (Inform): Dynamic KPI cards. -->
@@ -88,13 +88,13 @@
                 <!-- Left Column: Main Iterations -->
                 <div>
                     <h2 class="text-2xl font-bold text-slate-800 text-center mb-2">迭代版本 (網頁原型)</h2>
-                    <p class="text-xs text-slate-400 text-center mb-8">此區塊內容主要於專案第1-5天建立</p>
+                    <p class="text-xs text-slate-400 text-center mb-8">此區塊內容主要於開發第1天建立</p>
                     <div id="timeline-main" class="relative ml-6 md:ml-4"></div>
                 </div>
                 <!-- Right Column: Docs & Easter Eggs -->
                 <div>
                     <h2 class="text-2xl font-bold text-slate-800 text-center mb-2">知識資產 (方法論)</h2>
-                    <p class="text-xs text-slate-400 text-center mb-8">此區塊內容主要於專案第10-12天爆發性成長</p>
+                    <p class="text-xs text-slate-400 text-center mb-8">此區塊內容主要於開發第2天爆發性成長</p>
                     <div id="timeline-side" class="relative ml-6 md:ml-4"></div>
                 </div>
             </div>
@@ -104,7 +104,7 @@
         <section class="my-16">
             <div class="max-w-4xl mx-auto bg-gradient-to-r from-sky-100 to-blue-200 p-8 rounded-2xl shadow-xl text-center border border-sky-200">
                 <h3 class="text-3xl font-bold text-slate-800 mb-2">專案最終產出：核心方法論</h3>
-                <p class="text-xs text-slate-400 mb-8">此區塊內容於專案第12天完成</p>
+                <p class="text-xs text-slate-400 mb-8">此區塊內容於開發第3天完成</p>
                 <div class="bg-white/70 backdrop-blur-sm p-6 rounded-lg text-left shadow-lg">
                     <h4 class="text-xl font-bold text-[#003F5C]">AI協作的科學：從信任到驗證</h4>
                     <p class="text-sm text-slate-600 mt-2">一份關於我們如何發明、驗證並確立「AI專案管理虛擬實踐場」終極方法論的互動式資訊圖表。</p>
@@ -145,18 +145,16 @@
             { name: "六版", day: 4, description: "進行整體架構與程式碼重構，提升穩定性。", file: "6.html", tag: "重構", column: 'main' },
             { name: "七版追加樣式調整", day: 5, description: "全面調整 UI 樣式與色彩配置，優化視覺體驗。", file: "7.html", tag: "樣式", column: 'main' },
             
-            // Side Timeline - Documents, Insights, Easter Eggs, and the FINAL METHODOLOGY
+            // Side Timeline - Documents, Insights, Easter Eggs
             { name: "設計樣式庫", day: 10, description: "基於專案成果逆向工程整理的設計規範與元件庫。", file: "design.html", tag: "文件", column: 'side' },
             { name: "專案 FAQ", day: 10, description: "解答在人機協作專案中，各團隊最關心的問題。", file: "faq.html", tag: "文件", column: 'side' },
             { name: "Flash彩蛋預期效果", day: 11, description: "做做手工藝以迴避版權無法生成問題（欸嘿", file: "rewrite.html", tag: "預告", column: 'side' },
             { name: "Flash彩蛋實際情形", day: 11, description: "Flash自己生出來的蜘蛛星雲網頁，請各位笑納XD", file: "Flash1.html", tag: "彩蛋", column: 'side' },
             { name: "彩蛋說明", day: 11, description: "關於 Flash 彩蛋的背景故事與技術說明。", file: "Flash1-1.html", tag: "說明", column: 'side' },
-            // Day 12 Knowledge Explosion
             { name: "知識蒸餾報告", day: 12, description: "為解決跨模型上下文問題，所進行的知識蒸餾實證分析報告。", file: "distillation.html", tag: "分析", column: 'side' },
             { name: "空白模型測試", day: 12, description: "發現「上下文的詛咒」，證明潔淨室測試的必要性。", file: "test.html", tag: "經驗", column: 'side' },
             { name: "交付物演化史", day: 12, description: "頓悟：比「流程」更重要的，是「驗證流程的流程」。", file: "finaltask.html", tag: "經驗", column: 'side' },
-            { name: "PMP圖書館", day: 12, description: "最終確立「科學實驗室」的核心哲學，將信任昇華為驗證。", file: "library.html", tag: "經驗", column: 'side' },
-            { name: "方法論資訊圖表", day: 12, description: "將所有洞見，視覺化為一份可傳承、可分享的互動式報告。", file: "pm.html", tag: "分析", column: 'side' }
+            { name: "PMP圖書館", day: 12, description: "最終確立「科學實驗室」的核心哲學，將信任昇華為驗證。", file: "library.html", tag: "經驗", column: 'side' }
         ];
 
         function getTagInfo(tag) {
