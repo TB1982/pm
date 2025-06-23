@@ -103,7 +103,99 @@
             </div>
         </section>
 
+<section class="bg-white p-6 rounded-2xl shadow-lg mt-16">
+<div class="container mx-auto p-4 md:p-8 max-w-md">
+    <div class="card mt-12">
+            <h2 class="text-2xl font-bold text-slate-800 mb-4">專案迭代次數</h2>
+            <p class="text-slate-500">此數據直接來自 GitHub 的提交紀錄</p>
+            <div id="commitCount" class="text-5xl md:text-6xl main-number">
+                載入中...
+            </div>
+            <p class="text-slate-500 text-sm mt-2">（主要分支提交數）</p>
+            <p id="timeSinceFirstCommit" class="text-slate-500 text-sm mt-1"></p> <!-- Added the element for time since first commit -->
+    </div>
+</div>
+</section>
+    <script>
+        // 設定您的 GitHub 用戶名和儲存庫名稱
+        const GITHUB_USERNAME = 'tb1982'; // 請替換為您的 GitHub 用戶名
+        const REPO_NAME = 'pm'; // 請替換為您的儲存庫名稱
+        const BRANCH_NAME = 'main'; // 通常是 'main' 或 'master'
 
+        async function getCommitCount() {
+            const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/commits?sha=${BRANCH_NAME}`;
+            
+            try {
+                const response = await fetch(url);
+                const commits = await response.json();
+                
+                if (commits && commits.length) {
+                    const totalCommitsUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contributors?anon=1`;
+                    const totalCommitsResponse = await fetch(totalCommitsUrl);
+                    const contributors = await totalCommitsResponse.json();
+                    let totalCount = '未知';
+                    if (Array.isArray(contributors) && contributors.length > 0) {
+                        const yourContribution = contributors.find(c => c.login === GITHUB_USERNAME);
+                        if (yourContribution && yourContribution.contributions) {
+                            totalCount = yourContribution.contributions;
+                        } else {
+                            totalCount = commits.length + "+"; 
+                        }
+                    } else {
+                         totalCount = commits.length + "+";
+                    }
+                    document.getElementById('commitCount').innerText = totalCount;
+                } else {
+                    document.getElementById('commitCount').innerText = '0';
+                }
+            } catch (error) {
+                console.error('獲取提交次數失敗:', error);
+                document.getElementById('commitCount').innerText = '載入失敗';
+            }
+        }
+
+        async function getTimeSinceFirstCommit() {
+            const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/commits?per_page=1&page=1&sort=asc`;
+            
+            try {
+                const response = await fetch(url);
+                const commits = await response.json();
+
+                if (commits && commits.length > 0) {
+                    const firstCommitDate = new Date(commits[0].commit.author.date);
+                    const currentDate = new Date();
+
+                    const diffTime = Math.abs(currentDate - firstCommitDate); // 毫秒差
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // 天數
+
+                    let durationString = '';
+                    if (diffDays < 30) {
+                        durationString = `${diffDays} 天前開始`;
+                    } else if (diffDays < 365) {
+                        const months = Math.floor(diffDays / 30);
+                        durationString = `${months} 個月前開始`;
+                    } else {
+                        const years = Math.floor(diffDays / 365);
+                        const remainingMonths = Math.floor((diffDays % 365) / 30);
+                        durationString = `${years} 年 ${remainingMonths} 個月前開始`;
+                    }
+                    
+                    document.getElementById('timeSinceFirstCommit').innerText = durationString;
+
+                } else {
+                    document.getElementById('timeSinceFirstCommit').innerText = '無法獲取時間';
+                }
+            } catch (error) {
+                console.error('獲取首次提交時間失敗:', error);
+                document.getElementById('timeSinceFirstCommit').innerText = '載入時間失敗';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            getCommitCount(); 
+            getTimeSinceFirstCommit();
+        });
+    </script>
         <footer class="text-center mt-16">
             <p class="text-slate-400 text-sm">由 GitHub Pages 部署 | <a href="mailto:babelon1882@gmail.com">
 T.B.° </a> 最後更新於 2025</p>
@@ -216,98 +308,6 @@ T.B.° </a> 最後更新於 2025</p>
             });
         });
     </script>
-<section class="bg-white p-6 rounded-2xl shadow-lg mt-16">
-<div class="container mx-auto p-4 md:p-8 max-w-md">
-    <div class="card mt-12">
-            <h2 class="text-2xl font-bold text-slate-800 mb-4">專案迭代次數</h2>
-            <p class="text-slate-500">此數據直接來自 GitHub 的提交紀錄</p>
-            <div id="commitCount" class="text-5xl md:text-6xl main-number">
-                載入中...
-            </div>
-            <p class="text-slate-500 text-sm mt-2">（主要分支提交數）</p>
-            <p id="timeSinceFirstCommit" class="text-slate-500 text-sm mt-1"></p> <!-- Added the element for time since first commit -->
-    </div>
-</div>
-</section>
-    <script>
-        // 設定您的 GitHub 用戶名和儲存庫名稱
-        const GITHUB_USERNAME = 'tb1982'; // 請替換為您的 GitHub 用戶名
-        const REPO_NAME = 'pm'; // 請替換為您的儲存庫名稱
-        const BRANCH_NAME = 'main'; // 通常是 'main' 或 'master'
 
-        async function getCommitCount() {
-            const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/commits?sha=${BRANCH_NAME}`;
-            
-            try {
-                const response = await fetch(url);
-                const commits = await response.json();
-                
-                if (commits && commits.length) {
-                    const totalCommitsUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contributors?anon=1`;
-                    const totalCommitsResponse = await fetch(totalCommitsUrl);
-                    const contributors = await totalCommitsResponse.json();
-                    let totalCount = '未知';
-                    if (Array.isArray(contributors) && contributors.length > 0) {
-                        const yourContribution = contributors.find(c => c.login === GITHUB_USERNAME);
-                        if (yourContribution && yourContribution.contributions) {
-                            totalCount = yourContribution.contributions;
-                        } else {
-                            totalCount = commits.length + "+"; 
-                        }
-                    } else {
-                         totalCount = commits.length + "+";
-                    }
-                    document.getElementById('commitCount').innerText = totalCount;
-                } else {
-                    document.getElementById('commitCount').innerText = '0';
-                }
-            } catch (error) {
-                console.error('獲取提交次數失敗:', error);
-                document.getElementById('commitCount').innerText = '載入失敗';
-            }
-        }
-
-        async function getTimeSinceFirstCommit() {
-            const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/commits?per_page=1&page=1&sort=asc`;
-            
-            try {
-                const response = await fetch(url);
-                const commits = await response.json();
-
-                if (commits && commits.length > 0) {
-                    const firstCommitDate = new Date(commits[0].commit.author.date);
-                    const currentDate = new Date();
-
-                    const diffTime = Math.abs(currentDate - firstCommitDate); // 毫秒差
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // 天數
-
-                    let durationString = '';
-                    if (diffDays < 30) {
-                        durationString = `${diffDays} 天前開始`;
-                    } else if (diffDays < 365) {
-                        const months = Math.floor(diffDays / 30);
-                        durationString = `${months} 個月前開始`;
-                    } else {
-                        const years = Math.floor(diffDays / 365);
-                        const remainingMonths = Math.floor((diffDays % 365) / 30);
-                        durationString = `${years} 年 ${remainingMonths} 個月前開始`;
-                    }
-                    
-                    document.getElementById('timeSinceFirstCommit').innerText = durationString;
-
-                } else {
-                    document.getElementById('timeSinceFirstCommit').innerText = '無法獲取時間';
-                }
-            } catch (error) {
-                console.error('獲取首次提交時間失敗:', error);
-                document.getElementById('timeSinceFirstCommit').innerText = '載入時間失敗';
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            getCommitCount(); 
-            getTimeSinceFirstCommit();
-        });
-    </script>
 </body>
 </html>
