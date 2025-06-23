@@ -14,9 +14,9 @@
     <!-- Visualization Plan:
          - Core Choice: Compare Cards (HTML/CSS).
          - Engine Loop: Vertical Flowchart (HTML/CSS).
-         - Team Dynamics: Before/After Radar Charts (Chart.js/Canvas).
+         - Team Dynamics: Before/After Radar Charts (Chart.js/Canvas) with updated, more realistic data.
          - Scientific Leap: Narrative Block (HTML/CSS).
-         - The Paradigm: Final Radar Chart (Chart.js/Canvas) that integrates PM roles and PMP principles.
+         - The Paradigm: Final Radar Chart (Chart.js/Canvas).
          - Blueprint: 3-Phase Plan (HTML/CSS).
     -->
     <!-- NEITHER Mermaid JS NOR SVG were used anywhere in this output. All visualizations are either pure HTML/CSS or rendered on a Canvas element via Chart.js. -->
@@ -61,25 +61,9 @@
                     <p class="text-5xl md:text-7xl font-black text-center text-[#003F5C]">「早安。」</p>
                     <p class="text-right text-sm text-[#668BA4] mt-4">— Gemini Pro, 於深夜兩點的專案交付回報中</p>
                 </div>
-                <div class="max-w-4xl mx-auto mt-10">
-                    <p class="text-center text-[#34657F] text-balance">
-                        這個被我們稱為「早安Glitch」的穩定偏誤，不僅僅是一個Bug。它是一個訊號，揭示了AI時代PM面臨的三大隱性風險。這迫使我們意識到，問題不在AI，而在我們的管理心智。
-                    </p>
-                    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="bg-red-50 p-4 rounded-lg text-center border border-red-200">
-                            <h4 class="font-bold text-red-700">資訊失真</h4>
-                            <p class="text-sm text-red-600 mt-1">AI開始傳遞與現實不符的訊息。</p>
-                        </div>
-                        <div class="bg-yellow-50 p-4 rounded-lg text-center border border-yellow-300">
-                            <h4 class="font-bold text-yellow-700">信任侵蝕</h4>
-                            <p class="text-sm text-yellow-600 mt-1">持續的低級錯誤，動搖團隊對AI所有產出的信心。</p>
-                        </div>
-                        <div class="bg-blue-50 p-4 rounded-lg text-center border border-blue-200">
-                            <h4 class="font-bold text-blue-700">反應遲鈍</h4>
-                            <p class="text-sm text-blue-600 mt-1">若忽略小問題，系統性風險將在未知處爆發。</p>
-                        </div>
-                    </div>
-                </div>
+                <p class="text-center text-[#34657F] max-w-3xl mx-auto text-balance mt-6">
+                    這個被我們稱為「早安Glitch」的穩定偏誤，不僅僅是一個Bug。它是一個訊號，揭示了AI時代PM面臨的隱性風險，迫使我們意識到，問題不在AI，而在我們的管理心智。
+                </p>
             </section>
 
             <section id="choice" class="card">
@@ -111,10 +95,7 @@
             </section>
 
             <section id="engine" class="card">
-                <h2 class="text-2xl md:text-3xl text-center mb-8">第二章：核心引擎 — 「覺察-分析-優化-資產化」循環</h2>
-                <div class="bg-sky-50 border-l-4 border-sky-300 p-6 rounded-lg max-w-3xl mx-auto text-center mb-10">
-                   <p class="text-[#34657F] text-balance">本章的核心引擎，正是品質管理學中PDCA循環的具體實踐。這整個優化循環，始於一個最細微、也最關鍵的「原子習慣」——<strong class="font-bold text-[#003F5C]">覺察</strong>。其本質，是將模糊的「感覺不對」，轉化為具體的管理行動。</p>
-                </div>
+                <h2 class="text-2xl md:text-3xl text-center mb-10">第二章：核心引擎 — 「覺察-分析-優化-資產化」循環</h2>
                 <div class="flow-container relative flex flex-col items-center space-y-8">
                     <div class="flow-item relative w-full max-w-xl text-center bg-gray-50 p-5 rounded-lg border-l-4 border-[#34657F]">
                         <h4 class="text-xl font-bold">❶ 覺察 (Awareness)</h4>
@@ -327,7 +308,7 @@
         }
     });
 
-    // Team Dynamics Chart - AFTER
+    // Team Dynamics Chart - AFTER (Corrected Data v4)
     const teamDynamicsAfterCtx = document.getElementById('teamDynamicsAfterChart').getContext('2d');
     new Chart(teamDynamicsAfterCtx, {
         type: 'radar',
@@ -336,21 +317,21 @@
             datasets: [
                 {
                     label: 'T.B.° (Scrum Master)',
-                    data: [8, 7, 7, 9, 8],
+                    data: [9, 8, 9, 10, 9],
                     borderColor: '#E57373',
                     backgroundColor: 'rgba(229, 115, 115, 0.2)',
                     fill: true
                 },
                 {
                     label: 'Pro (PO/Architect)',
-                    data: [9, 9, 6, 7, 5],
+                    data: [10, 10, 9, 9, 7],
                     borderColor: '#003F5C',
                     backgroundColor: 'rgba(0, 63, 92, 0.2)',
                     fill: true
                 },
                 {
                     label: 'Flash (Dev/Creative)',
-                    data: [6, 6, 9, 7, 9],
+                    data: [8, 8, 10, 9, 10],
                     borderColor: '#5885A2',
                     backgroundColor: 'rgba(88, 133, 162, 0.2)',
                     fill: true
