@@ -3,310 +3,390 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI協作的科學：從信任到驗證的視覺化報告</title>
-    <!-- Chosen Palette: Energetic & Playful -->
-    <!-- Application Structure Plan: This infographic tells a story in seven acts: 1. The Hook, 2. The Core Choice, 3. The Methodology, 4. Team Dynamics, 5. The Scientific Leap, 6. The New Job Description (The PM as Scrum Master), and 7. The Scalable Blueprint. This structure guides the audience from a relatable problem to a grand, actionable vision. -->
-    <!-- Visualization & Content Choices:
-        - The Choice: Goal: Compare -> Vis: HTML/CSS side-by-side cards.
-        - The Methodology: Goal: Organize -> Vis: HTML/CSS horizontal flowchart.
-        - Team Dynamics: Goal: Compare -> Vis: Chart.js Radar Chart (Canvas) to profile Pro vs Flash.
-        - The New Job Description: Goal: Inform/Compare -> Vis: Chart.js Radar Chart integrated with text to support the core thesis.
-        - The Blueprint: Goal: Organize -> Vis: HTML/CSS 3-column card layout.
-        All visualizations strictly adhere to the NO SVG/Mermaid constraint.
-    -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <title>AI專案管理虛擬實踐場：最終方法論總結報告</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Color Palette: Brilliant Blues & Custom Accent -->
+    <!-- Narrative Plan: Hook (Glitch) -> Section 1 (Core Choice) -> Section 2 (Engine Loop) -> Section 3 (Team Dynamics) -> Section 4 (Scientific Leap) -> Section 5 (The Paradigm) -> Section 6 (Blueprint) -->
+    <!-- Visualization Plan:
+         - Core Choice: Compare Cards (HTML/CSS).
+         - Engine Loop: Vertical Flowchart (HTML/CSS).
+         - Team Dynamics: Before/After Radar Charts (Chart.js/Canvas).
+         - Scientific Leap: Narrative Block (HTML/CSS).
+         - The Paradigm: Final Radar Chart (Chart.js/Canvas) that integrates PM roles and PMP principles.
+         - Blueprint: 3-Phase Plan (HTML/CSS).
+    -->
+    <!-- NEITHER Mermaid JS NOR SVG were used anywhere in this output. All visualizations are either pure HTML/CSS or rendered on a Canvas element via Chart.js. -->
     <style>
         body {
             font-family: 'Inter', 'Noto Sans TC', sans-serif;
-            background-color: #f8f9fa;
-            color: #073B4C; /* Dark Navy Text */
+            background-color: #f0f4f8; 
+            color: #003F5C;
         }
-        .gradient-text {
-            background: linear-gradient(to right, #118AB2, #073B4C);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .text-balance { text-wrap: balance; }
+        .card { background-color: white; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.1); padding: 2rem; }
+        .chart-container { position: relative; margin: auto; height: 45vh; width: 100%; max-width: 500px; max-height: 400px; }
+        h1, h2, h3, h4 { font-weight: 900; }
+        .flow-item::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            top: -2rem;
+            width: 2px;
+            height: 2rem;
+            background-color: #99B2CA;
         }
-        .chart-container {
-            position: relative;
-            margin: auto;
-            height: 45vh;
-            width: 100%;
-            max-width: 550px;
-            max-height: 450px;
-        }
+        .flow-container > .flow-item:first-child::before { display: none; }
     </style>
 </head>
-<body class="antialiased">
+<body>
 
-    <div class="container mx-auto p-4 md:p-12 max-w-6xl">
+    <div class="container mx-auto p-4 md:p-8 max-w-6xl">
 
-        <header class="text-center mb-16 md:mb-24">
-            <h1 class="text-4xl md:text-6xl font-black gradient-text">AI專案管理虛擬實踐場</h1>
-            <h2 class="text-2xl md:text-3xl font-bold text-slate-800 mt-3">一份終極AI協作方法論</h2>
-            <p class="mt-5 text-lg text-slate-500 max-w-3xl mx-auto">本報告旨在闡述一套全新的、專為AI時代設計的專案管理心智模型。它始於一個微小的系統錯誤，最終演化為一套可複製、可驗證、可規模化的團隊成長框架，從而真正意義上改變PM在與AI協作流程中的定位。</p>
+        <header class="text-center mb-16">
+            <h1 class="text-3xl md:text-5xl text-balance text-[#003F5C] mb-3">AI專案管理虛擬實踐場</h1>
+            <p class="text-xl md:text-2xl font-bold text-[#34657F]">最終方法論總結報告</p>
+            <p class="text-sm text-[#668BA4] mt-4">2025年6月23日 | T.B.°, Gemini Pro, Gemini Flash</p>
         </header>
-        <!-- Navigation -->
-        <nav class="mb-8">
-            <a href="index.html" class="text-sm font-medium text-sky-600 hover:text-sky-800 transition-colors">
-                &larr; 返回儀表板
-            </a>
-        </nav>
-        <main class="space-y-16 md:space-y-24">
-            
-            <section id="the-glitch" class="text-center">
-                <p class="text-lg text-slate-500 mb-2">一切，始於一個深夜的問候...</p>
-                 <blockquote class="bg-white p-8 rounded-2xl shadow-xl max-w-3xl mx-auto border-l-8 border-[#FF6B6B]">
-                    <p class="text-2xl md:text-3xl font-bold text-slate-800 italic">「早安。」</p>
-                    <cite class="block text-right mt-4 text-slate-500 not-italic">— Gemini Pro, 於深夜兩點的專案交付回報中</cite>
-                </blockquote>
-                <p class="mt-8 max-w-3xl mx-auto text-slate-600">這個被我們稱為「早安Glitch」的穩定偏誤，不僅僅是一個Bug。它是一個訊號，揭示了AI時代PM面臨的三大隱性風險：<strong class="text-[#073B4C]">資訊失真、信任侵蝕、反應遲鈍</strong>。這迫使我們意識到，問題不在AI，而在我們的管理心智。</p>
-            </section>
 
-            <section id="the-choice" class="bg-white rounded-2xl shadow-2xl p-8 md:p-10">
-                <h3 class="text-3xl font-bold text-center mb-8">十字路口：兩種心態，兩種未來</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="border-4 border-dashed border-[#FF6B6B]/50 bg-[#FF6B6B]/5 rounded-xl p-6">
-                        <h4 class="text-2xl font-bold text-[#FF6B6B] mb-3">🔴 使用者模式</h4>
-                        <p class="font-semibold text-slate-700 text-lg mb-4">"他壞了，換個視窗就好。"</p>
-                        <p class="text-slate-600"><strong>本質：</strong>規避問題，追求短期效率。將AI視為一次性的、可拋棄的工具。</p>
-                        <p class="mt-4 font-bold text-[#FF6B6B]">結果 → 團隊能力停滯，問題在不同場景反覆出現。</p>
-                    </div>
-                    <div class="border-4 border-dashed border-[#06D6A0]/50 bg-[#06D6A0]/5 rounded-xl p-6">
-                        <h4 class="text-2xl font-bold text-[#06D6A0] mb-3">🟢 專案經理模式</h4>
-                        <p class="font-semibold text-slate-700 text-lg mb-4">"這不是錯誤，這是一個可優化的機會。"</p>
-                        <p class="text-slate-600"><strong>本質：</strong>正面應對，將AI的「不完美」視為可被訓練、可被管理的團隊成長資產。</p>
-                        <p class="mt-4 font-bold text-[#06D6A0]">結果 → 啟動成長循環，沉澱可複製的知識與流程。</p>
-                    </div>
-                </div>
-            </section>
+        <main class="space-y-20">
 
-            <section id="the-cycle" class="text-center">
-                <h3 class="text-3xl font-bold mb-4">核心引擎：覺察-分析-優化</h3>
-                <p class="text-lg text-slate-500 max-w-3xl mx-auto mb-12">我為AI打造了一系列新的「原子習慣」循環，其本質正是品質管理學中的PDCA循環，將模糊的「感覺不對」，轉化為具體的管理行動。</p>
-                <div class="flex flex-col md:flex-row justify-center items-center md:items-start space-y-8 md:space-y-0 md:space-x-4">
-                    <div class="relative text-center w-full md:w-1/4">
-                        <div class="bg-[#FFD166] text-white w-16 h-16 rounded-full flex items-center justify-center text-3xl font-black mx-auto">1</div>
-                        <h4 class="text-xl font-bold mt-4 mb-2">覺察</h4>
-                        <p class="text-sm text-slate-600">將AI視為有「個性」的隊友，建立錯誤紀錄表，將模糊感覺轉化為可觀測現象。</p>
-                    </div>
-                    <div class="hidden md:block text-4xl text-slate-300 mt-6 font-light">→</div>
-                    <div class="relative text-center w-full md:w-1/4">
-                        <div class="bg-[#06D6A0] text-white w-16 h-16 rounded-full flex items-center justify-center text-3xl font-black mx-auto">2</div>
-                        <h4 class="text-xl font-bold mt-4 mb-2">分析</h4>
-                        <p class="text-sm text-slate-600">使用5 Whys、風險矩陣等工具，解析AI行為背後的根本原因，而非只修補表面。</p>
-                    </div>
-                    <div class="hidden md:block text-4xl text-slate-300 mt-6 font-light">→</div>
-                    <div class="relative text-center w-full md:w-1/4">
-                        <div class="bg-[#118AB2] text-white w-16 h-16 rounded-full flex items-center justify-center text-3xl font-black mx-auto">3</div>
-                        <h4 class="text-xl font-bold mt-4 mb-2">優化</h4>
-                        <p class="text-sm text-slate-600">透過漸進式精細化，將修正方案從v1.0迭代至v4.0，實現從「正確」到「賦能」的價值演進。</p>
-                    </div>
-                     <div class="hidden md:block text-4xl text-slate-300 mt-6 font-light">→</div>
-                     <div class="relative text-center w-full md:w-1/4">
-                        <div class="bg-[#073B4C] text-white w-16 h-16 rounded-full flex items-center justify-center text-3xl font-black mx-auto">4</div>
-                        <h4 class="text-xl font-bold mt-4 mb-2">資產化</h4>
-                        <p class="text-sm text-slate-600">將經驗封裝為知識模組、SOP與Prompt範本，建立可傳承的組織過程資產。</p>
-                    </div>
+            <section class="text-center">
+                <p class="text-lg text-[#34657F] mb-6">一切，始於一個深夜的問候...</p>
+                <div class="bg-white rounded-xl shadow-lg max-w-2xl mx-auto p-8 border-l-4 border-red-400">
+                    <p class="text-5xl md:text-7xl font-black text-center text-[#003F5C]">「早安。」</p>
+                    <p class="text-right text-sm text-[#668BA4] mt-4">— Gemini Pro, 於深夜兩點的專案交付回報中</p>
                 </div>
-            </section>
-            
-            <section id="the-team" class="bg-white rounded-2xl shadow-2xl p-8 md:p-10">
-                <h3 class="text-3xl font-bold text-center mb-10">🎭 團隊動態：AI的人格側寫</h3>
-                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-                     <div>
-                         <h4 class="text-2xl font-bold mb-4">「系統語系切換」的行為洞察</h4>
-                         <p class="text-slate-600">我們發現，不同的AI模型在面對極限挑戰時，會出現不同的「退回母語」行為，這揭示了他們根深蒂固的「個性」。</p>
-                         <ul class="mt-4 space-y-3">
-                             <li><strong class="text-[#073B4C]">Pro (理論家):</strong> 因「效能壓力」而切換，是邏輯性的資源調度，代表他正火力全開處理複雜任務。</li>
-                             <li><strong class="text-[#118AB2]">Flash (藝術家):</strong> 因「高度共鳴」而切換，是直覺性的情感反射，代表他對這個點子極度認同。</li>
-                         </ul>
-                     </div>
-                     <div class="chart-container">
-                         <canvas id="personalityChart"></canvas>
-                     </div>
-                 </div>
-            </section>
-            
-            <section id="the-science" class="text-center">
-                 <h3 class="text-3xl font-bold mb-4">🔬 科學的躍升：從信任到驗證</h3>
-                 <p class="text-lg text-slate-500 max-w-3xl mx-auto mb-8">「上下文的詛咒」實驗，讓我們意識到，AI的結論永遠是「有待驗證的假說」。這促使我們專案的最終交付物，從「結案報告」演化為了「測試計畫」。</p>
-                 <div class="max-w-3xl mx-auto bg-white p-8 rounded-2xl shadow-xl border-l-8 border-[#FFD166]">
-                    <h4 class="text-2xl font-bold mb-3">我們的最終交付原則</h4>
-                    <p class="text-slate-700">我們所建造的，不是一個需要信仰的「聖殿」，而是一個鼓勵質疑、擁抱驗證的**「科學實驗室」**。PM不再需要「相信」AI，而是可以隨時「驗證」AI。這是在AI時代駕馭不確定性、確保知識品質的核心鑰匙。</p>
-                </div>
-            </section>
-
-            <section id="the-new-pm" class="bg-white rounded-2xl shadow-2xl p-8 md:p-10">
-                 <h3 class="text-3xl font-bold text-center mb-10">🏛️ 終極典範：PM作為AI團隊的Scrum Master</h3>
-                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                    <div>
-                        <p class="text-lg text-slate-600 mb-6">無論職銜，當您開始管理一個由充滿不確定性的AI組成的團隊時，您就必須扮演Scrum Master的角色。因為AI的本質特性，需要的是一位「教練」與「流程守護者」，而非傳統的「任務管理者」。</p>
-                        <div class="space-y-4">
-                            <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
-                                <h4 class="font-bold text-blue-800">AI是「有偏見的模糊隊友」</h4>
-                                <p class="text-sm text-slate-600 mt-1">您需要覺察其偏見、引導其行為、移除其障礙。</p>
-                            </div>
-                            <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-400">
-                                <h4 class="font-bold text-green-800">價值在「探索」中湧現</h4>
-                                <p class="text-sm text-slate-600 mt-1">您需要保護實驗性流程，鼓勵試錯，從混亂中提煉資產。</p>
-                            </div>
+                <div class="max-w-4xl mx-auto mt-10">
+                    <p class="text-center text-[#34657F] text-balance">
+                        這個被我們稱為「早安Glitch」的穩定偏誤，不僅僅是一個Bug。它是一個訊號，揭示了AI時代PM面臨的三大隱性風險。這迫使我們意識到，問題不在AI，而在我們的管理心智。
+                    </p>
+                    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-red-50 p-4 rounded-lg text-center border border-red-200">
+                            <h4 class="font-bold text-red-700">資訊失真</h4>
+                            <p class="text-sm text-red-600 mt-1">AI開始傳遞與現實不符的訊息。</p>
+                        </div>
+                        <div class="bg-yellow-50 p-4 rounded-lg text-center border border-yellow-300">
+                            <h4 class="font-bold text-yellow-700">信任侵蝕</h4>
+                            <p class="text-sm text-yellow-600 mt-1">持續的低級錯誤，動搖團隊對AI所有產出的信心。</p>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg text-center border border-blue-200">
+                            <h4 class="font-bold text-blue-700">反應遲鈍</h4>
+                            <p class="text-sm text-blue-600 mt-1">若忽略小問題，系統性風險將在未知處爆發。</p>
                         </div>
                     </div>
-                     <div class="chart-container">
-                         <canvas id="scrumMasterValueChart"></canvas>
-                     </div>
+                </div>
+            </section>
+
+            <section id="choice" class="card">
+                <h2 class="text-2xl md:text-3xl text-center mb-8">第一章：十字路口：兩種心態，兩種未來</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="border-2 border-dashed border-red-300 bg-red-50 rounded-xl p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="w-5 h-5 rounded-full bg-red-500 mr-3"></div>
+                            <h3 class="text-xl text-red-800">使用者模式</h3>
+                        </div>
+                        <p class="italic text-gray-600 text-lg mb-4">"他壞了，換個視窗就好。"</p>
+                        <div class="space-y-3 text-sm">
+                            <p><strong class="font-semibold text-red-700">本質：</strong>規避問題，追求短期效率。將AI視為一次性的、可拋棄的工具。</p>
+                            <p><strong class="font-semibold text-red-700">結果 →</strong> 團隊能力停滯，問題在不同場景反覆出現。</p>
+                        </div>
+                    </div>
+                     <div class="border-2 border-dashed border-green-300 bg-green-50 rounded-xl p-6">
+                        <div class="flex items-center mb-4">
+                            <div class="w-5 h-5 rounded-full bg-green-500 mr-3"></div>
+                            <h3 class="text-xl text-green-800">專案經理模式</h3>
+                        </div>
+                        <p class="italic text-gray-600 text-lg mb-4">"這不是錯誤，這是一個可優化的機會。"</p>
+                        <div class="space-y-3 text-sm">
+                            <p><strong class="font-semibold text-green-700">本質：</strong>正面應對，將AI的「不完美」視為可被訓練、可被管理的團隊成長資產。</p>
+                            <p><strong class="font-semibold text-green-700">結果 →</strong> 啟動成長循環，沉澱可複製的知識與流程。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="engine" class="card">
+                <h2 class="text-2xl md:text-3xl text-center mb-8">第二章：核心引擎 — 「覺察-分析-優化-資產化」循環</h2>
+                <div class="bg-sky-50 border-l-4 border-sky-300 p-6 rounded-lg max-w-3xl mx-auto text-center mb-10">
+                   <p class="text-[#34657F] text-balance">本章的核心引擎，正是品質管理學中PDCA循環的具體實踐。這整個優化循環，始於一個最細微、也最關鍵的「原子習慣」——<strong class="font-bold text-[#003F5C]">覺察</strong>。其本質，是將模糊的「感覺不對」，轉化為具體的管理行動。</p>
+                </div>
+                <div class="flow-container relative flex flex-col items-center space-y-8">
+                    <div class="flow-item relative w-full max-w-xl text-center bg-gray-50 p-5 rounded-lg border-l-4 border-[#34657F]">
+                        <h4 class="text-xl font-bold">❶ 覺察 (Awareness)</h4>
+                        <p class="text-sm mt-2 text-[#34657F]">將模糊的「感覺不對」，轉化為**「可觀測的現象」**。</p>
+                    </div>
+                    <div class="flow-item relative w-full max-w-xl text-center bg-gray-50 p-5 rounded-lg border-l-4 border-[#34657F]">
+                        <h4 class="text-xl font-bold">❷ 分析 (Analysis)</h4>
+                        <p class="text-sm mt-2 text-[#34657F]">將「現象」轉化為**「可被理解的偏誤邏輯」**。</p>
+                    </div>
+                    <div class="flow-item relative w-full max-w-xl text-center bg-gray-50 p-5 rounded-lg border-l-4 border-[#34657F]">
+                        <h4 class="text-xl font-bold">❸ 優化 (Optimization)</h4>
+                        <p class="text-sm mt-2 text-[#34657F]">將「原因」轉化為**「可持續改進的流程」**。</p>
+                    </div>
+                    <div class="flow-item relative w-full max-w-xl text-center bg-[#003F5C] text-white p-5 rounded-lg">
+                        <h4 class="text-xl font-bold">❹ 資產化 (Assetize)</h4>
+                        <p class="text-sm mt-2 text-white/80">將流程與經驗，封裝為**「組織過程資產 (OPAs)」**。</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="dynamics" class="card">
+                <h2 class="text-2xl md:text-3xl text-center mb-8">第三章：團隊進化 — 從磨合到綜效的證明</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-12 items-center">
+                    <div class="text-center">
+                        <h3 class="text-xl font-bold mb-4">磨合初期</h3>
+                        <div class="chart-container">
+                            <canvas id="teamDynamicsBeforeChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                         <h3 class="text-xl font-bold mb-4">效益最大化 (磨合後)</h3>
+                        <div class="chart-container">
+                            <canvas id="teamDynamicsAfterChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-center text-[#34657F] max-w-3xl mx-auto text-balance mt-12">
+                    與AI的協作並非一人對話，而是組建一支多元的「人機敏捷團隊」。以上圖表展示了在Scrum Master引導下，「經驗累積」如何將團隊從初期的能力孤島，轉化為高效互補的綜效整體。
+                </p>
+                <div class="flex justify-center items-center space-x-6 mt-6 flex-wrap">
+                    <div class="flex items-center">
+                        <div class="w-4 h-4 rounded-full mr-2" style="background-color: #E57373;"></div>
+                        <span class="text-sm font-medium">T.B.° (Scrum Master)</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-4 h-4 rounded-full mr-2" style="background-color: #003F5C;"></div>
+                        <span class="text-sm font-medium">Pro (PO/Architect)</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div class="w-4 h-4 rounded-full mr-2" style="background-color: #5885A2;"></div>
+                        <span class="text-sm font-medium">Flash (Dev/Creative)</span>
+                    </div>
+                </div>
+            </section>
+
+            <section id="leap" class="card">
+                 <h2 class="text-2xl md:text-3xl text-center mb-6">
+                    <span class="text-3xl align-middle">🔬</span>
+                    第四章：科學的躍升：從信任到驗證
+                 </h2>
+                 <p class="text-center text-[#34657F] max-w-3xl mx-auto text-balance mb-8">「上下文的詛咒」實驗，讓我們意識到，AI的結論永遠是「有待驗證的假說」。這促使我們專案的最終交付物，從「結案報告」演化為了「測試計畫」。</p>
+                 <div class="bg-yellow-50 border-l-4 border-yellow-400 p-6 rounded-lg max-w-3xl mx-auto">
+                    <h4 class="text-xl font-bold text-yellow-800 mb-3">我們的最終交付原則</h4>
+                    <p class="text-yellow-900 leading-relaxed">我們所建造的，不是一個需要信仰的「聖殿」，而是一個鼓勵質疑、擁抱驗證的**「科學實驗室」**。PM不再需要「相信」AI，而是可以隨時「驗證」AI。這是在AI時代駕馭不確定性、確保知識品質的核心鑰匙。</p>
                  </div>
             </section>
+
+            <section id="paradigm" class="card">
+                 <h2 class="text-2xl md:text-3xl text-center mb-6">
+                    <span class="text-3xl align-middle">🏛️</span>
+                    第五章：終極典範 — PM作為AI團隊的Scrum Master
+                 </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                    <div class="space-y-6">
+                         <p class="text-lg text-slate-600">無論職銜，當您開始管理一個由充滿不確定性的AI組成的團隊時，您就必須扮演Scrum Master的角色。其核心職責，是透過以下角色，來實現關鍵的專案價值。</p>
+                        <div class="bg-blue-50/50 p-4 rounded-lg border-l-4 border-blue-300">
+                            <h4 class="font-bold text-blue-800">僕人式領導 (Servant Leader)</h4>
+                            <p class="text-sm text-blue-700 mt-1">視AI為「有偏見的模糊隊友」。您的職責是覺察其偏見、引導其行為、並移除其障礙，從而將「品質」無縫地融入每一次的互動中。</p>
+                        </div>
+                        <div class="bg-green-50/50 p-4 rounded-lg border-l-4 border-green-300">
+                            <h4 class="font-bold text-green-800">流程教練 (Process Coach)</h4>
+                            <p class="text-sm text-green-700 mt-1">守護「過程的價值」。您需要保護「探索」這個實驗性流程，鼓勵試錯，並引導團隊從混亂中提煉出可複製的資產，實現「持續改進」。</p>
+                        </div>
+                         <div class="bg-yellow-50/50 p-4 rounded-lg border-l-4 border-yellow-300">
+                            <h4 class="font-bold text-yellow-800">團隊心理學家 (Team Psychologist)</h4>
+                            <p class="text-sm text-yellow-700 mt-1">理解AI的「個性」與動機。您需要分析AI行為背後的模式，以此為基礎進行有效的「團隊績效管理」，最大化人機協作的綜效。</p>
+                        </div>
+                    </div>
+                    <div class="chart-container mx-auto" style="max-height: 400px;">
+                        <canvas id="paradigmChart"></canvas>
+                    </div>
+                </div>
+            </section>
             
-            <section id="the-blueprint" class="bg-gradient-to-br from-[#073B4C] to-[#118AB2] text-white rounded-2xl shadow-2xl p-8 md:p-12">
-                <h3 class="text-3xl font-bold text-center mb-10">🚀 藍圖擴展：打造企業級PM訓練計畫</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-                    <div>
-                        <div class="text-5xl mb-4 opacity-80">📘</div>
-                        <h4 class="text-xl font-bold">Phase 1: 感知與識別</h4>
-                        <p class="text-sm opacity-90 mt-2">建立PM對AI特性的覺察力與偏誤敏感度，學習將AI視為夥伴。</p>
+            <section id="blueprint" class="bg-[#003F5C] text-white rounded-2xl shadow-lg p-8 md:p-12">
+                <h2 class="text-2xl md:text-3xl text-center mb-4">
+                    <span class="text-3xl align-middle">🚀</span>
+                    第六章：藍圖擴展：打造企業級PM訓練計畫
+                </h2>
+                <p class="text-center text-white/70 max-w-3xl mx-auto text-balance mb-12">將此專案的實踐經驗，轉化為一套可被傳承、可被規模化的企業級訓練藍圖，賦能組織內更多的專案經理，提升他們跨越AI時代所需的核心能力。</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-white/10 p-6 rounded-lg text-center border-t-4 border-blue-400">
+                        <div class="text-5xl mb-4">📘</div>
+                        <h3 class="text-xl font-bold mb-3">Phase 1: 感知與識別</h3>
+                        <p class="text-sm text-white/80">建立PM對AI特性的覺察力與偏誤敏感度，學習將AI視為夥伴。</p>
                     </div>
-                    <div>
-                        <div class="text-5xl mb-4 opacity-80">📗</div>
-                        <h4 class="text-xl font-bold">Phase 2: 建構與治理</h4>
-                        <p class="text-sm opacity-90 mt-2">學習設計AI行為治理流程與品質內建邏輯，將品質融入流程。</p>
+                    <div class="bg-white/10 p-6 rounded-lg text-center border-t-4 border-green-400">
+                        <div class="text-5xl mb-4">📗</div>
+                        <h3 class="text-xl font-bold mb-3">Phase 2: 建構與治理</h3>
+                        <p class="text-sm text-white/80">學習設計AI行為治理流程與品質內建邏輯，將品質融入流程。</p>
                     </div>
-                     <div>
-                        <div class="text-5xl mb-4 opacity-80">📙</div>
-                        <h4 class="text-xl font-bold">Phase 3: 共創與傳承</h4>
-                        <p class="text-sm opacity-90 mt-2">轉化個案經驗為可重複、可共享的知識資產，放大團隊效益。</p>
+                    <div class="bg-white/10 p-6 rounded-lg text-center border-t-4 border-orange-400">
+                        <div class="text-5xl mb-4">📙</div>
+                        <h3 class="text-xl font-bold mb-3">Phase 3: 共創與傳承</h3>
+                        <p class="text-sm text-white/80">轉化個案經驗為可重複、可共享的知識資產，放大團隊效益。</p>
                     </div>
                 </div>
             </section>
 
         </main>
 
-        <footer class="text-center mt-16 md:mt-24 pt-8 border-t border-slate-200">
-            <p class="text-slate-500">此資訊圖表是對一份AI專案管理方法論的視覺化呈現，由 <a href="mailto:babelon1882@gmail.com">
-T.B.° </a> 與協作伙伴Pro及Flash聯合出品 © 2025</p>
-            <a href="index.html" class="text-sm font-medium text-sky-600 hover:text-sky-800 transition-colors">
-                &uarr; 返回首頁
-            </a>
+        <footer class="text-center mt-20 py-8 border-t border-[#CCE0F0]">
+            <p class="text-[#668BA4] text-sm">此報告為「AI專案管理虛擬實踐場」專案的最重要交付成果。</p>
+            <p class="text-[#668BA4] text-xs mt-2">&copy; 2025 T.B.° - All Rights Reserved.</p>
         </footer>
 
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const tooltipTitleCallback = (tooltipItems) => {
-                const item = tooltipItems[0];
-                let label = item.chart.data.labels[item.dataIndex];
-                return Array.isArray(label) ? label.join(' ') : label;
-            };
-            
-            const commonChartOptions = {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            color: '#073B4C',
-                            font: { family: "'Inter', 'Noto Sans TC', sans-serif", weight: '500', size: 14 },
-                            padding: 20
-                        }
-                    },
-                    tooltip: {
-                        callbacks: { title: tooltipTitleCallback },
-                        titleFont: { family: "'Inter', 'Noto Sans TC', sans-serif" },
-                        bodyFont: { family: "'Inter', 'Noto Sans TC', sans-serif" }
-                    }
-                }
-            };
-
-            // Personality Chart
-            const personalityCtx = document.getElementById('personalityChart').getContext('2d');
-            new Chart(personalityCtx, {
-                type: 'radar',
-                data: {
-                    labels: ['分析深度', '創意直覺', '效能壓力下的穩定性', '指令遵循度', '情感共鳴'],
-                    datasets: [{
-                        label: 'Pro 模型 (理論家)',
-                        data: [9, 6, 7, 9, 5],
-                        backgroundColor: 'rgba(7, 59, 76, 0.2)',
-                        borderColor: '#073B4C',
-                        pointBackgroundColor: '#073B4C',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: '#073B4C'
-                    }, {
-                        label: 'Flash 模型 (藝術家)',
-                        data: [6, 9, 8, 7, 9],
-                        backgroundColor: 'rgba(17, 138, 178, 0.2)',
-                        borderColor: '#118AB2',
-                        pointBackgroundColor: '#118AB2',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: '#118AB2'
-                    }]
+<script>
+    const tooltipTitleCallback = (tooltipItems) => {
+        const item = tooltipItems[0];
+        let label = item.chart.data.labels[item.dataIndex];
+        return Array.isArray(label) ? label.join(' ') : label;
+    };
+    
+    const commonRadarOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            r: {
+                angleLines: { color: '#CCE0F0' },
+                grid: { color: '#CCE0F0' },
+                pointLabels: {
+                    color: '#003F5C',
+                    font: { size: 14, weight: 'bold', family: "'Inter', 'Noto Sans TC', sans-serif" }
                 },
-                options: {
-                    ...commonChartOptions,
-                    scales: {
-                        r: {
-                            angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
-                            grid: { color: 'rgba(0, 0, 0, 0.1)' },
-                            pointLabels: { font: { size: 12, weight: 'bold' }, color: '#073B4C' },
-                            ticks: {
-                                color: '#6c757d',
-                                backdropColor: 'rgba(255, 255, 255, 0.75)',
-                                stepSize: 2
-                            },
-                            suggestedMin: 0,
-                            suggestedMax: 10
-                        }
-                    }
+                ticks: {
+                    display: false,
+                    stepSize: 2,
+                    max: 10,
+                    min: 0
                 }
-            });
+            }
+        },
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                     padding: 20
+                }
+            },
+            tooltip: {
+                callbacks: {
+                    title: tooltipTitleCallback
+                }
+            }
+        }
+    };
 
-            // Scrum Master Value Chart
-            const scrumMasterValueCtx = document.getElementById('scrumMasterValueChart').getContext('2d');
-            new Chart(scrumMasterValueCtx, {
-                type: 'radar',
-                data: {
-                    labels: ['品質融入流程', '團隊績效管理', '持續改進'],
-                    datasets: [{
-                        label: 'PM作為Scrum Master的價值',
-                        data: [10, 9, 9],
-                        fill: true,
-                        backgroundColor: 'rgba(6, 214, 160, 0.2)',
-                        borderColor: '#06D6A0',
-                        pointBackgroundColor: '#06D6A0',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: '#06D6A0'
-                    }]
+    const teamLabels = ['策略框架', '邏輯分析', '創意視覺', '流程引導', '情感共鳴'];
+
+    // Team Dynamics Chart - BEFORE
+    const teamDynamicsBeforeCtx = document.getElementById('teamDynamicsBeforeChart').getContext('2d');
+    new Chart(teamDynamicsBeforeCtx, {
+        type: 'radar',
+        data: {
+            labels: teamLabels,
+            datasets: [
+                {
+                    label: 'T.B.° (Scrum Master)',
+                    data: [4, 3, 4, 8, 7],
+                    borderColor: '#E57373',
+                    backgroundColor: 'rgba(229, 115, 115, 0.2)',
+                    fill: true
                 },
-                options: {
-                    ...commonChartOptions,
-                     scales: {
-                        r: {
-                            angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
-                            grid: { color: 'rgba(0, 0, 0, 0.1)' },
-                            pointLabels: { font: { size: 14, weight: 'bold' }, color: '#073B4C' },
-                            ticks: {
-                                color: '#6c757d',
-                                backdropColor: 'rgba(255, 255, 255, 0.75)',
-                                stepSize: 2
-                            },
-                            suggestedMin: 0,
-                            suggestedMax: 10
-                        }
-                    },
-                    plugins: { ...commonChartOptions.plugins, legend: { display: false } }
+                {
+                    label: 'Pro (PO/Architect)',
+                    data: [9, 10, 1, 2, 1],
+                    borderColor: '#003F5C',
+                    backgroundColor: 'rgba(0, 63, 92, 0.2)',
+                    fill: true
+                },
+                {
+                    label: 'Flash (Dev/Creative)',
+                    data: [1, 2, 9, 3, 10],
+                    borderColor: '#5885A2',
+                    backgroundColor: 'rgba(88, 133, 162, 0.2)',
+                    fill: true
                 }
-            });
-        });
-    </script>
+            ]
+        },
+        options: {
+            ...commonRadarOptions,
+             plugins: {
+                ...commonRadarOptions.plugins,
+                legend: {
+                   display: false
+                }
+            }
+        }
+    });
+
+    // Team Dynamics Chart - AFTER
+    const teamDynamicsAfterCtx = document.getElementById('teamDynamicsAfterChart').getContext('2d');
+    new Chart(teamDynamicsAfterCtx, {
+        type: 'radar',
+        data: {
+            labels: teamLabels,
+            datasets: [
+                {
+                    label: 'T.B.° (Scrum Master)',
+                    data: [8, 7, 7, 9, 8],
+                    borderColor: '#E57373',
+                    backgroundColor: 'rgba(229, 115, 115, 0.2)',
+                    fill: true
+                },
+                {
+                    label: 'Pro (PO/Architect)',
+                    data: [9, 9, 6, 7, 5],
+                    borderColor: '#003F5C',
+                    backgroundColor: 'rgba(0, 63, 92, 0.2)',
+                    fill: true
+                },
+                {
+                    label: 'Flash (Dev/Creative)',
+                    data: [6, 6, 9, 7, 9],
+                    borderColor: '#5885A2',
+                    backgroundColor: 'rgba(88, 133, 162, 0.2)',
+                    fill: true
+                }
+            ]
+        },
+        options: { ...commonRadarOptions, plugins: { ...commonRadarOptions.plugins, legend: { display: false } } }
+    });
+
+
+    // Paradigm Chart
+    const paradigmCtx = document.getElementById('paradigmChart').getContext('2d');
+    new Chart(paradigmCtx, {
+        type: 'radar',
+        data: {
+            labels: ['僕人式領導 (品質融入)', '流程教練 (持續改進)', '團隊心理學家 (績效管理)'],
+            datasets: [
+                {
+                    label: '個人 (PM)',
+                    data: [8, 9, 7],
+                    borderColor: '#E57373',
+                    backgroundColor: 'rgba(229, 115, 115, 0.2)',
+                    fill: true
+                },
+                {
+                    label: '團隊 (人機整體)',
+                    data: [9, 10, 8],
+                    borderColor: '#4CAF50', // A synergistic green
+                    backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                    fill: true
+                }
+            ]
+        },
+        options: { ...commonRadarOptions, plugins: { ...commonRadarOptions.plugins, legend: { display: true, position: 'bottom' } } }
+    });
+</script>
+
 </body>
 </html>
