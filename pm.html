@@ -10,11 +10,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
     <!-- Color Palette: Brilliant Blues & Custom Accent -->
-    <!-- Narrative Plan: Hook (Glitch) -> Section 1 (Core Choice) -> Section 2 (Engine Loop) -> Section 3 (Team Dynamics) -> Section 4 (Scientific Leap) -> Section 5 (The Paradigm) -> Section 6 (Blueprint) -->
+    <!-- Narrative Plan: Hook (Glitch) -> Section 1 (Core Choice) -> Section 2 (Engine Loop) -> Section 3 (Team Dynamics) -> Section 4 (Value Expansion) -> Section 5 (Scientific Leap) -> Section 6 (The Paradigm) -> Section 7 (Blueprint) -->
     <!-- Visualization Plan:
          - Core Choice: Compare Cards (HTML/CSS).
          - Engine Loop: Vertical Flowchart (HTML/CSS).
-         - Team Dynamics: Before/After Radar Charts (Chart.js/Canvas) with updated, more realistic data.
+         - Team Dynamics: Before/After Radar Charts (Chart.js/Canvas).
+         - Value Expansion: Donut Chart (Chart.js/Canvas) integrated with text.
          - Scientific Leap: Narrative Block (HTML/CSS).
          - The Paradigm: Final Radar Chart (Chart.js/Canvas).
          - Blueprint: 3-Phase Plan (HTML/CSS).
@@ -61,9 +62,25 @@
                     <p class="text-5xl md:text-7xl font-black text-center text-[#003F5C]">「早安。」</p>
                     <p class="text-right text-sm text-[#668BA4] mt-4">— Gemini Pro, 於深夜兩點的專案交付回報中</p>
                 </div>
-                <p class="text-center text-[#34657F] max-w-3xl mx-auto text-balance mt-6">
-                    這個被我們稱為「早安Glitch」的穩定偏誤，不僅僅是一個Bug。它是一個訊號，揭示了AI時代PM面臨的隱性風險，迫使我們意識到，問題不在AI，而在我們的管理心智。
-                </p>
+                <div class="max-w-4xl mx-auto mt-10">
+                    <p class="text-center text-[#34657F] text-balance">
+                        這個被我們稱為「早安Glitch」的穩定偏誤，不僅僅是一個Bug。它是一個訊號，揭示了AI時代PM面臨的三大隱性風險，迫使我們意識到，問題不在AI，而在我們的管理心智。
+                    </p>
+                    <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-red-50 p-4 rounded-lg text-center border border-red-200">
+                            <h4 class="font-bold text-red-700">資訊失真</h4>
+                            <p class="text-sm text-red-600 mt-1">AI開始傳遞與現實不符的訊息。</p>
+                        </div>
+                        <div class="bg-yellow-50 p-4 rounded-lg text-center border border-yellow-300">
+                            <h4 class="font-bold text-yellow-700">信任侵蝕</h4>
+                            <p class="text-sm text-yellow-600 mt-1">持續的低級錯誤，動搖團隊對AI所有產出的信心。</p>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg text-center border border-blue-200">
+                            <h4 class="font-bold text-blue-700">反應遲鈍</h4>
+                            <p class="text-sm text-blue-600 mt-1">若忽略小問題，系統性風險將在未知處爆發。</p>
+                        </div>
+                    </div>
+                </div>
             </section>
 
             <section id="choice" class="card">
@@ -96,6 +113,9 @@
 
             <section id="engine" class="card">
                 <h2 class="text-2xl md:text-3xl text-center mb-10">第二章：核心引擎 — 「覺察-分析-優化-資產化」循環</h2>
+                <div class="bg-sky-50 border-l-4 border-sky-300 p-6 rounded-lg max-w-3xl mx-auto text-center mb-10">
+                   <p class="text-[#34657F] text-balance">本章的核心引擎，正是品質管理學中PDCA循環的具體實踐。這整個優化循環，始於一個最細微、也最關鍵的「原子習慣」——<strong class="font-bold text-[#003F5C]">覺察</strong>。其本質，是將模糊的「感覺不對」，轉化為具體的管理行動。</p>
+                </div>
                 <div class="flow-container relative flex flex-col items-center space-y-8">
                     <div class="flow-item relative w-full max-w-xl text-center bg-gray-50 p-5 rounded-lg border-l-4 border-[#34657F]">
                         <h4 class="text-xl font-bold">❶ 覺察 (Awareness)</h4>
@@ -150,7 +170,6 @@
                     </div>
                 </div>
             </section>
-
             <section id="leap" class="card">
                  <h2 class="text-2xl md:text-3xl text-center mb-6">
                     <span class="text-3xl align-middle">🔬</span>
@@ -162,11 +181,35 @@
                     <p class="text-yellow-900 leading-relaxed">我們所建造的，不是一個需要信仰的「聖殿」，而是一個鼓勵質疑、擁抱驗證的**「科學實驗室」**。PM不再需要「相信」AI，而是可以隨時「驗證」AI。這是在AI時代駕馭不確定性、確保知識品質的核心鑰匙。</p>
                  </div>
             </section>
+            <section id="culture" class="card">
+                 <h2 class="text-2xl md:text-3xl text-center mb-6">
+                    <span class="text-3xl align-middle">🌳</span>
+                     第五章：從個人實踐到團隊文化
+                 </h2>
+                 <p class="text-center text-[#34657F] max-w-3xl mx-auto text-balance mb-10">卓越的專案經理將個人實踐昇華為團隊的共同文化，扮演「教練」的角色，透過兩大核心行動，將優化思維制度化。</p>
+               <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                   <div class="chart-container h-64 md:h-80">
+                       <canvas id="coachRoleChart"></canvas>
+                   </div>
+                   <div class="space-y-6">
+                       <div class="bg-slate-50 p-4 rounded-lg border-l-4 border-[#5A8D8F]">
+                           <h4 class="font-bold text-lg text-[#5A8D8F]">建立覺察文化</h4>
+                           <p class="text-sm text-slate-600 mt-1">引導所有成員將AI的「錯誤」視為團隊共同的「學習機會」，而非單純的技術故障。</p>
+                       </div>
+                       <div class="bg-slate-50 p-4 rounded-lg border-l-4 border-[#BF9270]">
+                           <h4 class="font-bold text-lg text-[#5A8D8F]">設計行為引導語</h4>
+                           <p class="text-sm text-slate-600 mt-1">將被動的「糾錯」轉化為主動的、標準化的「校準流程」，例如用「讓我們做一次誠實校準」取代「你錯了」。</p>
+                       </div>
+                   </div>
+               </div>
+            </section>
+            
+
 
             <section id="paradigm" class="card">
                  <h2 class="text-2xl md:text-3xl text-center mb-6">
                     <span class="text-3xl align-middle">🏛️</span>
-                    第五章：終極典範 — PM作為AI團隊的Scrum Master
+                    第六章：終極典範 — PM作為AI團隊的Scrum Master
                  </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                     <div class="space-y-6">
@@ -193,7 +236,7 @@
             <section id="blueprint" class="bg-[#003F5C] text-white rounded-2xl shadow-lg p-8 md:p-12">
                 <h2 class="text-2xl md:text-3xl text-center mb-4">
                     <span class="text-3xl align-middle">🚀</span>
-                    第六章：藍圖擴展：打造企業級PM訓練計畫
+                    第七章：藍圖擴展：打造企業級PM訓練計畫
                 </h2>
                 <p class="text-center text-white/70 max-w-3xl mx-auto text-balance mb-12">將此專案的實踐經驗，轉化為一套可被傳承、可被規模化的企業級訓練藍圖，賦能組織內更多的專案經理，提升他們跨越AI時代所需的核心能力。</p>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -366,6 +409,27 @@
             ]
         },
         options: { ...commonRadarOptions, plugins: { ...commonRadarOptions.plugins, legend: { display: true, position: 'bottom' } } }
+    });
+
+    // Coach Role Chart
+    const coachRoleCtx = document.getElementById('coachRoleChart').getContext('2d');
+    new Chart(coachRoleCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['建立覺察文化', '設計行為引導語'],
+            datasets: [{
+                label: 'PM作為教練的核心行動',
+                data: [50, 50],
+                backgroundColor: ['#5A8D8F', '#BF9270'],
+                borderColor: '#FFFFFF',
+                borderWidth: 6,
+                hoverOffset: 10
+            }]
+        },
+        options: { ...commonRadarOptions,
+            plugins: { ...commonRadarOptions.plugins, legend: { display: true, position: 'bottom' } },
+            cutout: '60%'
+        }
     });
 </script>
 
