@@ -3,24 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>專案迭代互動儀表板 v2.6</title>
+    <title>專案迭代互動儀表板 v2.9 (Final)</title>
     <!-- Chosen Palette: Slate Gray & Sky Blue -->
-    <!-- Application Structure Plan: The SPA is designed as a vertical interactive timeline. This structure is ideal for showcasing chronological project evolution. Based on user feedback, the layout is updated to prioritize navigation. The timeline is now the primary element, split into two columns: main project iterations on the left, and supplementary artifacts (easter eggs, docs) on the right. A new, centered, full-width section is added below the timelines to feature the final infographic, giving it prominence as the project's capstone deliverable. -->
-    <!-- Visualization & Content Choices: 1. Project Growth (Change): Line Chart (Chart.js) now serves as a summary at the end. 2. Version Details (Organize/Inform): A two-column vertical timeline (HTML/Tailwind) now separates primary versions from secondary artifacts, improving content discoverability. Each node remains a clickable link. -->
+    <!-- Application Structure Plan: The SPA is designed as a vertical interactive timeline. A new DYNAMIC KPI dashboard section is added at the top to immediately convey the project's velocity by fetching live data from GitHub. The main timeline is split into two columns: main project iterations on the left, and supplementary artifacts (easter eggs, docs) on the right. A new, centered, full-width section is added below the timelines to feature the final infographic, giving it prominence as the project's capstone deliverable. -->
+    <!-- Visualization & Content Choices: 1. Project Growth (Change): Line Chart (Chart.js) now serves as a summary at the end. 2. Version Details (Organize/Inform): A two-column vertical timeline (HTML/Tailwind) now separates primary versions from secondary artifacts, improving content discoverability. Each node remains a clickable link. 3. KPIs (Inform): A new grid of styled HTML cards uses large numbers and icons to highlight key project metrics, now populated dynamically via the GitHub API. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: Slate Gray & Sky Blue -->
-    <!-- Application Structure Plan: A simple page to display a single metric (commit count). -->
-    <!-- Visualization & Content Choices: Display commit count as a large number. Goal: Inform. Method: HTML/Tailwind. NO SVG/Mermaid. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
             font-family: 'Inter', 'Noto Sans TC', sans-serif;
@@ -62,19 +54,47 @@
 
         <header class="text-center mb-10 md:mb-16">
             <h1 class="text-4xl md:text-5xl font-bold text-slate-800">專案迭代儀表板</h1>
-            <p class="mt-4 text-lg text-slate-500">視覺化呈現專案從無到有的完整演進歷程、文件與彩蛋，驗證AI協作極速迭代的敏捷開發實力/實例。</p>
+            <p class="mt-4 text-lg text-slate-500">視覺化呈現專案從無到有的完整演進歷程、文件與彩蛋。</p>
         </header>
+
+        <!-- KPI Dashboard Section -->
+        <section class="mb-16">
+             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-lg text-center transform hover:-translate-y-1 transition-transform duration-300">
+                    <p class="text-5xl">⚡️</p>
+                    <p id="developmentDuration" class="text-3xl font-bold text-sky-600 mt-2">載入中...</p>
+                    <p class="text-sm font-semibold text-slate-500 mt-1">首次上線起算</p>
+                </div>
+                 <div class="bg-white p-6 rounded-2xl shadow-lg text-center transform hover:-translate-y-1 transition-transform duration-300">
+                    <p class="text-5xl">⚙️</p>
+                    <p id="commitCount" class="text-3xl font-bold text-sky-600 mt-2">載入中...</p>
+                    <p class="text-sm font-semibold text-slate-500 mt-1">GitHub 提交次數</p>
+                </div>
+                 <div class="bg-white p-6 rounded-2xl shadow-lg text-center transform hover:-translate-y-1 transition-transform duration-300">
+                    <p class="text-5xl">🧠</p>
+                    <p class="text-3xl font-bold text-sky-600 mt-2">11 份</p>
+                    <p class="text-sm font-semibold text-slate-500 mt-1">核心知識資產</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-lg text-center transform hover:-translate-y-1 transition-transform duration-300">
+                    <p class="text-5xl">👨‍🚀</p>
+                    <p class="text-3xl font-bold text-sky-600 mt-2">3 位</p>
+                    <p class="text-sm font-semibold text-slate-500 mt-1">人機敏捷團隊</p>
+                </div>
+            </div>
+        </section>
 
         <section class="mb-12 md:mb-16">
             <div class="grid grid-cols-1 lg:grid-cols-2 lg:gap-x-12 gap-y-12">
                 <!-- Left Column: Main Iterations -->
                 <div>
-                    <h2 class="text-2xl font-bold text-slate-800 mb-8 text-center">迭代版本 (第一天)</h2>
+                    <h2 class="text-2xl font-bold text-slate-800 text-center mb-2">迭代版本</h2>
+                    <p class="text-xs text-slate-400 text-center mb-8">此區塊內容主要於專案第一天建立</p>
                     <div id="timeline-main" class="relative ml-6 md:ml-4"></div>
                 </div>
                 <!-- Right Column: Docs & Easter Eggs -->
                 <div>
-                    <h2 class="text-2xl font-bold text-slate-800 mb-8 text-center">參考文件 & 彩蛋 & 經驗框架 (第二天)</h2>
+                    <h2 class="text-2xl font-bold text-slate-800 text-center mb-2">參考文件 & 彩蛋</h2>
+                    <p class="text-xs text-slate-400 text-center mb-8">此區塊內容主要於專案第二天建立</p>
                     <div id="timeline-side" class="relative ml-6 md:ml-4"></div>
                 </div>
             </div>
@@ -83,11 +103,11 @@
         <!-- Final Output Section -->
         <section class="my-16">
             <div class="max-w-4xl mx-auto bg-gradient-to-r from-sky-100 to-blue-200 p-8 rounded-2xl shadow-xl text-center border border-sky-200">
-                <h3 class="text-3xl font-bold text-slate-800 mb-2">專案最終產出：核心方法論（第三天）</h3>
-                <p class="text-slate-600 mb-8">這份視覺化報告，是我們這兩天所有探索、實驗與洞見的最終總結。</p>
+                <h3 class="text-3xl font-bold text-slate-800 mb-2">專案最終產出：核心方法論</h3>
+                <p class="text-xs text-slate-400 mb-8">此區塊內容於專案第三天完成</p>
                 <div class="bg-white/70 backdrop-blur-sm p-6 rounded-lg text-left shadow-lg">
-                    <h4 class="text-xl font-bold text-[#003F5C]">AI協作的科學：從專案經理立足邁進AI世代的未來框架</h4>
-                    <p class="text-sm text-slate-600 mt-2">一份關於我們如何從敏捷經驗中驗證並確立「AI專案管理虛擬實踐場」終極方法論的互動式資訊圖表。</p>
+                    <h4 class="text-xl font-bold text-[#003F5C]">AI協作的科學：從信任到驗證</h4>
+                    <p class="text-sm text-slate-600 mt-2">一份關於我們如何發明、驗證並確立「AI專案管理虛擬實踐場」終極方法論的互動式資訊圖表。</p>
                 </div>
                 <a href="pm.html" class="mt-8 inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition-transform duration-300 hover:scale-105 shadow-lg hover:shadow-blue-500/50">
                     查看視覺化報告
@@ -103,102 +123,11 @@
             </div>
         </section>
 
-<section class="bg-white p-6 rounded-2xl shadow-lg mt-16">
-<div class="container mx-auto p-4 md:p-8 max-w-md">
-    <div class="card mt-12">
-            <h2 class="text-2xl font-bold text-slate-800 mb-4">專案迭代次數</h2>
-            <p class="text-slate-500">此數據直接來自 GitHub 的提交紀錄</p>
-            <div id="commitCount" class="text-5xl md:text-6xl main-number">
-                載入中...
-            </div>
-            <p class="text-slate-500 text-sm mt-2">（主要分支提交數）</p>
-            <p id="timeSinceFirstCommit" class="text-slate-500 text-sm mt-1"></p> <!-- Added the element for time since first commit -->
-    </div>
-</div>
-</section>
-    <script>
-        // 設定您的 GitHub 用戶名和儲存庫名稱
-        const GITHUB_USERNAME = 'tb1982'; // 請替換為您的 GitHub 用戶名
-        const REPO_NAME = 'pm'; // 請替換為您的儲存庫名稱
-        const BRANCH_NAME = 'main'; // 通常是 'main' 或 'master'
 
-        async function getCommitCount() {
-            const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/commits?sha=${BRANCH_NAME}`;
-            
-            try {
-                const response = await fetch(url);
-                const commits = await response.json();
-                
-                if (commits && commits.length) {
-                    const totalCommitsUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contributors?anon=1`;
-                    const totalCommitsResponse = await fetch(totalCommitsUrl);
-                    const contributors = await totalCommitsResponse.json();
-                    let totalCount = '未知';
-                    if (Array.isArray(contributors) && contributors.length > 0) {
-                        const yourContribution = contributors.find(c => c.login === GITHUB_USERNAME);
-                        if (yourContribution && yourContribution.contributions) {
-                            totalCount = yourContribution.contributions;
-                        } else {
-                            totalCount = commits.length + "+"; 
-                        }
-                    } else {
-                         totalCount = commits.length + "+";
-                    }
-                    document.getElementById('commitCount').innerText = totalCount;
-                } else {
-                    document.getElementById('commitCount').innerText = '0';
-                }
-            } catch (error) {
-                console.error('獲取提交次數失敗:', error);
-                document.getElementById('commitCount').innerText = '載入失敗';
-            }
-        }
-
-        async function getTimeSinceFirstCommit() {
-            const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/commits?per_page=1&page=1&sort=asc`;
-            
-            try {
-                const response = await fetch(url);
-                const commits = await response.json();
-
-                if (commits && commits.length > 0) {
-                    const firstCommitDate = new Date(commits[0].commit.author.date);
-                    const currentDate = new Date();
-
-                    const diffTime = Math.abs(currentDate - firstCommitDate); // 毫秒差
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // 天數
-
-                    let durationString = '';
-                    if (diffDays < 30) {
-                        durationString = `${diffDays} 天前開始`;
-                    } else if (diffDays < 365) {
-                        const months = Math.floor(diffDays / 30);
-                        durationString = `${months} 個月前開始`;
-                    } else {
-                        const years = Math.floor(diffDays / 365);
-                        const remainingMonths = Math.floor((diffDays % 365) / 30);
-                        durationString = `${years} 年 ${remainingMonths} 個月前開始`;
-                    }
-                    
-                    document.getElementById('timeSinceFirstCommit').innerText = durationString;
-
-                } else {
-                    document.getElementById('timeSinceFirstCommit').innerText = '無法獲取時間';
-                }
-            } catch (error) {
-                console.error('獲取首次提交時間失敗:', error);
-                document.getElementById('timeSinceFirstCommit').innerText = '載入時間失敗';
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            getCommitCount(); 
-            getTimeSinceFirstCommit();
-        });
-    </script>
         <footer class="text-center mt-16">
-            <p class="text-slate-400 text-sm">由 GitHub Pages 部署 | <a href="mailto:babelon1882@gmail.com">
-T.B.° </a> 最後更新於 2025</p>
+            <p class="text-slate-400 text-sm">
+                由 GitHub Pages 部署 | <a href="mailto:babelon1882@gmail.com" class="hover:text-sky-500 transition-colors">T.B.°</a>最後更新於 2025
+            </p>
         </footer>
     </div>
 
@@ -224,7 +153,7 @@ T.B.° </a> 最後更新於 2025</p>
             { name: "知識蒸餾報告", description: "為解決跨模型上下文問題，所進行的知識蒸餾實證分析報告。", file: "distillation.html", tag: "分析", column: 'side' },
             { name: "空白模型測試", description: "並非「變笨」，而是「上下文的詛咒 (The Curse of Context)」", file: "test.html", tag: "經驗", column: 'side' },
             { name: "交付物演化史", description: "比「流程」更重要的，是「驗證流程的流程」。", file: "finaltask.html", tag: "經驗", column: 'side' },
-            { name: "PMP圖書館", description: "利用知識蒸餾打造自己的成長/知識飛輪與RAG。", file: "library.html", tag: "經驗", column: 'side' }
+            { name: "PMP圖書館", description: "利用知識蒸餾打造自己的知識飛輪與RAG。", file: "library.html", tag: "經驗", column: 'side' }
         ];
 
         function getTagInfo(tag) {
@@ -244,7 +173,57 @@ T.B.° </a> 最後更新於 2025</p>
             }
         }
 
+        async function updateGithubStats() {
+            const GITHUB_USERNAME = 'tb1982';
+            const REPO_NAME = 'pm';
+            const BRANCH_NAME = 'main';
+            
+            const commitCountEl = document.getElementById('commitCount');
+            const durationEl = document.getElementById('developmentDuration');
+
+            try {
+                // Fetch up to 100 commits to get a more accurate count and the first commit
+                const commitsUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/commits?sha=${BRANCH_NAME}&per_page=100`;
+                const response = await fetch(commitsUrl);
+                if (!response.ok) {
+                    throw new Error(`GitHub API error: ${response.status}`);
+                }
+                const commits = await response.json();
+
+                if (commits && commits.length > 0) {
+                    // Update commit count
+                    let countText = commits.length.toString();
+                    // If we get 100, it's likely there are more pages.
+                    if (commits.length === 100) {
+                         countText += "+";
+                    }
+                    commitCountEl.innerText = countText;
+
+                    // Calculate duration since first commit
+                    // The last commit in this array is the oldest one on the page
+                    const firstCommit = commits[commits.length - 1];
+                    const firstCommitDate = new Date(firstCommit.commit.author.date);
+                    const currentDate = new Date();
+                    const diffTime = Math.abs(currentDate - firstCommitDate);
+                    const diffDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24))); // Ensure at least 1 day
+                    
+                    durationEl.innerText = `${diffDays} 天`;
+
+                } else {
+                    commitCountEl.innerText = '0';
+                    durationEl.innerText = 'N/A';
+                }
+
+            } catch (error) {
+                console.error('獲取GitHub數據失敗:', error);
+                commitCountEl.innerText = '讀取失敗';
+                durationEl.innerText = '讀取失敗';
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
+            updateGithubStats();
+
             const mainTimeline = document.getElementById('timeline-main');
             const sideTimeline = document.getElementById('timeline-side');
             
@@ -308,6 +287,5 @@ T.B.° </a> 最後更新於 2025</p>
             });
         });
     </script>
-
 </body>
 </html>
