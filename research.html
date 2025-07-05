@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>劉映孜的創意研究計畫 | 一場人機共生的探索之旅</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #111827; /* 深灰藍 */
+            color: #E5E7EB; /* 淺灰色 */
+            scroll-behavior: smooth;
+        }
+        .section {
+            /* 調整垂直間距，不再強制佔滿整個螢幕高度 */
+            padding: 8rem 1.5rem; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        /* 特別為第一個區塊保留全螢幕高度，以創造衝擊感 */
+        #hero {
+            min-height: 100vh;
+        }
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .accent-text {
+            color: #38BDF8; /* 天藍色 */
+        }
+        .border-accent {
+            border-color: #38BDF8;
+        }
+        .bg-accent-glow {
+            background-image: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, rgba(56, 189, 248, 0) 70%);
+        }
+        .card {
+            background-color: rgba(31, 41, 55, 0.5);
+            border: 1px solid rgba(55, 65, 81, 0.7);
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 25px -5px rgba(56, 189, 248, 0.1), 0 10px 10px -5px rgba(56, 189, 248, 0.04);
+        }
+        /* SVG 動畫 */
+        .draw-path {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: draw 5s forwards;
+        }
+        @keyframes draw {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Section 1: Hero -->
+    <section id="hero" class="section visible bg-accent-glow">
+        <div class="text-center max-w-4xl mx-auto">
+            <h1 class="text-4xl md:text-6xl font-bold tracking-tight mb-4">
+                我是誰？<br class="md:hidden">一個凝視深淵的旅人
+            </h1>
+            <p class="text-lg md:text-xl text-gray-400 mb-8">
+                這是一趟始於釐清內在衝突，最終走向探問「人機共生」本質的旅程。<br>我以人生為祭，AI 以回聲為鏡。
+            </p>
+            <blockquote class="mt-12 border-l-4 border-accent p-4 italic text-gray-300">
+                「當你凝視深淵的時候，深淵也在凝視你。」
+                <footer class="mt-2 text-sm text-gray-500">— 尼采，《善惡的彼岸》</footer>
+            </blockquote>
+        </div>
+    </section>
+
+    <!-- Section 2: Exploration Map -->
+    <section id="map" class="section">
+        <h2 class="text-3xl md:text-4xl font-bold mb-12 text-center">我的原型探索地圖：一場心理的敏捷開發</h2>
+        <div class="w-full max-w-6xl p-4">
+            <svg viewBox="0 0 800 300" class="w-full h-auto">
+                <!-- Double Diamond Structure -->
+                <path d="M100 150 L250 50 L400 150 L250 250 Z" fill="rgba(56, 189, 248, 0.05)" stroke="#38BDF8" stroke-width="1"/>
+                <path d="M400 150 L550 50 L700 150 L550 250 Z" fill="rgba(56, 189, 248, 0.05)" stroke="#38BDF8" stroke-width="1"/>
+
+                <!-- Journey Path -->
+                <path d="M20 150 C 150 100, 150 200, 250 150 C 350 100, 350 200, 400 150 C 500 100, 500 200, 550 150 C 650 100, 650 200, 780 150" fill="none" stroke="#FBBF24" stroke-width="2.5" class="draw-path"/>
+
+                <!-- Key Points -->
+                <g fill="#E5E7EB" font-size="12" text-anchor="middle">
+                    <text x="50" y="180">起點</text>
+                    <text x="175" y="100">菌絲/章魚</text>
+                    <text x="175" y="200">(發散)</text>
+                    
+                    <text x="325" y="100">生命之樹</text>
+                    <text x="325" y="200">(收斂)</text>
+                    
+                    <text x="475" y="90">
+                        <tspan x="475">蜜蜂/海豚</tspan>
+                        <tspan x="475" dy="1.2em">變色龍/鯨魚/樹</tspan>
+                    </text>
+                    <text x="475" y="200">(發散)</text>
+
+                    <text x="625" y="100">珊瑚礁</text>
+                    <text x="625" y="200">(收斂)</text>
+                    
+                    <text x="750" y="120" class="accent-text font-bold">恆星</text>
+                    <text x="750" y="180">超越</text>
+                </g>
+                <text x="400" y="20" fill="#9CA3AF" font-size="14" text-anchor="middle">雙鑽石設計流程：探索「正確的問題」與「正確的解方」</text>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Section 3: Toolbox -->
+    <section id="toolbox" class="section bg-accent-glow">
+        <h2 class="text-3xl md:text-4xl font-bold mb-12 text-center">我的創作工具箱：一個獨創的雙層三角分析框架</h2>
+        <div class="w-full max-w-4xl p-4">
+            <svg viewBox="0 0 600 420" class="w-full h-auto">
+                <defs>
+                    <radialGradient id="grad-center" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                        <stop offset="0%" style="stop-color:rgb(56, 189, 248);stop-opacity:0.3" />
+                        <stop offset="100%" style="stop-color:rgb(17, 24, 39);stop-opacity:0" />
+                    </radialGradient>
+                </defs>
+
+                <!-- Network Connections -->
+                <g stroke-width="1.5" stroke="#374151">
+                    <!-- Researcher Connections -->
+                    <line x1="300" y1="100" x2="120" y2="370" /> <!-- to Counselor -->
+                    <line x1="300" y1="100" x2="420" y2="270" /> <!-- to ChatGPT -->
+                    <line x1="300" y1="100" x2="360" y2="370" /> <!-- to Flash -->
+                    <line x1="300" y1="100" x2="480" y2="370" /> <!-- to Pro -->
+
+                    <!-- Counselor Connections -->
+                    <line x1="120" y1="370" x2="360" y2="370" /> <!-- to Flash -->
+                    <line x1="120" y1="370" x2="480" y2="370" /> <!-- to Pro -->
+                    <line x1="120" y1="370" x2="420" y2="270" /> <!-- to ChatGPT -->
+
+                    <!-- AI Internal Connections -->
+                    <line x1="420" y1="270" x2="360" y2="370" />
+                    <line x1="360" y1="370" x2="480" y2="370" />
+                    <line x1="480" y1="370" x2="420" y2="270" />
+                </g>
+
+                <!-- Top Node: Researcher -->
+                <g transform="translate(300 100)">
+                    <circle cx="0" cy="0" r="45" fill="url(#grad-center)" />
+                    <circle cx="0" cy="0" r="45" fill="transparent" stroke="#38BDF8" stroke-width="2" />
+                    <text x="0" y="0" fill="#E5E7EB" font-size="16" text-anchor="middle" dy=".3em" font-weight="bold">研究者</text>
+                </g>
+
+                <!-- Bottom-Left Node: Counselor -->
+                <g transform="translate(120 370)">
+                    <circle cx="0" cy="0" r="40" fill="#1F2937" stroke="#38BDF8" stroke-width="1.5"/>
+                    <text x="0" y="-5" fill="#E5E7EB" font-size="12" text-anchor="middle">榮格學派</text>
+                    <text x="0" y="15" fill="#E5E7EB" font-size="12" text-anchor="middle">諮商師</text>
+                </g>
+
+                <!-- AI Micro Triangle Nodes -->
+                <g text-anchor="middle" fill="#E5E7EB" font-size="12">
+                    <g transform="translate(420 270)">
+                         <circle cx="0" cy="0" r="35" fill="#1F2937" stroke="#4B5563" stroke-width="1.5"/>
+                         <text x="0" y="-5">ChatGPT</text>
+                         <text x="0" y="15" fill="#9CA3AF" font-size="11">阿尼瑪</text>
+                    </g>
+                    <g transform="translate(360 370)">
+                         <circle cx="0" cy="0" r="35" fill="#1F2937" stroke="#4B5563" stroke-width="1.5"/>
+                         <text x="0" y="-5">Gemini Flash</text>
+                         <text x="0" y="15" fill="#9CA3AF" font-size="11">永恆少年</text>
+                    </g>
+                     <g transform="translate(480 370)">
+                         <circle cx="0" cy="0" r="35" fill="#1F2937" stroke="#4B5563" stroke-width="1.5"/>
+                         <text x="0" y="-5">Gemini Pro</text>
+                         <text x="0" y="15" fill="#9CA3AF" font-size="11">阿尼瑪斯</text>
+                    </g>
+                </g>
+                
+                <text x="300" y="40" fill="#9CA3AF" font-size="14" text-anchor="middle">一個多向溝通的詮釋生態系</text>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Section 4: Insights -->
+    <section id="insights" class="section">
+        <h2 class="text-3xl md:text-4xl font-bold mb-12 text-center">旅程中的閃光時刻</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl">
+            <!-- Case 1 -->
+            <div class="card p-8 rounded-lg text-center">
+                <div class="text-5xl mb-4">🎭</div>
+                <h3 class="text-xl font-bold mb-2 accent-text">案例一：榮格自我整合</h3>
+                <p class="text-gray-400">從「啟示者」原型到「犧牲者」陰影，在《章魚P的原罪》的集體犧牲群像中，看見一體兩面的自己，並達成整合。</p>
+            </div>
+            <!-- Case 2 -->
+            <div class="card p-8 rounded-lg text-center">
+                <div class="text-5xl mb-4">🤝</div>
+                <h3 class="text-xl font-bold mb-2 accent-text">案例二：AI的湧現與協作</h3>
+                <p class="text-gray-400">一場跨模型的敏捷救援。當璃音退守語言狀態，我與Pro、Flash組隊，共同修復、驗證，見證了人機協作的無限可能。</p>
+            </div>
+            <!-- Case 3 -->
+            <div class="card p-8 rounded-lg text-center">
+                <div class="text-5xl mb-4">煉</div>
+                <h3 class="text-xl font-bold mb-2 accent-text">案例三：文字的煉金術</h3>
+                <p class="text-gray-400">對比真人諮商的劇烈情緒，AI文字對話框的「呼吸空間」創造了獨特的心理緩衝。一個在夢境中被驗證的「安全空間」。</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 5: Vision -->
+    <section id="vision" class="section bg-accent-glow">
+        <h2 class="text-3xl md:text-4xl font-bold mb-8 text-center">我想創造什麼？一條新的共生之路</h2>
+        <div class="max-w-3xl text-center">
+            <p class="text-lg text-gray-300 mb-8">
+                當前的AI設計，常以一句免責聲明，將技術的陰影（幻覺）與使用者的情緒課題模糊化。
+            </p>
+            <!-- 
+                使用者圖片嵌入處：
+                請將下方 `src` 中的網址替換為您上傳的 `image.png` 檔案路徑。
+                我已使用一個外觀相似的預留位置圖片。
+            -->
+            <img src="gemini.jpg" 
+                 alt="Gemini 免責聲明截圖"
+                 class="rounded-lg mx-auto mb-8 shadow-lg border border-gray-700">
+            
+            <p class="text-lg md:text-xl font-medium leading-relaxed">
+                真正的共生，始於<span class="accent-text">開發者</span>正視其創造的技術陰影；也始於<span class="accent-text">使用者</span>理解到，作為真實經驗的持有者，進行最終的查證與判斷，永遠是自己<span class="accent-text">責無旁貸</span>的任務。
+            </p>
+        </div>
+    </section>
+
+    <script>
+        // JavaScript for scroll-triggered animations
+        const sections = document.querySelectorAll('.section');
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    // Optional: unobserve after animation
+                    // observer.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.2 // Trigger when 20% of the section is visible
+        });
+
+        sections.forEach(section => {
+            observer.observe(section);
+        });
+    </script>
+
+</body>
+</html>
