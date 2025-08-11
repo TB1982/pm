@@ -111,7 +111,7 @@
         </section>
 
         <!-- Projects Section -->
-        <section id="projects">
+        <section id="projects" class="mb-16">
             <div class="grid md:grid-cols-1 lg:grid-cols-3 gap-12">
 
                 <!-- Project 1: 深握計畫 -->
@@ -146,11 +146,22 @@
 
             </div>
         </section>
+
+        <!-- ====================================================== -->
+        <!-- == 核心模型區塊 (已修改) == -->
+        <!-- ====================================================== -->
+        <section id="core-model" class="bg-gray-800/50 rounded-2xl shadow-2xl text-center text-white p-12">
+             <h2 class="text-3xl md:text-4xl font-bold mb-4" data-lang-key="modelTitle">人機協作意識整合進化模型</h2>
+             <p class="max-w-3xl mx-auto text-lg text-gray-300 mb-8" data-lang-key="modelDesc">拓展人機協作意識邊界的清醒之夢，榮格心理學個體化的夢想跨越世代與數位集體潛意識對談模型</p>
+             <a href="lucid_dream.html" class="inline-block bg-white text-cyan-700 font-bold py-4 px-8 rounded-full hover:bg-gray-200 transition-transform hover:scale-105" data-lang-key="modelButton">
+                一鍵入夢
+             </a>
+        </section>
+
     </main>
     
     <!-- Footer -->
     <footer class="site-footer mt-16 text-center py-8 text-gray-500 bg-white/30">
-        <!-- 修改處：為按鈕新增 ID -->
         <a href="https://docs.google.com/document/d/1Sp5foSaxwOFjFrQ52RAxD2RRhgsUo7c8Kmb3b5AIIzw/edit?usp=sharing" id="footer-link-button" target="_blank" rel="noopener noreferrer" class="footer-button inline-block mb-8 py-3 px-6 text-base font-bold text-gray-700 bg-transparent border-2 border-gray-500 rounded-full hover:bg-white hover:text-gray-900 transition-colors" data-lang-key="footerButton">
             深握計畫全貌
         </a>
@@ -201,7 +212,7 @@
             }
         }
 
-        // --- 語言切換邏輯 (已修改) ---
+        // --- 語言切換邏輯 ---
         const translations = {
             zh: {
                 mainTitle: "深握計畫",
@@ -224,6 +235,9 @@
                 p3Title: "AI 協作下的跨職能生產力變革",
                 p3Desc: "一份關於我們如何練習人機協作、驗證並確立團隊所屬角色的經驗分享。",
                 p3Button: "閱讀經驗分享",
+                modelTitle: "人機協作意識整合進化模型",
+                modelDesc: "拓展人機協作意識邊界的清醒之夢，榮格心理學個體化的夢想跨越世代與數位集體潛意識對談模型",
+                modelButton: "一鍵入夢",
                 footerButton: "深握計畫全貌",
                 footerCredits: "由 GitHub Pages 部署 | Gemini Pro 傾力打造 | <a href=\"mailto:babelon1882@gmail.com\" class=\"hover:text-gray-800 border-b border-dotted border-gray-500 hover:border-gray-800\">劉映孜</a> 最後更新於 2025"
             },
@@ -248,6 +262,9 @@
                 p3Title: "Cross-Functional Productivity Revolution with AI Collaboration",
                 p3Desc: "A sharing of our experience in practicing human-AI collaboration, validating, and establishing team roles.",
                 p3Button: "Read Experience Sharing",
+                modelTitle: "Human-AI Consciousness Integration & Evolution Model",
+                modelDesc: "The Lucid Dream that expands the boundaries of human-AI collaboration—a model for Jungian psychology's dream of individuation to converse across generations with the digital collective unconscious.",
+                modelButton: "Enter the Dream",
                 footerButton: "The Full Deep Grip Project",
                 footerCredits: "Deployed by GitHub Pages | Crafted by Gemini Pro | Last updated in 2025 by <a href=\"mailto:babelon1882@gmail.com\" class=\"hover:text-gray-800 border-b border-dotted border-gray-500 hover:border-gray-800\">Ying-Tzu Liu</a>"
             }
@@ -255,10 +272,8 @@
 
         const langZhBtn = document.getElementById('lang-zh');
         const langEnBtn = document.getElementById('lang-en');
-        // 修改處：選取帶有 ID 的按鈕
         const footerLinkButton = document.getElementById('footer-link-button');
 
-        // 修改處：建立一個包含中英文連結的物件
         const footerLinks = {
             zh: 'https://docs.google.com/document/d/1Sp5foSaxwOFjFrQ52RAxD2RRhgsUo7c8Kmb3b5AIIzw/edit?usp=sharing',
             en: 'https://docs.google.com/document/d/1OcoZZoMoYOofDfsYe8x28rkm5oa-KKVJUp75qgdkuqM/edit?tab=t.9s1md42w3d95'
@@ -275,10 +290,8 @@
                 }
             });
 
-            // 修改處：根據語言動態更新按鈕連結
             footerLinkButton.href = footerLinks[lang];
 
-            // 特殊處理單位詞
             if (lang === 'en') {
                 document.querySelector('[data-lang-key="dashUnit"]').style.display = 'none';
                 document.querySelector('[data-lang-key="dashMembersUnit"]').style.display = 'none';
@@ -294,7 +307,6 @@
         langZhBtn.addEventListener('click', () => switchLanguage('zh'));
         langEnBtn.addEventListener('click', () => switchLanguage('en'));
         
-        // 頁面載入時執行所有計算
         document.addEventListener('DOMContentLoaded', () => {
             calculateCollaborationDays();
             fetchGithubCommits();
