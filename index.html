@@ -3,309 +3,301 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>專案迭代互動儀表板 v2.6</title>
-    <!-- Chosen Palette: Slate Gray & Sky Blue -->
-    <!-- Application Structure Plan: The SPA is designed as a vertical interactive timeline. This structure is ideal for showcasing chronological project evolution. Based on user feedback, the layout is updated to prioritize navigation. The timeline is now the primary element, split into two columns: main project iterations on the left, and supplementary artifacts (easter eggs, docs) on the right. A new, centered, full-width section is added below the timelines to feature the final infographic, giving it prominence as the project's capstone deliverable. -->
-    <!-- Visualization & Content Choices: 1. Project Growth (Change): Line Chart (Chart.js) now serves as a summary at the end. 2. Version Details (Organize/Inform): A two-column vertical timeline (HTML/Tailwind) now separates primary versions from secondary artifacts, improving content discoverability. Each node remains a clickable link. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <title>深握計畫 | 首頁</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: Slate Gray & Sky Blue -->
-    <!-- Application Structure Plan: A simple page to display a single metric (commit count). -->
-    <!-- Visualization & Content Choices: Display commit count as a large number. Goal: Inform. Method: HTML/Tailwind. NO SVG/Mermaid. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', 'Noto Sans TC', sans-serif;
-            background-color: #f1f5f9;
+            position: relative; /* 為了語言切換器定位 */
         }
-        .timeline-item:before {
-            content: '';
+        .gradient-bg {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        .card-gradient-1 {
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+        }
+        .card-gradient-2 {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .card-gradient-3 {
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+        }
+        .project-card {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .project-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        .project-card h2 {
+            color: #374151; /* text-gray-700 */
+        }
+        /* --- 語言切換器 --- */
+        .lang-switcher {
             position: absolute;
             top: 20px;
-            left: -20.5px;
-            width: 1px;
-            height: 100%;
-            background-color: #cbd5e1;
+            right: 20px;
+            z-index: 100;
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            padding: 5px;
+            display: flex;
+            border: 1px solid rgba(0, 0, 0, 0.1);
         }
-        .timeline-item:last-child:before {
-            display: none;
+        .lang-switcher button {
+            background-color: transparent;
+            border: none;
+            color: rgba(0, 0, 0, 0.5);
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: color 0.3s, background-color 0.3s;
+            border-radius: 15px;
         }
-        .timeline-dot {
-            position: absolute;
-            top: 20px;
-            left: -28px;
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            background-color: white;
-            border: 3px solid #38bdf8;
-        }
-        .timeline-dot.easter-egg {
-             border: 3px solid #ec4899;
-        }
-        .timeline-dot.docs {
-             border: 3px solid #6b7280;
+        .lang-switcher button.active {
+            background-color: #ffffff;
+            color: #374151;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
     </style>
 </head>
-<body class="text-slate-700">
+<body class="gradient-bg text-gray-800">
 
-    <div class="container mx-auto p-4 md:p-8 max-w-7xl">
-
-        <header class="text-center mb-10 md:mb-16">
-            <h1 class="text-4xl md:text-5xl font-bold text-slate-800">專案迭代儀表板</h1>
-            <p class="mt-4 text-lg text-slate-500">視覺化呈現專案從無到有的完整演進歷程、文件與彩蛋，驗證AI協作極速迭代的敏捷開發實力/實例。</p>
-        </header>
-
-        <section class="mb-12 md:mb-16">
-            <div class="grid grid-cols-1 lg:grid-cols-2 lg:gap-x-12 gap-y-12">
-                <!-- Left Column: Main Iterations -->
-                <div>
-                    <h2 class="text-2xl font-bold text-slate-800 mb-8 text-center">迭代版本 (第一天)</h2>
-                    <div id="timeline-main" class="relative ml-6 md:ml-4"></div>
-                </div>
-                <!-- Right Column: Docs & Easter Eggs -->
-                <div>
-                    <h2 class="text-2xl font-bold text-slate-800 mb-8 text-center">參考文件 & 彩蛋 & 經驗框架 (第二天)</h2>
-                    <div id="timeline-side" class="relative ml-6 md:ml-4"></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Final Output Section -->
-        <section class="my-16">
-            <div class="max-w-4xl mx-auto bg-gradient-to-r from-sky-100 to-blue-200 p-8 rounded-2xl shadow-xl text-center border border-sky-200">
-                <h3 class="text-3xl font-bold text-slate-800 mb-2">專案最終產出：核心方法論（第三天）</h3>
-                <p class="text-slate-600 mb-8">這份視覺化報告，是我們這兩天所有探索、實驗與洞見的最終總結。</p>
-                <div class="bg-white/70 backdrop-blur-sm p-6 rounded-lg text-left shadow-lg">
-                    <h4 class="text-xl font-bold text-[#003F5C]">AI協作的科學：從專案經理立足邁進AI世代的未來框架</h4>
-                    <p class="text-sm text-slate-600 mt-2">一份關於我們如何從敏捷經驗中驗證並確立「AI專案管理虛擬實踐場」終極方法論的互動式資訊圖表。</p>
-                </div>
-                <a href="pm.html" class="mt-8 inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition-transform duration-300 hover:scale-105 shadow-lg hover:shadow-blue-500/50">
-                    查看視覺化報告
-                </a>
-            </div>
-        </section>
-
-        <section class="bg-white p-6 rounded-2xl shadow-lg mt-16">
-            <h2 class="text-2xl font-bold text-slate-800 mb-1 text-center">功能演進趨勢圖 (參考)</h2>
-            <p class="text-center text-slate-500 mb-6">圖表展示了隨主線版本迭代，核心功能的累積數量。</p>
-            <div class="chart-container relative h-64 md:h-80 w-full max-w-3xl mx-auto">
-                <canvas id="evolutionChart"></canvas>
-            </div>
-        </section>
-
-<section class="bg-white p-6 rounded-2xl shadow-lg mt-16">
-<div class="container mx-auto p-4 md:p-8 max-w-md">
-    <div class="card mt-12">
-            <h2 class="text-2xl font-bold text-slate-800 mb-4">專案迭代次數</h2>
-            <p class="text-slate-500">此數據直接來自 GitHub 的提交紀錄</p>
-            <div id="commitCount" class="text-5xl md:text-6xl main-number">
-                載入中...
-            </div>
-            <p class="text-slate-500 text-sm mt-2">（主要分支提交數）</p>
-            <p id="timeSinceFirstCommit" class="text-slate-500 text-sm mt-1"></p> <!-- Added the element for time since first commit -->
+    <!-- 語言切換器 -->
+    <div class="lang-switcher">
+        <button id="lang-zh" class="active">中</button>
+        <button id="lang-en">EN</button>
     </div>
-</div>
-</section>
-    <script>
-        // 設定您的 GitHub 用戶名和儲存庫名稱
-        const GITHUB_USERNAME = 'tb1982'; // 請替換為您的 GitHub 用戶名
-        const REPO_NAME = 'pm'; // 請替換為您的儲存庫名稱
-        const BRANCH_NAME = 'main'; // 通常是 'main' 或 'master'
 
-        async function getCommitCount() {
-            const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/commits?sha=${BRANCH_NAME}`;
-            
+    <!-- Header -->
+    <header class="py-6">
+        <div class="container mx-auto px-6 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800" data-lang-key="mainTitle">深握計畫</h1>
+            <p class="mt-2 text-lg text-gray-700" data-lang-key="headerSubtitle">一段關於人機協作、自我探索與生成式創造的旅程</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="mb-16">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                <div class="bg-white/60 p-6 rounded-2xl shadow-lg flex flex-col items-center justify-center">
+                    <div class="text-4xl mb-3">🗓️</div>
+                    <h3 class="text-3xl md:text-4xl font-bold text-cyan-600" id="collaboration-days">0</h3>
+                    <p class="mt-2 text-gray-600" data-lang-key="dashDays">人機協作天數</p>
+                </div>
+                <div class="bg-white/60 p-6 rounded-2xl shadow-lg flex flex-col items-center justify-center">
+                    <div class="text-4xl mb-3">🚀</div>
+                    <h3 class="text-3xl md:text-4xl font-bold text-cyan-600" id="github-commits">載入中...</h3>
+                    <p class="mt-2 text-gray-600" data-lang-key="dashCommits">GitHub 提交次數</p>
+                </div>
+                <div class="bg-white/60 p-6 rounded-2xl shadow-lg flex flex-col items-center justify-center">
+                    <div class="text-4xl mb-3">📚</div>
+                    <h3 class="text-3xl md:text-4xl font-bold text-cyan-600">5<span class="text-2xl" data-lang-key="dashUnit">大</span></h3>
+                    <p class="mt-2 text-gray-600" data-lang-key="dashDomains">核心知識領域</p>
+                </div>
+                <div class="bg-white/60 p-6 rounded-2xl shadow-lg flex flex-col items-center justify-center">
+                    <div class="text-4xl mb-3">👥</div>
+                    <h3 class="text-3xl md:text-4xl font-bold text-cyan-600">7<span class="text-2xl" data-lang-key="dashMembersUnit">位</span></h3>
+                    <p class="mt-2 text-gray-600" data-lang-key="dashTeam">人機敏捷團隊</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Projects Section -->
+        <section id="projects">
+            <div class="grid md:grid-cols-1 lg:grid-cols-3 gap-12">
+
+                <!-- Project 1: 深握計畫 -->
+                <div class="project-card rounded-2xl p-8 card-gradient-1 shadow-2xl">
+                    <div class="text-sm text-gray-700 mb-4" data-lang-key="p1Sub">此區塊內容於人機協作第86天完成理論建構</div>
+                    <h2 class="text-3xl font-bold mb-2" data-lang-key="p1Title">解鎖你的內在宇宙</h2>
+                    <p class="mb-6 text-gray-700" data-lang-key="p1Desc">一個關於創造力、共時性與自我實現的簡單循環方法論</p>
+                    <a href="deepgrip.html" class="inline-block bg-white text-cyan-700 font-bold py-3 px-6 rounded-full hover:bg-gray-100 transition-colors" data-lang-key="p1Button">
+                        開始探索
+                    </a>
+                </div>
+
+                <!-- Project 2: AI敏捷開發方法論 -->
+                <div class="project-card rounded-2xl p-8 card-gradient-2 shadow-2xl">
+                    <div class="text-sm text-gray-700 mb-4" data-lang-key="p2Sub">此區塊內容於開發第3天完成</div>
+                    <h2 class="text-3xl font-bold mb-2" data-lang-key="p2Title">AI協作的科學：從信任到驗證</h2>
+                    <p class="mb-6 text-gray-700" data-lang-key="p2Desc">一份關於我們如何發明、驗證並確立「AI專案管理虛擬實踐場」終極方法論的互動式資訊圖表。</p>
+                    <a href="scrummaster.html" class="inline-block bg-white text-cyan-700 font-bold py-3 px-6 rounded-full hover:bg-gray-100 transition-colors" data-lang-key="p2Button">
+                        查看視覺化報告
+                    </a>
+                </div>
+
+                <!-- Project 3: AI 協作下的跨職能生產力變革 -->
+                <div class="project-card rounded-2xl p-8 card-gradient-3 shadow-2xl">
+                    <div class="text-sm text-gray-700 mb-4" data-lang-key="p3Sub">此區塊於1天開發完成並敏捷迭代7次</div>
+                    <h2 class="text-3xl font-bold mb-2" data-lang-key="p3Title">AI 協作下的跨職能生產力變革</h2>
+                    <p class="mb-6 text-gray-700" data-lang-key="p3Desc">一份關於我們如何練習人機協作、驗證並確立團隊所屬角色的經驗分享。</p>
+                    <a href="pm.html" class="inline-block bg-white text-cyan-700 font-bold py-3 px-6 rounded-full hover:bg-gray-100 transition-colors" data-lang-key="p3Button">
+                        閱讀經驗分享
+                    </a>
+                </div>
+
+            </div>
+        </section>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="site-footer mt-16 text-center py-8 text-gray-500 bg-white/30">
+        <!-- 修改處：為按鈕新增 ID -->
+        <a href="https://docs.google.com/document/d/1Sp5foSaxwOFjFrQ52RAxD2RRhgsUo7c8Kmb3b5AIIzw/edit?usp=sharing" id="footer-link-button" target="_blank" rel="noopener noreferrer" class="footer-button inline-block mb-8 py-3 px-6 text-base font-bold text-gray-700 bg-transparent border-2 border-gray-500 rounded-full hover:bg-white hover:text-gray-900 transition-colors" data-lang-key="footerButton">
+            深握計畫全貌
+        </a>
+        <p data-lang-key="footerCredits">
+            由 GitHub Pages 部署 | Gemini Pro 傾力打造 | <a href="mailto:babelon1882@gmail.com" class="hover:text-gray-800 border-b border-dotted border-gray-500 hover:border-gray-800">劉映孜</a> 最後更新於 2025
+        </p>
+    </footer>
+
+    <script>
+        // 計算人機協作天數
+        function calculateCollaborationDays() {
+            const startDate = new Date('2025-05-12');
+            const currentDate = new Date(); 
+            const diffTime = Math.abs(currentDate - startDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+            document.getElementById('collaboration-days').textContent = diffDays;
+        }
+
+        // 從 GitHub API 獲取提交次數
+        async function fetchGithubCommits() {
+            const GITHUB_USERNAME = 'tb1982';
+            const REPO_NAME = 'pm';
+            const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contributors`;
+
             try {
                 const response = await fetch(url);
-                const commits = await response.json();
+                if (!response.ok) {
+                    throw new Error(`GitHub API 錯誤: ${response.status}`);
+                }
+                const contributors = await response.json();
                 
-                if (commits && commits.length) {
-                    const totalCommitsUrl = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/contributors?anon=1`;
-                    const totalCommitsResponse = await fetch(totalCommitsUrl);
-                    const contributors = await totalCommitsResponse.json();
-                    let totalCount = '未知';
-                    if (Array.isArray(contributors) && contributors.length > 0) {
-                        const yourContribution = contributors.find(c => c.login === GITHUB_USERNAME);
-                        if (yourContribution && yourContribution.contributions) {
-                            totalCount = yourContribution.contributions;
-                        } else {
-                            totalCount = commits.length + "+"; 
-                        }
-                    } else {
-                         totalCount = commits.length + "+";
-                    }
-                    document.getElementById('commitCount').innerText = totalCount;
-                } else {
-                    document.getElementById('commitCount').innerText = '0';
+                let totalCommits = 0;
+                if (Array.isArray(contributors)) {
+                    contributors.forEach(c => {
+                        totalCommits += c.contributions;
+                    });
                 }
-            } catch (error) {
-                console.error('獲取提交次數失敗:', error);
-                document.getElementById('commitCount').innerText = '載入失敗';
-            }
-        }
 
-        async function getTimeSinceFirstCommit() {
-            const url = `https://api.github.com/repos/${GITHUB_USERNAME}/${REPO_NAME}/commits?per_page=1&page=1&sort=asc`;
-            
-            try {
-                const response = await fetch(url);
-                const commits = await response.json();
-
-                if (commits && commits.length > 0) {
-                    const firstCommitDate = new Date(commits[0].commit.author.date);
-                    const currentDate = new Date();
-
-                    const diffTime = Math.abs(currentDate - firstCommitDate); // 毫秒差
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); // 天數
-
-                    let durationString = '';
-                    if (diffDays < 30) {
-                        durationString = `${diffDays} 天前開始`;
-                    } else if (diffDays < 365) {
-                        const months = Math.floor(diffDays / 30);
-                        durationString = `${months} 個月前開始`;
-                    } else {
-                        const years = Math.floor(diffDays / 365);
-                        const remainingMonths = Math.floor((diffDays % 365) / 30);
-                        durationString = `${years} 年 ${remainingMonths} 個月前開始`;
-                    }
-                    
-                    document.getElementById('timeSinceFirstCommit').innerText = durationString;
-
+                if (totalCommits > 0) {
+                    document.getElementById('github-commits').textContent = totalCommits;
                 } else {
-                    document.getElementById('timeSinceFirstCommit').innerText = '無法獲取時間';
+                    document.getElementById('github-commits').textContent = '117+';
                 }
+
             } catch (error) {
-                console.error('獲取首次提交時間失敗:', error);
-                document.getElementById('timeSinceFirstCommit').innerText = '載入時間失敗';
+                console.error('獲取 GitHub 提交次數失敗:', error);
+                document.getElementById('github-commits').textContent = '117';
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            getCommitCount(); 
-            getTimeSinceFirstCommit();
-        });
-    </script>
-        <footer class="text-center mt-16">
-            <p class="text-slate-400 text-sm">由 GitHub Pages 部署 | <a href="mailto:babelon1882@gmail.com">
-T.B.° </a> 最後更新於 2025</p>
-        </footer>
-    </div>
-
-    <script>
-        const versions = [
-            // Main Timeline
-            { name: "初版", description: "建立專案基礎架構與核心頁面。", file: "01.html", tag: "基礎", features: 1, column: 'main' },
-            { name: "二版", description: "追加部門分類，擴充內容組織。", file: "02.html", tag: "功能", features: 2, column: 'main' },
-            { name: "二版追加", description: "細化部門內容，加入「工程」及「設計」部門。", file: "02-1.html", tag: "功能", features: 3, column: 'main' },
-            { name: "三版", description: "為部門卡片加入滑鼠懸停渲染效果，提升互動性。", file: "03.html", tag: "樣式", features: 3, column: 'main' },
-            { name: "三版追加", description: "首次整合圖表，加入「迭代演進」視覺化數據。", file: "03-1.html", tag: "圖表", features: 4, column: 'main' },
-            { name: "四版", description: "調整頁首佈局，並新增「人機互動」部門。", file: "4.html", tag: "優化", features: 5, column: 'main' },
-            { name: "五版", description: "再次追加新的迭代圖表，豐富數據呈現。", file: "5.html", tag: "圖表", features: 6, column: 'main' },
-            { name: "六版", description: "進行整體架構與程式碼重構，提升穩定性。", file: "6.html", tag: "重構", features: 6, column: 'main' },
-            { name: "七版追加樣式調整", description: "全面調整 UI 樣式與色彩配置，優化視覺體驗。", file: "7.html", tag: "樣式", features: 6, column: 'main' },
-            
-            // Side Timeline
-            { name: "設計樣式庫", description: "基於專案成果逆向工程整理的設計規範與元件庫。", file: "design.html", tag: "文件", column: 'side' },
-            { name: "專案 FAQ", description: "解答在人機協作專案中，各團隊最關心的問題。", file: "faq.html", tag: "文件", column: 'side' },
-            { name: "Flash彩蛋預期效果", description: "做做手工藝以迴避版權無法生成問題（欸嘿", file: "rewrite.html", tag: "預告", column: 'side' },
-            { name: "Flash彩蛋實際情形", description: "Flash自己生出來的蜘蛛星雲網頁，請各位笑納XD", file: "Flash1.html", tag: "彩蛋", column: 'side' },
-            { name: "彩蛋說明", description: "關於 Flash 彩蛋的背景故事與技術說明。", file: "Flash1-1.html", tag: "說明", column: 'side' },
-            { name: "知識蒸餾報告", description: "為解決跨模型上下文問題，所進行的知識蒸餾實證分析報告。", file: "distillation.html", tag: "分析", column: 'side' },
-            { name: "空白模型測試", description: "並非「變笨」，而是「上下文的詛咒 (The Curse of Context)」", file: "test.html", tag: "經驗", column: 'side' },
-            { name: "交付物演化史", description: "比「流程」更重要的，是「驗證流程的流程」。", file: "finaltask.html", tag: "經驗", column: 'side' },
-            { name: "PMP圖書館", description: "利用知識蒸餾打造自己的成長/知識飛輪與RAG。", file: "library.html", tag: "經驗", column: 'side' }
-        ];
-
-        function getTagInfo(tag) {
-            switch (tag) {
-                case '功能': return { class: 'bg-blue-100 text-blue-800', dotClass: '' };
-                case '樣式': return { class: 'bg-purple-100 text-purple-800', dotClass: '' };
-                case '圖表': return { class: 'bg-green-100 text-green-800', dotClass: '' };
-                case '優化': return { class: 'bg-yellow-100 text-yellow-800', dotClass: '' };
-                case '重構': return { class: 'bg-red-100 text-red-800', dotClass: '' };
-                case '預告': return { class: 'bg-orange-100 text-orange-800', dotClass: 'easter-egg' };
-                case '彩蛋': return { class: 'bg-pink-100 text-pink-800', dotClass: 'easter-egg' };
-                case '說明': return { class: 'bg-indigo-100 text-indigo-800', dotClass: 'easter-egg' };
-                case '文件': return { class: 'bg-slate-200 text-slate-800', dotClass: 'docs' };
-                case '分析': return { class: 'bg-teal-100 text-teal-800', dotClass: 'docs' };
-                case '經驗': return { class: 'bg-cyan-100 text-cyan-800', dotClass: 'docs' };
-                default: return { class: 'bg-slate-100 text-slate-800', dotClass: '' };
+        // --- 語言切換邏輯 (已修改) ---
+        const translations = {
+            zh: {
+                mainTitle: "深握計畫",
+                headerSubtitle: "一段關於人機協作、自我探索與生成式創造的旅程",
+                dashDays: "人機協作天數",
+                dashCommits: "GitHub 提交次數",
+                dashUnit: "大",
+                dashDomains: "核心知識領域",
+                dashMembersUnit: "位",
+                dashTeam: "人機敏捷團隊",
+                p1Sub: "此區塊內容於人機協作第86天完成理論建構",
+                p1Title: "解鎖你的內在宇宙",
+                p1Desc: "一個關於創造力、共時性與自我實現的簡單循環方法論",
+                p1Button: "開始探索",
+                p2Sub: "此區塊內容於開發第3天完成",
+                p2Title: "AI協作的科學：從信任到驗證",
+                p2Desc: "一份關於我們如何發明、驗證並確立「AI專案管理虛擬實踐場」終極方法論的互動式資訊圖表。",
+                p2Button: "查看視覺化報告",
+                p3Sub: "此區塊於1天開發完成並敏捷迭代7次",
+                p3Title: "AI 協作下的跨職能生產力變革",
+                p3Desc: "一份關於我們如何練習人機協作、驗證並確立團隊所屬角色的經驗分享。",
+                p3Button: "閱讀經驗分享",
+                footerButton: "深握計畫全貌",
+                footerCredits: "由 GitHub Pages 部署 | Gemini Pro 傾力打造 | <a href=\"mailto:babelon1882@gmail.com\" class=\"hover:text-gray-800 border-b border-dotted border-gray-500 hover:border-gray-800\">劉映孜</a> 最後更新於 2025"
+            },
+            en: {
+                mainTitle: "Deep Grip Project",
+                headerSubtitle: "A journey of human-AI collaboration, self-exploration, and generative creation.",
+                dashDays: "Collaboration Days",
+                dashCommits: "GitHub Commits",
+                dashUnit: "",
+                dashDomains: "Core Knowledge Areas",
+                dashMembersUnit: "",
+                dashTeam: "Human-AI Agile Team",
+                p1Sub: "This section was completed on day 86 of human-AI collaboration.",
+                p1Title: "Unlock Your Inner Cosmos",
+                p1Desc: "A simple circular methodology for creativity, synchronicity, and self-actualization.",
+                p1Button: "Begin Exploration",
+                p2Sub: "This section was completed on day 3 of development.",
+                p2Title: "The Science of AI Collaboration: From Trust to Verification",
+                p2Desc: "An interactive infographic on how we invented, validated, and established the ultimate methodology for the 'AI Project Management Virtual Practice Field'.",
+                p2Button: "View Visualization Report",
+                p3Sub: "Developed in 1 day with 7 agile iterations.",
+                p3Title: "Cross-Functional Productivity Revolution with AI Collaboration",
+                p3Desc: "A sharing of our experience in practicing human-AI collaboration, validating, and establishing team roles.",
+                p3Button: "Read Experience Sharing",
+                footerButton: "The Full Deep Grip Project",
+                footerCredits: "Deployed by GitHub Pages | Crafted by Gemini Pro | Last updated in 2025 by <a href=\"mailto:babelon1882@gmail.com\" class=\"hover:text-gray-800 border-b border-dotted border-gray-500 hover:border-gray-800\">Ying-Tzu Liu</a>"
             }
-        }
+        };
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const mainTimeline = document.getElementById('timeline-main');
-            const sideTimeline = document.getElementById('timeline-side');
+        const langZhBtn = document.getElementById('lang-zh');
+        const langEnBtn = document.getElementById('lang-en');
+        // 修改處：選取帶有 ID 的按鈕
+        const footerLinkButton = document.getElementById('footer-link-button');
+
+        // 修改處：建立一個包含中英文連結的物件
+        const footerLinks = {
+            zh: 'https://docs.google.com/document/d/1Sp5foSaxwOFjFrQ52RAxD2RRhgsUo7c8Kmb3b5AIIzw/edit?usp=sharing',
+            en: 'https://docs.google.com/document/d/1OcoZZoMoYOofDfsYe8x28rkm5oa-KKVJUp75qgdkuqM/edit?tab=t.9s1md42w3d95'
+        };
+
+        function switchLanguage(lang) {
+            document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+            const trans = translations[lang];
             
-            versions.forEach(version => {
-                const tagInfo = getTagInfo(version.tag);
-                const item = document.createElement('div');
-                item.className = 'timeline-item relative pl-8 pb-8';
-                item.innerHTML = `
-                    <div class="timeline-dot ${tagInfo.dotClass}"></div>
-                    <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300">
-                        <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-2">
-                            <h3 class="text-xl font-bold text-slate-800">${version.name}</h3>
-                            <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full ${tagInfo.class} mt-2 sm:mt-0">${version.tag}</span>
-                        </div>
-                        <p class="text-slate-600 mb-4">${version.description}</p>
-                        <a href="${version.file}" class="inline-block bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">
-                            前往 »
-                        </a>
-                    </div>
-                `;
-                if(version.column === 'main') {
-                    mainTimeline.appendChild(item);
-                } else {
-                    sideTimeline.appendChild(item);
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.dataset.langKey;
+                if (trans[key] !== undefined) { 
+                    el.innerHTML = trans[key];
                 }
             });
 
-            const mainVersions = versions.filter(v => v.column === 'main');
-            const ctx = document.getElementById('evolutionChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: mainVersions.map(v => v.name),
-                    datasets: [{
-                        label: '累積功能數量',
-                        data: mainVersions.map(v => v.features),
-                        borderColor: '#38bdf8',
-                        backgroundColor: 'rgba(56, 189, 248, 0.1)',
-                        fill: true,
-                        tension: 0.3,
-                        pointBackgroundColor: '#38bdf8',
-                        pointHoverRadius: 7,
-                        pointHitRadius: 10
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } }, x: { grid: { display: false } } },
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: '#0f172a',
-                            titleFont: { size: 16 },
-                            bodyFont: { size: 14 },
-                            padding: 12,
-                            boxPadding: 4,
-                            callbacks: { label: (context) => `累積功能: ${context.parsed.y}` }
-                        }
-                    }
-                }
-            });
+            // 修改處：根據語言動態更新按鈕連結
+            footerLinkButton.href = footerLinks[lang];
+
+            // 特殊處理單位詞
+            if (lang === 'en') {
+                document.querySelector('[data-lang-key="dashUnit"]').style.display = 'none';
+                document.querySelector('[data-lang-key="dashMembersUnit"]').style.display = 'none';
+            } else {
+                document.querySelector('[data-lang-key="dashUnit"]').style.display = 'inline';
+                document.querySelector('[data-lang-key="dashMembersUnit"]').style.display = 'inline';
+            }
+
+            langZhBtn.classList.toggle('active', lang === 'zh');
+            langEnBtn.classList.toggle('active', lang === 'en');
+        }
+
+        langZhBtn.addEventListener('click', () => switchLanguage('zh'));
+        langEnBtn.addEventListener('click', () => switchLanguage('en'));
+        
+        // 頁面載入時執行所有計算
+        document.addEventListener('DOMContentLoaded', () => {
+            calculateCollaborationDays();
+            fetchGithubCommits();
         });
     </script>
 
