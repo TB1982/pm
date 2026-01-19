@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>曼陀羅九宮格生成器 (Mandala Chart) - 免費線上目標達成計畫工具</title>
+    <meta name="description" content="免費線上曼陀羅九宮格生成器 (Mandala Chart)。支援馬卡龍、莫蘭迪色系自訂配色，提供智能對比度文字與高解析圖片下載。幫助您運用M-1九宮格思考法，視覺化規劃年度目標與人生清單，操作簡單無需安裝。">
+    <meta name="keywords" content="曼陀羅九宮格, 曼陀羅思考法, Mandala Chart, 九宮格思考法, 目標達成, 年度計畫, 視覺化圖表, 線上工具, 免費下載, 生產力工具, M-1九宮格">
+    <meta name="author" content="Nova & Gemini Pro">
+    <meta name="robots" content="index, follow">
+
+    <meta property="og:title" content="曼陀羅九宮格生成器 - 打造你的目標藍圖">
+    <meta property="og:description" content="免費、免安裝的線上曼陀羅思考法工具。自訂配色、一鍵下載，立即規劃你的精彩人生。">
+    <meta property="og:type" content="website">
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect x=%225%22 y=%225%22 width=%2290%22 height=%2290%22 rx=%2215%22 fill=%22%236366f1%22/><path d=%22M30 30h40M30 50h40M30 70h40M30 30v40M50 30v40M70 30v40%22 stroke=%22white%22 stroke-width=%228%22 stroke-linecap=%22round%22/></svg>">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --grid-gap: 4px;
+            --grid-border-color: #475569;
+            --font-size-s: 0.9rem;
+            --font-size-m: 1.1rem;
+            --font-size-l: 1.4rem;
+            --font-size-xl: 1.8rem;
+            --current-font-size: var(--font-size-m);
+        }
+
+        body {
+            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        h1 { margin-bottom: 15px; color: #334155; font-size: 1.8rem; text-align: center; }
+
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            margin-bottom: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            align-items: flex-start;
+            justify-content: center;
+            max-width: 950px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .control-label {
+            font-size: 0.9rem;
+            color: #64748b;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .btn-group { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+
+        button {
+            padding: 8px 16px;
+            border: 1px solid #cbd5e1;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+            color: #475569;
+            font-weight: 500;
+        }
+
+        button:hover { background: #f1f5f9; border-color: #94a3b8; }
+        button.active { background: #6366f1; color: white; border-color: #6366f1; }
+        
+        .btn-primary { background: #6366f1; color: white; border: none; }
+        .btn-primary:hover { background: #4f46e5; }
+        .btn-outline { border: 1px solid #6366f1; color: #6366f1; }
+        .btn-outline:hover { background: #eef2ff; }
+
+        .color-picker-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .palette-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .palette-name {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            width: 60px;
+            text-align: right;
+            margin-right: 5px;
+        }
+
+        .color-swatch {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.1s, border-color 0.2s;
+            position: relative;
+        }
+        .color-swatch:hover { 
+            transform: scale(1.15); 
+            border-color: rgba(0,0,0,0.2); 
+            z-index: 10;
+        }
+        .color-swatch:active { transform: scale(0.95); }
+
+        .custom-picker-row {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 5px;
+            padding-top: 5px;
+            border-top: 1px dashed #e2e8f0;
+        }
+
+        #mandala-container-wrapper {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-width: 800px;
+            width: 100%;
+        }
+
+        #mandala-container {
+            background: var(--grid-border-color);
+            border: 3px solid var(--grid-border-color);
+            aspect-ratio: 1 / 1;
+            box-sizing: border-box;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: var(--grid-gap);
+            width: 100%;
+            height: 100%;
+        }
+
+        .sub-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 1px;
+            background-color: var(--grid-border-color);
+        }
+
+        .cell {
+            position: relative;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transition: background-color 0.3s, color 0.3s;
+            font-size: var(--current-font-size);
+            font-weight: 500;
+        }
+
+        .editable-div {
+            width: 100%;
+            height: 100%;
+            border: none;
+            text-align: center;
+            background: transparent;
+            padding: 4px;
+            box-sizing: border-box;
+            outline: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            word-break: break-word;
+            overflow: hidden;
+            font-family: inherit;
+            color: inherit;
+        }
+
+        .editable-div:empty::before {
+            content: attr(data-placeholder);
+            color: inherit;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        #fileInput { display: none; }
+
+        @media (max-width: 768px) {
+            .controls { padding: 15px; gap: 20px; }
+            .palette-row { flex-wrap: wrap; justify-content: center; }
+            .palette-name { width: 100%; text-align: center; margin-bottom: 2px; }
+            :root {
+                --font-size-s: 0.7rem;
+                --font-size-m: 0.9rem;
+                --font-size-l: 1.1rem;
+                --font-size-xl: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>曼陀羅九宮格生成器</h1>
+
+    <div class="controls">
+        <div class="control-group">
+            <span class="control-label">字體大小</span>
+            <div class="btn-group" id="fontSizeControls">
+                <button onclick="setFontSize('s')" id="btn-fs-s">小</button>
+                <button onclick="setFontSize('m')" id="btn-fs-m" class="active">中</button>
+                <button onclick="setFontSize('l')" id="btn-fs-l">大</button>
+                <button onclick="setFontSize('xl')" id="btn-fs-xl">特大</button>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <span class="control-label">風格色系 (點選顏色 → 點擊區塊中心)</span>
+            <div class="color-picker-wrapper">
+                <div class="palette-row">
+                    <span class="palette-name">馬卡龍</span>
+                    <div class="color-swatch" style="background: #FF9999;" onclick="pickColor('#FF9999')"></div>
+                    <div class="color-swatch" style="background: #FFCC99;" onclick="pickColor('#FFCC99')"></div>
+                    <div class="color-swatch" style="background: #FFF599;" onclick="pickColor('#FFF599')"></div>
+                    <div class="color-swatch" style="background: #B8FFB8;" onclick="pickColor('#B8FFB8')"></div>
+                    <div class="color-swatch" style="background: #99FFFF;" onclick="pickColor('#99FFFF')"></div>
+                    <div class="color-swatch" style="background: #99CCFF;" onclick="pickColor('#99CCFF')"></div>
+                    <div class="color-swatch" style="background: #CC99FF;" onclick="pickColor('#CC99FF')"></div>
+                    <div class="color-swatch" style="background: #FF99CC;" onclick="pickColor('#FF99CC')"></div>
+                </div>
+
+                <div class="palette-row">
+                    <span class="palette-name">莫蘭迪</span>
+                    <div class="color-swatch" style="background: #D3C4BE;" onclick="pickColor('#D3C4BE')"></div>
+                    <div class="color-swatch" style="background: #B4A5A5;" onclick="pickColor('#B4A5A5')"></div>
+                    <div class="color-swatch" style="background: #8C9A9E;" onclick="pickColor('#8C9A9E')"></div>
+                    <div class="color-swatch" style="background: #989F86;" onclick="pickColor('#989F86')"></div>
+                    <div class="color-swatch" style="background: #B0A695;" onclick="pickColor('#B0A695')"></div>
+                    <div class="color-swatch" style="background: #7E8088;" onclick="pickColor('#7E8088')"></div>
+                    <div class="color-swatch" style="background: #A79086;" onclick="pickColor('#A79086')"></div>
+                    <div class="color-swatch" style="background: #606c78;" onclick="pickColor('#606c78')"></div>
+                </div>
+
+                <div class="palette-row">
+                    <span class="palette-name">大地色</span>
+                    <div class="color-swatch" style="background: #D4A373;" onclick="pickColor('#D4A373')"></div>
+                    <div class="color-swatch" style="background: #CCD5AE;" onclick="pickColor('#CCD5AE')"></div>
+                    <div class="color-swatch" style="background: #E9EDC9;" onclick="pickColor('#E9EDC9')"></div>
+                    <div class="color-swatch" style="background: #FAEDCD;" onclick="pickColor('#FAEDCD')"></div>
+                    <div class="color-swatch" style="background: #A98467;" onclick="pickColor('#A98467')"></div>
+                    <div class="color-swatch" style="background: #6C584C;" onclick="pickColor('#6C584C')"></div>
+                    <div class="color-swatch" style="background: #588157;" onclick="pickColor('#588157')"></div>
+                    <div class="color-swatch" style="background: #3A5A40;" onclick="pickColor('#3A5A40')"></div>
+                </div>
+
+                <div class="custom-picker-row">
+                    <span style="font-size: 0.8rem; color:#888;">自訂顏色:</span>
+                    <input type="color" id="colorPicker" value="#6366f1" style="cursor: pointer; height: 24px; width: 40px; padding: 0; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <span class="control-label">存取與下載</span>
+            <div class="btn-group">
+                <button class="btn-outline" onclick="exportData()">匯出</button>
+                <button class="btn-outline" onclick="document.getElementById('fileInput').click()">匯入</button>
+                <button class="btn-primary" onclick="downloadImage()">下載圖片</button>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="fileInput" accept=".json" onchange="importData(this)">
+
+    <div id="mandala-container-wrapper">
+        <div id="mandala-container">
+            <div class="main-grid" id="mainGrid"></div>
+        </div>
+    </div>
+
+    <script>
+        let state = {
+            blocks: Array(9).fill().map(() => ({ color: '#ffffff' })),
+            cells: Array(81).fill('') 
+        };
+
+        const mainGrid = document.getElementById('mainGrid');
+        const colorPicker = document.getElementById('colorPicker');
+
+        function init() { renderGrid(); }
+
+        function renderGrid() {
+            mainGrid.innerHTML = '';
+            for (let i = 0; i < 9; i++) {
+                const subGrid = document.createElement('div');
+                subGrid.className = 'sub-grid';
+
+                const baseColor = state.blocks[i].color;
+                
+                // 顏色運算 (保持 Pro 精修版邏輯)
+                let centerColor, surroundColor;
+
+                if (baseColor.toLowerCase() === '#ffffff') {
+                    centerColor = '#ffffff';
+                    surroundColor = '#ffffff';
+                } else {
+                    // 中央飽和度+5%，周邊混白87%
+                    centerColor = saturateColor(baseColor, 0.05);
+                    surroundColor = lightenColor(baseColor, 0.87);
+                }
+
+                for (let j = 0; j < 9; j++) {
+                    const cellIndex = i * 9 + j;
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+
+                    const isCenter = (j === 4);
+                    let finalBgColor = isCenter ? centerColor : surroundColor;
+                    
+                    cell.style.backgroundColor = finalBgColor;
+                    cell.style.color = getContrastYIQ(finalBgColor);
+
+                    const editableDiv = document.createElement('div');
+                    editableDiv.className = 'editable-div';
+                    editableDiv.contentEditable = "true";
+                    editableDiv.innerText = state.cells[cellIndex];
+                    editableDiv.setAttribute('data-placeholder', isCenter ? "中心" : "");
+                    
+                    editableDiv.addEventListener('input', (e) => {
+                        state.cells[cellIndex] = e.target.innerText;
+                    });
+
+                    if (isCenter) {
+                        editableDiv.addEventListener('click', () => {
+                            applyColorToBlock(i, colorPicker.value);
+                        });
+                    } else {
+                        cell.addEventListener('click', (e) => {
+                             if (e.target === cell) editableDiv.focus();
+                        });
+                    }
+
+                    cell.appendChild(editableDiv);
+                    subGrid.appendChild(cell);
+                }
+                mainGrid.appendChild(subGrid);
+            }
+        }
+
+        colorPicker.addEventListener('input', (e) => { });
+        function pickColor(color) { colorPicker.value = color; }
+
+        function applyColorToBlock(blockIndex, color) {
+            state.blocks[blockIndex].color = color;
+            renderGrid();
+            setTimeout(() => {
+                const centerCellIndex = blockIndex * 9 + 4;
+                const allDivs = document.querySelectorAll('.editable-div');
+                if (allDivs[centerCellIndex]) allDivs[centerCellIndex].focus();
+            }, 0);
+        }
+
+        function setFontSize(size) {
+            const root = document.documentElement;
+            document.querySelectorAll('#fontSizeControls button').forEach(b => b.classList.remove('active'));
+            document.getElementById(`btn-fs-${size}`).classList.add('active');
+            let newSize = '1.1rem';
+            if (size === 's') newSize = varStyle('--font-size-s');
+            if (size === 'm') newSize = varStyle('--font-size-m');
+            if (size === 'l') newSize = varStyle('--font-size-l');
+            if (size === 'xl') newSize = varStyle('--font-size-xl');
+            root.style.setProperty('--current-font-size', newSize);
+        }
+        
+        function varStyle(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+        function downloadImage() {
+            const container = document.getElementById('mandala-container');
+            const editables = container.querySelectorAll('.editable-div');
+            editables.forEach(el => el.contentEditable = "false");
+            html2canvas(container, { scale: 3, backgroundColor: null, logging: false, useCORS: true }).then(canvas => {
+                editables.forEach(el => el.contentEditable = "true");
+                const link = document.createElement('a');
+                link.download = 'mandala_chart.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
+            const node = document.createElement('a');
+            node.setAttribute("href", dataStr);
+            node.setAttribute("download", "mandala_data.json");
+            document.body.appendChild(node);
+            node.click();
+            node.remove();
+        }
+
+        function importData(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const d = JSON.parse(e.target.result);
+                    if (d && d.blocks && d.cells) { state = d; renderGrid(); alert('匯入成功'); } else alert('格式錯誤');
+                } catch (er) { alert('檔案錯誤'); }
+                input.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        function saturateColor(hex, amount) {
+            hex = hex.replace('#', '');
+            let r = parseInt(hex.substring(0,2), 16);
+            let g = parseInt(hex.substring(2,4), 16);
+            let b = parseInt(hex.substring(4,6), 16);
+            let hsl = rgbToHsl(r, g, b);
+            hsl[1] = Math.min(1, Math.max(0, hsl[1] + amount));
+            let rgb = hslToRgb(hsl[0], hsl[1], hsl[2]);
+            return "#" + ((1 << 24) + (rgb[0] << 16) + (rgb[1] << 8) + rgb[2]).toString(16).slice(1);
+        }
+
+        function lightenColor(hex, amount) {
+            hex = hex.replace('#', '');
+            let r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
+            r = Math.round(r + (255 - r) * amount);
+            g = Math.round(g + (255 - g) * amount);
+            b = Math.round(b + (255 - b) * amount);
+            return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).padStart(6, '0');
+        }
+
+        function getContrastYIQ(hexcolor){
+            hexcolor = hexcolor.replace("#", "");
+            if (hexcolor.length === 3) hexcolor = hexcolor.split('').map(c => c + c).join('');
+            var r = parseInt(hexcolor.substr(0,2),16);
+            var g = parseInt(hexcolor.substr(2,2),16);
+            var b = parseInt(hexcolor.substr(4,2),16);
+            var yiq = ((r*299)+(g*587)+(b*114))/1000;
+            return (yiq >= 160) ? '#334155' : '#ffffff'; 
+        }
+
+        function rgbToHsl(r, g, b) {
+            r /= 255, g /= 255, b /= 255;
+            var max = Math.max(r, g, b), min = Math.min(r, g, b);
+            var h, s, l = (max + min) / 2;
+            if (max == min) { h = s = 0; } else {
+                var d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h /= 6;
+            }
+            return [h, s, l];
+        }
+
+        function hslToRgb(h, s, l) {
+            var r, g, b;
+            if (s == 0) { r = g = b = l; } else {
+                function hue2rgb(p, q, t) {
+                    if (t < 0) t += 1; if (t > 1) t -= 1;
+                    if (t < 1/6) return p + (q - p) * 6 * t;
+                    if (t < 1/2) return q;
+                    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+                    return p;
+                }
+                var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                var p = 2 * l - q;
+                r = hue2rgb(p, q, h + 1/3);
+                g = hue2rgb(p, q, h);
+                b = hue2rgb(p, q, h - 1/3);
+            }
+            return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+        }
+
+        init();
+    </script>
+</body>
+</html>
