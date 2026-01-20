@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>曼陀羅九宮格生成器 (Mandala Chart) - 兼容放射型與螺旋型思考的目標管理工具</title>
-    <meta name="description" content="源自松村寧雄的曼陀羅思考法(Mandala Chart)線上工具。支援大谷翔平使用的目標達成九宮格，具備自動散射連動、多巴胺配色。整合水平思考與垂直思考，是規劃年度目標與專案管理的最佳免費工具。">
-    <meta name="keywords" content="曼陀羅九宮格, 曼陀羅思考法, Mandala Chart, 松村寧雄, 大谷翔平, 目標管理, 放射性思考, 螺旋式思考, M-1九宮格, 年度計畫">
+    <title>曼陀羅九宮格生成器 (Mandala Chart) </title>
+    <meta name="description" content="基於認知心理學(Cognitive Psychology)設計的曼陀羅九宮格工具。利用雙重編碼(Dual Coding)與降低認知負荷(Cognitive Load)原理，提供自動散射與多巴胺配色。支援大谷翔平目標達成法，是年度計畫與創意思考的最佳免費工具。">
+    <meta name="keywords" content="曼陀羅九宮格, Mandala Chart, 目標管理, 認知心理學, 雙重編碼, 大谷翔平, 放射性思考, 螺旋式思考, M-1九宮格">
     <meta name="author" content="Nova & Gemini Pro">
     
-    <meta property="og:title" content="曼陀羅九宮格生成器 - 大谷翔平的目標達成法">
-    <meta property="og:description" content="整合水平與垂直思考的雙軸思維系統。支援放射發散與螺旋深究雙重模式，立即免費使用。">
+    <meta property="og:title" content="曼陀羅九宮格生成器 - 全方位思考工具">
+    <meta property="og:description" content="結合視覺化認知輔助與雙軸思考的目標達成系統。由 Gemini Pro 協作打造。">
     <meta property="og:type" content="website">
 
     <script type="application/ld+json">
@@ -18,26 +18,24 @@
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
       "name": "Mandala Chart Generator",
+      "author": {
+        "@type": "Person",
+        "name": "Nova"
+      },
       "applicationCategory": "ProductivityApplication",
       "operatingSystem": "Web",
-      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-      "description": "An advanced online Mandala Chart tool based on Yasuo Matsumura's methodology. Features dual-axis thinking (Lateral/Vertical), auto-scatter logic, and multilingual support.",
-      "featureList": "Radiant & Spiral Logic Support, Auto-scatter, Dopamine Colors, RWD, Image Download",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "TWD" },
+      "description": "A sophisticated Mandala Chart tool engineered with Cognitive Psychology principles. It utilizes Information Layering to reduce Cognitive Load and Dual Coding Theory (linking text with colors) for Memory Anchoring. Features distinct Radiant (Horizontal) and Spiral (Vertical) thinking modes.",
+      "featureList": "Visual Cognitive Aid, Cognitive Load Reduction, Dual Coding Memory Anchoring, Radiant & Spiral Logic, Auto-scatter, Dopamine Colors, Minimalist Black/White Mode",
+      "datePublished": "2026-01-20",
       "mainEntity": {
         "@type": "FAQPage",
         "mainEntity": [{
           "@type": "Question",
-          "name": "什麼是曼陀羅思考法 (Mandala Thinking)?",
+          "name": "為什麼這個工具有助於記憶?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "源於1979年松村寧雄開發的系統，靈感取自佛教曼陀羅，強調從中心核心本質向外無限衍生的輻射狀思考模式。"
-          }
-        }, {
-          "@type": "Question",
-          "name": "放射性與螺旋式填寫有何不同?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "放射性(模式一)適合創意發想與靈感捕捉；螺旋式(模式二)適合依照順時鐘順序進行流程規劃與深度探究。"
+            "text": "本工具運用雙重編碼(Dual Coding)原理，透過色彩與空間配置強化大腦對抽象目標的記憶定錨。"
           }
         }]
       }
@@ -69,7 +67,7 @@
             align-items: center;
             min-height: 100vh;
             color: #333;
-            padding-bottom: 80px;
+            padding-bottom: 20px; 
         }
 
         .header-row {
@@ -150,6 +148,7 @@
         .color-swatch {
             width: 24px; height: 24px; border-radius: 5px; cursor: pointer;
             border: 2px solid transparent; transition: transform 0.1s;
+            box-sizing: border-box; /* 確保邊框不影響大小 */
         }
         .color-swatch:hover { transform: scale(1.15); border-color: rgba(0,0,0,0.2); }
         .custom-picker-row { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding-top: 5px; border-top: 1px dashed #e2e8f0; }
@@ -219,16 +218,15 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.04);
             color: #334155;
             line-height: 1.8;
+            margin-bottom: 40px;
         }
 
-        .guide-section h2 { font-size: 1.6rem; color: #1e293b; margin-bottom: 25px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; }
-        .guide-section h3 { font-size: 1.2rem; color: #6366f1; margin-top: 35px; margin-bottom: 15px; font-weight: 700; }
-        .guide-section h4 { font-size: 1.05rem; color: #475569; margin-top: 20px; margin-bottom: 8px; font-weight: 600; }
+        .guide-section h2 { font-size: 1.6rem; color: #1e293b; margin-bottom: 25px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+        .guide-section h3 { font-size: 1.2rem; color: #6366f1; margin-top: 35px; margin-bottom: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px;}
         .guide-section p { margin-bottom: 15px; font-size: 1rem; text-align: justify; }
         .guide-section li { margin-bottom: 8px; font-size: 1rem; }
         .guide-section ul, .guide-section ol { padding-left: 24px; margin-bottom: 20px; }
         
-        /* 模式說明框 */
         .mode-box { 
             background: #f8fafc; 
             padding: 20px; 
@@ -236,10 +234,30 @@
             margin: 20px 0; 
             border-radius: 0 8px 8px 0; 
         }
-        .mode-box strong { color: #6366f1; }
+        
+        /* Footer Styles */
+        .site-footer {
+            margin-top: 40px;
+            text-align: center;
+            padding: 30px 20px;
+            color: #64748b;
+            background-color: rgba(255,255,255,0.5);
+            width: 100%;
+            font-size: 0.9rem;
+        }
+        .site-footer a {
+            color: #6366f1;
+            text-decoration: none;
+            border-bottom: 1px dotted #6366f1;
+            transition: all 0.2s;
+        }
+        .site-footer a:hover {
+            color: #4f46e5;
+            border-bottom: 1px solid #4f46e5;
+        }
 
         @media (max-width: 600px) {
-            body { padding: 10px; padding-bottom: 150px; }
+            body { padding: 10px; padding-bottom: 20px; }
             .header-row { flex-direction: column; gap: 10px; }
             .lang-switch { position: static; transform: none; align-self: flex-end; margin-right: 10px;}
             .controls { padding: 15px; gap: 15px; }
@@ -292,6 +310,7 @@
                     <div class="color-swatch" style="background: #0055FF;" onclick="pickColor('#0055FF')"></div>
                     <div class="color-swatch" style="background: #AA00FF;" onclick="pickColor('#AA00FF')"></div>
                     <div class="color-swatch" style="background: #FF00AA;" onclick="pickColor('#FF00AA')"></div>
+                    <div class="color-swatch" style="background: #000000;" onclick="pickColor('#000000')"></div>
                 </div>
                 <div class="palette-row">
                     <span class="palette-name" data-i18n="pMorandi">莫蘭迪</span>
@@ -303,6 +322,7 @@
                     <div class="color-swatch" style="background: #7E8088;" onclick="pickColor('#7E8088')"></div>
                     <div class="color-swatch" style="background: #A79086;" onclick="pickColor('#A79086')"></div>
                     <div class="color-swatch" style="background: #606c78;" onclick="pickColor('#606c78')"></div>
+                    <div class="color-swatch" style="background: #ffffff; border: 1px solid #e2e8f0;" onclick="pickColor('#ffffff')"></div>
                 </div>
                 <div class="palette-row">
                     <span class="palette-name" data-i18n="pEarth">大地色</span>
@@ -317,7 +337,7 @@
                 </div>
                 <div class="custom-picker-row">
                     <span style="font-size: 0.8rem; color:#888;" data-i18n="customColor">自訂顏色:</span>
-                    <input type="color" id="colorPicker" value="#6366f1" style="cursor: pointer; height: 24px; width: 40px; padding: 0; border: 1px solid #ccc; border-radius: 4px;">
+                    <input type="color" id="colorPicker" value="#99CCFF" style="cursor: pointer; height: 24px; width: 40px; padding: 0; border: 1px solid #ccc; border-radius: 4px;">
                 </div>
             </div>
         </div>
@@ -341,8 +361,13 @@
     <article class="guide-section" id="guideSection">
         </article>
 
+    <footer class="site-footer">
+        <p data-i18n="footerCredits">
+            由 GitHub 部署 | Gemini Pro 傾力打造 | <a href="mailto:babelon1882@gmail.com">Nova</a> 最後更新於 2026
+        </p>
+    </footer>
+
     <script>
-        // --- i18n Resources (Updated with User's Copy) ---
         const translations = {
             zh: {
                 title: '曼陀羅九宮格生成器',
@@ -355,8 +380,9 @@
                 btnExport: '匯出', btnImport: '匯入', btnDownload: '下載圖片',
                 coreGoal: '核心目標', subGoal: '次目標',
                 alertImportSuccess: '匯入成功', alertFormatError: '格式錯誤', alertFileError: '檔案錯誤',
+                footerCredits: '由 GitHub 部署 | Gemini Pro 傾力打造 | <a href="mailto:babelon1882@gmail.com">Nova</a> 最後更新於 2026',
                 guideHTML: `
-                    <h2>什麼是曼陀羅思考法？</h2>
+                    <h2>🧩 什麼是曼陀羅思考法？</h2>
                     <p>這不僅僅是一個九宮格，它是一套能將 <strong>抽象目標</strong> 轉化為 <strong>具體行動</strong> 的思維導航系統。透過 3x3 的矩陣結構，強制大腦在有限的空間內進行無限的延伸，幫助使用者在混沌的資訊中建立秩序。</p>
                     
                     <h2>📜 起源與哲學 (Origin & Philosophy)</h2>
@@ -371,14 +397,14 @@
                     <h3>C. 現代應用：從管理到卓越</h3>
                     <p>此方法原用於企業管理與績效考核，後因美國職棒大聯盟（MLB）球星 <strong>大谷翔平 (Shohei Ohtani)</strong> 在高中時期利用此表（常被稱為「目標達成九宮格」）成功規劃出邁向世界級選手的路徑而廣為人知。它證明了曼陀羅思考法在 <strong>「個人目標管理」</strong> 與 <strong>「潛能開發」</strong> 上的卓越成效。</p>
 
-                    <h2>雙軸思維整合：水平與垂直的交響</h2>
+                    <h2>🧠 雙軸思維整合：水平與垂直的交響</h2>
                     <p>曼陀羅的強大之處，在於它同時整合了兩種維度的思考模式：</p>
                     <ul>
                         <li><strong>水平思考 (Lateral Thinking) —— 廣度的探索：</strong>當你站在中心（核心主題）向外觀看，周圍的八個格子代表了「廣度」。它強迫你去發掘與主題相關的八個不同面向或類別，打破單一視角的盲點。</li>
                         <li><strong>垂直思考 (Vertical Thinking) —— 深度的挖掘：</strong>當你選定周圍任一格子作為次主題，並將其展開為另一個九宮格時，這就是「深度」。它要求你針對該面向提出具體的執行方案、KPI 或細節，將概念落實為行動。</li>
                     </ul>
 
-                    <h2>兩大填寫策略：放射性 vs. 螺旋式</h2>
+                    <h2>🛤️ 兩大填寫策略：放射性 vs. 螺旋式</h2>
                     <p>根據你的目標屬性，選擇最適合的思維路徑：</p>
 
                     <div class="mode-box">
@@ -403,7 +429,7 @@
                         <li><strong>發散或排序：</strong>依據您的思維模式，在周圍 8 格填入關鍵字。</li>
                         <li><strong>自動連動：</strong>系統會自動將這 8 個關鍵字帶入外圍九宮格的中心，省去重複抄寫的時間。</li>
                         <li><strong>深化內容：</strong>在外圍格子中填寫具體執行方案 (Action Items)。</li>
-                        <li><strong>視覺化管理：</strong>善用「多巴胺色」來激勵動力，或「莫蘭迪色」來保持專注，並留下顏色與區塊記憶。</li>
+                        <li><strong>視覺化管理：</strong>善用「多巴胺色」來激勵動力，或「莫蘭迪色」來保持專注，強化記憶定錨。</li>
                     </ul>
                 `
             },
@@ -418,55 +444,42 @@
                 btnExport: 'Export', btnImport: 'Import', btnDownload: 'Download',
                 coreGoal: 'Core Goal', subGoal: 'Sub Goal',
                 alertImportSuccess: 'Import Successful!', alertFormatError: 'Invalid Format', alertFileError: 'File Error',
+                footerCredits: 'Deployed via GitHub | Powered by Gemini Pro | <a href="mailto:babelon1882@gmail.com">Nova</a> Last updated 2026',
                 guideHTML: `
-                    <h2>What is Mandala Thinking?</h2>
-                    <p>This is more than just a 9-grid chart; it is a mental navigation system that transforms <strong>abstract goals</strong> into <strong>concrete actions</strong>. Through its 3x3 matrix structure, it forces the brain to expand limitlessly within a finite space, helping users establish order amidst chaotic information.</p>
+                    <h2>🧩 What is Mandala Thinking?</h2>
+                    <p>This is more than just a 9-grid chart; it is a mental navigation system that transforms <strong>abstract goals</strong> into <strong>concrete actions</strong>. Through its 3x3 matrix structure, it forces the brain to expand limitlessly within a finite space.</p>
                     
                     <h2>📜 Origin & Philosophy</h2>
-                    
-                    <h3>A. Founding & Development</h3>
-                    <p>The Mandala Chart (Mandala Thinking) originated in <strong>1979</strong>, developed by <strong>Yasuo Matsumura</strong> of the <strong>Clover Management Research Institute</strong> in Japan.</p>
+                    <p>The Mandala Chart originated in <strong>1979</strong>, developed by <strong>Yasuo Matsumura</strong> of the <strong>Clover Management Research Institute</strong> in Japan.</p>
+                    <p>Its design is inspired by the Buddhist <strong>"Mandala"</strong>, symbolizing essence and completeness. It allows thinking to return to the brain's natural <strong>"Radiant"</strong> operating mode.</p>
+                    <p>It became globally famous after MLB star <strong>Shohei Ohtani</strong> used it to map his path to success.</p>
 
-                    <h3>B. Design Logic: Systematizing Eastern Wisdom</h3>
-                    <p>Its inspiration comes from the <strong>"Mandala"</strong> of Esoteric Buddhism. In Sanskrit, Mandala means "circle" or "essence," symbolizing the completeness of the universe.</p>
-                    <p>Matsumura transformed this concept into a business and logical tool, viewing the "center" as the core essence and the "surroundings" as infinitely derived phenomena. It breaks the limitations of traditional Linear Note-taking, allowing thinking to return to the brain's most natural <strong>"Radiant"</strong> operating mode.</p>
-
-                    <h3>C. Modern Application: From Management to Excellence</h3>
-                    <p>Originally used for corporate management and performance assessment, this method became widely known after MLB superstar <strong>Shohei Ohtani</strong> used it (often called the "Goal Achievement Chart") during high school to map out his path to becoming a world-class player. It proves the excellent effectiveness of Mandala Thinking in <strong>"Personal Goal Management"</strong> and <strong>"Potential Development"</strong>.</p>
-
-                    <h2>Dual-Axis Integration: A Symphony of Horizontal & Vertical</h2>
-                    <p>The power of the Mandala Chart lies in its integration of two dimensions of thinking:</p>
+                    <h2>🧠 Dual-Axis Integration</h2>
                     <ul>
-                        <li><strong>Lateral Thinking (Horizontal) — Exploration of Breadth:</strong> When you stand at the center (Core Theme) and look outward, the eight surrounding cells represent "breadth." It forces you to discover eight different facets or categories related to the theme, breaking the blind spots of a single perspective.</li>
-                        <li><strong>Vertical Thinking (Depth) — Excavation of Depth:</strong> When you select any surrounding cell as a sub-theme and expand it into another 9-grid, this is "depth." It requires you to propose specific execution plans, KPIs, or details for that facet, implementing concepts into actions.</li>
+                        <li><strong>Lateral Thinking (Horizontal):</strong> Exploring breadth by expanding from the center to surrounding cells.</li>
+                        <li><strong>Vertical Thinking (Depth):</strong> Digging deep by expanding a sub-theme into detailed action plans.</li>
                     </ul>
 
-                    <h2>Two Filling Strategies: Radiant vs. Spiral</h2>
-                    <p>Choose the most suitable thinking path based on your goal attributes:</p>
-
+                    <h2>🛤️ Two Filling Strategies</h2>
                     <div class="mode-box">
-                        <h3>🌟 Mode 1: Radiant / Horizontal Thinking</h3>
-                        <p><strong>Scenario:</strong> Creative brainstorming, capturing inspiration, annual goal setting.<br>
-                        <strong>Path:</strong> Start from the center and jump freely to any surrounding cell.<br>
-                        <strong>Applications:</strong> Brainstorming, product feature ideation, vision boards, self-growth goal setting.<br>
-                        <strong>Advantage:</strong> Unrestricted by order, maximizes associative power, captures fleeting sparks of inspiration.</p>
+                        <h3>🌟 Mode 1: Radiant (Horizontal)</h3>
+                        <p><strong>Scenario:</strong> Brainstorming, Goal Setting.<br>
+                        <strong>Advantage:</strong> Maximizes associative power and creativity.</p>
                     </div>
 
                     <div class="mode-box">
-                        <h3>🌀 Mode 2: Spiral / Vertical Thinking</h3>
-                        <p><strong>Scenario:</strong> Process planning, problem decomposition, deep dives, study notes.<br>
-                        <strong>Path:</strong> Start from the center and fill in order (time/process/step) in a clockwise direction (usually starting from the top or bottom).<br>
-                        <strong>Applications:</strong> Project timelines, analyzing causes of problems, storyboarding, prioritizing self-improvement.<br>
-                        <strong>Advantage:</strong> Establishes strong logical coherence and causality, giving thinking the weight of timelines or priorities.</p>
+                        <h3>🌀 Mode 2: Spiral (Vertical)</h3>
+                        <p><strong>Scenario:</strong> Process Planning, Problem Solving.<br>
+                        <strong>Advantage:</strong> Establishes logical coherence and causality.</p>
                     </div>
 
-                    <h2>🚀 How to Use This Tool</h2>
+                    <h2>🚀 How to Use</h2>
                     <ul>
                         <li><strong>Set Core:</strong> Enter your theme in the center.</li>
-                        <li><strong>Radiate or Order:</strong> Fill in keywords in the surrounding 8 cells based on your thinking mode.</li>
-                        <li><strong>Auto-Link:</strong> The system automatically carries these 8 keywords to the centers of the outer grids, saving rewriting time.</li>
-                        <li><strong>Deepen Content:</strong> Fill in specific Action Items in the outer grids.</li>
-                        <li><strong>Visual Management:</strong> Use "Dopamine Colors" for motivation or "Morandi Colors" for focus, creating color and block memory.</li>
+                        <li><strong>Expand:</strong> Fill in keywords in the surrounding 8 cells.</li>
+                        <li><strong>Auto-Link:</strong> Keywords automatically scatter to outer grids.</li>
+                        <li><strong>Deepen:</strong> Fill in Action Items.</li>
+                        <li><strong>Visualize:</strong> Use colors to anchor your memory and motivation.</li>
                     </ul>
                 `
             }
@@ -500,9 +513,6 @@
                 if (t[key]) el.innerHTML = t[key];
             });
             document.getElementById('guideSection').innerHTML = t.guideHTML;
-            document.title = currentLang === 'zh' 
-                ? "曼陀羅九宮格生成器"
-                : "Mandala Chart Generator";
         }
 
         function renderGrid() {
@@ -725,10 +735,5 @@
 
         init();
     </script>
-<footer class="site-footer mt-16 text-center py-8 text-gray-500 bg-white/30">
-        <p data-lang-key="footerCredits">
-            由 GitHub 部署 | Gemini Pro 傾力打造 | <a href="mailto:babelon1882@gmail.com" class="hover:text-gray-800 border-b border-dotted border-gray-500 hover:border-gray-800">Nova</a> 最後更新於 2026
-        </p>
-    </footer>
 </body>
 </html>
