@@ -4,8 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>曼陀羅九宮格生成器</title>
-    <meta name="description" content="支援多巴胺配色、完美邊框修正與RWD的曼陀羅九宮格生成器。">
+    <title>曼陀羅九宮格生成器 (Mandala Chart)</title>
+    <meta name="description" content="Free online Mandala Chart generator with auto-scatter logic, dopamine colors, and multilingual support. Visualizes your goals into actionable plans. 免費線上曼陀羅九宮格生成器，支援中英切換、自動散射連動與豐富配色。">
+    <meta name="keywords" content="Mandala Chart, 曼陀羅九宮格, Goal Setting, 目標管理, M-1 Chart, 九宮格思考法">
+    <meta name="author" content="Nova & Gemini Pro">
+    
+    <meta property="og:title" content="Mandala Chart Generator (曼陀羅九宮格)">
+    <meta property="og:description" content="Visualize your goals with this free, interactive Mandala Chart tool. Supports English & Chinese.">
+    <meta property="og:type" content="website">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Mandala Chart Generator",
+      "applicationCategory": "ProductivityApplication",
+      "operatingSystem": "Web",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "description": "A bilingual (English/Chinese) online tool for creating Mandala Charts with automatic goal scattering feature.",
+      "featureList": "Auto-scatter, Multilingual, Dopamine Colors, RWD, Image Download"
+    }
+    </script>
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect x=%225%22 y=%225%22 width=%2290%22 height=%2290%22 rx=%2215%22 fill=%22%236366f1%22/><path d=%22M30 30h40M30 50h40M30 70h40M30 30v40M50 30v40M70 30v40%22 stroke=%22white%22 stroke-width=%228%22 stroke-linecap=%22round%22/></svg>">
 
@@ -13,8 +32,8 @@
     <style>
         :root {
             --bg-color: #f8fafc;
-            --grid-border-color: #475569; /* 內格線顏色 */
-            --thick-border-color: #1e293b; /* 粗外框顏色 */
+            --grid-border-color: #475569;
+            --thick-border-color: #1e293b;
             --font-size-s: 0.8rem;
             --font-size-m: 1rem;
             --font-size-l: 1.3rem;
@@ -23,7 +42,7 @@
         }
 
         body {
-            font-family: "Microsoft JhengHei", "Heiti TC", sans-serif;
+            font-family: "Microsoft JhengHei", "Heiti TC", "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg-color);
             margin: 0;
             padding: 20px;
@@ -32,10 +51,37 @@
             align-items: center;
             min-height: 100vh;
             color: #333;
-            padding-bottom: 100px;
+            padding-bottom: 80px;
         }
 
-        h1 { margin-bottom: 15px; color: #334155; font-size: 1.6rem; text-align: center; }
+        .header-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            width: 100%;
+            max-width: 950px;
+            margin-bottom: 15px;
+        }
+
+        h1 { margin: 0; color: #334155; font-size: 1.8rem; font-weight: 700; text-align: center; }
+
+        /* 語言切換按鈕 */
+        .lang-switch {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            border: 1px solid #cbd5e1;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            color: #475569;
+            font-weight: 600;
+        }
+        .lang-switch:hover { background: #f1f5f9; color: #6366f1; border-color: #6366f1; }
 
         .controls {
             background: white;
@@ -82,7 +128,7 @@
 
         .color-picker-wrapper { display: flex; flex-direction: column; gap: 10px; }
         .palette-row { display: flex; align-items: center; gap: 6px; justify-content: center; flex-wrap: wrap; }
-        .palette-name { font-size: 0.75rem; color: #94a3b8; width: 50px; text-align: right; margin-right: 4px; }
+        .palette-name { font-size: 0.75rem; color: #94a3b8; width: 60px; text-align: right; margin-right: 4px; }
         
         .color-swatch {
             width: 24px; height: 24px; border-radius: 5px; cursor: pointer;
@@ -91,7 +137,6 @@
         .color-swatch:hover { transform: scale(1.15); border-color: rgba(0,0,0,0.2); }
         .custom-picker-row { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding-top: 5px; border-top: 1px dashed #e2e8f0; }
 
-        /* --- 核心重構區：Grid 系統 --- */
         #mandala-container-wrapper {
             background: white;
             padding: 10px;
@@ -100,15 +145,14 @@
             max-width: 800px;
             width: 100%;
             overflow: visible; 
+            margin-bottom: 40px;
         }
 
         #mandala-container {
-            /* 修正：改回使用實體 border，這是最保險的邊框顯示方式 */
             border: 3px solid var(--thick-border-color);
-            background-color: var(--grid-border-color); /* 格線隙縫顏色 */
-            
+            background-color: var(--grid-border-color);
             width: 100%;
-            box-sizing: border-box; /* 關鍵：確保 border 包含在 100% 寬度內 */
+            box-sizing: border-box;
             display: grid;
             grid-template-columns: repeat(9, 1fr);
             gap: 1px;
@@ -117,57 +161,28 @@
         .cell {
             position: relative;
             background: white;
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             min-height: 60px; 
             aspect-ratio: 1 / 1; 
             font-size: var(--current-font-size);
             font-weight: 500;
-            
-            /* 關鍵：讓格子也是 border-box，這樣加內部粗線才不會撐開跑版 */
             box-sizing: border-box; 
         }
 
         @media (max-width: 600px) {
-            .cell {
-                aspect-ratio: auto;
-                min-height: 50px;
-            }
+            .cell { aspect-ratio: auto; min-height: 50px; }
         }
 
-        /* 粗線樣式 (視覺模擬 3x3 區塊) */
-        .cell.thick-right {
-            border-right: 3px solid var(--thick-border-color);
-            /* 因為有 box-sizing: border-box，這裡不需要負 margin 了，直接畫在格子內側最安全 */
-            z-index: 1;
-        }
-        .cell.thick-bottom {
-            border-bottom: 3px solid var(--thick-border-color);
-            z-index: 1;
-        }
+        .cell.thick-right { border-right: 3px solid var(--thick-border-color); z-index: 1; }
+        .cell.thick-bottom { border-bottom: 3px solid var(--thick-border-color); z-index: 1; }
 
         .editable-div {
-            width: 100%; 
-            height: 100%;
-            min-height: 100%;
-            border: none; 
-            text-align: center; 
-            background: transparent;
-            padding: 2px;
-            box-sizing: border-box; 
-            outline: none;
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            
-            /* 強制斷行，解決中/大字體表現不一的問題 */
-            word-break: break-all; 
-            white-space: pre-wrap; 
-            
-            font-family: inherit; 
-            color: inherit;
-            line-height: 1.3; 
+            width: 100%; height: 100%; min-height: 100%;
+            border: none; text-align: center; background: transparent;
+            padding: 2px; box-sizing: border-box; outline: none;
+            display: flex; align-items: center; justify-content: center;
+            word-break: break-all; white-space: pre-wrap; 
+            font-family: inherit; color: inherit; line-height: 1.3; 
         }
 
         .editable-div:empty::before {
@@ -177,37 +192,58 @@
 
         #fileInput { display: none; }
 
+        .guide-section {
+            max-width: 800px;
+            width: 90%;
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+            color: #475569;
+            line-height: 1.7;
+        }
+
+        .guide-section h2 { font-size: 1.5rem; color: #334155; margin-bottom: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+        .guide-section h3 { font-size: 1.1rem; color: #6366f1; margin-top: 25px; margin-bottom: 10px; }
+        .guide-section p, .guide-section li { margin-bottom: 10px; font-size: 1rem; }
+        .guide-section ul, .guide-section ol { padding-left: 20px; }
+        .feature-tag { display: inline-block; background: #eef2ff; color: #6366f1; padding: 2px 8px; border-radius: 4px; font-size: 0.85rem; margin-right: 5px; font-weight: 500; }
+
         @media (max-width: 600px) {
             body { padding: 10px; padding-bottom: 150px; }
+            .header-row { flex-direction: column; gap: 10px; }
+            .lang-switch { position: static; transform: none; align-self: flex-end; margin-right: 10px;}
             .controls { padding: 15px; gap: 15px; }
             .palette-name { display: none; }
             #mandala-container-wrapper { padding: 5px; }
-            :root {
-                --font-size-s: 0.7rem; --font-size-m: 0.9rem; --font-size-l: 1.1rem; --font-size-xl: 1.3rem;
-            }
+            .guide-section { padding: 25px; width: 100%; box-sizing: border-box; }
+            :root { --font-size-s: 0.7rem; --font-size-m: 0.9rem; --font-size-l: 1.1rem; --font-size-xl: 1.3rem; }
         }
     </style>
 </head>
 <body>
 
-    <h1>曼陀羅九宮格生成器</h1>
+    <div class="header-row">
+        <h1 data-i18n="title">曼陀羅九宮格生成器</h1>
+        <button class="lang-switch" onclick="toggleLanguage()">En / 中文</button>
+    </div>
 
     <div class="controls">
         <div class="control-group">
-            <span class="control-label">字體大小</span>
+            <span class="control-label" data-i18n="fontSize">字體大小</span>
             <div class="btn-group" id="fontSizeControls">
-                <button onclick="setFontSize('s')" id="btn-fs-s">小</button>
-                <button onclick="setFontSize('m')" id="btn-fs-m" class="active">中</button>
-                <button onclick="setFontSize('l')" id="btn-fs-l">大</button>
-                <button onclick="setFontSize('xl')" id="btn-fs-xl">特大</button>
+                <button onclick="setFontSize('s')" id="btn-fs-s" data-i18n="fsS">小</button>
+                <button onclick="setFontSize('m')" id="btn-fs-m" class="active" data-i18n="fsM">中</button>
+                <button onclick="setFontSize('l')" id="btn-fs-l" data-i18n="fsL">大</button>
+                <button onclick="setFontSize('xl')" id="btn-fs-xl" data-i18n="fsXL">特大</button>
             </div>
         </div>
 
         <div class="control-group">
-            <span class="control-label">風格色系 (先選色 → 再點區塊中心)</span>
+            <span class="control-label" data-i18n="colorStyle">風格色系 (先選色 → 再點區塊中心)</span>
             <div class="color-picker-wrapper">
                 <div class="palette-row">
-                    <span class="palette-name">馬卡龍</span>
+                    <span class="palette-name" data-i18n="pMacaron">馬卡龍</span>
                     <div class="color-swatch" style="background: #FF9999;" onclick="pickColor('#FF9999')"></div>
                     <div class="color-swatch" style="background: #FFCC99;" onclick="pickColor('#FFCC99')"></div>
                     <div class="color-swatch" style="background: #FFF599;" onclick="pickColor('#FFF599')"></div>
@@ -217,13 +253,19 @@
                     <div class="color-swatch" style="background: #CC99FF;" onclick="pickColor('#CC99FF')"></div>
                     <div class="color-swatch" style="background: #FF99CC;" onclick="pickColor('#FF99CC')"></div>
                 </div>
-                
                 <div class="palette-row">
-                    <span class="palette-name">多巴胺</span>
-                    <div class="color-swatch" style="background: #FF0055;" onclick="pickColor('#FF0055')"></div> <div class="color-swatch" style="background: #FF5500;" onclick="pickColor('#FF5500')"></div> <div class="color-swatch" style="background: #FFDD00;" onclick="pickColor('#FFDD00')"></div> <div class="color-swatch" style="background: #00FF33;" onclick="pickColor('#00FF33')"></div> <div class="color-swatch" style="background: #00DDFF;" onclick="pickColor('#00DDFF')"></div> <div class="color-swatch" style="background: #0055FF;" onclick="pickColor('#0055FF')"></div> <div class="color-swatch" style="background: #AA00FF;" onclick="pickColor('#AA00FF')"></div> <div class="color-swatch" style="background: #FF00AA;" onclick="pickColor('#FF00AA')"></div> </div>
-
+                    <span class="palette-name" data-i18n="pDopamine">多巴胺</span>
+                    <div class="color-swatch" style="background: #FF0055;" onclick="pickColor('#FF0055')"></div>
+                    <div class="color-swatch" style="background: #FF5500;" onclick="pickColor('#FF5500')"></div>
+                    <div class="color-swatch" style="background: #FFDD00;" onclick="pickColor('#FFDD00')"></div>
+                    <div class="color-swatch" style="background: #00FF33;" onclick="pickColor('#00FF33')"></div>
+                    <div class="color-swatch" style="background: #00DDFF;" onclick="pickColor('#00DDFF')"></div>
+                    <div class="color-swatch" style="background: #0055FF;" onclick="pickColor('#0055FF')"></div>
+                    <div class="color-swatch" style="background: #AA00FF;" onclick="pickColor('#AA00FF')"></div>
+                    <div class="color-swatch" style="background: #FF00AA;" onclick="pickColor('#FF00AA')"></div>
+                </div>
                 <div class="palette-row">
-                    <span class="palette-name">莫蘭迪</span>
+                    <span class="palette-name" data-i18n="pMorandi">莫蘭迪</span>
                     <div class="color-swatch" style="background: #D3C4BE;" onclick="pickColor('#D3C4BE')"></div>
                     <div class="color-swatch" style="background: #B4A5A5;" onclick="pickColor('#B4A5A5')"></div>
                     <div class="color-swatch" style="background: #8C9A9E;" onclick="pickColor('#8C9A9E')"></div>
@@ -234,7 +276,7 @@
                     <div class="color-swatch" style="background: #606c78;" onclick="pickColor('#606c78')"></div>
                 </div>
                 <div class="palette-row">
-                    <span class="palette-name">大地色</span>
+                    <span class="palette-name" data-i18n="pEarth">大地色</span>
                     <div class="color-swatch" style="background: #D4A373;" onclick="pickColor('#D4A373')"></div>
                     <div class="color-swatch" style="background: #CCD5AE;" onclick="pickColor('#CCD5AE')"></div>
                     <div class="color-swatch" style="background: #E9EDC9;" onclick="pickColor('#E9EDC9')"></div>
@@ -245,18 +287,18 @@
                     <div class="color-swatch" style="background: #3A5A40;" onclick="pickColor('#3A5A40')"></div>
                 </div>
                 <div class="custom-picker-row">
-                    <span style="font-size: 0.8rem; color:#888;">自訂顏色:</span>
+                    <span style="font-size: 0.8rem; color:#888;" data-i18n="customColor">自訂顏色:</span>
                     <input type="color" id="colorPicker" value="#6366f1" style="cursor: pointer; height: 24px; width: 40px; padding: 0; border: 1px solid #ccc; border-radius: 4px;">
                 </div>
             </div>
         </div>
 
         <div class="control-group">
-            <span class="control-label">存取與下載</span>
+            <span class="control-label" data-i18n="actions">存取與下載</span>
             <div class="btn-group">
-                <button class="btn-outline" onclick="exportData()">匯出</button>
-                <button class="btn-outline" onclick="document.getElementById('fileInput').click()">匯入</button>
-                <button class="btn-primary" onclick="downloadImage()">下載圖片</button>
+                <button class="btn-outline" onclick="exportData()" data-i18n="btnExport">匯出</button>
+                <button class="btn-outline" onclick="document.getElementById('fileInput').click()" data-i18n="btnImport">匯入</button>
+                <button class="btn-primary" onclick="downloadImage()" data-i18n="btnDownload">下載圖片</button>
             </div>
         </div>
     </div>
@@ -264,11 +306,83 @@
     <input type="file" id="fileInput" accept=".json" onchange="importData(this)">
 
     <div id="mandala-container-wrapper">
-        <div id="mandala-container" id="mainGrid">
-            </div>
+        <div id="mandala-container" id="mainGrid"></div>
     </div>
 
+    <article class="guide-section" id="guideSection">
+        </article>
+
     <script>
+        // --- 翻譯資源 (i18n Resources) ---
+        const translations = {
+            zh: {
+                title: '曼陀羅九宮格生成器',
+                fontSize: '字體大小',
+                fsS: '小', fsM: '中', fsL: '大', fsXL: '特大',
+                colorStyle: '風格色系 (先選色 → 再點區塊中心)',
+                pMacaron: '馬卡龍', pDopamine: '多巴胺', pMorandi: '莫蘭迪', pEarth: '大地色',
+                customColor: '自訂顏色:',
+                actions: '存取與下載',
+                btnExport: '匯出', btnImport: '匯入', btnDownload: '下載圖片',
+                coreGoal: '核心目標', subGoal: '次目標',
+                alertImportSuccess: '匯入成功', alertFormatError: '格式錯誤', alertFileError: '檔案錯誤',
+                guideHTML: `
+                    <h2>什麼是曼陀羅九宮格 (Mandala Chart)？</h2>
+                    <p>曼陀羅思考法（Mandala Chart），又稱為九宮格思考法，是一種強大的視覺化目標達成工具。透過將一個核心主題拆解為 8 個次級目標，再將每個次級目標延伸出 8 個具體行動，最終形成 64 個可執行的計畫。</p>
+                    <p>這個工具由 Nova's Tool 開發，旨在提供一個免費、無廣告且高度客製化的線上使用體驗。</p>
+                    <h3>✨ 本工具特色</h3>
+                    <p>
+                        <span class="feature-tag">目標自動散射連動</span>
+                        <span class="feature-tag">智能調整文字深淺對比</span>
+                        <span class="feature-tag">多巴胺/莫蘭迪配色</span>
+                        <span class="feature-tag">RWD完美支援</span>
+                    </p>
+                    <h3>🚀 如何使用此生成器</h3>
+                    <ol>
+                        <li><strong>設定核心目標：</strong>點擊正中央的九宮格中心，輸入您今年的年度關鍵字或主要目標。</li>
+                        <li><strong>擴展次級目標：</strong>在核心目標周圍的 8 個格子輸入次級目標。系統會自動將這些內容「散射」到外圍對應九宮格的中心點。</li>
+                        <li><strong>規劃行動方案：</strong>在外圍的每個九宮格中，填寫為了達成該次級目標所需的 8 個具體行動。</li>
+                        <li><strong>自訂風格：</strong>使用上方的色票工具，點選喜歡的顏色後，再點擊任一「區塊中心」，即可一鍵切換該區塊的色系。</li>
+                        <li><strong>保存成果：</strong>完成後，您可以選擇「下載圖片」保存為 PNG，或使用「匯出」功能保存 JSON 檔以便日後編輯。</li>
+                    </ol>
+                `
+            },
+            en: {
+                title: 'Mandala Chart Generator',
+                fontSize: 'Font Size',
+                fsS: 'Small', fsM: 'Medium', fsL: 'Large', fsXL: 'X-Large',
+                colorStyle: 'Color Style (Pick Color → Click Center Block)',
+                pMacaron: 'Macaron', pDopamine: 'Dopamine', pMorandi: 'Morandi', pEarth: 'Earth',
+                customColor: 'Custom:',
+                actions: 'Actions',
+                btnExport: 'Export', btnImport: 'Import', btnDownload: 'Download',
+                coreGoal: 'Core Goal', subGoal: 'Sub Goal',
+                alertImportSuccess: 'Import Successful!', alertFormatError: 'Invalid Format', alertFileError: 'File Error',
+                guideHTML: `
+                    <h2>What is a Mandala Chart?</h2>
+                    <p>The Mandala Chart (also known as the 9-Grid Method) is a powerful visualization tool for goal achievement. It helps you break down a core theme into 8 sub-goals, which then branch out into 8 specific actions each, creating a total of 64 actionable steps.</p>
+                    <p>Developed by Nova's Tool, this generator offers a free, ad-free, and highly customizable online experience.</p>
+                    <h3>✨ Key Features</h3>
+                    <p>
+                        <span class="feature-tag">Auto-Scatter Logic</span>
+                        <span class="feature-tag">Smart Contrast Text</span>
+                        <span class="feature-tag">Dopamine/Morandi Colors</span>
+                        <span class="feature-tag">Mobile Optimized</span>
+                    </p>
+                    <h3>🚀 How to Use</h3>
+                    <ol>
+                        <li><strong>Set Core Goal:</strong> Click the very center of the grid and enter your main goal or keyword for the year.</li>
+                        <li><strong>Expand Sub-Goals:</strong> Enter 8 sub-goals in the cells surrounding the core goal. The system will automatically "scatter" these to the centers of the outer 3x3 blocks.</li>
+                        <li><strong>Plan Actions:</strong> In each outer block, fill in the 8 specific actions required to achieve that sub-goal.</li>
+                        <li><strong>Customize Style:</strong> Select a color from the palette, then click the center of any block to apply the color theme.</li>
+                        <li><strong>Save Results:</strong> Click "Download" to save as a PNG image, or use "Export" to save a JSON file for future editing.</li>
+                    </ol>
+                `
+            }
+        };
+
+        let currentLang = 'zh'; // Default Language
+        
         let state = {
             blocks: Array(9).fill().map(() => ({ color: '#ffffff' })),
             cells: Array(81).fill('') 
@@ -277,10 +391,36 @@
         const mainGrid = document.getElementById('mandala-container');
         const colorPicker = document.getElementById('colorPicker');
 
-        function init() { renderGrid(); }
+        function init() { 
+            updateLanguageUI();
+            renderGrid(); 
+        }
+
+        // --- 多語系切換邏輯 ---
+        function toggleLanguage() {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            updateLanguageUI();
+            renderGrid(); // Re-render grid to update placeholders
+        }
+
+        function updateLanguageUI() {
+            const t = translations[currentLang];
+            // Update simple text elements
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (t[key]) el.innerHTML = t[key];
+            });
+            // Update HTML content (Guide)
+            document.getElementById('guideSection').innerHTML = t.guideHTML;
+            // Update Page Title
+            document.title = currentLang === 'zh' 
+                ? "曼陀羅九宮格生成器 (Mandala Chart)"
+                : "Mandala Chart Generator";
+        }
 
         function renderGrid() {
             mainGrid.innerHTML = '';
+            const t = translations[currentLang];
             
             for (let i = 0; i < 81; i++) {
                 const row = Math.floor(i / 9);
@@ -319,9 +459,10 @@
                 editableDiv.contentEditable = "true";
                 editableDiv.innerText = state.cells[i];
                 
+                // Placeholder Logic based on current language
                 let placeholder = "";
                 if (isCenterOfBlock) {
-                    placeholder = (blockIndex === 4) ? "核心目標" : "次目標";
+                    placeholder = (blockIndex === 4) ? t.coreGoal : t.subGoal;
                 }
                 editableDiv.setAttribute('data-placeholder', placeholder);
                 
@@ -415,14 +556,16 @@
         }
 
         function importData(input) {
+            const t = translations[currentLang];
             const file = input.files[0];
             if (!file) return;
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     const d = JSON.parse(e.target.result);
-                    if (d && d.blocks && d.cells) { state = d; renderGrid(); alert('匯入成功'); } else alert('格式錯誤');
-                } catch (er) { alert('檔案錯誤'); }
+                    if (d && d.blocks && d.cells) { state = d; renderGrid(); alert(t.alertImportSuccess); } 
+                    else alert(t.alertFormatError);
+                } catch (er) { alert(t.alertFileError); }
                 input.value = '';
             };
             reader.readAsText(file);
@@ -496,10 +639,5 @@
 
         init();
     </script>
-<footer class="site-footer mt-16 text-center py-8 text-gray-500 bg-white/30">
-        <p data-lang-key="footerCredits">
-            由 GitHub 部署 | Gemini Pro 傾力打造 | <a href="mailto:babelon1882@gmail.com" class="hover:text-gray-800 border-b border-dotted border-gray-500 hover:border-gray-800">T.B°</a> 最後更新於 2026
-        </p>
-    </footer>
 </body>
 </html>
