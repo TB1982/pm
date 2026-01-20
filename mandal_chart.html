@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>曼陀羅九宮格生成器 (Mobile Fixed) - Nova's Tool</title>
-    <meta name="description" content="自動散射連動功能的曼陀羅九宮格生成器，手機版完美適配。">
+    <title>曼陀羅九宮格生成器</title>
+    <meta name="description" content="支援多巴胺配色、完美邊框修正與RWD的曼陀羅九宮格生成器。">
     
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect x=%225%22 y=%225%22 width=%2290%22 height=%2290%22 rx=%2215%22 fill=%22%236366f1%22/><path d=%22M30 30h40M30 50h40M30 70h40M30 30v40M50 30v40M70 30v40%22 stroke=%22white%22 stroke-width=%228%22 stroke-linecap=%22round%22/></svg>">
 
@@ -13,8 +13,8 @@
     <style>
         :root {
             --bg-color: #f8fafc;
-            --grid-gap: 4px;
-            --grid-border-color: #475569;
+            --grid-border-color: #475569; /* 內格線顏色 */
+            --thick-border-color: #1e293b; /* 粗外框顏色 */
             --font-size-s: 0.8rem;
             --font-size-m: 1rem;
             --font-size-l: 1.3rem;
@@ -30,11 +30,9 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            /* 手機版關鍵修正：高度完全自動，允許頁面捲動 */
             min-height: 100vh;
-            height: auto; 
             color: #333;
-            padding-bottom: 100px; /* 底部留白，避免手機鍵盤遮擋 */
+            padding-bottom: 100px;
         }
 
         h1 { margin-bottom: 15px; color: #334155; font-size: 1.6rem; text-align: center; }
@@ -62,11 +60,7 @@
             align-items: center;
         }
         
-        .control-label {
-            font-size: 0.85rem;
-            color: #64748b;
-            font-weight: 600;
-        }
+        .control-label { font-size: 0.85rem; color: #64748b; font-weight: 600; }
 
         .btn-group { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
 
@@ -95,10 +89,9 @@
             border: 2px solid transparent; transition: transform 0.1s;
         }
         .color-swatch:hover { transform: scale(1.15); border-color: rgba(0,0,0,0.2); }
-
         .custom-picker-row { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding-top: 5px; border-top: 1px dashed #e2e8f0; }
 
-        /* 容器與 Grid 設定 */
+        /* --- 核心重構區：Grid 系統 --- */
         #mandala-container-wrapper {
             background: white;
             padding: 10px;
@@ -106,56 +99,76 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             max-width: 800px;
             width: 100%;
-            /* 移除可能導致截斷的限制 */
             overflow: visible; 
         }
 
         #mandala-container {
-            background: var(--grid-border-color);
-            border: 3px solid var(--grid-border-color);
-            /* 保持正方形，但允許寬度隨容器縮放 */
+            /* 修正：改回使用實體 border，這是最保險的邊框顯示方式 */
+            border: 3px solid var(--thick-border-color);
+            background-color: var(--grid-border-color); /* 格線隙縫顏色 */
+            
             width: 100%;
-            aspect-ratio: 1 / 1; 
-            box-sizing: border-box;
-            height: auto; /* 高度自動跟隨寬度變化 */
-        }
-
-        .main-grid {
+            box-sizing: border-box; /* 關鍵：確保 border 包含在 100% 寬度內 */
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-            gap: var(--grid-gap);
-            width: 100%; height: 100%;
-        }
-
-        .sub-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr);
+            grid-template-columns: repeat(9, 1fr);
             gap: 1px;
-            background-color: var(--grid-border-color);
         }
 
         .cell {
             position: relative;
             background: white;
-            display: flex; align-items: center; justify-content: center;
-            overflow: hidden;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            min-height: 60px; 
+            aspect-ratio: 1 / 1; 
             font-size: var(--current-font-size);
             font-weight: 500;
+            
+            /* 關鍵：讓格子也是 border-box，這樣加內部粗線才不會撐開跑版 */
+            box-sizing: border-box; 
+        }
+
+        @media (max-width: 600px) {
+            .cell {
+                aspect-ratio: auto;
+                min-height: 50px;
+            }
+        }
+
+        /* 粗線樣式 (視覺模擬 3x3 區塊) */
+        .cell.thick-right {
+            border-right: 3px solid var(--thick-border-color);
+            /* 因為有 box-sizing: border-box，這裡不需要負 margin 了，直接畫在格子內側最安全 */
+            z-index: 1;
+        }
+        .cell.thick-bottom {
+            border-bottom: 3px solid var(--thick-border-color);
+            z-index: 1;
         }
 
         .editable-div {
-            width: 100%; height: 100%;
-            border: none; text-align: center; background: transparent;
-            padding: 2px; box-sizing: border-box; outline: none;
-            display: flex; align-items: center; justify-content: center;
-            word-break: break-word; overflow-y: auto;
-            font-family: inherit; color: inherit;
+            width: 100%; 
+            height: 100%;
+            min-height: 100%;
+            border: none; 
+            text-align: center; 
+            background: transparent;
+            padding: 2px;
+            box-sizing: border-box; 
+            outline: none;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            
+            /* 強制斷行，解決中/大字體表現不一的問題 */
+            word-break: break-all; 
+            white-space: pre-wrap; 
+            
+            font-family: inherit; 
+            color: inherit;
+            line-height: 1.3; 
         }
-
-        /* 隱藏捲軸 */
-        .editable-div::-webkit-scrollbar { width: 0px; background: transparent; }
 
         .editable-div:empty::before {
             content: attr(data-placeholder);
@@ -164,21 +177,13 @@
 
         #fileInput { display: none; }
 
-        /* 手機版特別優化 */
         @media (max-width: 600px) {
-            body { padding: 10px; padding-bottom: 150px; } /* 底部留更多空間 */
+            body { padding: 10px; padding-bottom: 150px; }
             .controls { padding: 15px; gap: 15px; }
             .palette-name { display: none; }
-            
-            #mandala-container-wrapper {
-                padding: 5px; /* 減少內距爭取空間 */
-                width: 100%;
-                /* 手機上不做橫向捲動，直接寬度 100% 撐滿，高度自然延伸 */
-            }
-            
+            #mandala-container-wrapper { padding: 5px; }
             :root {
-                /* 手機字體稍微調小一點點以防爆格 */
-                --font-size-s: 0.7rem; --font-size-m: 0.85rem; --font-size-l: 1rem; --font-size-xl: 1.2rem;
+                --font-size-s: 0.7rem; --font-size-m: 0.9rem; --font-size-l: 1.1rem; --font-size-xl: 1.3rem;
             }
         }
     </style>
@@ -212,6 +217,11 @@
                     <div class="color-swatch" style="background: #CC99FF;" onclick="pickColor('#CC99FF')"></div>
                     <div class="color-swatch" style="background: #FF99CC;" onclick="pickColor('#FF99CC')"></div>
                 </div>
+                
+                <div class="palette-row">
+                    <span class="palette-name">多巴胺</span>
+                    <div class="color-swatch" style="background: #FF0055;" onclick="pickColor('#FF0055')"></div> <div class="color-swatch" style="background: #FF5500;" onclick="pickColor('#FF5500')"></div> <div class="color-swatch" style="background: #FFDD00;" onclick="pickColor('#FFDD00')"></div> <div class="color-swatch" style="background: #00FF33;" onclick="pickColor('#00FF33')"></div> <div class="color-swatch" style="background: #00DDFF;" onclick="pickColor('#00DDFF')"></div> <div class="color-swatch" style="background: #0055FF;" onclick="pickColor('#0055FF')"></div> <div class="color-swatch" style="background: #AA00FF;" onclick="pickColor('#AA00FF')"></div> <div class="color-swatch" style="background: #FF00AA;" onclick="pickColor('#FF00AA')"></div> </div>
+
                 <div class="palette-row">
                     <span class="palette-name">莫蘭迪</span>
                     <div class="color-swatch" style="background: #D3C4BE;" onclick="pickColor('#D3C4BE')"></div>
@@ -254,9 +264,8 @@
     <input type="file" id="fileInput" accept=".json" onchange="importData(this)">
 
     <div id="mandala-container-wrapper">
-        <div id="mandala-container">
-            <div class="main-grid" id="mainGrid"></div>
-        </div>
+        <div id="mandala-container" id="mainGrid">
+            </div>
     </div>
 
     <script>
@@ -265,19 +274,26 @@
             cells: Array(81).fill('') 
         };
 
-        const mainGrid = document.getElementById('mainGrid');
+        const mainGrid = document.getElementById('mandala-container');
         const colorPicker = document.getElementById('colorPicker');
 
         function init() { renderGrid(); }
 
         function renderGrid() {
             mainGrid.innerHTML = '';
-            for (let i = 0; i < 9; i++) {
-                const subGrid = document.createElement('div');
-                subGrid.className = 'sub-grid';
-
-                const baseColor = state.blocks[i].color;
+            
+            for (let i = 0; i < 81; i++) {
+                const row = Math.floor(i / 9);
+                const col = i % 9;
+                const blockRow = Math.floor(row / 3);
+                const blockCol = Math.floor(col / 3);
+                const blockIndex = blockRow * 3 + blockCol;
                 
+                const innerRow = row % 3;
+                const innerCol = col % 3;
+                const cellIndexInBlock = innerRow * 3 + innerCol;
+
+                const baseColor = state.blocks[blockIndex].color;
                 let centerColor, surroundColor;
                 if (baseColor.toLowerCase() === '#ffffff') {
                     centerColor = '#ffffff'; surroundColor = '#ffffff';
@@ -286,58 +302,61 @@
                     surroundColor = lightenColor(baseColor, 0.87);
                 }
 
-                for (let j = 0; j < 9; j++) {
-                    const cellIndex = i * 9 + j;
-                    const cell = document.createElement('div');
-                    cell.className = 'cell';
+                const isCenterOfBlock = (cellIndexInBlock === 4);
+                let finalBgColor = isCenterOfBlock ? centerColor : surroundColor;
 
-                    const isCenter = (j === 4);
-                    let finalBgColor = isCenter ? centerColor : surroundColor;
-                    
-                    cell.style.backgroundColor = finalBgColor;
-                    cell.style.color = getContrastYIQ(finalBgColor);
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                
+                if (col === 2 || col === 5) cell.classList.add('thick-right');
+                if (row === 2 || row === 5) cell.classList.add('thick-bottom');
 
-                    const editableDiv = document.createElement('div');
-                    editableDiv.className = 'editable-div';
-                    editableDiv.contentEditable = "true";
-                    editableDiv.innerText = state.cells[cellIndex];
-                    editableDiv.setAttribute('data-placeholder', isCenter ? (i===4 ? "核心目標" : "次目標") : "");
-                    editableDiv.id = `cell-${cellIndex}`;
-                    
-                    // --- 核心連動邏輯 (Scatter Logic) ---
-                    editableDiv.addEventListener('input', (e) => {
-                        const newVal = e.target.innerText;
-                        state.cells[cellIndex] = newVal;
+                cell.style.backgroundColor = finalBgColor;
+                cell.style.color = getContrastYIQ(finalBgColor);
 
-                        // 判斷：若在「正中央九宮格 (Block 4)」且「不是最中間那格 (Cell 4)」
-                        // 則將內容同步到「外圍對應九宮格的中心格」
-                        if (i === 4 && j !== 4) {
-                            const targetBlockIndex = j; // 周圍格子的 index 剛好對應外圍 Block 的 index
-                            const targetCellIndex = targetBlockIndex * 9 + 4; // 該 Block 的中心格 (index 4)
-                            
-                            state.cells[targetCellIndex] = newVal;
-                            
-                            const targetDiv = document.getElementById(`cell-${targetCellIndex}`);
-                            if (targetDiv) {
-                                targetDiv.innerText = newVal;
-                            }
-                        }
-                    });
-
-                    if (isCenter) {
-                        editableDiv.addEventListener('click', () => {
-                            applyColorToBlock(i, colorPicker.value);
-                        });
-                    } else {
-                        cell.addEventListener('click', (e) => {
-                             if (e.target === cell) editableDiv.focus();
-                        });
-                    }
-
-                    cell.appendChild(editableDiv);
-                    subGrid.appendChild(cell);
+                const editableDiv = document.createElement('div');
+                editableDiv.className = 'editable-div';
+                editableDiv.contentEditable = "true";
+                editableDiv.innerText = state.cells[i];
+                
+                let placeholder = "";
+                if (isCenterOfBlock) {
+                    placeholder = (blockIndex === 4) ? "核心目標" : "次目標";
                 }
-                mainGrid.appendChild(subGrid);
+                editableDiv.setAttribute('data-placeholder', placeholder);
+                
+                editableDiv.id = `cell-${i}`;
+                
+                editableDiv.addEventListener('input', (e) => {
+                    const newVal = e.target.innerText;
+                    state.cells[i] = newVal;
+
+                    if (blockIndex === 4 && !isCenterOfBlock) {
+                        const targetBlockIndex = cellIndexInBlock; 
+                        const targetBlockRow = Math.floor(targetBlockIndex / 3);
+                        const targetBlockCol = targetBlockIndex % 3;
+                        const globalTargetRow = targetBlockRow * 3 + 1;
+                        const globalTargetCol = targetBlockCol * 3 + 1;
+                        const targetGlobalIndex = globalTargetRow * 9 + globalTargetCol;
+
+                        state.cells[targetGlobalIndex] = newVal;
+                        const targetDiv = document.getElementById(`cell-${targetGlobalIndex}`);
+                        if (targetDiv) targetDiv.innerText = newVal;
+                    }
+                });
+
+                if (isCenterOfBlock) {
+                    editableDiv.addEventListener('click', () => {
+                        applyColorToBlock(blockIndex, colorPicker.value);
+                    });
+                } else {
+                    cell.addEventListener('click', (e) => {
+                         if (e.target === cell) editableDiv.focus();
+                    });
+                }
+
+                cell.appendChild(editableDiv);
+                mainGrid.appendChild(cell);
             }
         }
 
@@ -348,8 +367,11 @@
             state.blocks[blockIndex].color = color;
             renderGrid();
             setTimeout(() => {
-                const centerCellIndex = blockIndex * 9 + 4;
-                const targetDiv = document.getElementById(`cell-${centerCellIndex}`);
+                const blockRow = Math.floor(blockIndex / 3);
+                const blockCol = blockIndex % 3;
+                const centerGlobalIndex = (blockRow * 3 + 1) * 9 + (blockCol * 3 + 1);
+                
+                const targetDiv = document.getElementById(`cell-${centerGlobalIndex}`);
                 if (targetDiv) targetDiv.focus();
             }, 0);
         }
@@ -372,6 +394,7 @@
             const container = document.getElementById('mandala-container');
             const editables = container.querySelectorAll('.editable-div');
             editables.forEach(el => el.contentEditable = "false");
+            
             html2canvas(container, { scale: 3, backgroundColor: null, logging: false, useCORS: true }).then(canvas => {
                 editables.forEach(el => el.contentEditable = "true");
                 const link = document.createElement('a');
