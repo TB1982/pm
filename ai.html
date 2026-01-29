@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 發展策略金字塔</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft JhengHei', 'PingFang TC', Arial, sans-serif;
+            text-align: center;
+            padding: 30px 0 80px 0;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 40px;
+        }
+
+        .pyramid-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* 中間金字塔區域 */
+        .pyramid-section {
+            flex: 1;
+            position: relative;
+            height: 700px;
+        }
+
+        .pyramid-container {
+            position: relative;
+            max-width: 800px;
+            height: 650px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 金字塔背景 */
+        .pyramid-bg {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 400px solid transparent;
+            border-right: 400px solid transparent;
+            border-bottom: 650px solid #ffd700;
+        }
+
+        /* 金字塔層級 */
+        .pyramid-layer {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* gap: 15px; */
+            height: 25%;
+            width: 100%;
+        }
+
+        /* 第一層 */
+        .layer-1 {
+            top: 0;
+        }
+        .layer-1 .pyramid-box{
+            flex: 0 0 25%;
+            padding-top: 9%;
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        /* 第二層 */
+        .layer-2 {
+            top: 25%;
+            border-top: 6px solid #fff;
+        }
+        .layer-2 .pyramid-box{
+            flex: 0 0 25%;
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        /* 第三層 */
+        .layer-3 {
+            top: 50%;
+            border-top: 6px solid #fff;
+        }
+        .layer-3 .pyramid-box{
+            flex: 0 0 25%;
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        /* 第四層 */
+        .layer-4 {
+            top: 75%;
+            border-top: 6px solid #fff;
+        }
+        .layer-4 .pyramid-box{
+            flex: 0 0 25%;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .layer-2 .pyramid-box,.layer-3 .pyramid-box,.layer-4 .pyramid-box{
+            border-right: 3px solid #fff;
+            border-left: 3px solid #fff;
+        }
+        .layer-2 .pyramid-box:first-child,.layer-3 .pyramid-box:first-child,.layer-4 .pyramid-box:first-child{
+            border-left:none;
+            padding-left: 9%;
+        }
+        .layer-2 .pyramid-box:last-child,.layer-3 .pyramid-box:last-child,.layer-4 .pyramid-box:last-child{
+            border-right:none;
+            padding-right: 9%;
+        }
+        
+
+        .pyramid-box {
+            padding: 20px 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            text-decoration: none;
+            display: block;
+            height: 100%;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pyramid-box:hover {
+            background: rgba(255, 255, 255, 0.7);
+            transform: scale(1.05);
+            text-decoration: none;
+        }
+
+        .pyramid-box h4 {
+            position: relative;
+            font-size: 1.125em;
+            color: #333;
+            margin-bottom: 8px;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+        .pyramid-box .tag {
+            position: relative;
+            font-size: 1em;
+            color: #0060c1;
+        }
+
+        .mainTitle{
+            position: absolute;
+            left: -16em;
+            top: 18%;
+            width: 15em;
+            font-weight: 700;
+            padding: 12px 20px;
+            border-radius: 15px;
+            text-align: center;
+            background-color: #6d8f5d;
+            z-index: 2;
+        }
+        .mainTitle2{
+            top: 54%;
+        }
+        .mainTitle3{
+            top: 80%;
+        }
+        .mainTitle .title{
+            font-size: 1.25em;
+            color: #fff;
+            border-bottom: 1px solid #c5c5c5;
+            padding-bottom: 8px;
+        }
+        .mainTitle p{
+            font-size: 1.375em;
+            color: #faeaae;
+            padding-top: 6px;
+        }
+        .line{
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 25%;
+            transform: translateY(-50%);
+            width: 50%;
+            height: 4px;
+            background-color: #6d8f5d;
+            z-index: 1;
+        }
+        .line::before{
+            content: '';
+            position: absolute;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            background-color: #6d8f5d;
+            border-radius: 50%;
+        }
+        .line1{
+            top: 25%;
+            width: 33%;
+        }
+        .line2{
+            top: 61%;
+            width: 15%;
+        }
+        .line3{
+            top: 87%;
+            width: 2%;
+        }
+        .benefitTitle{
+            position: absolute;
+            top: 15%;
+            right: -7.7em;
+            width: 6.1em;
+            font-size: 1.625em;
+            color: #c35500;
+            font-weight: 700;
+        }
+        .benefit{
+            position: absolute;
+            top: 20%;
+            right: -10em;
+            width: 8em;
+            font-size: 1.25em;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 15px;
+            background: #c35500;
+        }
+        .benefit .title{
+            font-weight: 700;
+        }
+        .benefit b{
+            font-size: 1.375em;
+        }
+        .benefit1{
+            top: 24%;
+        }
+        .benefit2{
+            top: 48%;
+        }
+        .benefit3{
+            top: 74%;
+        }
+
+        /* light1 */
+        @keyframes shimmer {
+            0% { transform: translateX(-150%) translateY(-150%) rotate(45deg); }
+            100% { transform: translateX(150%) translateY(150%) rotate(45deg); }
+        }
+        .light{
+            position: relative;
+            overflow: hidden;
+        }
+        .light::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(to right,  rgba(255, 255, 255,0) 0%,rgba(255, 255, 255,0.8) 50%,rgba(255, 255, 255,0) 100%);
+            animation: shimmer 5s infinite;
+        }
+        
+
+        @media (max-width: 800px) {
+            h1{
+                margin-bottom: 0;
+            }
+            .pyramid-container{
+                height: auto;
+            }
+            .pyramid-bg{
+                display: none;
+            }
+            .pyramid-layer{
+                display: block;
+                position: relative;
+                top: inherit;
+                left: inherit;
+                transform: none;
+                height:auto;
+            }
+            .pyramid-box{
+                height:auto;
+                border: none !important;
+                padding: 20px 15px !important;
+                background: none !important;
+            }
+            .pyramid-box:not(:first-child){
+                border-top: 1px solid #fff !important;
+            }
+            h4 br{
+                display: none;
+            }
+            .layer-1,.layer-2{
+                background: #fff7cc;
+            }
+            .layer-3{
+                border-top: 0;
+                background: #ffeb80;
+            }
+            .layer-4{
+                border-top: 0;
+                background: #ffdf33;
+            }
+            .pyramid-box:hover{
+                transform: none;
+            }
+
+            .line{
+                display: none;
+            }
+            .mainTitle{
+                position: relative;
+                left: inherit !important;
+                top: inherit !important;
+                margin: 30px 0 0 0;
+                width: 100%;
+                border-radius:0;
+            }
+
+            .benefitBox{
+                margin-top: 32px;
+            }
+            .benefitTitle,.benefit{
+                position: relative;
+                right: initial !important;
+                top: initial !important;
+            }
+            .benefit{
+                margin-top: 24px;
+            }
+
+            /* light1 */
+            @keyframes shimmer {
+                0% { transform: translateX(-150%) translateY(0) rotate(45deg); }
+                100% { transform: translateX(200%) translateY(0) rotate(45deg); }
+            }
+            .light::before {
+                width: 130%;
+                height: 260%;
+                background: linear-gradient(to bottom,  rgba(255, 255, 255,0) 0%,rgba(255, 255, 255,0.8) 50%,rgba(255, 255, 255,0) 100%);
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI 新十大建設推動方案</h1>
+        
+        <div class="pyramid-container">
+            <!-- 金字塔背景 -->
+            <div class="pyramid-bg"></div>
+            <div class="line line1"></div>
+            <div class="line line2"></div>
+            <div class="line line3"></div>
+
+            <div class="mainTitle mainTitle1">
+                <div class="title">智慧應用</div>
+                <p>帶動AI全面發展</p>
+            </div>
+
+            <!-- 第一層 -->
+            <div class="pyramid-layer layer-1">
+                <a href="https://ostp.nstc.gov.tw/zhTW/PolicyContent.aspx?id=11" class="pyramid-box" target="_blank" title="國科會（另開新視窗）">
+                    <h4>全民智慧<br>生活圈</h4>
+                    <p class="tag">（國科會）</p>
+                </a>
+            </div>
+
+            <!-- 第二層 -->
+            <div class="pyramid-layer layer-2">
+                <a href="https://www.moea.gov.tw/Mns/populace/home/Home.aspx" class="pyramid-box" target="_blank" title="經濟部（另開新視窗）">
+                    <h4>百工百業<br>智慧應用</h4>
+                    <p class="tag">（經濟部）</p>
+                </a>
+                <a href="#" class="pyramid-box light" title="移至數發部">
+                    <h4>AI數位<br>產業登峰</h4>
+                    <p class="tag">（數發部）</p>
+                </a>
+            </div>
+
+            <div class="mainTitle mainTitle2">
+                <div class="title">關鍵技術</div>
+                <p>建立AI護國群山</p>
+            </div>
+
+            <!-- 第三層 -->
+            <div class="pyramid-layer layer-3">
+                <a href="https://www.moea.gov.tw/Mns/populace/home/Home.aspx" class="pyramid-box" target="_blank" title="經濟部（另開新視窗）">
+                    <h4>矽光子技術<br>全球領先</h4>
+                    <p class="tag">（經濟部）</p>
+                </a>
+                <a href="https://ostp.nstc.gov.tw/zhTW/PolicyContent.aspx?id=11" class="pyramid-box" target="_blank" title="國科會（另開新視窗）">
+                    <h4>全球量子<br>能力登頂</h4>
+                    <p class="tag">（國科會）</p>
+                </a>
+                <a href="https://ostp.nstc.gov.tw/zhTW/PolicyContent.aspx?id=11" class="pyramid-box" target="_blank" title="國科會（另開新視窗）">
+                    <h4>全球AI機器人<br>供應鏈樞紐</h4>
+                    <p class="tag">（國科會）</p>
+                </a>
+            </div>
+
+            <div class="mainTitle mainTitle3">
+                <div class="title">數位基磐</div>
+                <p>推進AI全球評比前五</p>
+            </div>
+
+            <!-- 第四層 -->
+            <div class="pyramid-layer layer-4">
+                <a href="https://ostp.nstc.gov.tw/zhTW/PolicyContent.aspx?id=11" class="pyramid-box" target="_blank" title="國科會（另開新視窗）">
+                    <h4>主權AI<br>及算力建設</h4>
+                    <p class="tag">（國科會）</p>
+                </a>
+                <a href="#" class="pyramid-box light" title="移至數發部">
+                    <h4>智慧政府與<br>資料治理</h4>
+                    <p class="tag">（數發部）</p>
+                </a>
+                <a href="https://www.asvda.org/" class="pyramid-box" target="_blank" title="國發會（另開新視窗）">
+                    <h4>AI人才生態系<br>引領國際</h4>
+                    <p class="tag">（國發會）</p>
+                </a>
+                <a href="https://www.asvda.org/" class="pyramid-box" target="_blank" title="國發會（另開新視窗）">
+                    <h4>千億資金<br>驅動創新</h4>
+                    <p class="tag">（國發會）</p>
+                </a>
+            </div>
+
+            <div class="benefitBox">
+                <div class="benefitTitle">2040年創造</div>
+                <div class="benefit benefit1">
+                    <div class="title"><b>15兆</b>元</div>
+                    <p>以上產值</p>
+                </div>
+                <div class="benefit benefit2">
+                    <div class="title"><b>50萬</b>個</div>
+                    <p>高薪就業機會</p>
+                </div>
+                <div class="benefit benefit3">
+                    <div class="title"><b>3</b>個</div>
+                    <p>國際級實驗室</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 提示框 -->
+    <!-- <div class="tooltip" id="tooltip"></div>
+
+    <script>
+        // 獲取所有可點擊元素
+        const clickableElements = document.querySelectorAll('.pyramid-box');
+        const tooltip = document.getElementById('tooltip');
+
+        clickableElements.forEach(element => {
+            // Hover 效果 - 顯示提示
+            element.addEventListener('mouseenter', function() {
+                tooltip.textContent = '點擊開啟新頁面';
+                tooltip.classList.add('show');
+            });
+
+            element.addEventListener('mousemove', function(e) {
+                tooltip.style.left = (e.pageX + 15) + 'px';
+                tooltip.style.top = (e.pageY + 15) + 'px';
+            });
+
+            element.addEventListener('mouseleave', function() {
+                tooltip.classList.remove('show');
+            });
+        });
+    </script> -->
+</body>
+</html>
