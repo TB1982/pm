@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
+<!-- saved from url=(0048)http://192.168.151.132/20220509_modaDemo/ai.html -->
+<html lang="zh-TW"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI 發展策略金字塔</title>
     <style>
@@ -143,7 +143,7 @@
         }
 
         .pyramid-box:hover {
-            background: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.6);
             transform: scale(1.05);
             text-decoration: none;
         }
@@ -280,13 +280,56 @@
             background: linear-gradient(to right,  rgba(255, 255, 255,0) 0%,rgba(255, 255, 255,0.8) 50%,rgba(255, 255, 255,0) 100%);
             animation: shimmer 5s infinite;
         }
-        
+        .light .border{
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            box-shadow: inset 0 0 0 4px #B56927;
+        }
+        .layer-2 a:nth-child(2) .border{
+            clip-path: polygon(0% 0%, 52% 0%, 100% 100%, 0% 100%);
+            transition: all 0.3s;
+        }
+        .layer-2 a:nth-child(2):hover .border{
+            box-shadow: inset -2px -2px 0 6px #B56927;
+        }
+        /* 補右邊線 */
+        .layer-2 a:nth-child(2) .border::after{
+            content: '';
+            position: absolute;
+            top: -8%;
+            right: 24%;
+            height: 116%;
+            width: 4px;
+            transform: rotate(-31deg);
+            background: #B56927;
+        }
 
-        @media (max-width: 800px) {
+        /* light2 */
+        /* @keyframes centerPulse {
+            0%, 100% { 
+                box-shadow: inset 0 0 30px rgba(255, 255, 255, 0);
+            }
+            50% { 
+                box-shadow: inset 0 0 50px rgb(255, 170, 91);
+            }
+        }
+        .light{
+            animation: centerPulse 4s infinite;
+        }
+        .layer-2 a:nth-child(2){
+            clip-path: polygon(0% 0%, 52% 0%, 100% 100%, 0% 100%);
+        } */
+
+        @media (max-width: 1400px) {
             h1{
                 margin-bottom: 0;
             }
             .pyramid-container{
+                flex-direction: row;
+                flex-wrap: wrap;
                 height: auto;
             }
             .pyramid-bg{
@@ -300,20 +343,20 @@
                 transform: none;
                 height:auto;
             }
+            .line{
+                display: none;
+            }
             .pyramid-box{
                 height:auto;
-                border: none !important;
+                /* border: none !important; */
                 padding: 20px 15px !important;
                 background: none !important;
             }
-            .pyramid-box:not(:first-child){
-                border-top: 1px solid #fff !important;
-            }
-            h4 br{
-                display: none;
-            }
             .layer-1,.layer-2{
                 background: #fff7cc;
+            }
+            .layer-2{
+                border-top: 1px solid #fff;
             }
             .layer-3{
                 border-top: 0;
@@ -326,10 +369,7 @@
             .pyramid-box:hover{
                 transform: none;
             }
-
-            .line{
-                display: none;
-            }
+            
             .mainTitle{
                 position: relative;
                 left: inherit !important;
@@ -358,6 +398,138 @@
             }
             .light::before {
                 width: 130%;
+                height: 400%;
+                top: -150%;
+                left: -50%;
+                background: linear-gradient(to right,  rgba(255, 255, 255,0) 0%,rgba(255, 255, 255,0.8) 50%,rgba(255, 255, 255,0) 100%);
+            }
+            .layer-2 a:nth-child(2) .border{
+                clip-path: none;
+            }
+            .layer-2 a:nth-child(2) .border::after{
+                display: none;
+            }
+            .layer-2 a:nth-child(2):hover .border{
+                box-shadow: inset 0 0 0 4px #B56927;
+            }
+
+            .layer-1{
+                width: 33.33%;
+            }
+            .layer-2{
+                display: flex;
+                width: 66.66%;
+                border-top: 0;
+            }
+            .layer-2 .pyramid-box,.layer-3 .pyramid-box,.layer-4 .pyramid-box{
+                flex: 1;
+            }
+            .layer-3,.layer-4{
+                display: flex;
+            }
+            .pyramid-box:first-child{
+                border: 0 !important;
+                border-top: 6px solid #fff !important;
+            }
+            .pyramid-box:not(:first-child){
+                border-top: 6px solid #fff !important;
+                border-left: 6px solid #fff !important;
+            }
+            .layer-2 .pyramid-box{
+                border-left: 6px solid #fff !important;
+            }
+
+            .benefitBox{
+                display: flex;
+                justify-content: center;
+                flex-wrap: wrap;
+                column-gap: 32px;
+                width: 100%;
+            }
+            .benefitTitle{
+                width: 100%;
+            }
+            .benefit {
+                margin-top: 24px;
+                flex: 0 0 auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .pyramid-container{
+                flex-direction: column;
+            }
+            .pyramid-box{
+                border: none !important;
+            }
+            .pyramid-layer{
+                display: block !important;
+            }
+            .pyramid-box:first-child{
+                border-top: 0 !important;
+            }
+            .pyramid-box:not(:first-child){
+                border-top: 1px solid #fff !important;
+            }
+            h4 br{
+                display: none;
+            }
+            .layer-1,.layer-2{
+                width: 100%;
+                background: #fff7cc;
+            }
+            .layer-2{
+                border-top: 1px solid #fff;
+            }
+            .layer-3{
+                border-top: 0;
+                background: #ffeb80;
+            }
+            .layer-4{
+                border-top: 0;
+                background: #ffdf33;
+            }
+            .pyramid-box:hover{
+                transform: none;
+            }
+            .layer-2 .pyramid-box, .layer-3 .pyramid-box, .layer-4 .pyramid-box{
+                flex: 0 0 100% !important;
+            }
+            .pyramid-layer .pyramid-box{
+                border-left: 0 !important;
+            }
+            .benefitBox{
+                display: block;
+            }
+            
+            .mainTitle{
+                position: relative;
+                left: inherit !important;
+                top: inherit !important;
+                margin: 30px 0 0 0;
+                width: 100%;
+                border-radius:0;
+            }
+
+            .benefitBox{
+                margin-top: 32px;
+            }
+            .benefitTitle,.benefit{
+                position: relative;
+                right: initial !important;
+                top: initial !important;
+            }
+            .benefit{
+                margin: 24px auto 0 auto;
+            }
+
+            /* light1 */
+            @keyframes shimmer {
+                0% { transform: translateX(-150%) translateY(0) rotate(-45deg); }
+                100% { transform: translateX(200%) translateY(0) rotate(-45deg); }
+            }
+            .light::before {
+                width: 130%;
                 height: 260%;
                 background: linear-gradient(to bottom,  rgba(255, 255, 255,0) 0%,rgba(255, 255, 255,0.8) 50%,rgba(255, 255, 255,0) 100%);
             }
@@ -372,6 +544,7 @@
         <div class="pyramid-container">
             <!-- 金字塔背景 -->
             <div class="pyramid-bg"></div>
+            <!-- 線條 -->
             <div class="line line1"></div>
             <div class="line line2"></div>
             <div class="line line3"></div>
@@ -395,7 +568,8 @@
                     <h4>百工百業<br>智慧應用</h4>
                     <p class="tag">（經濟部）</p>
                 </a>
-                <a href="#" class="pyramid-box light" title="移至數發部">
+                <a href="http://192.168.151.132/20220509_modaDemo/ai.html#" class="pyramid-box light" title="移至數發部">
+                    <div class="border"></div>
                     <h4>AI數位<br>產業登峰</h4>
                     <p class="tag">（數發部）</p>
                 </a>
@@ -433,7 +607,8 @@
                     <h4>主權AI<br>及算力建設</h4>
                     <p class="tag">（國科會）</p>
                 </a>
-                <a href="#" class="pyramid-box light" title="移至數發部">
+                <a href="http://192.168.151.132/20220509_modaDemo/ai.html#" class="pyramid-box light" title="移至數發部">
+                    <div class="border"></div>
                     <h4>智慧政府與<br>資料治理</h4>
                     <p class="tag">（數發部）</p>
                 </a>
@@ -465,30 +640,5 @@
         </div>
     </div>
 
-    <!-- 提示框 -->
-    <!-- <div class="tooltip" id="tooltip"></div>
 
-    <script>
-        // 獲取所有可點擊元素
-        const clickableElements = document.querySelectorAll('.pyramid-box');
-        const tooltip = document.getElementById('tooltip');
-
-        clickableElements.forEach(element => {
-            // Hover 效果 - 顯示提示
-            element.addEventListener('mouseenter', function() {
-                tooltip.textContent = '點擊開啟新頁面';
-                tooltip.classList.add('show');
-            });
-
-            element.addEventListener('mousemove', function(e) {
-                tooltip.style.left = (e.pageX + 15) + 'px';
-                tooltip.style.top = (e.pageY + 15) + 'px';
-            });
-
-            element.addEventListener('mouseleave', function() {
-                tooltip.classList.remove('show');
-            });
-        });
-    </script> -->
-</body>
-</html>
+</body></html>
