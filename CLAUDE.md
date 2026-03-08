@@ -154,3 +154,35 @@ Commit messages are written in Traditional Chinese. Follow the existing style:
 - **Image assets** in `修正方式/` and `預覽圖/` are reference screenshots only; do not delete them.
 - **No minification or asset hashing** — filenames are stable, caching is not a concern.
 - **Canvas page** (`deepholding.html`) contains complex standalone JavaScript; test carefully after any edits.
+
+---
+
+## AI Behaviour Rules
+
+- When editing content, **both Chinese and English variants must be updated simultaneously**. Never update one language without updating the other.
+- Do **not** introduce npm packages or local JS files to replace CDN dependencies.
+- Commit messages must be in **Traditional Chinese**, following the format: `動詞 + 對象` (e.g., `更新首頁手機版排版`).
+- Do **not** propose modifications to any file without reading it first.
+
+---
+
+## Interaction Language
+
+- Communicate with the user in **Traditional Chinese**.
+- CLAUDE.md itself is written and maintained in **English**.
+
+---
+
+## Safety Rules — Destructive Actions
+
+These rules exist to prevent irreversible damage. Inspired by real-world incidents where AI agents executed destructive infrastructure commands without confirmation.
+
+**STOP and explicitly ask the user before executing any of the following:**
+
+- Deleting files or directories (`rm`, `git clean`, recursive deletes)
+- Overwriting uncommitted changes (`git checkout --`, `git restore`, `git reset --hard`)
+- Force-pushing to any branch (`git push --force`)
+- Dropping or truncating data of any kind
+- Running any command that cannot be undone in a single step
+
+**General principle:** If an action is **irreversible** or has a **blast radius beyond the current file**, pause and confirm with the user first. The cost of asking is zero. The cost of not asking can be everything.
