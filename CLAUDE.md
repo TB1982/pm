@@ -2,6 +2,41 @@
 
 This file provides guidance for AI assistants working in this repository.
 
+---
+
+## Project & Author Identity
+
+This section exists to prevent AI assistants from fabricating personal or project details. **Always use these exact values. Never invent alternatives.**
+
+| Field | Value |
+|-------|-------|
+| Author display name | Nova |
+| Author email | babelon1882@gmail.com |
+| Project name (ZH) | 深握計畫 |
+| Project name (EN) | Deep Grip Project |
+| Site canonical URL | *(not yet assigned — do NOT fabricate a URL; omit `canonical` and `og:url` until confirmed)* |
+| Copyright year | 2024–present |
+| GitHub account | *(not specified — do not link to a GitHub profile unless explicitly provided)* |
+
+### Rules for AI assistants
+
+- **Never** generate a placeholder email such as `author@example.com` or any invented address.
+- **Never** invent a domain name for `canonical`, `og:url`, or any link.
+- **Never** attribute content to a name other than **Nova** without explicit instruction.
+- When the canonical URL is unknown, **omit** the `<link rel="canonical">` and `og:url` tags entirely — do not guess.
+
+### Usage in JSON-LD
+
+```json
+"author": {
+  "@type": "Person",
+  "name": "Nova",
+  "email": "babelon1882@gmail.com"
+}
+```
+
+---
+
 ## Project Overview
 
 **深握計畫 (Deep Grip Project)** is a static HTML/CSS/JavaScript site documenting AI collaboration research and project management methodologies. It serves as a personal/team portfolio, presenting findings on human-AI collaboration, Scrum practices, and design systems — primarily in Traditional Chinese with bilingual (zh-Hant/EN) toggle support.
