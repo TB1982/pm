@@ -157,6 +157,126 @@ Commit messages are written in Traditional Chinese. Follow the existing style:
 
 ---
 
+## AEO — Answer Engine Optimisation
+
+These rules ensure pages are discoverable by AI search engines (ChatGPT, Perplexity, Gemini) and traditional search.
+
+### Metadata (every page)
+
+Every `.html` file must include the following inside `<head>`:
+
+```html
+<!-- Basic SEO -->
+<meta name="description" content="頁面摘要，100–160字元">
+<link rel="canonical" href="https://example.com/page.html">
+
+<!-- Open Graph (social / AI preview) -->
+<meta property="og:title" content="頁面標題">
+<meta property="og:description" content="頁面摘要">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://example.com/page.html">
+<meta property="og:locale" content="zh_TW">
+```
+
+### JSON-LD Structured Data
+
+Add a `<script type="application/ld+json">` block before `</body>` on key pages:
+
+```html
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "頁面名稱",
+  "description": "頁面描述",
+  "inLanguage": "zh-Hant",
+  "author": {
+    "@type": "Person",
+    "name": "作者名稱"
+  }
+}
+</script>
+```
+
+- Use `@type: "Article"` for research/documentation pages.
+- Use `@type: "FAQPage"` with `mainEntity` array for `faq.html`.
+- Use `@type: "WebApplication"` for interactive tools (`lottery.html`, `mandal_chart.html`).
+- Do not fabricate URLs — only add canonical/og:url when the real production URL is known.
+
+---
+
+## Accessibility (A11y)
+
+Target: **WCAG 2.1 Level AA** — applied pragmatically without sacrificing visual design.
+
+### Always Required
+
+- Every `<img>` must have `alt=""` (empty string for decorative) or a descriptive alt text.
+- Heading hierarchy must be logical: one `<h1>` per page, then `<h2>` → `<h3>` in order. Do not skip levels.
+- Interactive elements (`<button>`, `<a>`) must have visible focus styles and descriptive labels.
+- Colour contrast: body text must meet **4.5:1** ratio against its background (AA normal text).
+
+### Animation & Motion
+
+Add this block to the `<style>` section of any page with CSS transitions or `transform` animations:
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+```
+
+This disables animations for users with vestibular disorders — zero visual impact for everyone else.
+
+### Canvas Pages
+
+`deepholding.html` uses `<canvas>` which is opaque to screen readers. Minimum required:
+
+```html
+<canvas aria-label="互動式內在宇宙循環動畫，以視覺方式呈現靜心概念" role="img">
+  您的瀏覽器不支援 Canvas，請升級瀏覽器。
+</canvas>
+```
+
+Do **not** attempt to make the canvas fully screen-reader-navigable — it is not required at AA level for decorative/artistic content.
+
+### Language Toggle
+
+When the language toggle switches to English (`EN`), update the `<html lang>` attribute:
+
+```js
+document.documentElement.lang = isEnglish ? 'en' : 'zh-Hant';
+```
+
+---
+
+## RWD — Responsive Web Design
+
+- Use **Tailwind responsive prefixes** (`sm:`, `md:`, `lg:`) for all layout changes. Avoid fixed `px` widths on containers.
+- Test at three breakpoints minimum: **375px** (mobile), **768px** (tablet), **1280px** (desktop).
+- Font sizes for body text: minimum `1rem` (16px) on mobile; never below `0.875rem` (14px) for any readable content.
+- Touch targets (buttons, links): minimum **44×44px** — use `min-h-[44px] min-w-[44px]` in Tailwind.
+- Images must use `max-w-full` to prevent horizontal overflow on small screens.
+- When adjusting mobile layout, always verify the desktop layout is not broken.
+
+---
+
+## Low-Carbon Web
+
+These principles reduce data transfer and energy consumption without affecting visual quality.
+
+- **No autoplay** — do not add video, audio, or GIF animations that play automatically.
+- **Lazy-load images** — add `loading="lazy"` to all `<img>` tags below the fold.
+- **Avoid redundant CDN calls** — if Tailwind CSS is already loaded, do not load a second CSS framework.
+- **Minimise inline duplication** — repeated large `<style>` blocks across pages should be refactored into a shared pattern (or noted as technical debt).
+- **No tracking scripts** — do not add analytics, ad pixels, or third-party tracking without explicit user instruction.
+- **Prefer SVG over raster** for icons and simple illustrations — SVG is resolution-independent and smaller in bytes.
+
+---
+
 ## AI Behaviour Rules
 
 - When editing content, **both Chinese and English variants must be updated simultaneously**. Never update one language without updating the other.
