@@ -1,4 +1,4 @@
-# CLAUDE.md — 深握計畫 (Deep Grip Project)
+# CLAUDE.md — 深握計畫 (Deep Holding Project)
 
 This file provides guidance for AI assistants working in this repository.
 
@@ -13,7 +13,7 @@ This section exists to prevent AI assistants from fabricating personal or projec
 | Author display name | Nova |
 | Author email | babelon1882@gmail.com |
 | Project name (ZH) | 深握計畫 |
-| Project name (EN) | Deep Grip Project |
+| Project name (EN) | Deep Holding Project |
 | Site canonical URL | `https://tb1982.github.io/pm/` |
 | Copyright year | 2024–present |
 | GitHub account | `tb1982` — `https://github.com/tb1982` |
@@ -70,7 +70,9 @@ https://www.instagram.com/liuyingtzu
 
 ## Project Overview
 
-**深握計畫 (Deep Grip Project)** is a static HTML/CSS/JavaScript site documenting AI collaboration research and project management methodologies. It serves as a personal/team portfolio, presenting findings on human-AI collaboration, Scrum practices, and design systems — primarily in Traditional Chinese with bilingual (zh-Hant/EN) toggle support.
+**深握計畫 (Deep Holding Project)** is a static HTML/CSS/JavaScript site documenting AI collaboration research and project management methodologies. It serves as a personal/team portfolio, presenting findings on human-AI collaboration, Scrum practices, and design systems — primarily in Traditional Chinese with bilingual (zh-Hant/EN) toggle support.
+
+> **Name origin:** *Deep Holding* evokes the image of a human and an AI holding hands in an unknown abyss, exploring together. The "depth" refers primarily to psychological and inner territory — this project has grown out of that kind of exploration. The word *holding* is chosen deliberately over *grip*: holding implies mutual trust and accompaniment, not control.
 
 - **Site type:** Static HTML — no backend, no build system, no package manager
 - **Primary language:** Traditional Chinese (zh-Hant), with English alternatives via JS toggle
