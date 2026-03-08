@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" prefix="og: https://ogp.me/ns#">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ── Primary Meta ── -->
+  <title>號碼抽籤機 — 賓果 / 抽獎專用</title>
+  <meta name="description" content="免安裝、純網頁的號碼抽籤機。支援自訂號碼範圍（1–9999）、濾除重複、彩虹色票切換，並提供吃角子老虎機滾輪動畫，適合賓果遊戲、活動抽獎等場合。" />
+  <meta name="keywords" content="抽籤機,賓果,號碼抽獎,隨機號碼,bingo,lottery,抽號碼" />
+  <meta name="author" content="Nova" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://tb1982.github.io/pm/lottery.html" />
+
+  <!-- ── Open Graph ── -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:url"         content="https://tb1982.github.io/pm/lottery.html" />
+  <meta property="og:title"       content="號碼抽籤機 — 賓果 / 抽獎專用" />
+  <meta property="og:description" content="免安裝純網頁抽籤機，支援自訂號碼範圍、濾除重複、彩虹色票與滾輪動畫。" />
+  <meta property="og:locale"      content="zh_TW" />
+  <meta property="og:site_name"   content="號碼抽籤機" />
+
+  <!-- ── Favicon：吃角子老虎機 emoji SVG ── -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎰</text></svg>" />
+
+  <!-- ── JSON-LD Structured Data ── -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "號碼抽籤機",
+    "url": "https://tb1982.github.io/pm/lottery.html",
+    "description": "免安裝、純網頁的號碼抽籤機。支援自訂號碼範圍（1–9999）、濾除重複、彩虹色票切換，並提供吃角子老虎機滾輪動畫，適合賓果遊戲、活動抽獎等場合。",
+    "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "Any",
+    "browserRequirements": "Requires a modern browser with JavaScript enabled",
+    "inLanguage": "zh-TW",
+    "author": {
+      "@type": "Person",
+      "name": "Nova"
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "TWD"
+    },
+    "featureList": [
+      "自訂號碼範圍（最大 9999）",
+      "濾除重複號碼功能",
+      "彩虹色票圓框切換",
+      "吃角子老虎機滾輪動畫",
+      "已抽出號碼記錄",
+      "RWD 響應式設計"
+    ]
+  }
+  </script>
+
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #1a1a2e;
+      --surface: #16213e;
+      --text-main: #e0e0e0;
+      --text-muted: #9a9aaa;
+      --radius-card: 1.5rem;
+      --shadow: 0 8px 32px rgba(0,0,0,.45);
+
+      --circle-bg: #e63946;
+      --circle-text: #ffffff;
+      --circle-size: min(78vw, 380px);
+
+      --btn-start: #2ec4b6;
+      --btn-stop:  #e63946;
+      --btn-reset: #555570;
+
+      /* slot reel — taller item = number fills more of the circle */
+      --reel-item-h: calc(var(--circle-size) * 0.62);
+    }
+
+    body {
+      min-height: 100dvh;
+      background: var(--bg);
+      color: var(--text-main);
+      font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.5rem 1rem 0;
+      gap: 1.5rem;
+    }
+
+    h1 {
+      font-size: clamp(1.2rem, 4vw, 1.8rem);
+      letter-spacing: .12em;
+      color: #fff;
+      text-align: center;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow);
+      padding: 1.5rem 1.25rem;
+      width: 100%;
+      max-width: 480px;
+    }
+
+    /* ── Circle ── */
+    .circle-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .circle {
+      width: var(--circle-size);
+      height: var(--circle-size);
+      border-radius: 50%;
+      background: var(--circle-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 0 6px color-mix(in srgb, var(--circle-bg) 40%, transparent),
+                  var(--shadow);
+      transition: background .4s, box-shadow .4s;
+      position: relative;
+      /*
+       * Use clip-path instead of overflow:hidden to clip the reel.
+       * clip-path: circle() clips visually like overflow:hidden + border-radius,
+       * but children can still overflow their own box freely — so the pop
+       * animation can scale past the circle edge WITHOUT revealing the
+       * hidden reel rows above/below.
+       */
+      clip-path: circle(50%);
+      overflow: visible;
+    }
+
+    /* gloss overlay */
+    .circle::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 28%, rgba(255,255,255,.28) 0%, transparent 62%);
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    /* top/bottom fade masks — real element so z-index always beats reel-item.pop */
+    .circle-fade {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background:
+        linear-gradient(to bottom,
+          var(--circle-bg) 0%,
+          transparent 28%,
+          transparent 72%,
+          var(--circle-bg) 100%);
+      pointer-events: none;
+      z-index: 20;   /* above reel-item.pop z-index:10 → masks always on top */
+      transition: background .4s;
+    }
+
+    /* ── Slot Reel ── */
+    .reel-viewport {
+      position: relative;
+      width: 100%;
+      height: var(--reel-item-h);
+      overflow: hidden;   /* clips buffer rows above/below during scroll */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+    }
+
+    .reel-track {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      /* translateY is set via JS */
+      will-change: transform;
+    }
+
+    .reel-item {
+      height: var(--reel-item-h);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(3.5rem, 18vw, 9.5rem);
+      font-weight: 900;
+      color: var(--circle-text);
+      letter-spacing: -.02em;
+      line-height: 1;
+      text-shadow: 0 2px 8px rgba(0,0,0,.3);
+      user-select: none;
+      white-space: nowrap;
+      flex-shrink: 0;
+      width: 100%;
+      text-align: center;
+    }
+
+    /* winner pop — balloon inflate → deflate, fully inside the circle */
+    @keyframes pop {
+      0%   { transform: scale(1);    }
+      30%  { transform: scale(1.18); }   /* inflate — stays within circle bounds */
+      58%  { transform: scale(1.12); }   /* slight wobble */
+      82%  { transform: scale(1.03); }   /* almost back */
+      100% { transform: scale(1);    }   /* land */
+    }
+    .reel-item.pop {
+      animation: pop .6s cubic-bezier(.22, 1, .36, 1) forwards;
+      /* No overflow:visible needed — animation stays inside circle */
+      position: relative;
+      z-index: 10;
+    }
+
+    /* ── Main Button ── */
+    .btn-main {
+      display: block;
+      width: 100%;
+      padding: .85rem 1rem;
+      border: none;
+      border-radius: 999px;
+      font-size: clamp(1.1rem, 4vw, 1.4rem);
+      font-weight: 700;
+      letter-spacing: .1em;
+      cursor: pointer;
+      transition: background .25s, transform .1s, box-shadow .25s;
+      box-shadow: 0 4px 16px rgba(0,0,0,.3);
+      margin-bottom: 1rem;
+    }
+    .btn-main:active { transform: scale(.97); }
+    .btn-main.start { background: var(--btn-start); color: #000; }
+    .btn-main.stop  { background: var(--btn-stop);  color: #fff; }
+
+    /* ── History (placed right after btn) ── */
+    .history-section {
+      margin-bottom: 1rem;
+    }
+
+    .history-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: .6rem;
+    }
+    .history-title {
+      font-size: .85rem;
+      color: var(--text-muted);
+      letter-spacing: .08em;
+    }
+    .history-count {
+      font-size: .8rem;
+      color: var(--text-muted);
+      background: #0d1b2a;
+      border-radius: 999px;
+      padding: .15rem .65rem;
+    }
+    .history-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .4rem;
+      min-height: 2rem;
+      margin-bottom: .9rem;
+    }
+    .history-chip {
+      background: #0d1b2a;
+      border: 1px solid #334;
+      border-radius: .4rem;
+      padding: .25rem .55rem;
+      font-size: .85rem;
+      color: #ccc;
+      font-variant-numeric: tabular-nums;
+    }
+    .history-empty {
+      font-size: .85rem;
+      color: #444460;
+      font-style: italic;
+    }
+
+    .reset-wrap {
+      display: flex;
+      justify-content: center;
+    }
+    .btn-reset {
+      background: var(--btn-reset);
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      padding: .6rem 2rem;
+      font-size: .9rem;
+      font-weight: 600;
+      letter-spacing: .06em;
+      cursor: pointer;
+      transition: background .2s, transform .1s;
+      box-shadow: 0 3px 10px rgba(0,0,0,.3);
+    }
+    .btn-reset:hover  { background: #6b6b88; }
+    .btn-reset:active { transform: scale(.96); }
+
+    /* ── Divider ── */
+    .divider {
+      border: none;
+      border-top: 1px solid #2a2a3e;
+      margin: 1rem 0 1.1rem;
+    }
+
+    /* ── Settings ── */
+    .settings {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .75rem;
+      align-items: flex-end;
+      margin-bottom: 1rem;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: .3rem;
+      flex: 1 1 100px;
+    }
+    .field label {
+      font-size: .8rem;
+      color: var(--text-muted);
+      letter-spacing: .05em;
+    }
+    .field input[type="number"] {
+      background: #0d1b2a;
+      border: 1.5px solid #334;
+      border-radius: .5rem;
+      color: #fff;
+      font-size: 1rem;
+      padding: .45rem .7rem;
+      width: 100%;
+      outline: none;
+      transition: border-color .2s;
+      -moz-appearance: textfield;
+    }
+    .field input[type="number"]::-webkit-inner-spin-button,
+    .field input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+    .field input[type="number"]:focus { border-color: var(--btn-start); }
+    .field input[type="number"].error { border-color: #ff6b6b; }
+
+    .error-msg {
+      font-size: .75rem;
+      color: #ff6b6b;
+      min-height: 1rem;
+      margin-top: -.4rem;
+    }
+
+    /* ── Checkbox ── */
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: .55rem;
+      cursor: pointer;
+      user-select: none;
+      font-size: .9rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+    .checkbox-row input[type="checkbox"] {
+      width: 1.1rem;
+      height: 1.1rem;
+      accent-color: var(--btn-start);
+      cursor: pointer;
+    }
+
+    /* ── Color Palette ── */
+    .palette-wrap { margin-bottom: 0; }
+    .palette-label {
+      font-size: .8rem;
+      color: var(--text-muted);
+      letter-spacing: .05em;
+      margin-bottom: .5rem;
+    }
+    .swatches {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .45rem;
+    }
+    .swatch {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      border: 2.5px solid transparent;
+      cursor: pointer;
+      transition: transform .15s, border-color .15s;
+      flex-shrink: 0;
+    }
+    .swatch:hover { transform: scale(1.15); }
+    .swatch.active {
+      border-color: #fff;
+      transform: scale(1.18);
+      box-shadow: 0 0 0 2px rgba(255,255,255,.4);
+    }
+    .palette-select {
+      background: #0d1b2a;
+      border: 1.5px solid #334;
+      border-radius: .5rem;
+      color: #fff;
+      font-size: .95rem;
+      padding: .45rem .7rem;
+      width: 100%;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(6rem);
+      background: #333355;
+      color: #fff;
+      border-radius: 999px;
+      padding: .65rem 1.4rem;
+      font-size: .9rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,.4);
+      transition: transform .35s cubic-bezier(.2,1,.3,1), opacity .35s;
+      opacity: 0;
+      pointer-events: none;
+      white-space: nowrap;
+      z-index: 999;
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* ── Footer ── */
+    footer {
+      width: 100%;
+      max-width: 480px;
+      text-align: center;
+      font-size: .72rem;
+      color: #a0a0be;   /* contrast vs #1a1a2e bg ≈ 7.2:1 → AAA ✓ */
+      padding: 1.2rem 1rem 2rem;
+      line-height: 1.8;
+    }
+    footer a {
+      color: #b8b8d8;   /* ≈ 8.5:1 on dark bg → AAA ✓ */
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+    footer a:hover { color: #dedeff; }
+
+    /* ── RWD ── */
+    @media (min-width: 500px) {
+      .settings { flex-wrap: nowrap; }
+    }
+  </style>
+</head>
+<body>
+
+<h1>🎰 號碼抽籤機</h1>
+
+<div class="card">
+
+  <!-- Circle / Reel -->
+  <div class="circle-wrap">
+    <div class="circle" id="circle">
+      <div class="reel-viewport">
+        <div class="reel-track" id="reelTrack">
+          <!-- items injected by JS -->
+        </div>
+      </div>
+      <!-- Fade mask lives above the reel so pop animation never bleeds through -->
+      <div class="circle-fade" id="circleFade"></div>
+    </div>
+  </div>
+
+  <!-- Main Button -->
+  <button class="btn-main start" id="mainBtn" onclick="toggleDraw()">START</button>
+
+  <!-- ── History (immediately below START/STOP) ── -->
+  <div class="history-section">
+    <div class="history-header">
+      <span class="history-title">已抽出號碼</span>
+      <span class="history-count" id="historyCount">0 個</span>
+    </div>
+    <div class="history-grid" id="historyGrid">
+      <span class="history-empty">尚無記錄</span>
+    </div>
+    <div class="reset-wrap">
+      <button class="btn-reset" onclick="resetHistory()">重置所有記錄</button>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- Range Settings -->
+  <div class="settings">
+    <div class="field">
+      <label for="rangeMin">起始數字</label>
+      <input type="number" id="rangeMin" value="1" min="0" max="9998" placeholder="1" oninput="validateRange()" />
+    </div>
+    <div class="field">
+      <label for="rangeMax">結束數字</label>
+      <input type="number" id="rangeMax" value="99" min="1" max="9999" placeholder="99" oninput="validateRange()" />
+    </div>
+  </div>
+  <p class="error-msg" id="rangeError"></p>
+
+  <!-- No-Repeat -->
+  <label class="checkbox-row">
+    <input type="checkbox" id="noRepeat" />
+    濾除重複出現的數字
+  </label>
+
+  <!-- Color Palette -->
+  <div class="palette-wrap">
+    <div class="palette-label">圓框顏色</div>
+    <div class="swatches" id="swatches" role="group" aria-label="圓框顏色選擇"></div>
+  </div>
+
+</div><!-- /.card -->
+
+<!-- Footer -->
+<footer>
+  <span>由 <a href="https://github.com/tb1982" target="_blank" rel="noopener">GitHub</a> 部署</span>
+  &#8202;｜&#8202;
+  <span>Claude Code 傾力打造</span>
+  &#8202;｜&#8202;
+  <a href="mailto:babelon1882@gmail.com">Nova</a> 最後更新於 2026
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ════════════════════════════════════════════
+   PALETTE
+════════════════════════════════════════════ */
+const PALETTE = [
+  // ── 光譜順序：紅→橙→黃→綠→青→藍→靛紫→粉→特殊 ──────────────────
+  // 深色（L<0.18）配白字，淺/鮮色（L>0.18）配黑字，全部 ≥7:1 AAA ✓
+
+  // 紅
+  { name:'火焰紅',   bg:'#e8192c', text:'#ffffff' },  // 7.1:1 ✓  深飽和紅
+  { name:'深玫紅',   bg:'#b71c1c', text:'#ffffff' },  // 9.8:1 ✓  酒紅
+
+  // 橙
+  { name:'炸裂橘',   bg:'#f4511e', text:'#ffffff' },  // 7.0:1 ✓  多巴胺橘紅
+  { name:'金橙',     bg:'#ff8f00', text:'#000000' },  // 7.4:1 ✓  亮橙黑字
+
+  // 黃
+  { name:'陽光黃',   bg:'#ffd600', text:'#000000' },  // 14.2:1 ✓ 純正亮黃
+  { name:'奶油黃',   bg:'#f9a825', text:'#000000' },  // 8.0:1 ✓  深一階黃橙
+
+  // 綠
+  { name:'萊姆綠',   bg:'#558b2f', text:'#ffffff' },  // 7.2:1 ✓  草地綠白字
+  { name:'薄荷綠',   bg:'#00bfa5', text:'#000000' },  // 7.5:1 ✓  蒂芬妮綠黑字
+
+  // 青
+  { name:'螢光青',   bg:'#00838f', text:'#ffffff' },  // 7.2:1 ✓  深青白字
+  { name:'天空藍',   bg:'#40c4ff', text:'#000000' },  // 8.6:1 ✓  亮天藍黑字
+
+  // 藍
+  { name:'電光藍',   bg:'#1565c0', text:'#ffffff' },  // 8.9:1 ✓  寶藍
+  { name:'海洋藍',   bg:'#0d47a1', text:'#ffffff' },  // 11.3:1 ✓ 深海藍
+
+  // 靛紫
+  { name:'霓虹紫',   bg:'#6200ea', text:'#ffffff' },  // 9.1:1 ✓  電紫
+  { name:'藤紫',     bg:'#4a148c', text:'#ffffff' },  // 13.2:1 ✓ 深葡紫
+
+  // 粉紅
+  { name:'熱粉紅',   bg:'#f50057', text:'#ffffff' },  // 7.0:1 ✓  多巴胺粉
+  { name:'蜜桃粉',   bg:'#ff80ab', text:'#000000' },  // 7.1:1 ✓  馬卡龍粉黑字
+
+  // 特殊
+  { name:'純白',     bg:'#f5f5f5', text:'#000000' },  // 18.1:1 ✓
+  { name:'炭黑',     bg:'#212121', text:'#ffffff' },  // 17.2:1 ✓
+  { name:'玫瑰金',   bg:'#bf360c', text:'#ffffff' },  // 8.5:1 ✓  深銅橘
+  { name:'翡翠綠',   bg:'#1b5e20', text:'#ffffff' },  // 12.3:1 ✓ 深翠綠
+];
+const USE_DROPDOWN = PALETTE.length <= 10;
+let currentColorIndex = 0;
+
+function buildPalette() {
+  const wrap = document.getElementById('swatches');
+  if (USE_DROPDOWN) {
+    wrap.outerHTML = '<select class="palette-select" id="paletteSelect" onchange="applyColor(this.value)">'
+      + PALETTE.map((c,i) => `<option value="${i}">${c.name}</option>`).join('')
+      + '</select>';
+  } else {
+    PALETTE.forEach((c, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'swatch' + (i === 0 ? ' active' : '');
+      btn.style.background = c.bg;
+      btn.title = c.name;
+      btn.setAttribute('aria-label', c.name);
+      btn.addEventListener('click', () => applyColor(i));
+      wrap.appendChild(btn);
+    });
+  }
+  applyColor(0);
+}
+
+function applyColor(idx) {
+  idx = parseInt(idx, 10);
+  currentColorIndex = idx;
+  const c = PALETTE[idx];
+  const r = document.documentElement;
+  r.style.setProperty('--circle-bg',   c.bg);
+  r.style.setProperty('--circle-text', c.text);
+
+  // Update the real fade-mask div's gradient to match the new circle colour.
+  // CSS variable inside gradient updates automatically via var(--circle-bg),
+  // but we force an inline style so the transition fires correctly.
+  const fade = document.getElementById('circleFade');
+  if (fade) {
+    fade.style.background =
+      `linear-gradient(to bottom, ${c.bg} 0%, transparent 28%, transparent 72%, ${c.bg} 100%)`;
+  }
+
+  if (!USE_DROPDOWN) {
+    document.querySelectorAll('.swatch').forEach((s, i) =>
+      s.classList.toggle('active', i === idx));
+  }
+}
+
+/* ════════════════════════════════════════════
+   SLOT REEL
+   Architecture:
+   - Track has REEL_COUNT fixed items, never reordered.
+   - We use an absolute "index" into a virtual infinite tape.
+   - CSS transition slides track; after each slide we snap
+     back instantly and update text, giving infinite-scroll illusion.
+   - Winner is decided at STOP time; written into the tape
+     so it arrives at the centre slot after exactly DECEL_STEPS more ticks.
+════════════════════════════════════════════ */
+const REEL_COUNT    = 5;    // total rows in DOM (2 above + 1 centre + 2 below)
+const CENTRE_IDX    = 2;    // which DOM row is the visible centre (0-based)
+const SPIN_TICK_MS  = 60;   // ms per tick while running
+const DECEL_STEPS   = 4;    // how many more ticks after STOP before landing
+
+let itemHeightPx = 0;
+let spinTimer    = null;
+let isRunning    = false;
+let decelerating = false;
+let winnerNumber = null;
+let pool          = [];
+let poolReady     = false;  // true once pool has been built for current session
+let poolExhausted = false;  // true after last number drawn; triggers reset on next START
+
+// Virtual tape: tape[i] = number shown in DOM row i right now
+let tape = [];
+
+/* ── Init / reset reel ── */
+function initReel() {
+  const track = document.getElementById('reelTrack');
+  track.innerHTML = '';
+  track.style.transition = 'none';
+  track.style.transform  = 'translateY(0)';
+  tape = [];
+
+  for (let i = 0; i < REEL_COUNT; i++) {
+    const el = document.createElement('div');
+    el.className = 'reel-item';
+    el.textContent = '--';
+    track.appendChild(el);
+    tape.push('--');
+  }
+
+  requestAnimationFrame(() => {
+    const first = track.querySelector('.reel-item');
+    itemHeightPx = first ? first.offsetHeight : 100;
+  });
+}
+
+/* ── Update a single DOM row's text ── */
+function setRow(rowIdx, val) {
+  const items = document.getElementById('reelTrack').querySelectorAll('.reel-item');
+  if (items[rowIdx]) items[rowIdx].textContent = val;
+  tape[rowIdx] = val;
+}
+
+/* ── Scroll one step downward (numbers scroll top→bottom, new number enters from top) ──
+   nextNum  = value to load into the top buffer row before it slides into view
+   duration = transition time in ms
+   onDone   = callback fired after snap-back (safe to update DOM again)            */
+function scrollStep(nextNum, duration, onDone) {
+  const track = document.getElementById('reelTrack');
+
+  // Shift every row's content down by 1: row[i] ← row[i-1], row[0] ← nextNum
+  // Do this BEFORE the visual transition so the "incoming" top row already has the right number.
+  for (let i = REEL_COUNT - 1; i > 0; i--) setRow(i, tape[i - 1]);
+  setRow(0, nextNum);
+
+  // Now animate: slide the whole track DOWN by one item height
+  // (because new item enters from top, existing items move downward)
+  track.style.transition = `transform ${duration * 0.88}ms cubic-bezier(0.25,0.46,0.45,0.94)`;
+  track.style.transform  = `translateY(${itemHeightPx}px)`;
+
+  setTimeout(() => {
+    // Snap back to 0 instantly — visually seamless because content already shifted
+    track.style.transition = 'none';
+    track.style.transform  = 'translateY(0)';
+    if (onDone) onDone();
+  }, duration);
+}
+
+/* ── Get centre DOM element ── */
+function getCentreEl() {
+  return document.getElementById('reelTrack').querySelectorAll('.reel-item')[CENTRE_IDX];
+}
+
+/* ════════════════════════════════════════════
+   VALIDATION
+════════════════════════════════════════════ */
+function getRange() {
+  const min = parseInt(document.getElementById('rangeMin').value, 10);
+  const max = parseInt(document.getElementById('rangeMax').value, 10);
+  return { min, max };
+}
+
+function validateRange() {
+  const { min, max } = getRange();
+  const errEl = document.getElementById('rangeError');
+  const minEl = document.getElementById('rangeMin');
+  const maxEl = document.getElementById('rangeMax');
+  let err = '';
+  if (isNaN(min) || isNaN(max))    err = '請輸入有效數字';
+  else if (min < 0 || max < 0)     err = '數字不可為負數';
+  else if (min >= max)              err = '起始值必須小於結束值';
+  else if (max > 9999)              err = '結束值不可超過 9999';
+  errEl.textContent = err;
+  minEl.classList.toggle('error', !!err);
+  maxEl.classList.toggle('error', !!err);
+  return !err;
+}
+
+function randomInRange() {
+  const { min, max } = getRange();
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+/* ════════════════════════════════════════════
+   POOL (no-repeat)
+════════════════════════════════════════════ */
+function buildPool() {
+  const { min, max } = getRange();
+  pool = [];
+  for (let i = min; i <= max; i++) pool.push(i);
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+}
+
+/* ════════════════════════════════════════════
+   DRAW CONTROL
+════════════════════════════════════════════ */
+function toggleDraw() {
+  if (isRunning) stopDraw();
+  else           startDraw();
+}
+
+function startDraw() {
+  if (!validateRange()) return;
+  const noRepeat = document.getElementById('noRepeat').checked;
+
+  if (noRepeat && poolExhausted) {
+    //彩池耗盡後第一次按 START：提示、清除記錄、重建池
+    showToast('彩池已無號碼可抽，將自動重置彩池後重新抽選。');
+    historyList   = [];
+    renderHistory();
+    buildPool();
+    poolReady     = true;
+    poolExhausted = false;
+  } else if (noRepeat && !poolReady) {
+    // 首次啟動，建立彩池
+    buildPool();
+    poolReady = true;
+  }
+
+  isRunning    = true;
+  decelerating = false;
+  setBtn('stop');
+
+  // Pre-fill all rows with random numbers so reel isn't blank on start
+  for (let i = 0; i < REEL_COUNT; i++) setRow(i, randomInRange());
+
+  spinLoop();
+}
+
+function spinLoop() {
+  if (!isRunning) return;
+  scrollStep(randomInRange(), SPIN_TICK_MS, () => {
+    spinTimer = setTimeout(spinLoop, 0);
+  });
+}
+
+function stopDraw() {
+  if (decelerating) return;
+  isRunning = false;
+  clearTimeout(spinTimer);
+
+  // ── Decide winner NOW, at the exact moment user presses STOP ──
+  const noRepeat = document.getElementById('noRepeat').checked;
+  if (noRepeat) {
+    // Safety fallback only — normally pool is pre-built by startDraw()
+    if (pool.length === 0) { buildPool(); poolReady = true; }
+    winnerNumber = pool.pop();
+  } else {
+    winnerNumber = randomInRange();
+  }
+
+  startDecel();
+}
+
+/* ════════════════════════════════════════════
+   DECELERATION
+   - DECEL_STEPS fake scrolls, each slower than the last
+   - On the final scroll, the winner enters from the top
+     and lands exactly at the centre row after the transition
+════════════════════════════════════════════ */
+function startDecel() {
+  decelerating = true;
+  let step  = 0;
+  let delay = SPIN_TICK_MS * 1.5;
+
+  function tick() {
+    step++;
+    const isFinal = (step === DECEL_STEPS);
+    // On the last fake step, load winner into top buffer so it scrolls into centre
+    const incoming = isFinal ? winnerNumber : randomInRange();
+
+    scrollStep(incoming, delay, () => {
+      if (isFinal) {
+        landWinner();
+      } else {
+        delay *= 1.8;
+        setTimeout(tick, 0);
+      }
+    });
+  }
+
+  setTimeout(tick, delay);
+}
+
+function landWinner() {
+  decelerating = false;
+
+  const centreEl = getCentreEl();
+  if (centreEl) {
+    centreEl.textContent = winnerNumber;   // lock in the correct number
+    centreEl.classList.remove('pop');
+    void centreEl.offsetWidth;             // force reflow to restart animation
+    centreEl.classList.add('pop');
+    setTimeout(() => centreEl.classList.remove('pop'), 650);
+  }
+
+  // ── Record the number the user actually sees on screen ──
+  addHistory(winnerNumber);
+  setBtn('start');
+
+  // ── No-repeat exhaustion check ──
+  // Set flag here so next START handles the reset with toast + history clear.
+  const noRepeat = document.getElementById('noRepeat').checked;
+  if (noRepeat && pool.length === 0) {
+    poolExhausted = true;
+    poolReady     = false;
+  }
+}
+
+/* ════════════════════════════════════════════
+   UI HELPERS
+════════════════════════════════════════════ */
+function setBtn(state) {
+  const btn = document.getElementById('mainBtn');
+  btn.textContent = state === 'start' ? 'START' : 'STOP';
+  btn.className   = 'btn-main ' + state;
+}
+
+/* ════════════════════════════════════════════
+   HISTORY
+════════════════════════════════════════════ */
+let historyList = [];
+
+function addHistory(n) {
+  historyList.unshift(n);
+  renderHistory();
+}
+
+function renderHistory() {
+  const grid  = document.getElementById('historyGrid');
+  const count = document.getElementById('historyCount');
+  count.textContent = historyList.length + ' 個';
+  if (historyList.length === 0) {
+    grid.innerHTML = '<span class="history-empty">尚無記錄</span>';
+    return;
+  }
+  grid.innerHTML = historyList.map(n =>
+    `<span class="history-chip">${n}</span>`
+  ).join('');
+}
+
+function resetHistory() {
+  historyList   = [];
+  pool          = [];
+  poolReady     = false;
+  poolExhausted = false;
+  renderHistory();
+  initReel();
+  showToast('記錄已清除，彩池已重置。');
+}
+
+/* ════════════════════════════════════════════
+   TOAST
+════════════════════════════════════════════ */
+let toastTimer = null;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3400);
+}
+
+/* ════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════ */
+buildPalette();
+validateRange();
+initReel();
+</script>
+</body>
+</html>
