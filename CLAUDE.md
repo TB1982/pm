@@ -14,16 +14,42 @@ This section exists to prevent AI assistants from fabricating personal or projec
 | Author email | babelon1882@gmail.com |
 | Project name (ZH) | 深握計畫 |
 | Project name (EN) | Deep Grip Project |
-| Site canonical URL | *(not yet assigned — do NOT fabricate a URL; omit `canonical` and `og:url` until confirmed)* |
+| Site canonical URL | `https://tb1982.github.io/pm/` |
 | Copyright year | 2024–present |
-| GitHub account | *(not specified — do not link to a GitHub profile unless explicitly provided)* |
+| GitHub account | `tb1982` — `https://github.com/tb1982` |
+| LinkedIn | `https://www.linkedin.com/in/yingtzuliu` |
+| Instagram | `https://www.instagram.com/liuyingtzu` |
 
 ### Rules for AI assistants
 
 - **Never** generate a placeholder email such as `author@example.com` or any invented address.
-- **Never** invent a domain name for `canonical`, `og:url`, or any link.
+- **Never** invent a domain name for `canonical`, `og:url`, or any link. Always use `https://tb1982.github.io/pm/` as the base.
 - **Never** attribute content to a name other than **Nova** without explicit instruction.
-- When the canonical URL is unknown, **omit** the `<link rel="canonical">` and `og:url` tags entirely — do not guess.
+- Per-page canonical URLs follow the pattern `https://tb1982.github.io/pm/<filename>.html`.
+
+### Footer — canonical format
+
+Every page footer must use this exact wording (both language variants):
+
+```
+<!-- 中文 -->
+由 GitHub 部署　｜　Claude Code 傾力打造　｜　Nova（babelon1882@gmail.com）最後更新於 2026
+
+<!-- English -->
+Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by Nova (babelon1882@gmail.com)
+```
+
+Do **not** alter the wording, substitute a different email, or remove any segment without explicit instruction.
+
+### Social links — canonical URLs
+
+When generating contact sections, about pages, or JSON-LD `sameAs`, always use these exact URLs:
+
+```
+https://github.com/tb1982
+https://www.linkedin.com/in/yingtzuliu
+https://www.instagram.com/liuyingtzu
+```
 
 ### Usage in JSON-LD
 
@@ -31,7 +57,12 @@ This section exists to prevent AI assistants from fabricating personal or projec
 "author": {
   "@type": "Person",
   "name": "Nova",
-  "email": "babelon1882@gmail.com"
+  "email": "babelon1882@gmail.com",
+  "sameAs": [
+    "https://github.com/tb1982",
+    "https://www.linkedin.com/in/yingtzuliu",
+    "https://www.instagram.com/liuyingtzu"
+  ]
 }
 ```
 
