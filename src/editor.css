@@ -263,6 +263,17 @@ body {
   overflow: hidden;
 }
 
+/* Hidden mirror for measuring textarea natural width */
+#textMirror {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+  white-space: pre;
+  padding: 2px 4px;
+  font-family: -apple-system, 'Helvetica Neue', sans-serif;
+  line-height: 1.25;
+}
+
 /* ─── Bottom bar ─────────────────────────────────────────────────────────── */
 
 .editor-bottombar {

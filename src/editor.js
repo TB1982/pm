@@ -33,7 +33,7 @@ let thickness = 2
 let lineStyle = 'solid'
 let startCap  = 'none'
 let endCap    = 'arrow'
-let fontSize  = 24
+let fontSize  = 48
 let numCount  = 1
 let numSize   = 14    // radius, image pixels
 
@@ -69,6 +69,7 @@ const canvasArea    = document.getElementById('canvasArea')
 const canvasWrapper = document.getElementById('canvasWrapper')
 const textInputWrap = document.getElementById('textInputWrap')
 const textInputEl   = document.getElementById('textInput')
+const textMirrorEl  = document.getElementById('textMirror')
 
 // ─── Utility ─────────────────────────────────────────────────────────────────
 
@@ -157,6 +158,7 @@ COLORS.forEach(c => {
     color = c.hex
     syncColor(color)
     if (selectedId) updateSelectedAnnot({ color })
+    if (textActive) textInputEl.style.color = color
   })
   swatchesEl.appendChild(btn)
 })
@@ -192,8 +194,12 @@ document.querySelectorAll('.cap-btn').forEach(btn =>
 
 // Font size
 document.getElementById('fontSizeInput').addEventListener('input', e => {
-  fontSize = Math.max(8, Math.min(400, parseInt(e.target.value) || 24))
+  fontSize = Math.max(8, Math.min(400, parseInt(e.target.value) || 48))
   if (selectedId) updateSelectedAnnot({ fontSize })
+  if (textActive) {
+    textInputEl.style.fontSize = Math.max(fontSize * viewScale, 14) + 'px'
+    resizeTextInput()
+  }
 })
 
 // Number size
@@ -695,6 +701,7 @@ annotCanvas.addEventListener('dblclick', e => {
   textEditOrig = JSON.parse(JSON.stringify(a))
   annotations  = annotations.filter(x => x.id !== a.id)
   selectedId   = null
+  renderAnnotations()   // clear old text from canvas immediately
   hideAllOptions()
 
   // Sync settings to the annotation being edited
@@ -704,8 +711,7 @@ annotCanvas.addEventListener('dblclick', e => {
 
   showTextInput({ x: a.x, y: a.y })
   textInputEl.value = a.content
-  textInputEl.style.height = 'auto'
-  textInputEl.style.height = textInputEl.scrollHeight + 'px'
+  resizeTextInput()
   textInputEl.select()
 })
 
@@ -714,10 +720,11 @@ annotCanvas.addEventListener('dblclick', e => {
 function showTextInput(pos) {
   textActive = true
   textPos    = pos
-  const fs   = fontSize * viewScale
+  const fs   = Math.max(fontSize * viewScale, 14)
 
-  textInputEl.style.left       = c(pos.x) + 'px'
-  textInputEl.style.top        = c(pos.y) + 'px'
+  // Offset by textarea padding (4px left, 2px top) so inner text aligns with canvas text
+  textInputEl.style.left       = (c(pos.x) - 4) + 'px'
+  textInputEl.style.top        = (c(pos.y) - 2) + 'px'
   textInputEl.style.fontSize   = fs + 'px'
   textInputEl.style.color      = color
   textInputEl.style.lineHeight = '1.25'
@@ -764,10 +771,18 @@ textInputEl.addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey && !isComposing) { e.preventDefault(); commitText() }
 })
 
-textInputEl.addEventListener('input', () => {
+function resizeTextInput() {
+  const lines = textInputEl.value.split('\n')
+  const widest = lines.reduce((a, b) => a.length > b.length ? a : b, '') || ' '
+  textMirrorEl.style.fontSize   = textInputEl.style.fontSize
+  textMirrorEl.style.lineHeight = textInputEl.style.lineHeight
+  textMirrorEl.textContent = widest
+  textInputEl.style.width  = textMirrorEl.offsetWidth + 'px'
   textInputEl.style.height = 'auto'
   textInputEl.style.height = textInputEl.scrollHeight + 'px'
-})
+}
+
+textInputEl.addEventListener('input', resizeTextInput)
 
 // ─── Keyboard shortcuts ───────────────────────────────────────────────────────
 
