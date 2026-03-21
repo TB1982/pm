@@ -1,11 +1,15 @@
 const {
   app, BrowserWindow, globalShortcut,
-  desktopCapturer, screen, ipcMain,
+  screen, ipcMain, systemPreferences,
   clipboard, nativeImage, shell
 } = require('electron')
+const { exec } = require('child_process')
+const { promisify } = require('util')
 const path = require('path')
 const fs   = require('fs')
 const os   = require('os')
+
+const execAsync = promisify(exec)
 
 let mainWindow   = null
 let overlayWindow = null
@@ -38,58 +42,57 @@ function mainWindowDisplay() {
   })
 }
 
-async function captureDisplay(display) {
-  const { size, scaleFactor, id } = display
-
-  // Request larger-than-needed size so thumbnails are at native resolution
-  const sources = await desktopCapturer.getSources({
-    types: ['screen'],
-    thumbnailSize: { width: 10000, height: 10000 }
-  })
-
-  if (!sources.length) throw new Error('找不到螢幕來源，請確認已授予「螢幕錄製」權限。')
-  if (sources.length === 1) return sources[0].thumbnail
-
-  // Match by display_id (string); fallback to largest thumbnail (primary display)
-  const byId = sources.find(s => s.display_id === String(id))
-  if (byId) return byId.thumbnail
-
-  // Last resort: pick source whose thumbnail is closest to this display's size
-  const target = size.width * scaleFactor
-  const source = sources.reduce((best, s) => {
-    const diff    = Math.abs(s.thumbnail.getSize().width - target)
-    const bestDiff = Math.abs(best.thumbnail.getSize().width - target)
-    return diff < bestDiff ? s : best
-  })
-  return source.thumbnail
+// Check macOS Screen Recording permission
+function screenPermissionStatus() {
+  if (process.platform !== 'darwin') return 'granted'
+  try {
+    return systemPreferences.getMediaAccessStatus('screen') // 'granted'|'denied'|'restricted'|'unknown'|'not-determined'
+  } catch {
+    return 'unknown'
+  }
 }
 
-function saveTemp(image) {
+// Capture a global rect (logical pixels) using the system screencapture tool.
+// screencapture handles HiDPI automatically — no scaleFactor math needed.
+async function captureGlobalRect(x, y, w, h) {
   const tmpPath = path.join(os.tmpdir(), `screenshot-${Date.now()}.png`)
-  fs.writeFileSync(tmpPath, image.toPNG())
-  return tmpPath
+  // -x: no shutter sound   -R: rect in global logical screen coordinates
+  await execAsync(`/usr/sbin/screencapture -R ${x},${y},${w},${h} -x "${tmpPath}"`)
+  const image = nativeImage.createFromPath(tmpPath)
+  if (!image || image.isEmpty()) {
+    fs.unlink(tmpPath, () => {})
+    throw new Error('PERMISSION')
+  }
+  return { image, tmpPath }
 }
 
 // ─── IPC: full-screen capture ─────────────────────────────────────────────────
 
 ipcMain.handle('capture-fullscreen', async () => {
-  // Determine display BEFORE minimizing (getBounds still valid while animating)
+  const status = screenPermissionStatus()
+  if (status === 'denied' || status === 'restricted') {
+    return { success: false, needsPermission: true }
+  }
+
+  // Determine display BEFORE minimizing
   const display = mainWindowDisplay()
+  const { bounds } = display
 
   mainWindow.minimize()
-  await wait(450) // wait for macOS minimize animation to complete
+  await wait(450) // wait for macOS minimize animation
 
   try {
-    const image = await captureDisplay(display)
-
+    const { image, tmpPath } = await captureGlobalRect(
+      bounds.x, bounds.y, bounds.width, bounds.height
+    )
     clipboard.writeImage(image)
-    const tmpPath = saveTemp(image)
     const { width, height } = image.getSize()
 
     mainWindow.restore()
     return { success: true, path: tmpPath, width, height }
   } catch (err) {
     mainWindow.restore()
+    if (err.message === 'PERMISSION') return { success: false, needsPermission: true }
     return { success: false, error: err.message }
   }
 })
@@ -97,12 +100,14 @@ ipcMain.handle('capture-fullscreen', async () => {
 // ─── IPC: open rectangle-selection overlay ────────────────────────────────────
 
 ipcMain.handle('open-overlay', async () => {
-  // Open overlay on the same display as the main window
+  const status = screenPermissionStatus()
+  if (status === 'denied' || status === 'restricted') {
+    return { needsPermission: true }
+  }
+
   const display = mainWindowDisplay()
   const { bounds } = display
 
-  // Don't hide the main window — the overlay will cover it.
-  // A brief wait lets any button-press rendering settle.
   await wait(80)
 
   overlayWindow = new BrowserWindow({
@@ -126,7 +131,6 @@ ipcMain.handle('open-overlay', async () => {
   overlayWindow.setVisibleOnAllWorkspaces(true)
   overlayWindow.loadFile('src/overlay.html')
 
-  // Stash display for later use in capture-rect
   overlayWindow._captureDisplay = display
 })
 
@@ -134,29 +138,31 @@ ipcMain.handle('open-overlay', async () => {
 
 ipcMain.handle('capture-rect', async (_, rect) => {
   const display = overlayWindow._captureDisplay
+  const { bounds } = display
+
   overlayWindow.close()
   overlayWindow = null
-  await wait(150)
+  await wait(100)
 
   try {
-    const fullImage  = await captureDisplay(display)
-    const sf         = display.scaleFactor
+    // Convert overlay-relative logical coords → global logical screen coords
+    const gx = Math.round(bounds.x + rect.x)
+    const gy = Math.round(bounds.y + rect.y)
+    const gw = Math.round(rect.width)
+    const gh = Math.round(rect.height)
 
-    const cropped = fullImage.crop({
-      x:      Math.round(rect.x      * sf),
-      y:      Math.round(rect.y      * sf),
-      width:  Math.round(rect.width  * sf),
-      height: Math.round(rect.height * sf)
-    })
+    const { image, tmpPath } = await captureGlobalRect(gx, gy, gw, gh)
+    clipboard.writeImage(image)
+    const { width, height } = image.getSize()
 
-    clipboard.writeImage(cropped)
-    const tmpPath = saveTemp(cropped)
-
-    mainWindow.webContents.send('capture-result', {
-      success: true, path: tmpPath, width: rect.width, height: rect.height
-    })
+    mainWindow.webContents.send('capture-result', { success: true, path: tmpPath, width, height })
   } catch (err) {
-    mainWindow.webContents.send('capture-result', { success: false, error: err.message })
+    const needsPermission = err.message === 'PERMISSION'
+    mainWindow.webContents.send('capture-result', {
+      success: false,
+      needsPermission,
+      error: needsPermission ? undefined : err.message
+    })
   }
 })
 
@@ -167,7 +173,14 @@ ipcMain.handle('cancel-overlay', () => {
     overlayWindow.close()
     overlayWindow = null
   }
-  // No need to restore — main window was never hidden for rect mode
+})
+
+// ─── IPC: open screen-recording permission pane ───────────────────────────────
+
+ipcMain.handle('open-permission-settings', () => {
+  shell.openExternal(
+    'x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture'
+  )
 })
 
 // ─── App lifecycle ────────────────────────────────────────────────────────────

@@ -3,8 +3,10 @@ const { ipcRenderer } = require('electron')
 const canvas = document.getElementById('canvas')
 const ctx    = canvas.getContext('2d')
 
-canvas.width  = window.screen.width
-canvas.height = window.screen.height
+// Use window inner size, not screen.width — screen.width may return the
+// primary display dimensions even when the overlay is on a secondary display.
+canvas.width  = window.innerWidth
+canvas.height = window.innerHeight
 
 let isDrawing = false
 let startX = 0, startY = 0, endX = 0, endY = 0

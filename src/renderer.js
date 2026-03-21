@@ -19,28 +19,60 @@ document.addEventListener('keydown', (e) => {
 
 function showToast(msg, isError = false) {
   const toast = document.getElementById('toast')
-  toast.textContent = msg
+  toast.innerHTML = ''
+  const span = document.createElement('span')
+  span.textContent = msg
+  toast.appendChild(span)
   toast.classList.toggle('toast-error', isError)
+  toast.classList.remove('toast-permission')
   toast.classList.add('visible')
   setTimeout(() => toast.classList.remove('visible'), 2400)
+}
+
+function showPermissionToast() {
+  const toast = document.getElementById('toast')
+  toast.innerHTML = ''
+
+  const msg = document.createElement('span')
+  msg.textContent = '需要「螢幕錄製」權限  '
+
+  const btn = document.createElement('button')
+  btn.textContent = '開啟系統設定'
+  btn.className = 'toast-btn'
+  btn.addEventListener('click', () => {
+    ipcRenderer.invoke('open-permission-settings')
+    toast.classList.remove('visible')
+  })
+
+  toast.appendChild(msg)
+  toast.appendChild(btn)
+  toast.classList.add('toast-permission', 'visible')
+  toast.classList.remove('toast-error')
+  setTimeout(() => toast.classList.remove('visible'), 8000)
+}
+
+function handleCaptureResult(result) {
+  if (result.success) {
+    showToast(`已複製到剪貼簿  ${result.width} × ${result.height} px`)
+  } else if (result.needsPermission) {
+    showPermissionToast()
+  } else {
+    showToast(result.error ?? '截圖失敗', true)
+  }
 }
 
 // ─── Capture: full screen ─────────────────────────────────────────────────────
 
 async function doFullscreen() {
   const result = await ipcRenderer.invoke('capture-fullscreen')
-  if (result.success) {
-    showToast(`已複製到剪貼簿  ${result.width} × ${result.height} px`)
-  } else {
-    showToast(result.error ?? '截圖失敗', true)
-  }
+  handleCaptureResult(result)
 }
 
 // ─── Capture: rectangle ───────────────────────────────────────────────────────
 
 async function doRect() {
-  await ipcRenderer.invoke('open-overlay')
-  // Result arrives via 'capture-done' or 'capture-cancelled'
+  const result = await ipcRenderer.invoke('open-overlay')
+  if (result?.needsPermission) showPermissionToast()
 }
 
 // ─── Shortcut events from main process ───────────────────────────────────────
@@ -54,13 +86,7 @@ ipcRenderer.on('shortcut-rect',       doRect)
 // For now, capture-rect resolves in main.js; renderer shows toast via
 // a dedicated channel when the window regains focus after capture.
 
-ipcRenderer.on('capture-result', (_, result) => {
-  if (result.success) {
-    showToast(`已複製到剪貼簿  ${result.width} × ${result.height} px`)
-  } else {
-    showToast(result.error ?? '截圖失敗', true)
-  }
-})
+ipcRenderer.on('capture-result', (_, result) => handleCaptureResult(result))
 
 // ─── Button wiring ────────────────────────────────────────────────────────────
 
