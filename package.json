@@ -5,6 +5,7 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
+    "test:window": "electron test-window-capture.js",
     "build": "electron-builder --mac --dmg"
   },
   "devDependencies": {
