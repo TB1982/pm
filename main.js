@@ -118,8 +118,9 @@ ipcMain.handle('open-overlay', async () => {
 // ─── IPC: capture cropped rect ────────────────────────────────────────────────
 
 ipcMain.handle('capture-rect', async (_, rect) => {
-  const display = overlayWindow._captureDisplay
-  const { bounds } = display
+  // Read ACTUAL window position before closing — macOS may place the window
+  // at a different y than the display bounds (e.g. offset by menu bar height).
+  const windowBounds = overlayWindow.getBounds()
 
   overlayWindow.close()
   overlayWindow = null
@@ -127,8 +128,8 @@ ipcMain.handle('capture-rect', async (_, rect) => {
 
   try {
     // Convert overlay-relative logical coords → global logical screen coords
-    const gx = Math.round(bounds.x + rect.x)
-    const gy = Math.round(bounds.y + rect.y)
+    const gx = Math.round(windowBounds.x + rect.x)
+    const gy = Math.round(windowBounds.y + rect.y)
     const gw = Math.round(rect.width)
     const gh = Math.round(rect.height)
 
