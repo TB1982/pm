@@ -1,8 +1,19 @@
-const { app, BrowserWindow, globalShortcut } = require('electron')
+const {
+  app, BrowserWindow, globalShortcut,
+  desktopCapturer, screen, ipcMain,
+  clipboard, nativeImage, shell
+} = require('electron')
 const path = require('path')
+const fs   = require('fs')
+const os   = require('os')
+
+let mainWindow   = null
+let overlayWindow = null
+
+// ─── Main window ─────────────────────────────────────────────────────────────
 
 function createWindow() {
-  const win = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 880,
     height: 560,
     minWidth: 680,
@@ -13,22 +24,145 @@ function createWindow() {
       contextIsolation: false
     }
   })
-
-  win.loadFile('src/index.html')
+  mainWindow.loadFile('src/index.html')
 }
+
+// ─── Capture helpers ──────────────────────────────────────────────────────────
+
+async function captureDisplay(display) {
+  const { size, scaleFactor } = display
+  const sources = await desktopCapturer.getSources({
+    types: ['screen'],
+    thumbnailSize: {
+      width:  Math.round(size.width  * scaleFactor),
+      height: Math.round(size.height * scaleFactor)
+    }
+  })
+
+  // Match by display_id when possible, otherwise fall back to first source
+  const source = sources.find(s => s.display_id === String(display.id))
+              ?? sources[0]
+
+  if (!source) throw new Error('找不到螢幕來源，請確認已授予「螢幕錄製」權限。')
+  return source.thumbnail // NativeImage at physical resolution
+}
+
+function saveTemp(image) {
+  const tmpPath = path.join(os.tmpdir(), `screenshot-${Date.now()}.png`)
+  fs.writeFileSync(tmpPath, image.toPNG())
+  return tmpPath
+}
+
+// ─── IPC: full-screen capture ─────────────────────────────────────────────────
+
+ipcMain.handle('capture-fullscreen', async () => {
+  mainWindow.hide()
+  await wait(300) // let window disappear before capture
+
+  try {
+    const cursor  = screen.getCursorScreenPoint()
+    const display = screen.getDisplayNearestPoint(cursor)
+    const image   = await captureDisplay(display)
+
+    clipboard.writeImage(image)
+    const tmpPath = saveTemp(image)
+    const { width, height } = image.getSize()
+
+    mainWindow.show()
+    return { success: true, path: tmpPath, width, height }
+  } catch (err) {
+    mainWindow.show()
+    return { success: false, error: err.message }
+  }
+})
+
+// ─── IPC: open rectangle-selection overlay ────────────────────────────────────
+
+ipcMain.handle('open-overlay', async () => {
+  const cursor  = screen.getCursorScreenPoint()
+  const display = screen.getDisplayNearestPoint(cursor)
+  const { bounds } = display
+
+  mainWindow.hide()
+  await wait(200)
+
+  overlayWindow = new BrowserWindow({
+    x: bounds.x,
+    y: bounds.y,
+    width:  bounds.width,
+    height: bounds.height,
+    frame:       false,
+    transparent: true,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+    resizable:   false,
+    movable:     false,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false
+    }
+  })
+
+  overlayWindow.setAlwaysOnTop(true, 'screen-saver')
+  overlayWindow.setVisibleOnAllWorkspaces(true)
+  overlayWindow.loadFile('src/overlay.html')
+
+  // Stash display for later use in capture-rect
+  overlayWindow._captureDisplay = display
+})
+
+// ─── IPC: capture cropped rect ────────────────────────────────────────────────
+
+ipcMain.handle('capture-rect', async (_, rect) => {
+  const display = overlayWindow._captureDisplay
+  overlayWindow.close()
+  overlayWindow = null
+  await wait(150)
+
+  try {
+    const fullImage  = await captureDisplay(display)
+    const sf         = display.scaleFactor
+
+    const cropped = fullImage.crop({
+      x:      Math.round(rect.x      * sf),
+      y:      Math.round(rect.y      * sf),
+      width:  Math.round(rect.width  * sf),
+      height: Math.round(rect.height * sf)
+    })
+
+    clipboard.writeImage(cropped)
+    const tmpPath = saveTemp(cropped)
+
+    mainWindow.show()
+    mainWindow.webContents.send('capture-result', {
+      success: true, path: tmpPath, width: rect.width, height: rect.height
+    })
+  } catch (err) {
+    mainWindow.show()
+    mainWindow.webContents.send('capture-result', { success: false, error: err.message })
+  }
+})
+
+// ─── IPC: cancel overlay ─────────────────────────────────────────────────────
+
+ipcMain.handle('cancel-overlay', () => {
+  if (overlayWindow) {
+    overlayWindow.close()
+    overlayWindow = null
+  }
+  mainWindow.show()
+})
+
+// ─── App lifecycle ────────────────────────────────────────────────────────────
 
 app.whenReady().then(() => {
   createWindow()
 
-  // Global shortcuts (all customizable later)
   globalShortcut.register('CommandOrControl+Ctrl+1', () => {
-    // TODO: fullscreen capture (S1)
-  })
-  globalShortcut.register('CommandOrControl+Ctrl+2', () => {
-    // TODO: window capture (S1)
+    mainWindow.webContents.send('shortcut-fullscreen')
   })
   globalShortcut.register('CommandOrControl+Ctrl+X', () => {
-    // TODO: rectangle capture (S1)
+    mainWindow.webContents.send('shortcut-rect')
   })
 })
 
@@ -43,3 +177,9 @@ app.on('activate', () => {
 app.on('will-quit', () => {
   globalShortcut.unregisterAll()
 })
+
+// ─── Util ─────────────────────────────────────────────────────────────────────
+
+function wait(ms) {
+  return new Promise(r => setTimeout(r, ms))
+}
