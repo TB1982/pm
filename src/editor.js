@@ -550,7 +550,9 @@ function bounds(a) {
     }
     case 'text': {
       const lines = a.content.split('\n')
-      return { x:a.x, y:a.y, w:lines.reduce((m,l)=>Math.max(m,l.length),0)*a.fontSize*0.58, h:lines.length*a.fontSize*1.25 }
+      annotCtx.font = `${a.fontSize}px -apple-system, "Helvetica Neue", sans-serif`
+      const maxW = lines.reduce((m, l) => Math.max(m, annotCtx.measureText(l).width), 0)
+      return { x:a.x, y:a.y, w:maxW, h:lines.length*a.fontSize*1.25 }
     }
     case 'number': return { x:a.x-16, y:a.y-16, w:32, h:32 }
   }
@@ -576,6 +578,9 @@ function findAt(pos) {
 annotCanvas.addEventListener('mousedown', e => {
   if (e.button !== 0) return
   const pos = evToImg(e)
+
+  // If text input is open and user clicks outside the textarea, commit it first
+  if (textActive) commitText()
 
   if (tool === 'select') {
     // 1. Check resize handles on selected annotation
@@ -768,7 +773,7 @@ textInputEl.addEventListener('compositionend',   () => { isComposing = false })
 
 textInputEl.addEventListener('keydown', e => {
   if (e.key === 'Escape') { e.stopPropagation(); cancelText(); return }
-  if (e.key === 'Enter' && !e.shiftKey && !isComposing) { e.preventDefault(); commitText() }
+  if (e.key === 'Enter' && e.shiftKey && !isComposing) { e.preventDefault(); commitText() }
 })
 
 function resizeTextInput() {
