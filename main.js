@@ -1,6 +1,6 @@
 const {
   app, BrowserWindow, globalShortcut,
-  screen, ipcMain, desktopCapturer,
+  screen, ipcMain, desktopCapturer, dialog,
   clipboard, nativeImage, shell
 } = require('electron')
 const { exec } = require('child_process')
@@ -31,6 +31,58 @@ function createWindow() {
   })
   mainWindow.loadFile('src/index.html')
 }
+
+// ─── Editor window ───────────────────────────────────────────────────────────
+
+function openEditorWindow(imagePath) {
+  const win = new BrowserWindow({
+    width: 1280,
+    height: 820,
+    minWidth: 900,
+    minHeight: 600,
+    titleBarStyle: 'hiddenInset',
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false
+    }
+  })
+  win.loadFile('src/editor.html')
+  win.webContents.once('did-finish-load', () => {
+    win.webContents.send('load-image', imagePath)
+  })
+}
+
+// Save final image (called from editor renderer after burn-in)
+ipcMain.handle('save-image-as', async (event, { dataURL, format }) => {
+  const win = BrowserWindow.fromWebContents(event.sender)
+  const ext = { png: 'png', jpg: 'jpg', webp: 'webp', gif: 'gif' }[format] ?? 'png'
+  const result = await dialog.showSaveDialog(win, {
+    defaultPath: `screenshot.${ext}`,
+    filters: [{ name: 'Image', extensions: [ext] }]
+  })
+  if (result.canceled) return { canceled: true }
+
+  const base64 = dataURL.replace(/^data:image\/[^;]+;base64,/, '')
+  const buffer = Buffer.from(base64, 'base64')
+  let s = sharp(buffer)
+  if      (format === 'jpg')  s = s.jpeg({ quality: 90 })
+  else if (format === 'webp') s = s.webp({ quality: 90 })
+  else if (format === 'gif')  s = s.gif()
+  else                        s = s.png()
+  await s.toFile(result.filePath)
+  return { success: true, path: result.filePath }
+})
+
+// Open image file (from main window "開啟圖片" button)
+ipcMain.handle('open-image-file', async (event) => {
+  const win = BrowserWindow.fromWebContents(event.sender)
+  const result = await dialog.showOpenDialog(win, {
+    filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg'] }],
+    properties: ['openFile']
+  })
+  if (result.canceled || result.filePaths.length === 0) return
+  openEditorWindow(result.filePaths[0])
+})
 
 // ─── Capture helpers ──────────────────────────────────────────────────────────
 
@@ -77,6 +129,7 @@ ipcMain.handle('capture-fullscreen', async () => {
       clipboard.writeImage(image)
       const { width, height } = image.getSize()
       mainWindow.restore()
+      openEditorWindow(tmpPath)
       return { success: true, path: tmpPath, width, height }
     }
 
@@ -122,6 +175,7 @@ ipcMain.handle('capture-fullscreen', async () => {
     const { width, height } = finalImage.getSize()
 
     mainWindow.restore()
+    openEditorWindow(stitchedPath)
     return { success: true, path: stitchedPath, width, height }
 
   } catch (err) {
@@ -185,6 +239,7 @@ ipcMain.handle('capture-rect', async (event, rect) => {
     clipboard.writeImage(image)
     const { width, height } = image.getSize()
 
+    openEditorWindow(tmpPath)
     mainWindow.webContents.send('capture-result', { success: true, path: tmpPath, width, height })
   } catch (err) {
     const needsPermission = err.message === 'PERMISSION'
@@ -238,6 +293,7 @@ ipcMain.handle('capture-window', async (_, sourceId) => {
     clipboard.writeImage(image)
     const { width, height } = image.getSize()
     mainWindow.restore()
+    openEditorWindow(tmpPath)
     return { success: true, path: tmpPath, width, height }
   } catch (err) {
     mainWindow.restore()

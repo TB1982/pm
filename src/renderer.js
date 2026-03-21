@@ -145,5 +145,5 @@ document.getElementById('btnWebCapture').addEventListener('click', () => {
 })
 
 document.getElementById('btnOpenImage').addEventListener('click', () => {
-  showToast('開啟圖片即將推出')
+  ipcRenderer.invoke('open-image-file')
 })
