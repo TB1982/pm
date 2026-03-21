@@ -11,8 +11,8 @@ const os   = require('os')
 
 const execAsync = promisify(exec)
 
-let mainWindow   = null
-let overlayWindow = null
+let mainWindow    = null
+let overlayWindows = []   // one per display
 
 // ─── Main window ─────────────────────────────────────────────────────────────
 
@@ -86,44 +86,44 @@ ipcMain.handle('capture-fullscreen', async () => {
 // ─── IPC: open rectangle-selection overlay ────────────────────────────────────
 
 ipcMain.handle('open-overlay', async () => {
-  const display = mainWindowDisplay()
-  const { bounds } = display
-
   await wait(80)
 
-  overlayWindow = new BrowserWindow({
-    x: bounds.x,
-    y: bounds.y,
-    width:  bounds.width,
-    height: bounds.height,
-    frame:       false,
-    transparent: true,
-    alwaysOnTop: true,
-    skipTaskbar: true,
-    resizable:   false,
-    movable:     false,
-    webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false
-    }
+  // Open one overlay per display so the user can drag on any screen
+  overlayWindows = screen.getAllDisplays().map(display => {
+    const { bounds } = display
+    const win = new BrowserWindow({
+      x: bounds.x,
+      y: bounds.y,
+      width:  bounds.width,
+      height: bounds.height,
+      frame:       false,
+      transparent: true,
+      alwaysOnTop: true,
+      skipTaskbar: true,
+      resizable:   false,
+      movable:     false,
+      webPreferences: {
+        nodeIntegration: true,
+        contextIsolation: false
+      }
+    })
+    win.setAlwaysOnTop(true, 'screen-saver')
+    win.setVisibleOnAllWorkspaces(true)
+    win.loadFile('src/overlay.html')
+    return win
   })
-
-  overlayWindow.setAlwaysOnTop(true, 'screen-saver')
-  overlayWindow.setVisibleOnAllWorkspaces(true)
-  overlayWindow.loadFile('src/overlay.html')
-
-  overlayWindow._captureDisplay = display
 })
 
 // ─── IPC: capture cropped rect ────────────────────────────────────────────────
 
-ipcMain.handle('capture-rect', async (_, rect) => {
-  // Read ACTUAL window position before closing — macOS may place the window
-  // at a different y than the display bounds (e.g. offset by menu bar height).
-  const windowBounds = overlayWindow.getBounds()
+ipcMain.handle('capture-rect', async (event, rect) => {
+  // Identify which overlay triggered this via its webContents ID
+  const senderId = event.sender.id
+  const active   = overlayWindows.find(w => !w.isDestroyed() && w.webContents.id === senderId)
+  const windowBounds = active ? active.getBounds() : { x: 0, y: 0 }
 
-  overlayWindow.close()
-  overlayWindow = null
+  // Close every overlay
+  closeAllOverlays()
   await wait(100)
 
   try {
@@ -150,12 +150,7 @@ ipcMain.handle('capture-rect', async (_, rect) => {
 
 // ─── IPC: cancel overlay ─────────────────────────────────────────────────────
 
-ipcMain.handle('cancel-overlay', () => {
-  if (overlayWindow) {
-    overlayWindow.close()
-    overlayWindow = null
-  }
-})
+ipcMain.handle('cancel-overlay', () => closeAllOverlays())
 
 // ─── IPC: open screen-recording permission pane ───────────────────────────────
 
@@ -189,6 +184,13 @@ app.on('activate', () => {
 app.on('will-quit', () => {
   globalShortcut.unregisterAll()
 })
+
+// ─── Overlay helpers ──────────────────────────────────────────────────────────
+
+function closeAllOverlays() {
+  overlayWindows.forEach(w => { try { w.close() } catch {} })
+  overlayWindows = []
+}
 
 // ─── Util ─────────────────────────────────────────────────────────────────────
 
