@@ -40,6 +40,3 @@ document.getElementById('btnOpenImage').addEventListener('click', () => {
   console.log('TODO: open image')
 })
 
-document.getElementById('btnSvgToPng').addEventListener('click', () => {
-  console.log('TODO: SVG to PNG (F1-B)')
-})

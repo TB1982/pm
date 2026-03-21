@@ -149,6 +149,12 @@ body {
   font-family: 'SF Mono', 'Menlo', monospace;
 }
 
+.btn-sub {
+  font-size: 10px;
+  color: #555;
+  text-align: center;
+}
+
 /* Modal */
 .modal-overlay {
   position: fixed;
