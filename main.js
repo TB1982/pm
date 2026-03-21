@@ -1,6 +1,6 @@
 const {
   app, BrowserWindow, globalShortcut,
-  screen, ipcMain,
+  screen, ipcMain, desktopCapturer,
   clipboard, nativeImage, shell
 } = require('electron')
 const { exec } = require('child_process')
@@ -8,6 +8,7 @@ const { promisify } = require('util')
 const path = require('path')
 const fs   = require('fs')
 const os   = require('os')
+const sharp = require('sharp')
 
 const execAsync = promisify(exec)
 
@@ -60,22 +61,69 @@ async function captureGlobalRect(x, y, w, h) {
 // ─── IPC: full-screen capture ─────────────────────────────────────────────────
 
 ipcMain.handle('capture-fullscreen', async () => {
-  // Determine display BEFORE minimizing
-  const display = mainWindowDisplay()
-  const { bounds } = display
+  // Sort displays left-to-right by their virtual x position
+  const displays = screen.getAllDisplays().sort((a, b) => a.bounds.x - b.bounds.x)
 
   mainWindow.minimize()
   await wait(450) // wait for macOS minimize animation
 
   try {
-    const { image, tmpPath } = await captureGlobalRect(
-      bounds.x, bounds.y, bounds.width, bounds.height
-    )
-    clipboard.writeImage(image)
-    const { width, height } = image.getSize()
+    if (displays.length === 1) {
+      // Single display — original behaviour
+      const { bounds } = displays[0]
+      const { image, tmpPath } = await captureGlobalRect(
+        bounds.x, bounds.y, bounds.width, bounds.height
+      )
+      clipboard.writeImage(image)
+      const { width, height } = image.getSize()
+      mainWindow.restore()
+      return { success: true, path: tmpPath, width, height }
+    }
+
+    // Multiple displays — capture each screen then stitch horizontally.
+    // Per SDD v0.6: use the smallest height as the common height (crop taller screens).
+    const captures = []
+    for (const d of displays) {
+      const { bounds } = d
+      const { image, tmpPath } = await captureGlobalRect(
+        bounds.x, bounds.y, bounds.width, bounds.height
+      )
+      captures.push({ tmpPath, size: image.getSize() })
+    }
+
+    const minHeight  = Math.min(...captures.map(c => c.size.height))
+    const totalWidth = captures.reduce((sum, c) => sum + c.size.width, 0)
+
+    const compositeInputs = []
+    let offsetX = 0
+    for (const c of captures) {
+      const { width, height } = c.size
+      const input = height > minHeight
+        ? await sharp(c.tmpPath).extract({ left: 0, top: 0, width, height: minHeight }).toBuffer()
+        : c.tmpPath
+      compositeInputs.push({ input, left: offsetX, top: 0 })
+      offsetX += width
+    }
+
+    const stitchedPath = path.join(os.tmpdir(), `screenshot-${Date.now()}.png`)
+    await sharp({
+      create: { width: totalWidth, height: minHeight, channels: 4,
+                background: { r: 0, g: 0, b: 0, alpha: 255 } }
+    })
+      .composite(compositeInputs)
+      .png()
+      .toFile(stitchedPath)
+
+    // Clean up individual screen captures
+    captures.forEach(c => fs.unlink(c.tmpPath, () => {}))
+
+    const finalImage = nativeImage.createFromPath(stitchedPath)
+    clipboard.writeImage(finalImage)
+    const { width, height } = finalImage.getSize()
 
     mainWindow.restore()
-    return { success: true, path: tmpPath, width, height }
+    return { success: true, path: stitchedPath, width, height }
+
   } catch (err) {
     mainWindow.restore()
     if (err.message === 'PERMISSION') return { success: false, needsPermission: true }
@@ -148,6 +196,46 @@ ipcMain.handle('capture-rect', async (event, rect) => {
   }
 })
 
+// ─── IPC: window picker ───────────────────────────────────────────────────────
+
+ipcMain.handle('get-window-sources', async () => {
+  const sources = await desktopCapturer.getSources({
+    types: ['window'],
+    thumbnailSize: { width: 320, height: 200 }
+  })
+  return sources
+    .filter(s => s.name && s.name.trim() !== '')
+    .map(s => ({ id: s.id, name: s.name, thumbnail: s.thumbnail.toDataURL() }))
+})
+
+ipcMain.handle('capture-window', async (_, sourceId) => {
+  // Electron source IDs on macOS are formatted as "window:<CGWindowID>:<displayID>"
+  const match = sourceId.match(/^window:(\d+)/)
+  if (!match) return { success: false, error: '無效的視窗 ID' }
+  const windowId = match[1]
+
+  mainWindow.minimize()
+  await wait(450)
+
+  const tmpPath = path.join(os.tmpdir(), `screenshot-${Date.now()}.png`)
+  try {
+    await execAsync(`/usr/sbin/screencapture -l ${windowId} -x "${tmpPath}"`)
+    const image = nativeImage.createFromPath(tmpPath)
+    if (!image || image.isEmpty()) {
+      fs.unlink(tmpPath, () => {})
+      throw new Error('PERMISSION')
+    }
+    clipboard.writeImage(image)
+    const { width, height } = image.getSize()
+    mainWindow.restore()
+    return { success: true, path: tmpPath, width, height }
+  } catch (err) {
+    mainWindow.restore()
+    if (err.message === 'PERMISSION') return { success: false, needsPermission: true }
+    return { success: false, error: err.message }
+  }
+})
+
 // ─── IPC: cancel overlay ─────────────────────────────────────────────────────
 
 ipcMain.handle('cancel-overlay', () => closeAllOverlays())
@@ -167,6 +255,11 @@ app.whenReady().then(() => {
 
   globalShortcut.register('CommandOrControl+Ctrl+1', () => {
     mainWindow.webContents.send('shortcut-fullscreen')
+  })
+  globalShortcut.register('CommandOrControl+Ctrl+2', () => {
+    mainWindow.show()
+    mainWindow.focus()
+    mainWindow.webContents.send('shortcut-window')
   })
   globalShortcut.register('CommandOrControl+Ctrl+X', () => {
     mainWindow.webContents.send('shortcut-rect')

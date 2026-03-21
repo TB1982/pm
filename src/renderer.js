@@ -12,7 +12,10 @@ helpModal.addEventListener('click', (e) => {
   if (e.target === helpModal) helpModal.classList.add('hidden')
 })
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') helpModal.classList.add('hidden')
+  if (e.key === 'Escape') {
+    helpModal.classList.add('hidden')
+    hideWindowPicker()
+  }
 })
 
 // ─── Toast notification ───────────────────────────────────────────────────────
@@ -68,6 +71,46 @@ async function doFullscreen() {
   handleCaptureResult(result)
 }
 
+// ─── Capture: window picker ───────────────────────────────────────────────────
+
+const windowPickerModal = document.getElementById('windowPickerModal')
+const windowPickerClose = document.getElementById('windowPickerClose')
+const windowPickerGrid  = document.getElementById('windowPickerGrid')
+
+windowPickerClose.addEventListener('click', hideWindowPicker)
+windowPickerModal.addEventListener('click', (e) => {
+  if (e.target === windowPickerModal) hideWindowPicker()
+})
+
+function hideWindowPicker() {
+  windowPickerModal.classList.add('hidden')
+}
+
+async function doWindow() {
+  const sources = await ipcRenderer.invoke('get-window-sources')
+  if (!sources || sources.length === 0) {
+    showToast('未找到可截圖的視窗', true)
+    return
+  }
+
+  windowPickerGrid.innerHTML = ''
+  sources.forEach(source => {
+    const card = document.createElement('button')
+    card.className = 'win-card'
+    card.innerHTML = `
+      <img class="win-thumb" src="${source.thumbnail}" alt="">
+      <span class="win-name">${source.name}</span>
+    `
+    card.addEventListener('click', async () => {
+      hideWindowPicker()
+      const result = await ipcRenderer.invoke('capture-window', source.id)
+      handleCaptureResult(result)
+    })
+    windowPickerGrid.appendChild(card)
+  })
+  windowPickerModal.classList.remove('hidden')
+}
+
 // ─── Capture: rectangle ───────────────────────────────────────────────────────
 
 async function doRect() {
@@ -78,6 +121,7 @@ async function doRect() {
 // ─── Shortcut events from main process ───────────────────────────────────────
 
 ipcRenderer.on('shortcut-fullscreen', doFullscreen)
+ipcRenderer.on('shortcut-window',     doWindow)
 ipcRenderer.on('shortcut-rect',       doRect)
 
 // ─── Capture result callbacks ─────────────────────────────────────────────────
@@ -94,9 +138,7 @@ document.getElementById('btnFullscreen').addEventListener('click', doFullscreen)
 
 document.getElementById('btnRect').addEventListener('click', doRect)
 
-document.getElementById('btnWindow').addEventListener('click', () => {
-  showToast('視窗截圖即將推出')
-})
+document.getElementById('btnWindow').addEventListener('click', doWindow)
 
 document.getElementById('btnWebCapture').addEventListener('click', () => {
   showToast('網頁截圖即將推出')
