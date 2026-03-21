@@ -204,7 +204,15 @@ ipcMain.handle('get-window-sources', async () => {
     thumbnailSize: { width: 320, height: 200 }
   })
   return sources
-    .filter(s => s.name && s.name.trim() !== '')
+    .filter(s => {
+      const name = s.name.trim()
+      if (!name) return false
+      // Exclude macOS background XPC service windows — they have no visible UI.
+      // These follow the pattern "AppName.XxxService", "AppName.XxxHelper", etc.
+      if (/\.[A-Z]\w*(Service|Helper|Agent|Daemon)\d*$/.test(name)) return false
+      if (s.thumbnail.isEmpty()) return false
+      return true
+    })
     .map(s => ({ id: s.id, name: s.name, thumbnail: s.thumbnail.toDataURL() }))
 })
 
