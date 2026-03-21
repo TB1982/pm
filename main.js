@@ -1,6 +1,6 @@
 const {
   app, BrowserWindow, globalShortcut,
-  screen, ipcMain, systemPreferences,
+  screen, ipcMain,
   clipboard, nativeImage, shell
 } = require('electron')
 const { exec } = require('child_process')
@@ -42,15 +42,6 @@ function mainWindowDisplay() {
   })
 }
 
-// Check macOS Screen Recording permission
-function screenPermissionStatus() {
-  if (process.platform !== 'darwin') return 'granted'
-  try {
-    return systemPreferences.getMediaAccessStatus('screen') // 'granted'|'denied'|'restricted'|'unknown'|'not-determined'
-  } catch {
-    return 'unknown'
-  }
-}
 
 // Capture a global rect (logical pixels) using the system screencapture tool.
 // screencapture handles HiDPI automatically — no scaleFactor math needed.
@@ -69,11 +60,6 @@ async function captureGlobalRect(x, y, w, h) {
 // ─── IPC: full-screen capture ─────────────────────────────────────────────────
 
 ipcMain.handle('capture-fullscreen', async () => {
-  const status = screenPermissionStatus()
-  if (status === 'denied' || status === 'restricted') {
-    return { success: false, needsPermission: true }
-  }
-
   // Determine display BEFORE minimizing
   const display = mainWindowDisplay()
   const { bounds } = display
@@ -100,11 +86,6 @@ ipcMain.handle('capture-fullscreen', async () => {
 // ─── IPC: open rectangle-selection overlay ────────────────────────────────────
 
 ipcMain.handle('open-overlay', async () => {
-  const status = screenPermissionStatus()
-  if (status === 'denied' || status === 'restricted') {
-    return { needsPermission: true }
-  }
-
   const display = mainWindowDisplay()
   const { bounds } = display
 
