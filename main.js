@@ -53,11 +53,17 @@ function openEditorWindow(imagePath) {
 }
 
 // Save final image (called from editor renderer after burn-in)
+function isoFilename(ext) {
+  const n = new Date()
+  const p = v => String(v).padStart(2, '0')
+  return `${n.getFullYear()}-${p(n.getMonth()+1)}-${p(n.getDate())}-${p(n.getHours())}-${p(n.getMinutes())}.${ext}`
+}
+
 ipcMain.handle('save-image-as', async (event, { dataURL, format }) => {
   const win = BrowserWindow.fromWebContents(event.sender)
   const ext = { png: 'png', jpg: 'jpg', webp: 'webp', gif: 'gif' }[format] ?? 'png'
   const result = await dialog.showSaveDialog(win, {
-    defaultPath: `screenshot.${ext}`,
+    defaultPath: isoFilename(ext),
     filters: [{ name: 'Image', extensions: [ext] }]
   })
   if (result.canceled) return { canceled: true }
