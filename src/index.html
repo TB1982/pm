@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Screenshot Tool</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="titlebar">
+    <span class="app-title">Screenshot Tool</span>
+    <button class="help-btn" id="helpBtn" title="快捷鍵說明">?</button>
+  </div>
+
+  <main class="main-screen">
+
+    <section class="action-group">
+      <h2 class="group-label">截圖</h2>
+      <div class="action-row">
+        <button class="action-btn primary" id="btnFullscreen">
+          <span class="btn-icon">⬛</span>
+          <span class="btn-label">全螢幕</span>
+          <span class="btn-shortcut">⌘⌃1</span>
+        </button>
+        <button class="action-btn primary" id="btnWindow">
+          <span class="btn-icon">◻</span>
+          <span class="btn-label">視窗</span>
+          <span class="btn-shortcut">⌘⌃2</span>
+        </button>
+        <button class="action-btn primary highlight" id="btnRect">
+          <span class="btn-icon">⬚</span>
+          <span class="btn-label">矩形選取</span>
+          <span class="btn-shortcut">⌘⌃X</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="action-group">
+      <h2 class="group-label">其他</h2>
+      <div class="action-row">
+        <button class="action-btn" id="btnWebCapture">
+          <span class="btn-icon">🌐</span>
+          <span class="btn-label">網頁截圖</span>
+        </button>
+        <button class="action-btn" id="btnOpenImage">
+          <span class="btn-icon">🖼</span>
+          <span class="btn-label">開啟圖片</span>
+        </button>
+        <button class="action-btn" id="btnSvgToPng">
+          <span class="btn-icon">⬡</span>
+          <span class="btn-label">SVG → PNG</span>
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Keyboard shortcut help modal -->
+  <div class="modal-overlay hidden" id="helpModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>快捷鍵說明</h2>
+        <button class="modal-close" id="modalClose">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="shortcut-section">
+          <h3>全域快捷鍵</h3>
+          <table>
+            <tr><td>全螢幕截圖</td><td><kbd>⌘</kbd><kbd>⌃</kbd><kbd>1</kbd></td></tr>
+            <tr><td>視窗截圖</td><td><kbd>⌘</kbd><kbd>⌃</kbd><kbd>2</kbd></td></tr>
+            <tr><td>矩形選取截圖</td><td><kbd>⌘</kbd><kbd>⌃</kbd><kbd>X</kbd></td></tr>
+            <tr><td>開啟主視窗</td><td><kbd>⌘</kbd><kbd>⌃</kbd><kbd>0</kbd></td></tr>
+          </table>
+        </div>
+        <div class="shortcut-section">
+          <h3>編輯器工具</h3>
+          <table>
+            <tr><td>矩形框</td><td><kbd>R</kbd></td></tr>
+            <tr><td>線條</td><td><kbd>L</kbd></td></tr>
+            <tr><td>文字</td><td><kbd>T</kbd></td></tr>
+            <tr><td>編號標記</td><td><kbd>N</kbd></td></tr>
+            <tr><td>疊入圖片</td><td><kbd>O</kbd></td></tr>
+            <tr><td>調整大小</td><td><kbd>S</kbd></td></tr>
+            <tr><td>裁切</td><td><kbd>C</kbd></td></tr>
+          </table>
+        </div>
+        <div class="shortcut-section">
+          <h3>通用操作</h3>
+          <table>
+            <tr><td>撤銷</td><td><kbd>⌘</kbd><kbd>Z</kbd></td></tr>
+            <tr><td>重做</td><td><kbd>⌘</kbd><kbd>⇧</kbd><kbd>Z</kbd></td></tr>
+            <tr><td>刪除選取元素</td><td><kbd>Delete</kbd></td></tr>
+            <tr><td>取消 / 離開工具</td><td><kbd>Esc</kbd></td></tr>
+            <tr><td>儲存</td><td><kbd>⌘</kbd><kbd>S</kbd></td></tr>
+            <tr><td>另存新檔</td><td><kbd>⌘</kbd><kbd>⇧</kbd><kbd>S</kbd></td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
