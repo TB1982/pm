@@ -219,7 +219,9 @@ ipcMain.handle('capture-window', async (_, sourceId) => {
 
   const tmpPath = path.join(os.tmpdir(), `screenshot-${Date.now()}.png`)
   try {
-    await execAsync(`/usr/sbin/screencapture -l ${windowId} -x "${tmpPath}"`)
+    // -o: no shadow (prevents transparent shadow pixels rendering as white in apps
+    //     that don't support alpha channel)
+    await execAsync(`/usr/sbin/screencapture -l ${windowId} -o -x "${tmpPath}"`)
     const image = nativeImage.createFromPath(tmpPath)
     if (!image || image.isEmpty()) {
       fs.unlink(tmpPath, () => {})
