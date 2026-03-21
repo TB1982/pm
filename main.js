@@ -209,7 +209,7 @@ ipcMain.handle('get-window-sources', async () => {
       if (!name) return false
       // Exclude macOS background XPC service windows — they have no visible UI.
       // These follow the pattern "AppName.XxxService", "AppName.XxxHelper", etc.
-      if (/\.[A-Z]\w*(Service|Helper|Agent|Daemon)\d*$/.test(name)) return false
+      if (/\.[A-Z]\w*(Service|Helper|Agent|Daemon)[\d.]*$/.test(name)) return false
       if (s.thumbnail.isEmpty()) return false
       return true
     })
