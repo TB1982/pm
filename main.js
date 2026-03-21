@@ -29,22 +29,39 @@ function createWindow() {
 
 // ─── Capture helpers ──────────────────────────────────────────────────────────
 
+// Returns the display the main window currently lives on
+function mainWindowDisplay() {
+  const b = mainWindow.getBounds()
+  return screen.getDisplayNearestPoint({
+    x: Math.round(b.x + b.width  / 2),
+    y: Math.round(b.y + b.height / 2)
+  })
+}
+
 async function captureDisplay(display) {
-  const { size, scaleFactor } = display
+  const { size, scaleFactor, id } = display
+
+  // Request larger-than-needed size so thumbnails are at native resolution
   const sources = await desktopCapturer.getSources({
     types: ['screen'],
-    thumbnailSize: {
-      width:  Math.round(size.width  * scaleFactor),
-      height: Math.round(size.height * scaleFactor)
-    }
+    thumbnailSize: { width: 10000, height: 10000 }
   })
 
-  // Match by display_id when possible, otherwise fall back to first source
-  const source = sources.find(s => s.display_id === String(display.id))
-              ?? sources[0]
+  if (!sources.length) throw new Error('找不到螢幕來源，請確認已授予「螢幕錄製」權限。')
+  if (sources.length === 1) return sources[0].thumbnail
 
-  if (!source) throw new Error('找不到螢幕來源，請確認已授予「螢幕錄製」權限。')
-  return source.thumbnail // NativeImage at physical resolution
+  // Match by display_id (string); fallback to largest thumbnail (primary display)
+  const byId = sources.find(s => s.display_id === String(id))
+  if (byId) return byId.thumbnail
+
+  // Last resort: pick source whose thumbnail is closest to this display's size
+  const target = size.width * scaleFactor
+  const source = sources.reduce((best, s) => {
+    const diff    = Math.abs(s.thumbnail.getSize().width - target)
+    const bestDiff = Math.abs(best.thumbnail.getSize().width - target)
+    return diff < bestDiff ? s : best
+  })
+  return source.thumbnail
 }
 
 function saveTemp(image) {
@@ -56,22 +73,23 @@ function saveTemp(image) {
 // ─── IPC: full-screen capture ─────────────────────────────────────────────────
 
 ipcMain.handle('capture-fullscreen', async () => {
-  mainWindow.hide()
-  await wait(300) // let window disappear before capture
+  // Determine display BEFORE minimizing (getBounds still valid while animating)
+  const display = mainWindowDisplay()
+
+  mainWindow.minimize()
+  await wait(450) // wait for macOS minimize animation to complete
 
   try {
-    const cursor  = screen.getCursorScreenPoint()
-    const display = screen.getDisplayNearestPoint(cursor)
-    const image   = await captureDisplay(display)
+    const image = await captureDisplay(display)
 
     clipboard.writeImage(image)
     const tmpPath = saveTemp(image)
     const { width, height } = image.getSize()
 
-    mainWindow.show()
+    mainWindow.restore()
     return { success: true, path: tmpPath, width, height }
   } catch (err) {
-    mainWindow.show()
+    mainWindow.restore()
     return { success: false, error: err.message }
   }
 })
@@ -79,12 +97,13 @@ ipcMain.handle('capture-fullscreen', async () => {
 // ─── IPC: open rectangle-selection overlay ────────────────────────────────────
 
 ipcMain.handle('open-overlay', async () => {
-  const cursor  = screen.getCursorScreenPoint()
-  const display = screen.getDisplayNearestPoint(cursor)
+  // Open overlay on the same display as the main window
+  const display = mainWindowDisplay()
   const { bounds } = display
 
-  mainWindow.hide()
-  await wait(200)
+  // Don't hide the main window — the overlay will cover it.
+  // A brief wait lets any button-press rendering settle.
+  await wait(80)
 
   overlayWindow = new BrowserWindow({
     x: bounds.x,
@@ -133,12 +152,10 @@ ipcMain.handle('capture-rect', async (_, rect) => {
     clipboard.writeImage(cropped)
     const tmpPath = saveTemp(cropped)
 
-    mainWindow.show()
     mainWindow.webContents.send('capture-result', {
       success: true, path: tmpPath, width: rect.width, height: rect.height
     })
   } catch (err) {
-    mainWindow.show()
     mainWindow.webContents.send('capture-result', { success: false, error: err.message })
   }
 })
@@ -150,7 +167,7 @@ ipcMain.handle('cancel-overlay', () => {
     overlayWindow.close()
     overlayWindow = null
   }
-  mainWindow.show()
+  // No need to restore — main window was never hidden for rect mode
 })
 
 // ─── App lifecycle ────────────────────────────────────────────────────────────
