@@ -283,7 +283,7 @@ function applyColor(hex) {
   pushRecentColor(hex)
 }
 function syncThickness(t) {
-  document.querySelectorAll('.sz-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.sz) === t))
+  document.querySelectorAll('.sz-btn[data-sz]').forEach(b => b.classList.toggle('active', parseInt(b.dataset.sz) === t))
 }
 function syncLineStyle(ls) {
   document.querySelectorAll('.style-btn[data-ls]').forEach(b => b.classList.toggle('active', b.dataset.ls === ls))
@@ -833,7 +833,7 @@ document.getElementById('fillBorderColorPreview').addEventListener('click', func
 })
 
 // Thickness
-document.querySelectorAll('.sz-btn').forEach(btn =>
+document.querySelectorAll('.sz-btn[data-sz]').forEach(btn =>
   btn.addEventListener('click', () => {
     thickness = parseInt(btn.dataset.sz)
     syncThickness(thickness)
