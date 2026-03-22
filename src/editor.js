@@ -1347,7 +1347,7 @@ function drawText(ctx, a) {
     ctx.lineCap     = 'round'
     lines.forEach((line, i) => {
       const lineY = c(a.y) + i * fs * 1.25
-      const uy    = lineY + fs * 0.85 + 4 * viewScale
+      const uy    = lineY + fs * 0.95 + 8 * viewScale
       const w     = ctx.measureText(line).width
       ctx.beginPath()
       ctx.moveTo(c(a.x), uy)
