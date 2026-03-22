@@ -1136,7 +1136,10 @@ document.getElementById('btnSaveConfirm').addEventListener('click', async () => 
   const format  = document.querySelector('input[name="fmt"]:checked').value
   const dataURL = burnIn(format)
   const result  = await ipcRenderer.invoke('save-image-as', { dataURL, format })
-  if (result?.success) showToast(`已儲存：${result.path.split('/').pop()}`)
+  if (result?.success) {
+    showToast(`已儲存：${result.path.split('/').pop()}`)
+    setTimeout(() => window.close(), 800)
+  }
 })
 
 // ─── Crop helpers ─────────────────────────────────────────────────────────────

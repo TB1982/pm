@@ -71,7 +71,7 @@ ipcMain.handle('save-image-as', async (event, { dataURL, format }) => {
 
   const base64 = dataURL.replace(/^data:image\/[^;]+;base64,/, '')
   const buffer = Buffer.from(base64, 'base64')
-  let s = sharp(buffer)
+  let s = sharp(buffer).withMetadata()
   if      (format === 'jpg')  s = s.jpeg({ quality: 90 })
   else if (format === 'webp') s = s.webp({ quality: 90 })
   else if (format === 'gif')  s = s.gif()
