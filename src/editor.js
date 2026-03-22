@@ -204,7 +204,7 @@ function syncThickness(t) {
   document.querySelectorAll('.sz-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.sz) === t))
 }
 function syncLineStyle(ls) {
-  document.querySelectorAll('.style-btn').forEach(b => b.classList.toggle('active', b.dataset.ls === ls))
+  document.querySelectorAll('.style-btn[data-ls]').forEach(b => b.classList.toggle('active', b.dataset.ls === ls))
 }
 function syncCaps(sc, ec) {
   document.querySelectorAll('.cap-btn[data-end="start"]').forEach(b => b.classList.toggle('active', b.dataset.cap === sc))
@@ -654,7 +654,7 @@ document.querySelectorAll('.sz-btn').forEach(btn =>
 )
 
 // Line style
-document.querySelectorAll('.style-btn').forEach(btn =>
+document.querySelectorAll('.style-btn[data-ls]').forEach(btn =>
   btn.addEventListener('click', () => {
     lineStyle = btn.dataset.ls
     syncLineStyle(lineStyle)
