@@ -138,6 +138,7 @@
       <div class="tool-sep"></div>
       <button class="tool-btn" data-tool="crop"   title="裁切 (C)">✂</button>
       <button class="tool-btn" id="btnResize"     title="調整大小 (S)">⇔</button>
+      <button class="tool-btn" id="btnExtend"     title="延伸畫布 (E)">⊞</button>
       <div class="tool-sep"></div>
       <button class="tool-btn" id="btnUndo" title="撤銷 (⌘Z)">↩</button>
       <button class="tool-btn" id="btnRedo" title="重做 (⌘⇧Z)">↪</button>
@@ -193,6 +194,62 @@
         <button class="btn-secondary" id="btnResizeCancel">取消</button>
         <button class="btn-primary"   id="btnResizeConfirm">套用</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Extend canvas modal -->
+<div class="modal-overlay hidden" id="extendModal">
+  <div class="modal modal-extend">
+    <div class="modal-header">
+      <h2>延伸畫布</h2>
+      <button class="modal-close" id="extendModalClose">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="extend-section-label">延伸方向</div>
+      <div class="dir-pad">
+        <button class="dir-btn" data-dir="tl">↖</button>
+        <button class="dir-btn" data-dir="t" >↑</button>
+        <button class="dir-btn" data-dir="tr">↗</button>
+        <button class="dir-btn" data-dir="l" >←</button>
+        <button class="dir-btn dir-center" data-dir="c">⊕</button>
+        <button class="dir-btn" data-dir="r" >→</button>
+        <button class="dir-btn" data-dir="bl">↙</button>
+        <button class="dir-btn" data-dir="b" >↓</button>
+        <button class="dir-btn" data-dir="br">↘</button>
+      </div>
+
+      <div class="extend-inputs">
+        <div class="extend-row hidden" id="extRowW">
+          <label class="extend-lbl" id="extLblW">寬度延伸</label>
+          <input type="number" class="extend-num" id="extendW" min="1" max="99999" value="100">
+          <span class="extend-unit">px</span>
+        </div>
+        <div class="extend-row hidden" id="extRowH">
+          <label class="extend-lbl" id="extLblH">高度延伸</label>
+          <input type="number" class="extend-num" id="extendH" min="1" max="99999" value="100">
+          <span class="extend-unit">px</span>
+        </div>
+        <div class="extend-row hidden" id="extRowS">
+          <label class="extend-lbl">四邊延伸</label>
+          <input type="number" class="extend-num" id="extendS" min="1" max="99999" value="100">
+          <span class="extend-unit">px</span>
+        </div>
+      </div>
+
+      <div class="extend-preview">
+        <span id="extendPreviewFrom">-- × --</span>
+        <span class="preview-arrow">→</span>
+        <span id="extendPreviewTo" class="preview-to">-- × --</span>
+        <span class="extend-unit">px</span>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" id="btnExtendCancel">取消</button>
+        <button class="btn-primary"   id="btnExtendConfirm">確認延伸</button>
+      </div>
+
     </div>
   </div>
 </div>

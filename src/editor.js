@@ -204,6 +204,138 @@ COLORS.forEach(c => {
 // Initialise colour preview + hex field to match the default colour
 syncColor(color)
 
+// ─── Extend canvas ────────────────────────────────────────────────────────────
+
+;(function initExtendCanvas() {
+  // Direction config:
+  //   showW / showH / showS  — which input rows to display
+  //   lblW  / lblH           — human-readable label for the input
+  //   oxLeft                 — true if extension is to the LEFT (original shifts right by addW)
+  //   oyTop                  — true if extension is to the TOP  (original shifts down  by addH)
+  const DIRS = {
+    tl: { showW: true,  showH: true,  showS: false, lblW: '向左延伸', lblH: '向上延伸', oxLeft: true,  oyTop: true  },
+    t:  { showW: false, showH: true,  showS: false,                    lblH: '向上延伸', oxLeft: false, oyTop: true  },
+    tr: { showW: true,  showH: true,  showS: false, lblW: '向右延伸', lblH: '向上延伸', oxLeft: false, oyTop: true  },
+    l:  { showW: true,  showH: false, showS: false, lblW: '向左延伸',                   oxLeft: true,  oyTop: false },
+    c:  { showW: false, showH: false, showS: true                                                                    },
+    r:  { showW: true,  showH: false, showS: false, lblW: '向右延伸',                   oxLeft: false, oyTop: false },
+    bl: { showW: true,  showH: true,  showS: false, lblW: '向左延伸', lblH: '向下延伸', oxLeft: true,  oyTop: false },
+    b:  { showW: false, showH: true,  showS: false,                    lblH: '向下延伸', oxLeft: false, oyTop: false },
+    br: { showW: true,  showH: true,  showS: false, lblW: '向右延伸', lblH: '向下延伸', oxLeft: false, oyTop: false },
+  }
+
+  let selectedDir = 'r'
+
+  const modal   = document.getElementById('extendModal')
+  const rowW    = document.getElementById('extRowW')
+  const rowH    = document.getElementById('extRowH')
+  const rowS    = document.getElementById('extRowS')
+  const inputW  = document.getElementById('extendW')
+  const inputH  = document.getElementById('extendH')
+  const inputS  = document.getElementById('extendS')
+  const lblW    = document.getElementById('extLblW')
+  const lblH    = document.getElementById('extLblH')
+  const preFrom = document.getElementById('extendPreviewFrom')
+  const preTo   = document.getElementById('extendPreviewTo')
+
+  function getAmounts() {
+    const d = DIRS[selectedDir]
+    let addW = 0, addH = 0, offX = 0, offY = 0
+    if (d.showS) {
+      const s = Math.max(0, parseInt(inputS.value) || 0)
+      addW = s * 2; addH = s * 2; offX = s; offY = s
+    } else {
+      if (d.showW) addW = Math.max(0, parseInt(inputW.value) || 0)
+      if (d.showH) addH = Math.max(0, parseInt(inputH.value) || 0)
+      if (d.oxLeft) offX = addW
+      if (d.oyTop)  offY = addH
+    }
+    return { addW, addH, offX, offY }
+  }
+
+  function updatePreview() {
+    const { addW, addH } = getAmounts()
+    preFrom.textContent = `${imgWidth} × ${imgHeight}`
+    preTo.textContent   = `${imgWidth + addW} × ${imgHeight + addH}`
+  }
+
+  function updateDirUI() {
+    const d = DIRS[selectedDir]
+    document.querySelectorAll('.dir-btn').forEach(b =>
+      b.classList.toggle('active', b.dataset.dir === selectedDir)
+    )
+    rowW.classList.toggle('hidden', !d.showW)
+    rowH.classList.toggle('hidden', !d.showH)
+    rowS.classList.toggle('hidden', !d.showS)
+    if (d.lblW) lblW.textContent = d.lblW
+    if (d.lblH) lblH.textContent = d.lblH
+    updatePreview()
+  }
+
+  function openExtendModal() {
+    updateDirUI()   // also calls updatePreview with current imgWidth/imgHeight
+    modal.classList.remove('hidden')
+  }
+
+  function closeExtendModal() { modal.classList.add('hidden') }
+
+  // Direction pad clicks
+  document.querySelectorAll('.dir-btn').forEach(b => {
+    b.addEventListener('click', () => { selectedDir = b.dataset.dir; updateDirUI() })
+  })
+
+  // Input changes → live preview
+  ;[inputW, inputH, inputS].forEach(inp => {
+    inp.addEventListener('input', updatePreview)
+    inp.addEventListener('keydown', e => e.stopPropagation())  // don't fire editor shortcuts
+  })
+
+  // Confirm
+  document.getElementById('btnExtendConfirm').addEventListener('click', () => {
+    const { addW, addH, offX, offY } = getAmounts()
+    if (addW === 0 && addH === 0) { closeExtendModal(); return }
+
+    const newW = imgWidth  + addW
+    const newH = imgHeight + addH
+
+    // Draw original onto a white canvas at the computed offset
+    const off = document.createElement('canvas')
+    off.width = newW; off.height = newH
+    const ctx = off.getContext('2d')
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(0, 0, newW, newH)
+    ctx.drawImage(imgElement, offX, offY)
+
+    // Shift annotations if the original image moved (left / top extension)
+    if (offX > 0 || offY > 0) {
+      annotations.forEach(a => moveAnnot(a, offX, offY))
+    }
+
+    const newImg = new Image()
+    newImg.onload = () => {
+      imgElement = newImg
+      imgWidth   = newW
+      imgHeight  = newH
+      document.getElementById('imgInfo').textContent = `${imgWidth} × ${imgHeight} px`
+      userZoomed = false
+      fitCanvas()
+      drawBase()
+      renderAnnotations()
+      showToast(`已延伸：${newW} × ${newH} px`)
+    }
+    newImg.src = off.toDataURL()
+    closeExtendModal()
+  })
+
+  // Cancel / close
+  document.getElementById('btnExtendCancel').addEventListener('click', closeExtendModal)
+  document.getElementById('extendModalClose').addEventListener('click', closeExtendModal)
+  modal.addEventListener('click', e => { if (e.target === modal) closeExtendModal() })
+
+  // Toolbar button + expose for keydown
+  document.getElementById('btnExtend').addEventListener('click', openExtendModal)
+})()
+
 // ─── Overlay image (E3) ───────────────────────────────────────────────────────
 
 ;(function initOverlayImg() {
@@ -1273,6 +1405,7 @@ document.addEventListener('keydown', e => {
     case 't': case 'T': setTool('text');   break
     case 'n': case 'N': setTool('number'); break
     case 'o': case 'O': document.getElementById('btnOverlayImg').click(); break
+    case 'e': case 'E': document.getElementById('btnExtend').click();     break
     case 'c': case 'C': setTool('crop');   break
     case 's': case 'S': openResizeModal(); break
     case 'Escape':

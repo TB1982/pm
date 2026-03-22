@@ -425,6 +425,96 @@ body {
 
 .save-btn:hover { background: #0070e0; }
 
+/* ─── Extend canvas modal ────────────────────────────────────────────────── */
+
+.modal-extend { width: 300px; }
+
+.extend-section-label {
+  font-size: 11px;
+  color: #666;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Direction pad */
+.dir-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  margin-bottom: 18px;
+}
+
+.dir-btn {
+  height: 44px;
+  background: #2e2e2e;
+  border: 1.5px solid #3a3a3a;
+  border-radius: 8px;
+  color: #999;
+  font-size: 17px;
+  cursor: pointer;
+  transition: background 0.1s, color 0.1s, border-color 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dir-btn:hover { background: #3a3a3a; color: #fff; }
+.dir-btn.active { background: #0a84ff; border-color: #0a84ff; color: #fff; }
+.dir-center { font-size: 14px; }
+
+/* Input rows */
+.extend-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+  min-height: 28px;  /* prevents layout jump when rows hide/show */
+}
+
+.extend-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.extend-lbl {
+  font-size: 12px;
+  color: #888;
+  width: 72px;
+  flex-shrink: 0;
+}
+
+.extend-num {
+  width: 80px;
+  background: #2e2e2e;
+  border: 1px solid #444;
+  border-radius: 5px;
+  color: #e0e0e0;
+  font-size: 13px;
+  padding: 5px 8px;
+  outline: none;
+  text-align: right;
+}
+.extend-num:focus { border-color: #4a9eff; }
+
+.extend-unit { font-size: 12px; color: #555; }
+
+/* Result preview */
+.extend-preview {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: #888;
+}
+.preview-arrow { color: #444; }
+.preview-to    { color: #4a9eff; font-weight: 500; }
+
 /* ─── Modal ──────────────────────────────────────────────────────────────── */
 
 .modal-overlay {
