@@ -1,5 +1,10 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* Reset macOS native button rendering so custom active/inactive styles work */
+button { -webkit-appearance: none; appearance: none; }
+/* Suppress Chromium default focus ring (we rely solely on .active class for state) */
+button:focus { outline: none; }
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
   background: #1a1a1a;
@@ -82,6 +87,7 @@ body {
   border: 1.5px solid rgba(255,255,255,0.25);
   flex-shrink: 0;
   box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3);
+  cursor: pointer;
 }
 
 .swatch {
@@ -170,7 +176,7 @@ body {
   cursor: pointer;
   font-size: 11px;
   padding: 3px 9px;
-  transition: background 0.12s, color 0.12s;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
   white-space: nowrap;
 }
 
@@ -207,6 +213,17 @@ body {
   transition: background 0.12s, color 0.12s;
 }
 .reset-btn:hover { background: #3a2020; border-color: #c0392b; color: #ff6b6b; }
+
+/* Fill ctrl containers — must be flex to flow horizontally in the options bar */
+#fillSolidCtrl, #fillGradientCtrl {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+#fillSolidCtrl.hidden, #fillGradientCtrl.hidden { display: none; }
+
+/* Border colour preview visibility tied to border-enabled state */
+#fillBorderColorPreview.hidden { display: none; }
 
 /* Option separator */
 .opt-sep {
@@ -670,3 +687,94 @@ body {
 /* ─── Small inline buttons (for options bar) ─────────────────────────────── */
 
 .btn-sm { padding: 4px 12px; font-size: 12px; border-radius: 6px; }
+
+/* ─── Floating colour-picker panel ────────────────────────────────────────── */
+
+#colorPickerPanel.hidden { display: none; }
+
+#colorPickerPanel {
+  position: fixed;
+  z-index: 9999;
+  background: #252525;
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 10px 32px rgba(0,0,0,0.65);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Theme grid: each hue is a column, shades are rows */
+#cppTheme {
+  display: flex;
+  gap: 3px;
+}
+.cpp-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+/* Standard colours: one flat row */
+#cppStandard {
+  display: flex;
+  gap: 3px;
+}
+
+/* Individual swatch tile */
+.cpp-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: transform 0.1s;
+  position: relative;
+}
+.cpp-swatch:hover { transform: scale(1.25); z-index: 1; }
+.cpp-swatch.active { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px rgba(255,255,255,0.25); }
+
+/* Section label above standard colours */
+.cpp-section-label {
+  font-size: 10px;
+  color: #888;
+  letter-spacing: 0.4px;
+  line-height: 1;
+}
+
+/* Horizontal divider inside panel */
+.cpp-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.1);
+  margin: 0 -2px;
+}
+
+/* Tools row: eyedropper + hex input */
+#cppTools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Transparent swatch — white background with diagonal red "no" line */
+.cpp-swatch-transparent {
+  background: #ffffff !important;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.15) !important;
+  position: relative;
+  overflow: hidden;
+}
+.cpp-swatch-transparent::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -20%;
+  width: 140%;
+  height: 2px;
+  background: #d42020;
+  transform: rotate(45deg) translateY(-50%);
+  transform-origin: center;
+  pointer-events: none;
+}

@@ -2,15 +2,25 @@ const { ipcRenderer } = require('electron')
 
 // ─── Colour palette ──────────────────────────────────────────────────────────
 
-const COLORS = [
-  { hex: '#ff3b30', name: '紅' },
-  { hex: '#ff9500', name: '橙' },
-  { hex: '#ffcc00', name: '黃' },
-  { hex: '#34c759', name: '綠' },
-  { hex: '#007aff', name: '藍' },
-  { hex: '#af52de', name: '紫' },
-  { hex: '#1c1c1e', name: '黑' },
-  { hex: '#ffffff', name: '白' },
+// Theme palette: 10 columns (hues) × 6 rows (light → dark)
+const PALETTE_THEME = [
+  ['#e5e5e5','#c4c4c4','#9a9a9a','#6b6b6b','#3d3d3d','#141414'],  // Gray
+  ['#fecaca','#fca5a5','#f87171','#ef4444','#b91c1c','#7f1d1d'],  // Red
+  ['#fed7aa','#fdba74','#fb923c','#f97316','#c2410c','#7c2d12'],  // Orange
+  ['#fef08a','#fde047','#facc15','#eab308','#a16207','#713f12'],  // Yellow
+  ['#bbf7d0','#86efac','#4ade80','#22c55e','#15803d','#14532d'],  // Green
+  ['#99f6e4','#5eead4','#2dd4bf','#14b8a6','#0f766e','#042f2e'],  // Teal
+  ['#bae6fd','#7dd3fc','#38bdf8','#0ea5e9','#0369a1','#0c4a6e'],  // Sky
+  ['#bfdbfe','#93c5fd','#60a5fa','#3b82f6','#1d4ed8','#1e3a8a'],  // Blue
+  ['#e9d5ff','#d8b4fe','#c084fc','#a855f7','#7e22ce','#3b0764'],  // Purple
+  ['#fecdd3','#fda4af','#fb7185','#f43f5e','#be123c','#881337'],  // Rose
+]
+
+// Standard colours row (10 accent / neutral colours + transparent)
+const PALETTE_STANDARD = [
+  '#000000','#1c1c1e','#ff3b30','#ff9500','#ffcc00',
+  '#34c759','#00c7be','#007aff','#5856d6','#af52de',
+  'transparent',
 ]
 
 // ─── State ───────────────────────────────────────────────────────────────────
@@ -45,7 +55,7 @@ let startCap  = 'none'
 let endCap    = 'arrow'
 let fontSize  = 48
 let numCount  = 1
-let numSize   = 14    // radius, image pixels
+let numSize   = 36    // radius, image pixels
 
 // Fill rect (色塊工具) state
 let fillMode         = 'solid'       // 'solid' | 'gradient'
@@ -55,6 +65,9 @@ let fillColorB       = 'transparent' // gradient end colour ('transparent' or he
 let fillGradientDir  = 'h'           // 'h' | 'v' | 'dr' | 'ur'
 let fillOpacity      = 100
 let fillBorderEnabled = true
+let fillBorderColor   = '#ffffff'    // border stroke colour
+let fillPrevColorA    = '#ffcc00'    // last non-transparent colorA (for 透 toggle)
+let fillPrevColorB    = '#333333'    // last non-transparent colorB (for 透 toggle)
 
 // Annotation clipboard (for Cmd+C / Cmd+V on number annotations)
 let annotClipboard = null
@@ -130,8 +143,17 @@ function showOptionsForTool(t) {
     return
   }
   if (!['rect','fillrect','line','text','number'].includes(t)) return
-  document.getElementById('grpColor').classList.remove('hidden')
-  if (t === 'fillrect') document.getElementById('grpFillColor').classList.remove('hidden')
+  if (t !== 'fillrect') document.getElementById('grpColor').classList.remove('hidden')
+  if (t === 'fillrect') {
+    document.getElementById('grpFillColor').classList.remove('hidden')
+    syncFillMode(fillMode)
+    syncFillColorA(fillColorA)
+    syncFillColorB(fillColorB)
+    syncFillGradientDir(fillGradientDir)
+    syncFillOpacity(fillOpacity)
+    syncFillBorder(fillBorderEnabled)
+    syncFillBorderColor(fillBorderColor)
+  }
   if (['rect','fillrect','line'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
   if (t === 'line')   { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden') }
   if (t === 'text')   document.getElementById('grpFont').classList.remove('hidden')
@@ -142,7 +164,7 @@ function showOptionsForAnnot(a) {
   hideAllOptions()
   if (a.type === 'img') return   // overlay image has no editable colour/thickness options
   const t = a.type
-  document.getElementById('grpColor').classList.remove('hidden')
+  if (t !== 'fillrect') document.getElementById('grpColor').classList.remove('hidden')
   if (t === 'fillrect') document.getElementById('grpFillColor').classList.remove('hidden')
   if (['rect','fillrect','line'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
   if (t === 'line')   { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden') }
@@ -155,15 +177,18 @@ function showOptionsForAnnot(a) {
     fillMode = a.fillMode ?? 'solid'; syncFillMode(fillMode)
     fillColor = a.fillColor ?? '#ffcc00'; syncFillColor(fillColor)
     fillColorA = a.fillColorA ?? '#ffcc00'; syncFillColorA(fillColorA)
+    if (fillColorA !== 'transparent') fillPrevColorA = fillColorA
     fillColorB = a.fillColorB ?? 'transparent'; syncFillColorB(fillColorB)
+    if (fillColorB !== 'transparent') fillPrevColorB = fillColorB
     fillGradientDir = a.fillGradientDir ?? 'h'; syncFillGradientDir(fillGradientDir)
     fillOpacity = a.fillOpacity ?? 100; syncFillOpacity(fillOpacity)
     fillBorderEnabled = a.fillBorder !== false; syncFillBorder(fillBorderEnabled)
+    fillBorderColor = a.fillBorderColor ?? '#ffffff'; syncFillBorderColor(fillBorderColor)
   }
   if (t === 'line')   { lineStyle = a.lineStyle; startCap = a.startCap; endCap = a.endCap; syncLineStyle(lineStyle); syncCaps(startCap, endCap) }
   if (t === 'text')   { fontSize = a.fontSize;   syncFontSize(fontSize) }
   if (t === 'number') {
-    numSize = a.size ?? 14; syncNumSize(numSize)
+    numSize = a.size ?? 36; syncNumSize(numSize)
     document.getElementById('numValueEdit').classList.remove('hidden')
     document.getElementById('numValueInput').value = a.value
   }
@@ -171,9 +196,6 @@ function showOptionsForAnnot(a) {
 
 // Sync UI controls
 function syncColor(col) {
-  document.querySelectorAll('.swatch').forEach(s => s.classList.toggle('active', s.dataset.hex === col))
-  const hexInput = document.getElementById('hexInput')
-  if (hexInput) hexInput.value = col.replace(/^#/, '').toUpperCase()
   const preview = document.getElementById('colorPreview')
   if (preview) preview.style.background = col
 }
@@ -189,7 +211,7 @@ function syncThickness(t) {
   document.querySelectorAll('.sz-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.sz) === t))
 }
 function syncLineStyle(ls) {
-  document.querySelectorAll('.style-btn').forEach(b => b.classList.toggle('active', b.dataset.ls === ls))
+  document.querySelectorAll('.style-btn[data-ls]').forEach(b => b.classList.toggle('active', b.dataset.ls === ls))
 }
 function syncCaps(sc, ec) {
   document.querySelectorAll('.cap-btn[data-end="start"]').forEach(b => b.classList.toggle('active', b.dataset.cap === sc))
@@ -207,36 +229,44 @@ function fillPreviewBg(hex) {
 }
 
 function syncFillMode(mode) {
-  document.getElementById('btnFillSolid').classList.toggle('active', mode === 'solid')
-  document.getElementById('btnFillGradient').classList.toggle('active', mode === 'gradient')
+  const solid = document.getElementById('btnFillSolid')
+  const grad  = document.getElementById('btnFillGradient')
+  if (mode === 'solid') { solid.classList.add('active'); grad.classList.remove('active') }
+  else                  { grad.classList.add('active');  solid.classList.remove('active') }
   document.getElementById('fillSolidCtrl').classList.toggle('hidden', mode !== 'solid')
   document.getElementById('fillGradientCtrl').classList.toggle('hidden', mode !== 'gradient')
 }
 function syncFillColor(hex) {
-  document.querySelectorAll('#fillColorSwatches .fill-swatch').forEach(s => s.classList.toggle('active', s.dataset.hex === hex))
   const p = document.getElementById('fillColorPreview')
   if (p) p.style.background = fillPreviewBg(hex)
 }
 function syncFillColorA(hex) {
-  document.querySelectorAll('#fillColorASwatches .fill-swatch').forEach(s => s.classList.toggle('active', s.dataset.hex === hex))
   const p = document.getElementById('fillColorAPreview')
   if (p) p.style.background = fillPreviewBg(hex)
 }
 function syncFillColorB(hex) {
-  document.querySelectorAll('#fillColorBSwatches .fill-swatch').forEach(s => s.classList.toggle('active', s.dataset.hex === hex))
   const p = document.getElementById('fillColorBPreview')
   if (p) p.style.background = fillPreviewBg(hex)
 }
 function syncFillGradientDir(dir) {
-  document.querySelectorAll('[data-fdir]').forEach(b => b.classList.toggle('active', b.dataset.fdir === dir))
+  document.querySelectorAll('[data-fdir]').forEach(b => {
+    if (b.dataset.fdir === dir) b.classList.add('active'); else b.classList.remove('active')
+  })
 }
 function syncFillOpacity(val) {
   const inp = document.getElementById('fillOpacityInput')
   if (inp) inp.value = val
 }
 function syncFillBorder(enabled) {
-  document.getElementById('btnFillBorderOn').classList.toggle('active', enabled)
-  document.getElementById('btnFillBorderOff').classList.toggle('active', !enabled)
+  const on  = document.getElementById('btnFillBorderOn')
+  const off = document.getElementById('btnFillBorderOff')
+  if (enabled) { on.classList.add('active');  off.classList.remove('active') }
+  else         { off.classList.add('active'); on.classList.remove('active') }
+  document.getElementById('fillBorderColorPreview').classList.toggle('hidden', !enabled)
+}
+function syncFillBorderColor(hex) {
+  const p = document.getElementById('fillBorderColorPreview')
+  if (p) p.style.background = fillPreviewBg(hex)
 }
 
 function applyFillMode(mode) {
@@ -248,10 +278,12 @@ function applyFillColor(hex) {
   if (selectedId) updateSelectedAnnot({ fillColor: hex })
 }
 function applyFillColorA(hex) {
+  if (hex !== 'transparent') fillPrevColorA = hex
   fillColorA = hex; syncFillColorA(hex)
   if (selectedId) updateSelectedAnnot({ fillColorA: hex })
 }
 function applyFillColorB(hex) {
+  if (hex !== 'transparent') fillPrevColorB = hex
   fillColorB = hex; syncFillColorB(hex)
   if (selectedId) updateSelectedAnnot({ fillColorB: hex })
 }
@@ -267,6 +299,10 @@ function applyFillBorder(enabled) {
   fillBorderEnabled = enabled; syncFillBorder(enabled)
   if (selectedId) updateSelectedAnnot({ fillBorder: enabled })
 }
+function applyFillBorderColor(hex) {
+  fillBorderColor = hex; syncFillBorderColor(hex)
+  if (selectedId) updateSelectedAnnot({ fillBorderColor: hex })
+}
 
 // Update selected annotation's properties + push history
 function updateSelectedAnnot(props) {
@@ -279,67 +315,8 @@ function updateSelectedAnnot(props) {
 
 // ─── UI init ─────────────────────────────────────────────────────────────────
 
-// Colour swatches
-const swatchesEl = document.getElementById('colorSwatches')
-COLORS.forEach(c => {
-  const btn = document.createElement('button')
-  btn.className     = 'swatch' + (c.hex === color ? ' active' : '')
-  btn.style.background = c.hex
-  btn.dataset.hex   = c.hex
-  btn.title         = c.name
-  if (c.hex === '#ffffff') btn.style.boxShadow = 'inset 0 0 0 1px #555'
-  btn.addEventListener('click', () => applyColor(c.hex))
-  swatchesEl.appendChild(btn)
-})
-
-// Initialise colour preview + hex field to match the default colour
+// Initialise colour preview to match the default colour
 syncColor(color)
-
-// ── Fill UI init ───────────────────────────────────────────────────────────────
-// Helper: build colour swatches for a fill slot (solid / A / B)
-// includeTransparent=true adds a checkerboard "透明" swatch at the end
-function buildFillSwatches(containerId, getVal, applyFn, includeTransparent) {
-  const el = document.getElementById(containerId)
-  const items = includeTransparent
-    ? [...COLORS, { hex: 'transparent', name: '透明' }]
-    : COLORS
-  items.forEach(c => {
-    const btn = document.createElement('button')
-    btn.className = 'swatch fill-swatch'
-    btn.dataset.hex = c.hex
-    btn.title       = c.name
-    if (c.hex === 'transparent') {
-      btn.style.background = 'repeating-conic-gradient(#aaa 0% 25%, #eee 0% 50%) 0 0 / 8px 8px'
-    } else {
-      btn.style.background = c.hex
-      if (c.hex === '#ffffff') btn.style.boxShadow = 'inset 0 0 0 1px #555'
-    }
-    btn.classList.toggle('active', c.hex === getVal())
-    btn.addEventListener('click', () => applyFn(c.hex))
-    el.appendChild(btn)
-  })
-}
-
-// Helper: wire a fill-preview square to a native <input type="color">
-function bindFillPicker(previewId, pickerId, getVal, applyFn) {
-  const preview = document.getElementById(previewId)
-  const picker  = document.getElementById(pickerId)
-  preview.style.cursor = 'pointer'
-  preview.addEventListener('click', () => {
-    const v = getVal()
-    picker.value = (v === 'transparent' || !v.startsWith('#')) ? '#ffcc00' : v
-    picker.click()
-  })
-  picker.addEventListener('input', e => applyFn(e.target.value))
-}
-
-buildFillSwatches('fillColorSwatches',  () => fillColor,  applyFillColor,  false)
-buildFillSwatches('fillColorASwatches', () => fillColorA, applyFillColorA, true)
-buildFillSwatches('fillColorBSwatches', () => fillColorB, applyFillColorB, true)
-
-bindFillPicker('fillColorPreview',  'fillNativePicker',  () => fillColor,  applyFillColor)
-bindFillPicker('fillColorAPreview', 'fillNativePickerA', () => fillColorA, applyFillColorA)
-bindFillPicker('fillColorBPreview', 'fillNativePickerB', () => fillColorB, applyFillColorB)
 
 // Mode toggle
 document.getElementById('btnFillSolid').addEventListener('click',    () => applyFillMode('solid'))
@@ -368,6 +345,7 @@ syncFillColorB(fillColorB)
 syncFillGradientDir(fillGradientDir)
 syncFillOpacity(fillOpacity)
 syncFillBorder(fillBorderEnabled)
+syncFillBorderColor(fillBorderColor)
 
 // ─── Extend canvas ────────────────────────────────────────────────────────────
 
@@ -554,56 +532,166 @@ syncFillBorder(fillBorderEnabled)
   })
 })()
 
-// Eyedropper
-;(function initEyedropper() {
-  const btn    = document.getElementById('btnEyedropper')
-  const native = document.getElementById('nativeColorPicker')
+// ─── Floating colour-picker panel ────────────────────────────────────────────
 
-  btn.addEventListener('click', async () => {
+let _cppApplyFn    = null
+let _cppGetCurrent = null
+let _cppAnchorEl   = null
+
+function showColorPanel(anchorEl, applyFn, getCurrentFn) {
+  _cppApplyFn    = applyFn
+  _cppGetCurrent = getCurrentFn
+  _cppAnchorEl   = anchorEl
+  const cur = (getCurrentFn() || '').toLowerCase()
+  // Sync active swatch
+  document.querySelectorAll('.cpp-swatch').forEach(s =>
+    s.classList.toggle('active', s.dataset.hex === cur)
+  )
+  // Sync hex input
+  document.getElementById('cppHexInput').value =
+    cur.startsWith('#') ? cur.slice(1).toUpperCase() : ''
+  // Position BEFORE showing to avoid flash at wrong location
+  const panel = document.getElementById('colorPickerPanel')
+  const ar = anchorEl.getBoundingClientRect()
+  panel.style.left = ar.left + 'px'
+  panel.style.top  = (ar.bottom + 6) + 'px'
+  panel.classList.remove('hidden')
+  // Clamp to viewport after first paint
+  requestAnimationFrame(() => {
+    const pr = panel.getBoundingClientRect()
+    if (pr.right  > window.innerWidth  - 8) panel.style.left = Math.max(8, window.innerWidth  - pr.width  - 8) + 'px'
+    if (pr.bottom > window.innerHeight - 8) panel.style.top  = Math.max(8, ar.top - pr.height - 6) + 'px'
+  })
+}
+
+function hideColorPanel() {
+  document.getElementById('colorPickerPanel').classList.add('hidden')
+  _cppApplyFn = _cppGetCurrent = _cppAnchorEl = null
+}
+
+;(function initColorPanel() {
+  // Update the panel's active-swatch highlight + hex field after a colour is applied
+  function cppSyncDisplay(hex) {
+    document.querySelectorAll('.cpp-swatch').forEach(s =>
+      s.classList.toggle('active', s.dataset.hex === hex)
+    )
+    const hexIn = document.getElementById('cppHexInput')
+    if (hexIn && hex && hex.startsWith('#')) hexIn.value = hex.slice(1).toUpperCase()
+  }
+
+  // Build theme grid (column-by-column → each hue is one column, rows = shades)
+  const themeEl = document.getElementById('cppTheme')
+  PALETTE_THEME.forEach(col => {
+    const colEl = document.createElement('div')
+    colEl.className = 'cpp-col'
+    col.forEach(hex => {
+      const btn = document.createElement('button')
+      btn.className    = 'cpp-swatch'
+      btn.dataset.hex  = hex
+      btn.style.background = hex
+      // faint border for light swatches so they're visible on dark panel
+      const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16)
+      if (r + g + b > 500) btn.style.boxShadow = 'inset 0 0 0 1px rgba(0,0,0,0.15)'
+      // Panel stays open — user can freely browse colours
+      btn.addEventListener('click', () => { if (_cppApplyFn) { _cppApplyFn(hex); cppSyncDisplay(hex) } })
+      colEl.appendChild(btn)
+    })
+    themeEl.appendChild(colEl)
+  })
+
+  // Build standard colours row (including transparent swatch at end)
+  const stdEl = document.getElementById('cppStandard')
+  PALETTE_STANDARD.forEach(hex => {
+    const btn = document.createElement('button')
+    btn.className   = 'cpp-swatch'
+    btn.dataset.hex = hex
+    if (hex === 'transparent') {
+      btn.classList.add('cpp-swatch-transparent')
+      btn.title = '透明'
+    } else {
+      btn.style.background = hex
+      const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16)
+      if (r + g + b > 500) btn.style.boxShadow = 'inset 0 0 0 1px rgba(0,0,0,0.15)'
+    }
+    btn.addEventListener('click', () => { if (_cppApplyFn) { _cppApplyFn(hex); cppSyncDisplay(hex) } })
+    stdEl.appendChild(btn)
+  })
+
+  // Eyedropper in panel
+  const eyeBtn = document.getElementById('cppEyedropper')
+  const native = document.getElementById('cppNativePicker')
+  eyeBtn.addEventListener('click', async () => {
     if (window.EyeDropper) {
-      // Chromium native eyedropper — lets user pick any pixel on screen
-      btn.classList.add('active')
+      eyeBtn.classList.add('active')
       try {
         const { sRGBHex } = await new EyeDropper().open()
-        applyColor(sRGBHex)
-      } catch {
-        // user pressed Escape — silently ignore
-      } finally {
-        btn.classList.remove('active')
-      }
+        if (_cppApplyFn) { _cppApplyFn(sRGBHex); cppSyncDisplay(sRGBHex) }
+      } catch { /* user cancelled */ } finally { eyeBtn.classList.remove('active') }
     } else {
-      // Fallback: OS native colour picker (macOS includes its own eyedropper)
-      native.value = color
+      const cur = _cppGetCurrent ? _cppGetCurrent() : '#000000'
+      native.value = (cur === 'transparent' || !cur.startsWith('#')) ? '#ffcc00' : cur
       native.click()
     }
   })
-
-  native.addEventListener('input', () => applyColor(native.value))
-})()
-
-// Hex colour input
-;(function initHexInput() {
-  const input = document.getElementById('hexInput')
-
-  // Block editor keyboard shortcuts while the field is focused
-  input.addEventListener('keydown', (e) => e.stopPropagation())
-
-  // Sanitise typing: only allow hex chars; apply when 6 chars reached
-  input.addEventListener('input', () => {
-    const clean = input.value.replace(/[^0-9a-fA-F]/g, '')
-    input.value  = clean.toUpperCase()
-    if (clean.length === 6) applyColor('#' + clean)
+  native.addEventListener('input', () => {
+    if (_cppApplyFn) { _cppApplyFn(native.value); cppSyncDisplay(native.value) }
   })
 
-  // Handle paste: strip leading # and non-hex chars
-  input.addEventListener('paste', (e) => {
+  // Hex input in panel
+  const hexIn = document.getElementById('cppHexInput')
+  hexIn.addEventListener('keydown', e => e.stopPropagation())
+  hexIn.addEventListener('input', () => {
+    const clean = hexIn.value.replace(/[^0-9a-fA-F]/g, '')
+    hexIn.value = clean.toUpperCase()
+    if (clean.length === 6 && _cppApplyFn) {
+      const hex = '#' + clean.toLowerCase()
+      _cppApplyFn('#' + clean)
+      document.querySelectorAll('.cpp-swatch').forEach(s =>
+        s.classList.toggle('active', s.dataset.hex === hex)
+      )
+    }
+  })
+  hexIn.addEventListener('paste', e => {
     e.preventDefault()
     const text  = (e.clipboardData || window.clipboardData).getData('text')
     const clean = text.replace(/^#/, '').replace(/[^0-9a-fA-F]/g, '').slice(0, 6)
-    input.value = clean.toUpperCase()
-    if (clean.length === 6) applyColor('#' + clean)
+    hexIn.value = clean.toUpperCase()
+    if (clean.length === 6 && _cppApplyFn) {
+      _cppApplyFn('#' + clean)
+      cppSyncDisplay('#' + clean.toLowerCase())
+    }
   })
+
+  // Panel closes ONLY when user clicks the colour preview again (toggle in openColorPanel).
+  // No auto-close on outside click — avoids conflicts with canvas editing actions.
 })()
+
+// openColorPanel: toggle (click same anchor again = close) or open for new anchor
+function openColorPanel(anchorEl, applyFn, getCurrentFn) {
+  const panel = document.getElementById('colorPickerPanel')
+  if (_cppAnchorEl === anchorEl && !panel.classList.contains('hidden')) {
+    hideColorPanel()
+  } else {
+    showColorPanel(anchorEl, applyFn, getCurrentFn)
+  }
+}
+
+// Wire ALL colour preview squares → floating panel (with toggle)
+document.getElementById('colorPreview').addEventListener('click', function() {
+  openColorPanel(this, applyColor, () => color)
+})
+document.getElementById('fillColorPreview').addEventListener('click', function() {
+  openColorPanel(this, applyFillColor, () => fillColor)
+})
+document.getElementById('fillColorAPreview').addEventListener('click', function() {
+  openColorPanel(this, applyFillColorA, () => fillColorA)
+})
+document.getElementById('fillColorBPreview').addEventListener('click', function() {
+  openColorPanel(this, applyFillColorB, () => fillColorB)
+})
+document.getElementById('fillBorderColorPreview').addEventListener('click', function() {
+  openColorPanel(this, applyFillBorderColor, () => fillBorderColor)
+})
 
 // Thickness
 document.querySelectorAll('.sz-btn').forEach(btn =>
@@ -615,7 +703,7 @@ document.querySelectorAll('.sz-btn').forEach(btn =>
 )
 
 // Line style
-document.querySelectorAll('.style-btn').forEach(btn =>
+document.querySelectorAll('.style-btn[data-ls]').forEach(btn =>
   btn.addEventListener('click', () => {
     lineStyle = btn.dataset.ls
     syncLineStyle(lineStyle)
@@ -682,6 +770,7 @@ document.getElementById('btnRedo').addEventListener('click', redo)
 
 function setTool(t) {
   commitText()
+  hideColorPanel()
   if (t !== 'crop') { cropRect = null; isCropping = false; cropMoving = false; cropResizeH = null; cropMoveStart = null }
   tool       = t
   selectedId = null
@@ -963,6 +1052,7 @@ function drawFillRect(ctx, a) {
   ctx.fillRect(rx, ry, rw, rh)
   ctx.restore()
   if (a.fillBorder !== false) {
+    ctx.strokeStyle = a.fillBorderColor ?? '#ffffff'
     ctx.strokeRect(rx, ry, rw, rh)
   }
 }
@@ -1170,7 +1260,7 @@ function buildPreview() {
     return { ...base, type:'rect', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y) }
   if (tool === 'fillrect')
     return { ...base, type:'fillrect', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y),
-             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled }
+             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled, fillBorderColor }
   if (tool === 'line')
     return { ...base, type:'line', x1:s.x, y1:s.y, x2:e.x, y2:e.y, lineStyle, startCap, endCap }
   return null
@@ -1187,7 +1277,7 @@ function commitShape(start, end) {
     const w = Math.abs(end.x - start.x), h = Math.abs(end.y - start.y)
     if (w < 2 || h < 2) return null
     return { ...base, type:'fillrect', x:Math.min(start.x,end.x), y:Math.min(start.y,end.y), w, h,
-             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled }
+             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled, fillBorderColor }
   }
   if (tool === 'line') {
     if (Math.hypot(end.x-start.x, end.y-start.y) < 2) return null
