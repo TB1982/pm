@@ -170,7 +170,7 @@ body {
   cursor: pointer;
   font-size: 11px;
   padding: 3px 9px;
-  transition: background 0.12s, color 0.12s;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
   white-space: nowrap;
 }
 
@@ -207,6 +207,17 @@ body {
   transition: background 0.12s, color 0.12s;
 }
 .reset-btn:hover { background: #3a2020; border-color: #c0392b; color: #ff6b6b; }
+
+/* Fill ctrl containers — must be flex to flow horizontally in the options bar */
+#fillSolidCtrl, #fillGradientCtrl {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+#fillSolidCtrl.hidden, #fillGradientCtrl.hidden { display: none; }
+
+/* Border colour preview visibility tied to border-enabled state */
+#fillBorderColorPreview.hidden { display: none; }
 
 /* Option separator */
 .opt-sep {

@@ -55,6 +55,7 @@ let fillColorB       = 'transparent' // gradient end colour ('transparent' or he
 let fillGradientDir  = 'h'           // 'h' | 'v' | 'dr' | 'ur'
 let fillOpacity      = 100
 let fillBorderEnabled = true
+let fillBorderColor   = '#ffffff'    // border stroke colour
 
 // Annotation clipboard (for Cmd+C / Cmd+V on number annotations)
 let annotClipboard = null
@@ -159,6 +160,7 @@ function showOptionsForAnnot(a) {
     fillGradientDir = a.fillGradientDir ?? 'h'; syncFillGradientDir(fillGradientDir)
     fillOpacity = a.fillOpacity ?? 100; syncFillOpacity(fillOpacity)
     fillBorderEnabled = a.fillBorder !== false; syncFillBorder(fillBorderEnabled)
+    fillBorderColor = a.fillBorderColor ?? '#ffffff'; syncFillBorderColor(fillBorderColor)
   }
   if (t === 'line')   { lineStyle = a.lineStyle; startCap = a.startCap; endCap = a.endCap; syncLineStyle(lineStyle); syncCaps(startCap, endCap) }
   if (t === 'text')   { fontSize = a.fontSize;   syncFontSize(fontSize) }
@@ -234,6 +236,11 @@ function syncFillOpacity(val) {
 function syncFillBorder(enabled) {
   document.getElementById('btnFillBorderOn').classList.toggle('active', enabled)
   document.getElementById('btnFillBorderOff').classList.toggle('active', !enabled)
+  document.getElementById('fillBorderColorPreview').classList.toggle('hidden', !enabled)
+}
+function syncFillBorderColor(hex) {
+  const p = document.getElementById('fillBorderColorPreview')
+  if (p) p.style.background = fillPreviewBg(hex)
 }
 
 function applyFillMode(mode) {
@@ -263,6 +270,10 @@ function applyFillOpacity(val) {
 function applyFillBorder(enabled) {
   fillBorderEnabled = enabled; syncFillBorder(enabled)
   if (selectedId) updateSelectedAnnot({ fillBorder: enabled })
+}
+function applyFillBorderColor(hex) {
+  fillBorderColor = hex; syncFillBorderColor(hex)
+  if (selectedId) updateSelectedAnnot({ fillBorderColor: hex })
 }
 
 // Update selected annotation's properties + push history
@@ -330,9 +341,10 @@ function bindFillPicker(previewId, pickerId, getVal, applyFn) {
   picker.addEventListener('input', e => applyFn(e.target.value))
 }
 
-bindFillPicker('fillColorPreview',  'fillNativePicker',  () => fillColor,  applyFillColor)
-bindFillPicker('fillColorAPreview', 'fillNativePickerA', () => fillColorA, applyFillColorA)
-bindFillPicker('fillColorBPreview', 'fillNativePickerB', () => fillColorB, applyFillColorB)
+bindFillPicker('fillColorPreview',        'fillNativePicker',        () => fillColor,       applyFillColor)
+bindFillPicker('fillColorAPreview',       'fillNativePickerA',       () => fillColorA,      applyFillColorA)
+bindFillPicker('fillColorBPreview',       'fillNativePickerB',       () => fillColorB,      applyFillColorB)
+bindFillPicker('fillBorderColorPreview',  'fillBorderNativePicker',  () => fillBorderColor, applyFillBorderColor)
 
 // Transparent shortcuts
 document.getElementById('btnFillColorATransparent').addEventListener('click', () => applyFillColorA('transparent'))
@@ -365,6 +377,7 @@ syncFillColorB(fillColorB)
 syncFillGradientDir(fillGradientDir)
 syncFillOpacity(fillOpacity)
 syncFillBorder(fillBorderEnabled)
+syncFillBorderColor(fillBorderColor)
 
 // ─── Extend canvas ────────────────────────────────────────────────────────────
 
@@ -960,6 +973,7 @@ function drawFillRect(ctx, a) {
   ctx.fillRect(rx, ry, rw, rh)
   ctx.restore()
   if (a.fillBorder !== false) {
+    ctx.strokeStyle = a.fillBorderColor ?? '#ffffff'
     ctx.strokeRect(rx, ry, rw, rh)
   }
 }
@@ -1167,7 +1181,7 @@ function buildPreview() {
     return { ...base, type:'rect', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y) }
   if (tool === 'fillrect')
     return { ...base, type:'fillrect', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y),
-             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled }
+             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled, fillBorderColor }
   if (tool === 'line')
     return { ...base, type:'line', x1:s.x, y1:s.y, x2:e.x, y2:e.y, lineStyle, startCap, endCap }
   return null
@@ -1184,7 +1198,7 @@ function commitShape(start, end) {
     const w = Math.abs(end.x - start.x), h = Math.abs(end.y - start.y)
     if (w < 2 || h < 2) return null
     return { ...base, type:'fillrect', x:Math.min(start.x,end.x), y:Math.min(start.y,end.y), w, h,
-             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled }
+             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled, fillBorderColor }
   }
   if (tool === 'line') {
     if (Math.hypot(end.x-start.x, end.y-start.y) < 2) return null
