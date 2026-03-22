@@ -309,7 +309,7 @@ function _applyCanvasSize() {
 // ─── Zoom helpers ─────────────────────────────────────────────────────────────
 
 function applyZoom(newScale, pivotClientX, pivotClientY) {
-  const clamped = Math.max(MIN_SCALE, Math.min(MAX_SCALE, newScale))
+  const clamped = Math.max(fitScale, Math.min(MAX_SCALE, newScale))
   if (Math.abs(clamped - viewScale) < 0.0001) return
 
   // Capture image coordinate at pivot before scale change
@@ -353,17 +353,25 @@ function fitToWindow() {
 }
 
 function syncZoomSelect() {
-  const sel = document.getElementById('zoomSelect')
+  const sel    = document.getElementById('zoomSelect')
+  const custom = document.getElementById('zoomCustom')
   if (!sel) return
   const pct = Math.round(viewScale * 100)
   for (const opt of sel.options) {
+    if (opt.id === 'zoomCustom') continue
     if (Math.round(parseFloat(opt.value) * 100) === pct) { sel.value = opt.value; return }
   }
-  sel.value = ''
+  // No preset match — show current percentage in the dynamic option
+  if (custom) {
+    custom.textContent = pct + '%'
+    custom.disabled = false
+    sel.value = 'custom'
+  }
 }
 
-// Zoom dropdown
+// Zoom dropdown — ignore the dynamic 'custom' placeholder
 document.getElementById('zoomSelect').addEventListener('change', e => {
+  if (e.target.value === 'custom') return
   applyZoom(parseFloat(e.target.value))
 })
 
