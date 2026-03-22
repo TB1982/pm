@@ -365,6 +365,7 @@ document.documentElement.lang = isEnglish ? 'en' : 'zh-Hant';
 - Do **not** introduce npm packages or local JS files to replace CDN dependencies (static site only).
 - Do **not** propose modifications to any file without reading it first.
 - When working on the Electron tool, follow the **Document Sync Rules** section above.
+- **Discuss before developing:** If there is any ambiguity about requirements, expected behaviour, or implementation approach, raise all questions and reach agreement with the user *before* writing or modifying code. Do not start implementation until the approach is confirmed.
 
 ---
 
