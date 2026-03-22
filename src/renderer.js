@@ -244,6 +244,7 @@ function renderFileList() {
   const dropzoneEl = document.getElementById('batchDropzone')
 
   if (batchFiles.length === 0) {
+    scroll.innerHTML = ''   // 清除殘留 DOM，否則舊項目仍顯示，造成 guard 誤擋
     fileListEl.classList.add('hidden')
     dropzoneEl.classList.remove('hidden')
     return

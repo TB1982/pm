@@ -543,6 +543,7 @@ ipcMain.handle('capture-window', async (_, sourceId) => {
   if (!match) return { success: false, error: '無效的視窗 ID' }
   const windowId = match[1]
 
+  mainWindow.hide()   // 與全螢幕 / 矩形截圖一致，截圖完才由 editor 關閉後恢復
   await wait(150)
 
   const tmpPath = path.join(os.tmpdir(), `screenshot-${Date.now()}.png`)
@@ -558,6 +559,7 @@ ipcMain.handle('capture-window', async (_, sourceId) => {
     openEditorWindow(tmpPath)
     return { success: true, path: tmpPath, width, height }
   } catch (err) {
+    mainWindow.show()   // 失敗時恢復工具列
     if (err.message === 'PERMISSION') return { success: false, needsPermission: true }
     return { success: false, error: err.message }
   }

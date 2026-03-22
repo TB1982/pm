@@ -4,6 +4,11 @@
   padding: 0;
 }
 
+/* 通用隱藏類別（JS 以 classList.add/remove('hidden') 控制顯示） */
+.hidden {
+  display: none !important;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
   background: transparent;
