@@ -2,6 +2,8 @@
 
 /* Reset macOS native button rendering so custom active/inactive styles work */
 button { -webkit-appearance: none; appearance: none; }
+/* Suppress Chromium default focus ring (we rely solely on .active class for state) */
+button:focus { outline: none; }
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;

@@ -222,8 +222,10 @@ function fillPreviewBg(hex) {
 }
 
 function syncFillMode(mode) {
-  document.getElementById('btnFillSolid').classList.toggle('active', mode === 'solid')
-  document.getElementById('btnFillGradient').classList.toggle('active', mode === 'gradient')
+  const solid = document.getElementById('btnFillSolid')
+  const grad  = document.getElementById('btnFillGradient')
+  if (mode === 'solid') { solid.classList.add('active'); grad.classList.remove('active') }
+  else                  { grad.classList.add('active');  solid.classList.remove('active') }
   document.getElementById('fillSolidCtrl').classList.toggle('hidden', mode !== 'solid')
   document.getElementById('fillGradientCtrl').classList.toggle('hidden', mode !== 'gradient')
 }
@@ -234,23 +236,29 @@ function syncFillColor(hex) {
 function syncFillColorA(hex) {
   const p = document.getElementById('fillColorAPreview')
   if (p) p.style.background = fillPreviewBg(hex)
-  document.getElementById('btnFillColorATransparent').classList.toggle('active', hex === 'transparent')
+  const btn = document.getElementById('btnFillColorATransparent')
+  if (hex === 'transparent') btn.classList.add('active'); else btn.classList.remove('active')
 }
 function syncFillColorB(hex) {
   const p = document.getElementById('fillColorBPreview')
   if (p) p.style.background = fillPreviewBg(hex)
-  document.getElementById('btnFillColorBTransparent').classList.toggle('active', hex === 'transparent')
+  const btn = document.getElementById('btnFillColorBTransparent')
+  if (hex === 'transparent') btn.classList.add('active'); else btn.classList.remove('active')
 }
 function syncFillGradientDir(dir) {
-  document.querySelectorAll('[data-fdir]').forEach(b => b.classList.toggle('active', b.dataset.fdir === dir))
+  document.querySelectorAll('[data-fdir]').forEach(b => {
+    if (b.dataset.fdir === dir) b.classList.add('active'); else b.classList.remove('active')
+  })
 }
 function syncFillOpacity(val) {
   const inp = document.getElementById('fillOpacityInput')
   if (inp) inp.value = val
 }
 function syncFillBorder(enabled) {
-  document.getElementById('btnFillBorderOn').classList.toggle('active', enabled)
-  document.getElementById('btnFillBorderOff').classList.toggle('active', !enabled)
+  const on  = document.getElementById('btnFillBorderOn')
+  const off = document.getElementById('btnFillBorderOff')
+  if (enabled) { on.classList.add('active');  off.classList.remove('active') }
+  else         { off.classList.add('active'); on.classList.remove('active') }
   document.getElementById('fillBorderColorPreview').classList.toggle('hidden', !enabled)
 }
 function syncFillBorderColor(hex) {
