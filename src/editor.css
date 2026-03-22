@@ -662,6 +662,35 @@ body {
 
 .toast.toast-error { border-color: #c0392b; color: #ff6b6b; }
 
+/* ─── Context menu (right-click layer order) ─────────────────────────────── */
+
+.ctx-menu {
+  position: fixed;
+  background: #1e2130;
+  border: 1px solid #3a3f55;
+  border-radius: 6px;
+  padding: 4px 0;
+  box-shadow: 0 4px 16px rgba(0,0,0,.55);
+  z-index: 9999;
+  min-width: 130px;
+  user-select: none;
+}
+.ctx-menu.hidden { display: none; }
+.ctx-menu button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 6px 16px;
+  background: none;
+  border: none;
+  color: #e0e4f0;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.ctx-menu button:hover:not(:disabled) { background: rgba(255,255,255,.09); }
+.ctx-menu button:disabled { color: #52576e; cursor: default; }
+
 /* ─── Resize modal fields ────────────────────────────────────────────────── */
 
 .resize-fields { display: flex; flex-direction: column; gap: 12px; margin-bottom: 4px; }

@@ -1695,9 +1695,7 @@ annotCanvas.addEventListener('mousedown', e => {
 
   if (tool === 'number') {
     pushHistory()
-    const numAnn = { id:newId(), type:'number', color, thickness, x:pos.x, y:pos.y, value:numCount++, size:numSize, shadow: numShadow }
-    annotations.push(numAnn)
-    setTool('select'); selectedId = numAnn.id; showOptionsForAnnot(numAnn)
+    annotations.push({ id:newId(), type:'number', color, thickness, x:pos.x, y:pos.y, value:numCount++, size:numSize, shadow: numShadow })
     renderAnnotations()
     return
   }
@@ -1915,6 +1913,7 @@ function commitText() {
   if (!textActive) return
   const content = textInputEl.value
   textEditOrig  = null   // discard original; new content replaces it
+  _closeTextInput()   // 先關閉（textActive=false），避免 setTool→commitText 循環呼叫
   if (content.trim()) {
     pushHistory()
     const txtAnn = { id:newId(), type:'text', color, fontSize, x:textPos.x, y:textPos.y, content,
@@ -1924,7 +1923,6 @@ function commitText() {
     setTool('select'); selectedId = txtAnn.id; showOptionsForAnnot(txtAnn)
     renderAnnotations()
   }
-  _closeTextInput()
 }
 
 function cancelText() {
@@ -1964,6 +1962,65 @@ function resizeTextInput() {
 }
 
 textInputEl.addEventListener('input', resizeTextInput)
+
+// ─── Right-click context menu: layer ordering ─────────────────────────────────
+
+const ctxMenu = document.getElementById('ctxMenu')
+
+function hideCtxMenu() { ctxMenu.classList.add('hidden') }
+
+function showCtxMenu(clientX, clientY, targetId) {
+  const idx  = annotations.findIndex(a => a.id === targetId)
+  const last = annotations.length - 1
+  document.getElementById('ctxToTop').disabled    = idx === last
+  document.getElementById('ctxMoveUp').disabled   = idx === last
+  document.getElementById('ctxMoveDown').disabled = idx === 0
+  document.getElementById('ctxToBottom').disabled = idx === 0
+
+  // Clamp to viewport
+  ctxMenu.classList.remove('hidden')
+  const mw = ctxMenu.offsetWidth  || 140
+  const mh = ctxMenu.offsetHeight || 120
+  const x  = Math.min(clientX, window.innerWidth  - mw - 8)
+  const y  = Math.min(clientY, window.innerHeight - mh - 8)
+  ctxMenu.style.left = x + 'px'
+  ctxMenu.style.top  = y + 'px'
+}
+
+function moveLayer(dir) {
+  const idx = annotations.findIndex(a => a.id === selectedId)
+  if (idx < 0) { hideCtxMenu(); return }
+  pushHistory()
+  const last = annotations.length - 1
+  if (dir === 'top' && idx < last) {
+    const [a] = annotations.splice(idx, 1); annotations.push(a)
+  } else if (dir === 'up' && idx < last) {
+    ;[annotations[idx], annotations[idx + 1]] = [annotations[idx + 1], annotations[idx]]
+  } else if (dir === 'down' && idx > 0) {
+    ;[annotations[idx], annotations[idx - 1]] = [annotations[idx - 1], annotations[idx]]
+  } else if (dir === 'bottom' && idx > 0) {
+    const [a] = annotations.splice(idx, 1); annotations.unshift(a)
+  }
+  renderAnnotations()
+  hideCtxMenu()
+}
+
+annotCanvas.addEventListener('contextmenu', e => {
+  e.preventDefault()
+  if (tool !== 'select') return
+  const pos = evToImg(e)
+  const a   = findAt(pos)
+  if (!a) { hideCtxMenu(); return }
+  selectedId = a.id
+  showOptionsForAnnot(a)
+  renderAnnotations()
+  showCtxMenu(e.clientX, e.clientY, a.id)
+})
+
+document.addEventListener('click', () => hideCtxMenu())
+ctxMenu.querySelectorAll('button[data-dir]').forEach(btn =>
+  btn.addEventListener('click', e => { e.stopPropagation(); moveLayer(btn.dataset.dir) })
+)
 
 // ─── Keyboard shortcuts ───────────────────────────────────────────────────────
 
@@ -2015,6 +2072,7 @@ document.addEventListener('keydown', e => {
     case 'c': case 'C': setTool('crop');   break
     case 's': case 'S': openResizeModal(); break
     case 'Escape':
+      hideCtxMenu()
       if (tool === 'crop') { cancelCrop(); break }
       selectedId = null
       isDrawing  = false
