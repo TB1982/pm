@@ -157,6 +157,25 @@ body {
   outline: none;
 }
 
+/* Number value edit */
+.num-value-edit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.num-value-edit.hidden { display: none; }
+#numValueInput {
+  width: 54px;
+  background: #2e2e2e;
+  border: 1px solid #404040;
+  border-radius: 5px;
+  color: #e0e0e0;
+  font-size: 12px;
+  padding: 3px 6px;
+  text-align: center;
+  outline: none;
+}
+
 /* ─── Body ───────────────────────────────────────────────────────────────── */
 
 .editor-body {

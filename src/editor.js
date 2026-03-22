@@ -97,6 +97,7 @@ function hideAllOptions() {
   ['grpColor','grpThickness','grpLineStyle','grpCaps','grpFont','grpNumber','grpZoom'].forEach(id =>
     document.getElementById(id).classList.add('hidden')
   )
+  document.getElementById('numValueEdit').classList.add('hidden')
 }
 
 function showOptionsForTool(t) {
@@ -126,7 +127,11 @@ function showOptionsForAnnot(a) {
   if ('thickness' in a) { thickness = a.thickness; syncThickness(thickness) }
   if (t === 'line')   { lineStyle = a.lineStyle; startCap = a.startCap; endCap = a.endCap; syncLineStyle(lineStyle); syncCaps(startCap, endCap) }
   if (t === 'text')   { fontSize = a.fontSize;   syncFontSize(fontSize) }
-  if (t === 'number') { numSize  = a.size ?? 14; syncNumSize(numSize) }
+  if (t === 'number') {
+    numSize = a.size ?? 14; syncNumSize(numSize)
+    document.getElementById('numValueEdit').classList.remove('hidden')
+    document.getElementById('numValueInput').value = a.value
+  }
 }
 
 // Sync UI controls
@@ -224,6 +229,12 @@ document.querySelectorAll('.ns-btn').forEach(btn =>
     if (selectedId) updateSelectedAnnot({ size: numSize })
   })
 )
+
+// Number value edit (shown when a number annotation is selected)
+document.getElementById('numValueInput').addEventListener('input', e => {
+  const v = parseInt(e.target.value)
+  if (!isNaN(v) && v >= 0 && selectedId) updateSelectedAnnot({ value: v })
+})
 
 // Number reset
 document.getElementById('btnNumReset').addEventListener('click', () => {
@@ -516,6 +527,10 @@ function getHandles(a) {
       { id: 'p2', x: a.x2, y: a.y2, cursor: 'crosshair' },
     ]
   }
+  if (a.type === 'number') {
+    const r = a.size ?? 14
+    return [{ id: 'se', x: a.x + r, y: a.y + r, cursor: 'nwse-resize' }]
+  }
   return []
 }
 
@@ -526,6 +541,9 @@ function findHandle(pos, a) {
 
 function startResize(hId, a) {
   const info = { id: hId }
+  if (a.type === 'number') {
+    info.cx = a.x; info.cy = a.y
+  }
   if (a.type === 'rect') {
     const { x, y, w, h } = a
     switch (hId) {
@@ -564,6 +582,10 @@ function applyResize(a, pos) {
   if (a.type === 'line') {
     if (h.id === 'p1') { a.x1 = pos.x; a.y1 = pos.y }
     if (h.id === 'p2') { a.x2 = pos.x; a.y2 = pos.y }
+  }
+  if (a.type === 'number') {
+    const d = Math.max(Math.abs(pos.x - h.cx), Math.abs(pos.y - h.cy))
+    a.size = Math.max(d, 6)
   }
 }
 
@@ -667,7 +689,7 @@ function bounds(a) {
       const maxW = lines.reduce((m, l) => Math.max(m, annotCtx.measureText(l).width), 0)
       return { x:a.x, y:a.y, w:maxW, h:lines.length*a.fontSize*1.25 }
     }
-    case 'number': return { x:a.x-16, y:a.y-16, w:32, h:32 }
+    case 'number': { const r = a.size ?? 14; return { x:a.x-r, y:a.y-r, w:r*2, h:r*2 } }
   }
   return null
 }
