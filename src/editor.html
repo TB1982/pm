@@ -21,6 +21,30 @@
     <div class="opt-group" id="grpColor">
       <span class="opt-label">顏色</span>
       <div class="color-swatches" id="colorSwatches"></div>
+
+      <!-- Current colour preview -->
+      <div class="color-preview" id="colorPreview" title="目前顏色"></div>
+
+      <!-- Eyedropper -->
+      <button class="eyedropper-btn" id="btnEyedropper" title="滴管選色（從螢幕取色）">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+          <path d="M9.5 1.5 L11.5 3.5 L5 10 L2.5 10.5 L3 8 Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" fill="none"/>
+          <path d="M8 3 L10 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+          <circle cx="2" cy="11.5" r="1" fill="currentColor"/>
+        </svg>
+      </button>
+
+      <!-- Hex colour input -->
+      <div class="hex-input-wrap">
+        <span class="hex-prefix">#</span>
+        <input type="text" class="hex-input" id="hexInput"
+               maxlength="6" placeholder="FF3B30"
+               spellcheck="false" autocomplete="off"
+               aria-label="色碼（16 進位，例如 FF3B30）">
+      </div>
+
+      <!-- Hidden native colour picker (fallback when EyeDropper API unavailable) -->
+      <input type="color" id="nativeColorPicker" class="native-color-picker" tabindex="-1" aria-hidden="true">
     </div>
 
     <div class="opt-group" id="grpThickness">
@@ -86,6 +110,13 @@
       </select>
     </div>
 
+    <div class="opt-group hidden" id="grpCrop">
+      <span class="opt-label" id="cropSizeLabel">請拖曳選取範圍</span>
+      <div class="opt-sep"></div>
+      <button class="btn-primary btn-sm"   id="btnCropConfirm">確認裁切</button>
+      <button class="btn-secondary btn-sm" id="btnCropCancel">取消</button>
+    </div>
+
   </div>
 
   <!-- Body -->
@@ -99,10 +130,15 @@
       <button class="tool-btn"        data-tool="line"   title="線條 (L)">╱</button>
       <button class="tool-btn"        data-tool="text"   title="文字 (T)">T</button>
       <button class="tool-btn"        data-tool="number"   title="編號 (N)">①</button>
+      <button class="tool-btn" id="btnOverlayImg" title="疊入圖片 (O)">⧉</button>
       <div class="tool-sep"></div>
       <button class="tool-btn"        data-tool="zoom-in"  title="放大 (⌘=)">⊕</button>
       <button class="tool-btn"        data-tool="zoom-out" title="縮小 (⌘-)">⊖</button>
       <button class="tool-btn" id="btnFitZoom"              title="適合視窗 (⌘0)">⊟</button>
+      <div class="tool-sep"></div>
+      <button class="tool-btn" data-tool="crop"   title="裁切 (C)">✂</button>
+      <button class="tool-btn" id="btnResize"     title="調整大小 (S)">⇔</button>
+      <button class="tool-btn" id="btnExtend"     title="延伸畫布 (E)">⊞</button>
       <div class="tool-sep"></div>
       <button class="tool-btn" id="btnUndo" title="撤銷 (⌘Z)">↩</button>
       <button class="tool-btn" id="btnRedo" title="重做 (⌘⇧Z)">↪</button>
@@ -132,6 +168,90 @@
     <button class="save-btn" id="btnSave">完成並儲存</button>
   </div>
 
+</div>
+
+<!-- Resize modal -->
+<div class="modal-overlay hidden" id="resizeModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>調整尺寸</h2>
+      <button class="modal-close" id="resizeModalClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="resize-fields">
+        <div class="resize-row">
+          <span class="opt-label resize-lbl">寬度</span>
+          <input type="number" id="resizeW" min="1" max="99999" class="resize-input">
+          <span class="opt-label">px</span>
+        </div>
+        <div class="resize-row">
+          <span class="opt-label resize-lbl">高度</span>
+          <input type="number" id="resizeH" readonly class="resize-input resize-input-ro">
+          <span class="opt-label">px（等比例自動計算）</span>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" id="btnResizeCancel">取消</button>
+        <button class="btn-primary"   id="btnResizeConfirm">套用</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Extend canvas modal -->
+<div class="modal-overlay hidden" id="extendModal">
+  <div class="modal modal-extend">
+    <div class="modal-header">
+      <h2>延伸畫布</h2>
+      <button class="modal-close" id="extendModalClose">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="extend-section-label">延伸方向</div>
+      <div class="dir-pad">
+        <button class="dir-btn" data-dir="tl">↖</button>
+        <button class="dir-btn" data-dir="t" >↑</button>
+        <button class="dir-btn" data-dir="tr">↗</button>
+        <button class="dir-btn" data-dir="l" >←</button>
+        <button class="dir-btn dir-center" data-dir="c">⊕</button>
+        <button class="dir-btn" data-dir="r" >→</button>
+        <button class="dir-btn" data-dir="bl">↙</button>
+        <button class="dir-btn" data-dir="b" >↓</button>
+        <button class="dir-btn" data-dir="br">↘</button>
+      </div>
+
+      <div class="extend-inputs">
+        <div class="extend-row hidden" id="extRowW">
+          <label class="extend-lbl" id="extLblW">寬度延伸</label>
+          <input type="number" class="extend-num" id="extendW" min="1" max="99999" value="100">
+          <span class="extend-unit">px</span>
+        </div>
+        <div class="extend-row hidden" id="extRowH">
+          <label class="extend-lbl" id="extLblH">高度延伸</label>
+          <input type="number" class="extend-num" id="extendH" min="1" max="99999" value="100">
+          <span class="extend-unit">px</span>
+        </div>
+        <div class="extend-row hidden" id="extRowS">
+          <label class="extend-lbl">四邊延伸</label>
+          <input type="number" class="extend-num" id="extendS" min="1" max="99999" value="100">
+          <span class="extend-unit">px</span>
+        </div>
+      </div>
+
+      <div class="extend-preview">
+        <span id="extendPreviewFrom">-- × --</span>
+        <span class="preview-arrow">→</span>
+        <span id="extendPreviewTo" class="preview-to">-- × --</span>
+        <span class="extend-unit">px</span>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" id="btnExtendCancel">取消</button>
+        <button class="btn-primary"   id="btnExtendConfirm">確認延伸</button>
+      </div>
+
+    </div>
+  </div>
 </div>
 
 <!-- Save format modal -->

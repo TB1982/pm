@@ -8,50 +8,49 @@
 </head>
 <body>
 
-  <div class="titlebar">
-    <span class="app-title">Screenshot Tool</span>
-    <button class="help-btn" id="helpBtn" title="快捷鍵說明">?</button>
+  <!-- Compact floating toolbar -->
+  <div class="toolbar">
+    <div class="toolbar-buttons">
+
+      <button class="tb-btn" id="btnFullscreen">
+        <span class="tb-icon">⬛</span>
+        <span class="tb-label">全螢幕</span>
+        <span class="tb-shortcut">⌘⌃1</span>
+      </button>
+
+      <button class="tb-btn" id="btnWindow">
+        <span class="tb-icon">◻</span>
+        <span class="tb-label">視窗</span>
+        <span class="tb-shortcut">⌘⌃2</span>
+      </button>
+
+      <button class="tb-btn tb-btn-highlight" id="btnRect">
+        <span class="tb-icon">⬚</span>
+        <span class="tb-label">矩形</span>
+        <span class="tb-shortcut">⌘⌃X</span>
+      </button>
+
+      <button class="tb-btn" id="btnWebCapture">
+        <span class="tb-icon">🌐</span>
+        <span class="tb-label">網頁</span>
+      </button>
+
+      <button class="tb-btn" id="btnOpenImage">
+        <span class="tb-icon">🖼</span>
+        <span class="tb-label">開啟</span>
+      </button>
+
+      <button class="tb-btn" id="btnBatch">
+        <span class="tb-icon">🔄</span>
+        <span class="tb-label">批次轉</span>
+      </button>
+
+    </div>
+
+    <div class="tb-divider"></div>
+
+    <button class="tb-help" id="helpBtn" aria-label="快捷鍵說明">?</button>
   </div>
-
-  <main class="main-screen">
-
-    <section class="action-group">
-      <h2 class="group-label">截圖</h2>
-      <div class="action-row">
-        <button class="action-btn primary" id="btnFullscreen">
-          <span class="btn-icon">⬛</span>
-          <span class="btn-label">全螢幕</span>
-          <span class="btn-shortcut">⌘⌃1</span>
-        </button>
-        <button class="action-btn primary" id="btnWindow">
-          <span class="btn-icon">◻</span>
-          <span class="btn-label">視窗</span>
-          <span class="btn-shortcut">⌘⌃2</span>
-        </button>
-        <button class="action-btn primary highlight" id="btnRect">
-          <span class="btn-icon">⬚</span>
-          <span class="btn-label">矩形選取</span>
-          <span class="btn-shortcut">⌘⌃X</span>
-        </button>
-      </div>
-    </section>
-
-    <section class="action-group">
-      <h2 class="group-label">其他</h2>
-      <div class="action-row">
-        <button class="action-btn" id="btnWebCapture">
-          <span class="btn-icon">🌐</span>
-          <span class="btn-label">網頁截圖</span>
-        </button>
-        <button class="action-btn" id="btnOpenImage">
-          <span class="btn-icon">🖼</span>
-          <span class="btn-label">開啟圖片</span>
-          <span class="btn-sub">支援 PNG / JPG / WebP / SVG</span>
-        </button>
-      </div>
-    </section>
-
-  </main>
 
   <!-- Keyboard shortcut help modal -->
   <div class="modal-overlay hidden" id="helpModal">
@@ -67,7 +66,6 @@
             <tr><td>全螢幕截圖</td><td><kbd>⌘</kbd><kbd>⌃</kbd><kbd>1</kbd></td></tr>
             <tr><td>視窗截圖</td><td><kbd>⌘</kbd><kbd>⌃</kbd><kbd>2</kbd></td></tr>
             <tr><td>矩形選取截圖</td><td><kbd>⌘</kbd><kbd>⌃</kbd><kbd>X</kbd></td></tr>
-            <tr><td>開啟主視窗</td><td><kbd>⌘</kbd><kbd>⌃</kbd><kbd>0</kbd></td></tr>
           </table>
         </div>
         <div class="shortcut-section">
@@ -106,6 +104,129 @@
       </div>
       <div class="modal-body">
         <div class="win-picker-grid" id="windowPickerGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Batch conversion modal -->
+  <div class="modal-overlay hidden" id="batchModal">
+    <div class="modal batch-modal">
+      <div class="modal-header">
+        <h2>批次格式轉換</h2>
+        <button class="modal-close" id="batchModalClose">✕</button>
+      </div>
+      <div class="modal-body batch-body">
+
+        <!-- Drop zone -->
+        <div class="batch-dropzone" id="batchDropzone">
+          <span class="drop-icon">🖼</span>
+          <span class="drop-hint">拖曳圖片至此，或</span>
+          <button class="drop-btn" id="batchSelectBtn">選取檔案</button>
+        </div>
+
+        <!-- File list (hidden until files added) -->
+        <div class="batch-filelist hidden" id="batchFileList">
+          <div class="filelist-scroll" id="filelistScroll"></div>
+          <div class="filelist-footer">
+            <span class="filelist-count" id="filelistCount"></span>
+            <button class="add-more-btn" id="batchAddMoreBtn">+ 新增檔案</button>
+          </div>
+        </div>
+
+        <!-- Options -->
+        <div class="batch-options">
+
+          <div class="batch-row">
+            <label class="opt-label">轉換為</label>
+            <select class="opt-select" id="batchFormat">
+              <option value="png">PNG</option>
+              <option value="jpg">JPG</option>
+              <option value="webp" selected>WebP</option>
+              <option value="gif">GIF</option>
+            </select>
+          </div>
+
+          <div class="batch-row hidden" id="qualityRow">
+            <label class="opt-label">品質</label>
+            <input class="opt-num" type="number" id="batchQuality" value="90" min="1" max="100">
+            <span class="opt-unit">%</span>
+          </div>
+
+          <div class="batch-row hidden" id="svgWidthRow">
+            <label class="opt-label">SVG 輸出寬度</label>
+            <input class="opt-num opt-num-wide" type="number" id="batchSvgWidth" value="1920" min="1" max="8192">
+            <span class="opt-unit">px</span>
+          </div>
+
+          <div class="batch-divider"></div>
+
+          <div class="batch-row">
+            <label class="checkbox-label">
+              <input type="checkbox" id="batchResizeCheck">
+              <span>統一調整尺寸</span>
+            </label>
+          </div>
+
+          <div class="batch-row batch-resize-opts hidden" id="resizeOptions">
+            <span class="opt-prefix">固定</span>
+            <select class="opt-select opt-select-sm" id="batchResizeAxis">
+              <option value="width">寬度</option>
+              <option value="height">高度</option>
+            </select>
+            <span class="opt-prefix">為</span>
+            <input class="opt-num" type="number" id="batchResizeValue" value="600" min="1" max="8192">
+            <span class="opt-unit">px</span>
+          </div>
+
+          <div class="batch-divider"></div>
+
+          <div class="opt-label">輸出位置</div>
+          <div class="batch-radio-group">
+            <label class="radio-label">
+              <input type="radio" name="outputMode" value="same" checked>
+              <span>同原始檔案目錄</span>
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="outputMode" value="custom">
+              <span>指定目錄</span>
+              <button class="dir-select-btn hidden" id="batchDirBtn">選擇…</button>
+              <span class="dir-path hidden" id="batchDirPath">尚未選擇</span>
+            </label>
+          </div>
+
+          <div class="batch-row">
+            <label class="checkbox-label">
+              <input type="checkbox" id="batchDeleteCheck">
+              <span>轉換完成後刪除原始檔</span>
+            </label>
+          </div>
+
+        </div>
+
+        <!-- Same-format warning (hidden until triggered) -->
+        <div class="batch-warning hidden" id="batchWarning">
+          <div class="warning-icon">⚠️</div>
+          <div class="warning-body">
+            <div class="warning-title">以下檔案已是目標格式：</div>
+            <div class="warning-files" id="warningFiles"></div>
+          </div>
+          <div class="warning-actions">
+            <button class="btn-skip" id="warnSkipBtn">略過這些，繼續轉換</button>
+            <button class="btn-cancel-warn" id="warnCancelBtn">取消全部</button>
+          </div>
+        </div>
+
+        <!-- Progress (hidden until conversion starts) -->
+        <div class="batch-progress hidden" id="batchProgressSection">
+          <div class="progress-track">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <div class="progress-meta" id="progressMeta">0 / 0</div>
+          <div class="progress-log" id="progressLog"></div>
+        </div>
+
+        <button class="batch-start-btn" id="batchStartBtn">開始轉換</button>
+
       </div>
     </div>
   </div>

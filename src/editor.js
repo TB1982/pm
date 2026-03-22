@@ -69,6 +69,13 @@ let textPos      = null
 let textEditOrig = null   // restored on Escape during re-edit
 let isComposing  = false
 
+// Crop
+let cropRect      = null   // { x, y, w, h } in image coordinates
+let isCropping    = false  // currently drawing initial rect
+let cropMoving    = false  // dragging rect to reposition
+let cropResizeH   = null   // handle id being dragged ('nw','n','ne','e','se','s','sw','w')
+let cropMoveStart = null   // { pos, origRect } snapshot at drag start
+
 // ─── DOM ─────────────────────────────────────────────────────────────────────
 
 const baseCanvas    = document.getElementById('baseCanvas')
@@ -94,7 +101,7 @@ function getTextColor(hex) {
 // ─── Options bar helpers ──────────────────────────────────────────────────────
 
 function hideAllOptions() {
-  ['grpColor','grpThickness','grpLineStyle','grpCaps','grpFont','grpNumber','grpZoom'].forEach(id =>
+  ['grpColor','grpThickness','grpLineStyle','grpCaps','grpFont','grpNumber','grpZoom','grpCrop'].forEach(id =>
     document.getElementById(id).classList.add('hidden')
   )
   document.getElementById('numValueEdit').classList.add('hidden')
@@ -104,6 +111,10 @@ function showOptionsForTool(t) {
   hideAllOptions()
   if (t === 'zoom-in' || t === 'zoom-out') {
     document.getElementById('grpZoom').classList.remove('hidden')
+    return
+  }
+  if (t === 'crop') {
+    document.getElementById('grpCrop').classList.remove('hidden')
     return
   }
   if (!['rect','line','text','number'].includes(t)) return
@@ -116,6 +127,7 @@ function showOptionsForTool(t) {
 
 function showOptionsForAnnot(a) {
   hideAllOptions()
+  if (a.type === 'img') return   // overlay image has no editable colour/thickness options
   const t = a.type
   document.getElementById('grpColor').classList.remove('hidden')
   if (['rect','line'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
@@ -137,6 +149,18 @@ function showOptionsForAnnot(a) {
 // Sync UI controls
 function syncColor(col) {
   document.querySelectorAll('.swatch').forEach(s => s.classList.toggle('active', s.dataset.hex === col))
+  const hexInput = document.getElementById('hexInput')
+  if (hexInput) hexInput.value = col.replace(/^#/, '').toUpperCase()
+  const preview = document.getElementById('colorPreview')
+  if (preview) preview.style.background = col
+}
+
+// Central colour-apply helper — use this instead of setting `color` directly
+function applyColor(hex) {
+  color = hex
+  syncColor(hex)
+  if (selectedId) updateSelectedAnnot({ color: hex })
+  if (textActive) textInputEl.style.color = hex
 }
 function syncThickness(t) {
   document.querySelectorAll('.sz-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.sz) === t))
@@ -173,14 +197,248 @@ COLORS.forEach(c => {
   btn.dataset.hex   = c.hex
   btn.title         = c.name
   if (c.hex === '#ffffff') btn.style.boxShadow = 'inset 0 0 0 1px #555'
-  btn.addEventListener('click', () => {
-    color = c.hex
-    syncColor(color)
-    if (selectedId) updateSelectedAnnot({ color })
-    if (textActive) textInputEl.style.color = color
-  })
+  btn.addEventListener('click', () => applyColor(c.hex))
   swatchesEl.appendChild(btn)
 })
+
+// Initialise colour preview + hex field to match the default colour
+syncColor(color)
+
+// ─── Extend canvas ────────────────────────────────────────────────────────────
+
+;(function initExtendCanvas() {
+  // Direction config:
+  //   showW / showH / showS  — which input rows to display
+  //   lblW  / lblH           — human-readable label for the input
+  //   oxLeft                 — true if extension is to the LEFT (original shifts right by addW)
+  //   oyTop                  — true if extension is to the TOP  (original shifts down  by addH)
+  const DIRS = {
+    tl: { showW: true,  showH: true,  showS: false, lblW: '向左延伸', lblH: '向上延伸', oxLeft: true,  oyTop: true  },
+    t:  { showW: false, showH: true,  showS: false,                    lblH: '向上延伸', oxLeft: false, oyTop: true  },
+    tr: { showW: true,  showH: true,  showS: false, lblW: '向右延伸', lblH: '向上延伸', oxLeft: false, oyTop: true  },
+    l:  { showW: true,  showH: false, showS: false, lblW: '向左延伸',                   oxLeft: true,  oyTop: false },
+    c:  { showW: false, showH: false, showS: true                                                                    },
+    r:  { showW: true,  showH: false, showS: false, lblW: '向右延伸',                   oxLeft: false, oyTop: false },
+    bl: { showW: true,  showH: true,  showS: false, lblW: '向左延伸', lblH: '向下延伸', oxLeft: true,  oyTop: false },
+    b:  { showW: false, showH: true,  showS: false,                    lblH: '向下延伸', oxLeft: false, oyTop: false },
+    br: { showW: true,  showH: true,  showS: false, lblW: '向右延伸', lblH: '向下延伸', oxLeft: false, oyTop: false },
+  }
+
+  let selectedDir = 'r'
+
+  const modal   = document.getElementById('extendModal')
+  const rowW    = document.getElementById('extRowW')
+  const rowH    = document.getElementById('extRowH')
+  const rowS    = document.getElementById('extRowS')
+  const inputW  = document.getElementById('extendW')
+  const inputH  = document.getElementById('extendH')
+  const inputS  = document.getElementById('extendS')
+  const lblW    = document.getElementById('extLblW')
+  const lblH    = document.getElementById('extLblH')
+  const preFrom = document.getElementById('extendPreviewFrom')
+  const preTo   = document.getElementById('extendPreviewTo')
+
+  function getAmounts() {
+    const d = DIRS[selectedDir]
+    let addW = 0, addH = 0, offX = 0, offY = 0
+    if (d.showS) {
+      const s = Math.max(0, parseInt(inputS.value) || 0)
+      addW = s * 2; addH = s * 2; offX = s; offY = s
+    } else {
+      if (d.showW) addW = Math.max(0, parseInt(inputW.value) || 0)
+      if (d.showH) addH = Math.max(0, parseInt(inputH.value) || 0)
+      if (d.oxLeft) offX = addW
+      if (d.oyTop)  offY = addH
+    }
+    return { addW, addH, offX, offY }
+  }
+
+  function updatePreview() {
+    const { addW, addH } = getAmounts()
+    preFrom.textContent = `${imgWidth} × ${imgHeight}`
+    preTo.textContent   = `${imgWidth + addW} × ${imgHeight + addH}`
+  }
+
+  function updateDirUI() {
+    const d = DIRS[selectedDir]
+    document.querySelectorAll('.dir-btn').forEach(b =>
+      b.classList.toggle('active', b.dataset.dir === selectedDir)
+    )
+    rowW.classList.toggle('hidden', !d.showW)
+    rowH.classList.toggle('hidden', !d.showH)
+    rowS.classList.toggle('hidden', !d.showS)
+    if (d.lblW) lblW.textContent = d.lblW
+    if (d.lblH) lblH.textContent = d.lblH
+    updatePreview()
+  }
+
+  function openExtendModal() {
+    updateDirUI()   // also calls updatePreview with current imgWidth/imgHeight
+    modal.classList.remove('hidden')
+  }
+
+  function closeExtendModal() { modal.classList.add('hidden') }
+
+  // Direction pad clicks
+  document.querySelectorAll('.dir-btn').forEach(b => {
+    b.addEventListener('click', () => { selectedDir = b.dataset.dir; updateDirUI() })
+  })
+
+  // Input changes → live preview
+  ;[inputW, inputH, inputS].forEach(inp => {
+    inp.addEventListener('input', updatePreview)
+    inp.addEventListener('keydown', e => e.stopPropagation())  // don't fire editor shortcuts
+  })
+
+  // Confirm
+  document.getElementById('btnExtendConfirm').addEventListener('click', () => {
+    const { addW, addH, offX, offY } = getAmounts()
+    if (addW === 0 && addH === 0) { closeExtendModal(); return }
+
+    const newW = imgWidth  + addW
+    const newH = imgHeight + addH
+
+    // Draw original onto a white canvas at the computed offset
+    const off = document.createElement('canvas')
+    off.width = newW; off.height = newH
+    const ctx = off.getContext('2d')
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(0, 0, newW, newH)
+    ctx.drawImage(imgElement, offX, offY)
+
+    // Shift annotations if the original image moved (left / top extension)
+    if (offX > 0 || offY > 0) {
+      annotations.forEach(a => moveAnnot(a, offX, offY))
+    }
+
+    const newImg = new Image()
+    newImg.onload = () => {
+      imgElement = newImg
+      imgWidth   = newW
+      imgHeight  = newH
+      document.getElementById('imgInfo').textContent = `${imgWidth} × ${imgHeight} px`
+      userZoomed = false
+      fitCanvas()
+      drawBase()
+      renderAnnotations()
+      showToast(`已延伸：${newW} × ${newH} px`)
+    }
+    newImg.src = off.toDataURL()
+    closeExtendModal()
+  })
+
+  // Cancel / close
+  document.getElementById('btnExtendCancel').addEventListener('click', closeExtendModal)
+  document.getElementById('extendModalClose').addEventListener('click', closeExtendModal)
+  modal.addEventListener('click', e => { if (e.target === modal) closeExtendModal() })
+
+  // Toolbar button + expose for keydown
+  document.getElementById('btnExtend').addEventListener('click', openExtendModal)
+})()
+
+// ─── Overlay image (E3) ───────────────────────────────────────────────────────
+
+;(function initOverlayImg() {
+  // Use a hidden <input type="file"> — no IPC needed in this renderer context
+  const fileInput = document.createElement('input')
+  fileInput.type    = 'file'
+  fileInput.accept  = 'image/png,image/jpeg,image/webp,image/gif,image/svg+xml'
+  fileInput.style.display = 'none'
+  document.body.appendChild(fileInput)
+
+  document.getElementById('btnOverlayImg').addEventListener('click', () => {
+    if (annotations.some(a => a.type === 'img')) {
+      showToast('請先刪除現有疊入圖（Delete 鍵），再插入新圖', true)
+      return
+    }
+    fileInput.click()
+  })
+
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files[0]
+    if (!file) return
+    fileInput.value = ''   // allow re-selecting the same file next time
+
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      const src = ev.target.result
+      const tempImg = new Image()
+      tempImg.onload = () => {
+        const nw = tempImg.naturalWidth
+        const nh = tempImg.naturalHeight
+        // Default size: fit within 50% of base image; never exceed natural size
+        const scale = Math.min(1, (imgWidth * 0.5) / nw, (imgHeight * 0.5) / nh)
+        const w = Math.max(10, Math.round(nw * scale))
+        const h = Math.max(10, Math.round(nh * scale))
+        // Centre on base image
+        const x = Math.round((imgWidth  - w) / 2)
+        const y = Math.round((imgHeight - h) / 2)
+
+        const id = newId()
+        _imgCache.set(id, tempImg)   // pre-populate cache so first render is instant
+        pushHistory()
+        annotations.push({ id, type: 'img', x, y, w, h, src, aspectRatio: nw / nh })
+        setTool('select')
+        selectedId = id              // set AFTER setTool (setTool clears selectedId)
+        renderAnnotations()
+        showToast('疊入圖片已插入，拖動可移動，拖角落可等比縮放')
+      }
+      tempImg.src = src
+    }
+    reader.readAsDataURL(file)
+  })
+})()
+
+// Eyedropper
+;(function initEyedropper() {
+  const btn    = document.getElementById('btnEyedropper')
+  const native = document.getElementById('nativeColorPicker')
+
+  btn.addEventListener('click', async () => {
+    if (window.EyeDropper) {
+      // Chromium native eyedropper — lets user pick any pixel on screen
+      btn.classList.add('active')
+      try {
+        const { sRGBHex } = await new EyeDropper().open()
+        applyColor(sRGBHex)
+      } catch {
+        // user pressed Escape — silently ignore
+      } finally {
+        btn.classList.remove('active')
+      }
+    } else {
+      // Fallback: OS native colour picker (macOS includes its own eyedropper)
+      native.value = color
+      native.click()
+    }
+  })
+
+  native.addEventListener('input', () => applyColor(native.value))
+})()
+
+// Hex colour input
+;(function initHexInput() {
+  const input = document.getElementById('hexInput')
+
+  // Block editor keyboard shortcuts while the field is focused
+  input.addEventListener('keydown', (e) => e.stopPropagation())
+
+  // Sanitise typing: only allow hex chars; apply when 6 chars reached
+  input.addEventListener('input', () => {
+    const clean = input.value.replace(/[^0-9a-fA-F]/g, '')
+    input.value  = clean.toUpperCase()
+    if (clean.length === 6) applyColor('#' + clean)
+  })
+
+  // Handle paste: strip leading # and non-hex chars
+  input.addEventListener('paste', (e) => {
+    e.preventDefault()
+    const text  = (e.clipboardData || window.clipboardData).getData('text')
+    const clean = text.replace(/^#/, '').replace(/[^0-9a-fA-F]/g, '').slice(0, 6)
+    input.value = clean.toUpperCase()
+    if (clean.length === 6) applyColor('#' + clean)
+  })
+})()
 
 // Thickness
 document.querySelectorAll('.sz-btn').forEach(btn =>
@@ -259,6 +517,7 @@ document.getElementById('btnRedo').addEventListener('click', redo)
 
 function setTool(t) {
   commitText()
+  if (t !== 'crop') { cropRect = null; isCropping = false; cropMoving = false; cropResizeH = null; cropMoveStart = null }
   tool       = t
   selectedId = null
   isDrawing  = false
@@ -420,6 +679,21 @@ function c(v) { return v * viewScale }
 let _annId = 0
 function newId() { return `a${++_annId}` }
 
+// ─── Overlay-image cache ───────────────────────────────────────────────────────
+// Annotations are plain JSON objects; HTMLImageElement is kept separately.
+
+const _imgCache = new Map()
+
+function getImg(a) {
+  if (!_imgCache.has(a.id)) {
+    const img = new Image()
+    _imgCache.set(a.id, img)
+    img.onload = () => renderAnnotations()
+    img.src = a.src
+  }
+  return _imgCache.get(a.id)
+}
+
 // ─── Rendering ────────────────────────────────────────────────────────────────
 
 function renderAnnotations() {
@@ -437,9 +711,46 @@ function renderAnnotations() {
     const a = annotations.find(x => x.id === selectedId)
     if (a) drawSelection(annotCtx, a)
   }
+
+  // Crop overlay: dim outside selection, dashed border + resize handles
+  if (tool === 'crop' && cropRect && cropRect.w > 1 && cropRect.h > 1) {
+    const cr = cropRect
+    annotCtx.save()
+    annotCtx.fillStyle = 'rgba(0,0,0,0.50)'
+    annotCtx.beginPath()
+    annotCtx.rect(0, 0, annotCanvas.width, annotCanvas.height)
+    annotCtx.rect(c(cr.x), c(cr.y), c(cr.w), c(cr.h))
+    annotCtx.fill('evenodd')
+    annotCtx.strokeStyle = '#ffffff'
+    annotCtx.lineWidth = 1.5
+    annotCtx.setLineDash([5, 3])
+    annotCtx.strokeRect(c(cr.x), c(cr.y), c(cr.w), c(cr.h))
+    annotCtx.restore()
+    // Resize handles
+    if (!isCropping) {
+      getCropHandles(cr).forEach(h => {
+        annotCtx.save()
+        annotCtx.fillStyle   = '#ffffff'
+        annotCtx.strokeStyle = '#4a9eff'
+        annotCtx.lineWidth   = 1.5
+        annotCtx.setLineDash([])
+        annotCtx.beginPath()
+        annotCtx.arc(c(h.x), c(h.y), HANDLE_R, 0, Math.PI * 2)
+        annotCtx.fill(); annotCtx.stroke()
+        annotCtx.restore()
+      })
+    }
+  }
 }
 
 function drawOne(ctx, a) {
+  if (a.type === 'img') {
+    const img = getImg(a)
+    if (img.complete && img.naturalWidth > 0) {
+      ctx.drawImage(img, c(a.x), c(a.y), c(a.w), c(a.h))
+    }
+    return
+  }
   ctx.save()
   ctx.strokeStyle = a.color
   ctx.fillStyle   = a.color
@@ -507,7 +818,7 @@ function drawNumber(ctx, a) {
 // ─── Resize handles ───────────────────────────────────────────────────────────
 
 function getHandles(a) {
-  if (a.type === 'rect') {
+  if (a.type === 'rect' || a.type === 'img') {
     const { x, y, w, h } = a
     const mx = x + w / 2, my = y + h / 2
     return [
@@ -544,7 +855,7 @@ function startResize(hId, a) {
   if (a.type === 'number') {
     info.cx = a.x; info.cy = a.y
   }
-  if (a.type === 'rect') {
+  if (a.type === 'rect' || a.type === 'img') {
     const { x, y, w, h } = a
     switch (hId) {
       case 'nw': info.fixX = x+w; info.fixY = y+h; break
@@ -563,6 +874,43 @@ function startResize(hId, a) {
 
 function applyResize(a, pos) {
   const h = resizeHandle
+
+  if (a.type === 'img') {
+    const ar = a.aspectRatio
+    const corners = ['nw', 'ne', 'se', 'sw']
+    if (corners.includes(h.id)) {
+      // Corner drag: lock aspect ratio — opposite corner stays fixed
+      let newW
+      switch (h.id) {
+        case 'se': newW = Math.max(10, pos.x - h.fixX);   break
+        case 'sw': newW = Math.max(10, h.fixX - pos.x);   break
+        case 'ne': newW = Math.max(10, pos.x - h.fixX);   break
+        case 'nw': newW = Math.max(10, h.fixX - pos.x);   break
+      }
+      const newH = newW / ar
+      switch (h.id) {
+        case 'se': a.x = h.fixX;        a.y = h.fixY;        break
+        case 'sw': a.x = h.fixX - newW; a.y = h.fixY;        break
+        case 'ne': a.x = h.fixX;        a.y = h.fixY - newH; break
+        case 'nw': a.x = h.fixX - newW; a.y = h.fixY - newH; break
+      }
+      a.w = newW; a.h = newH
+    } else {
+      // Edge drag: free resize (allows stretching)
+      let x1, y1, x2, y2
+      switch (h.id) {
+        case 'n': x1=h.fixX; y1=pos.y;   x2=h.fixX+h.fixW; y2=h.fixY;        break
+        case 's': x1=h.fixX; y1=h.fixY;  x2=h.fixX+h.fixW; y2=pos.y;         break
+        case 'e': x1=h.fixX; y1=h.fixY;  x2=pos.x;         y2=h.fixY+h.fixH; break
+        case 'w': x1=pos.x;  y1=h.fixY;  x2=h.fixX;        y2=h.fixY+h.fixH; break
+      }
+      a.x = Math.min(x1, x2); a.y = Math.min(y1, y2)
+      a.w = Math.max(10, Math.abs(x2 - x1))
+      a.h = Math.max(10, Math.abs(y2 - y1))
+    }
+    return
+  }
+
   if (a.type === 'rect') {
     let x1, y1, x2, y2
     switch (h.id) {
@@ -677,7 +1025,8 @@ function recalcNumCount() {
 
 function bounds(a) {
   switch (a.type) {
-    case 'rect':   return { x: a.x, y: a.y, w: a.w, h: a.h }
+    case 'rect':
+    case 'img':    return { x: a.x, y: a.y, w: a.w, h: a.h }
     case 'line': {
       const minX = Math.min(a.x1,a.x2), maxX = Math.max(a.x1,a.x2)
       const minY = Math.min(a.y1,a.y2), maxY = Math.max(a.y1,a.y2)
@@ -716,6 +1065,25 @@ annotCanvas.addEventListener('mousedown', e => {
 
   // If text input is open and user clicks outside the textarea, commit it first
   if (textActive) commitText()
+
+  if (tool === 'crop') {
+    if (cropRect) {
+      const h = findCropHandle(pos)
+      if (h) { cropResizeH = h.id; return }
+      if (insideCropRect(pos)) {
+        cropMoving    = true
+        cropMoveStart = { pos, origRect: { ...cropRect } }
+        annotCanvas.style.cursor = 'grabbing'
+        return
+      }
+    }
+    // Start a new crop rect
+    isCropping = true
+    cropRect   = { x: pos.x, y: pos.y, w: 0, h: 0 }
+    drawStart  = pos
+    document.getElementById('cropSizeLabel').textContent = '請拖曳選取範圍'
+    return
+  }
 
   if (tool === 'zoom-in' || tool === 'zoom-out') {
     isPanning = true
@@ -782,6 +1150,39 @@ annotCanvas.addEventListener('mousemove', e => {
     return
   }
 
+  if (cropResizeH) {
+    applyCropResize(pos)
+    renderAnnotations()
+    return
+  }
+
+  if (cropMoving && cropMoveStart) {
+    const dx = pos.x - cropMoveStart.pos.x
+    const dy = pos.y - cropMoveStart.pos.y
+    cropRect = {
+      x: cropMoveStart.origRect.x + dx,
+      y: cropMoveStart.origRect.y + dy,
+      w: cropMoveStart.origRect.w,
+      h: cropMoveStart.origRect.h,
+    }
+    updateCropSizeLabel()
+    renderAnnotations()
+    return
+  }
+
+  if (isCropping && drawStart) {
+    const s = drawStart
+    cropRect = {
+      x: Math.min(s.x, pos.x),
+      y: Math.min(s.y, pos.y),
+      w: Math.abs(pos.x - s.x),
+      h: Math.abs(pos.y - s.y),
+    }
+    updateCropSizeLabel()
+    renderAnnotations()
+    return
+  }
+
   if (isResizing && selectedId) {
     const a = annotations.find(x => x.id === selectedId)
     if (a) applyResize(a, pos)
@@ -817,6 +1218,14 @@ annotCanvas.addEventListener('mousemove', e => {
     }
     annotCanvas.style.cursor = cur
   }
+
+  // Update cursor for crop tool (hover state)
+  if (tool === 'crop' && cropRect && !isCropping && !cropMoving && !cropResizeH) {
+    const h = findCropHandle(pos)
+    if (h) annotCanvas.style.cursor = h.cursor
+    else if (insideCropRect(pos)) annotCanvas.style.cursor = 'move'
+    else annotCanvas.style.cursor = 'crosshair'
+  }
 })
 
 document.addEventListener('mouseup', e => {
@@ -829,6 +1238,26 @@ document.addEventListener('mouseup', e => {
       if (tool === 'zoom-out') zoomOut(e.clientX, e.clientY)
     }
     panStart = null
+    return
+  }
+
+  if (cropResizeH) {
+    cropResizeH = null
+    renderAnnotations()
+    return
+  }
+
+  if (cropMoving) {
+    cropMoving    = false
+    cropMoveStart = null
+    annotCanvas.style.cursor = 'move'
+    return
+  }
+
+  if (isCropping) {
+    isCropping = false
+    if (!cropRect || cropRect.w < 2 || cropRect.h < 2) cropRect = null
+    renderAnnotations()
     return
   }
 
@@ -854,6 +1283,7 @@ document.addEventListener('mouseup', e => {
 function moveAnnot(a, dx, dy) {
   switch (a.type) {
     case 'rect':
+    case 'img':
     case 'text':
     case 'number': a.x += dx; a.y += dy; break
     case 'line':   a.x1 += dx; a.y1 += dy; a.x2 += dx; a.y2 += dy; break
@@ -966,13 +1396,20 @@ document.addEventListener('keydown', e => {
   if (meta && e.key === '-')                    { e.preventDefault(); setTool('zoom-out'); zoomOut();    return }
   if (meta && e.key === '0')                    { e.preventDefault(); fitToWindow();                     return }
 
+  if (e.key === 'Enter' && tool === 'crop') { e.preventDefault(); confirmCrop(); return }
+
   switch (e.key) {
     case 'v': case 'V': setTool('select'); break
     case 'r': case 'R': setTool('rect');   break
     case 'l': case 'L': setTool('line');   break
     case 't': case 'T': setTool('text');   break
     case 'n': case 'N': setTool('number'); break
+    case 'o': case 'O': document.getElementById('btnOverlayImg').click(); break
+    case 'e': case 'E': document.getElementById('btnExtend').click();     break
+    case 'c': case 'C': setTool('crop');   break
+    case 's': case 'S': openResizeModal(); break
     case 'Escape':
+      if (tool === 'crop') { cancelCrop(); break }
       selectedId = null
       isDrawing  = false
       if (tool === 'select') hideAllOptions()
@@ -1009,7 +1446,193 @@ document.getElementById('btnSaveConfirm').addEventListener('click', async () => 
   const format  = document.querySelector('input[name="fmt"]:checked').value
   const dataURL = burnIn(format)
   const result  = await ipcRenderer.invoke('save-image-as', { dataURL, format })
-  if (result?.success) showToast(`已儲存：${result.path.split('/').pop()}`)
+  if (result?.success) {
+    showToast(`已儲存：${result.path.split('/').pop()}`)
+    setTimeout(() => window.close(), 800)
+  }
+})
+
+// ─── Crop helpers ─────────────────────────────────────────────────────────────
+
+function getCropHandles(cr) {
+  const { x, y, w, h } = cr
+  const mx = x + w / 2, my = y + h / 2
+  return [
+    { id: 'nw', x,     y,     cursor: 'nwse-resize' },
+    { id: 'n',  x: mx, y,     cursor: 'ns-resize'   },
+    { id: 'ne', x: x+w,y,     cursor: 'nesw-resize' },
+    { id: 'e',  x: x+w,y: my, cursor: 'ew-resize'   },
+    { id: 'se', x: x+w,y: y+h,cursor: 'nwse-resize' },
+    { id: 's',  x: mx, y: y+h,cursor: 'ns-resize'   },
+    { id: 'sw', x,     y: y+h,cursor: 'nesw-resize' },
+    { id: 'w',  x,     y: my, cursor: 'ew-resize'   },
+  ]
+}
+
+function findCropHandle(pos) {
+  if (!cropRect) return null
+  const hitR = (HANDLE_R + 4) / viewScale
+  return getCropHandles(cropRect).find(h => Math.hypot(h.x - pos.x, h.y - pos.y) <= hitR) ?? null
+}
+
+function insideCropRect(pos) {
+  if (!cropRect) return false
+  const { x, y, w, h } = cropRect
+  return pos.x >= x && pos.x <= x + w && pos.y >= y && pos.y <= y + h
+}
+
+function applyCropResize(pos) {
+  const { x, y, w, h } = cropRect
+  let x1, y1, x2, y2
+  switch (cropResizeH) {
+    case 'nw': x1=pos.x; y1=pos.y; x2=x+w;  y2=y+h;  break
+    case 'n':  x1=x;     y1=pos.y; x2=x+w;  y2=y+h;  break
+    case 'ne': x1=x;     y1=pos.y; x2=pos.x;y2=y+h;  break
+    case 'e':  x1=x;     y1=y;     x2=pos.x;y2=y+h;  break
+    case 'se': x1=x;     y1=y;     x2=pos.x;y2=pos.y; break
+    case 's':  x1=x;     y1=y;     x2=x+w;  y2=pos.y; break
+    case 'sw': x1=pos.x; y1=y;     x2=x+w;  y2=pos.y; break
+    case 'w':  x1=pos.x; y1=y;     x2=x+w;  y2=y+h;  break
+    default: return
+  }
+  cropRect = {
+    x: Math.min(x1, x2),
+    y: Math.min(y1, y2),
+    w: Math.max(Math.abs(x2 - x1), 1),
+    h: Math.max(Math.abs(y2 - y1), 1),
+  }
+  updateCropSizeLabel()
+}
+
+function updateCropSizeLabel() {
+  const pw = Math.round(cropRect?.w ?? 0), ph = Math.round(cropRect?.h ?? 0)
+  document.getElementById('cropSizeLabel').textContent =
+    pw > 0 && ph > 0 ? `${pw} × ${ph} px` : '請拖曳選取範圍'
+}
+
+// ─── Crop ─────────────────────────────────────────────────────────────────────
+
+function confirmCrop() {
+  if (!cropRect || cropRect.w < 1 || cropRect.h < 1) {
+    showToast('請先拖曳選取裁切範圍', true); return
+  }
+  const cx = Math.max(0, Math.round(cropRect.x))
+  const cy = Math.max(0, Math.round(cropRect.y))
+  const cw = Math.min(Math.round(cropRect.w), imgWidth  - cx)
+  const ch = Math.min(Math.round(cropRect.h), imgHeight - cy)
+  if (cw < 1 || ch < 1) { showToast('裁切範圍超出圖片邊界', true); return }
+
+  const off = document.createElement('canvas')
+  off.width = cw; off.height = ch
+  off.getContext('2d').drawImage(imgElement, cx, cy, cw, ch, 0, 0, cw, ch)
+
+  const newImg = new Image()
+  newImg.onload = () => {
+    imgElement = newImg
+    imgWidth   = cw
+    imgHeight  = ch
+    // Translate annotation coordinates
+    annotations = annotations.map(a => {
+      a = JSON.parse(JSON.stringify(a))
+      switch (a.type) {
+        case 'rect': case 'text': case 'number': a.x -= cx; a.y -= cy; break
+        case 'line': a.x1 -= cx; a.y1 -= cy; a.x2 -= cx; a.y2 -= cy; break
+      }
+      return a
+    })
+    history    = [JSON.parse(JSON.stringify(annotations))]
+    historyIdx = 0
+    cropRect   = null
+    userZoomed = false
+    document.getElementById('imgInfo').textContent = `${imgWidth} × ${imgHeight} px`
+    fitCanvas()
+    drawBase()
+    setTool('rect')
+    showToast(`已裁切：${cw} × ${ch} px`)
+  }
+  newImg.src = off.toDataURL()
+}
+
+function cancelCrop() {
+  cropRect   = null
+  isCropping = false
+  setTool('rect')
+}
+
+document.getElementById('btnCropConfirm').addEventListener('click', confirmCrop)
+document.getElementById('btnCropCancel').addEventListener('click', cancelCrop)
+
+// ─── Resize ───────────────────────────────────────────────────────────────────
+
+const resizeModal = document.getElementById('resizeModal')
+
+function openResizeModal() {
+  if (!imgElement) return
+  document.getElementById('resizeW').value = imgWidth
+  document.getElementById('resizeH').value = imgHeight
+  resizeModal.classList.remove('hidden')
+  setTimeout(() => document.getElementById('resizeW').select(), 10)
+}
+
+document.getElementById('btnResize').addEventListener('click', openResizeModal)
+document.getElementById('resizeModalClose').addEventListener('click', () => resizeModal.classList.add('hidden'))
+document.getElementById('btnResizeCancel').addEventListener('click',  () => resizeModal.classList.add('hidden'))
+resizeModal.addEventListener('click', e => { if (e.target === resizeModal) resizeModal.classList.add('hidden') })
+
+document.getElementById('resizeW').addEventListener('input', e => {
+  const w = parseInt(e.target.value) || 0
+  document.getElementById('resizeH').value =
+    w > 0 && imgWidth > 0 ? Math.round(w * imgHeight / imgWidth) : ''
+})
+
+document.getElementById('btnResizeConfirm').addEventListener('click', () => {
+  const targetW = Math.max(1, parseInt(document.getElementById('resizeW').value) || 1)
+  const targetH = Math.max(1, parseInt(document.getElementById('resizeH').value) || 1)
+  const origW = imgWidth, origH = imgHeight
+
+  const off = document.createElement('canvas')
+  off.width = targetW; off.height = targetH
+  off.getContext('2d').drawImage(imgElement, 0, 0, targetW, targetH)
+
+  const newImg = new Image()
+  newImg.onload = () => {
+    imgElement = newImg
+    imgWidth   = targetW
+    imgHeight  = targetH
+    const sx = targetW / origW, sy = targetH / origH
+    annotations = annotations.map(a => {
+      a = JSON.parse(JSON.stringify(a))
+      switch (a.type) {
+        case 'rect':
+          a.x *= sx; a.y *= sy; a.w *= sx; a.h *= sy
+          a.thickness = Math.max(1, Math.round(a.thickness * sx))
+          break
+        case 'line':
+          a.x1 *= sx; a.y1 *= sy; a.x2 *= sx; a.y2 *= sy
+          a.thickness = Math.max(1, Math.round(a.thickness * sx))
+          break
+        case 'text':
+          a.x *= sx; a.y *= sy
+          a.fontSize = Math.max(8, Math.round(a.fontSize * sx))
+          break
+        case 'number':
+          a.x *= sx; a.y *= sy
+          a.size = Math.max(6, Math.round(a.size * sx))
+          break
+      }
+      return a
+    })
+    history    = [JSON.parse(JSON.stringify(annotations))]
+    historyIdx = 0
+    userZoomed = false
+    document.getElementById('imgInfo').textContent = `${imgWidth} × ${imgHeight} px`
+    fitCanvas()
+    drawBase()
+    renderAnnotations()
+    resizeModal.classList.add('hidden')
+    showToast(`已調整尺寸：${targetW} × ${targetH} px`)
+  }
+  newImg.src = off.toDataURL()
 })
 
 // Burn all annotations at full original resolution
