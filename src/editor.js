@@ -134,7 +134,16 @@ function showOptionsForTool(t) {
   }
   if (!['rect','fillrect','line','text','number'].includes(t)) return
   if (t !== 'fillrect') document.getElementById('grpColor').classList.remove('hidden')
-  if (t === 'fillrect') { document.getElementById('grpFillColor').classList.remove('hidden'); syncFillMode(fillMode) }
+  if (t === 'fillrect') {
+    document.getElementById('grpFillColor').classList.remove('hidden')
+    syncFillMode(fillMode)
+    syncFillColorA(fillColorA)
+    syncFillColorB(fillColorB)
+    syncFillGradientDir(fillGradientDir)
+    syncFillOpacity(fillOpacity)
+    syncFillBorder(fillBorderEnabled)
+    syncFillBorderColor(fillBorderColor)
+  }
   if (['rect','fillrect','line'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
   if (t === 'line')   { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden') }
   if (t === 'text')   document.getElementById('grpFont').classList.remove('hidden')
