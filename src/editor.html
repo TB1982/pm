@@ -86,6 +86,13 @@
       </select>
     </div>
 
+    <div class="opt-group hidden" id="grpCrop">
+      <span class="opt-label" id="cropSizeLabel">請拖曳選取範圍</span>
+      <div class="opt-sep"></div>
+      <button class="btn-primary btn-sm"   id="btnCropConfirm">確認裁切</button>
+      <button class="btn-secondary btn-sm" id="btnCropCancel">取消</button>
+    </div>
+
   </div>
 
   <!-- Body -->
@@ -103,6 +110,9 @@
       <button class="tool-btn"        data-tool="zoom-in"  title="放大 (⌘=)">⊕</button>
       <button class="tool-btn"        data-tool="zoom-out" title="縮小 (⌘-)">⊖</button>
       <button class="tool-btn" id="btnFitZoom"              title="適合視窗 (⌘0)">⊟</button>
+      <div class="tool-sep"></div>
+      <button class="tool-btn" data-tool="crop"   title="裁切 (C)">✂</button>
+      <button class="tool-btn" id="btnResize"     title="調整大小 (S)">⇔</button>
       <div class="tool-sep"></div>
       <button class="tool-btn" id="btnUndo" title="撤銷 (⌘Z)">↩</button>
       <button class="tool-btn" id="btnRedo" title="重做 (⌘⇧Z)">↪</button>
@@ -132,6 +142,34 @@
     <button class="save-btn" id="btnSave">完成並儲存</button>
   </div>
 
+</div>
+
+<!-- Resize modal -->
+<div class="modal-overlay hidden" id="resizeModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>調整尺寸</h2>
+      <button class="modal-close" id="resizeModalClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="resize-fields">
+        <div class="resize-row">
+          <span class="opt-label resize-lbl">寬度</span>
+          <input type="number" id="resizeW" min="1" max="99999" class="resize-input">
+          <span class="opt-label">px</span>
+        </div>
+        <div class="resize-row">
+          <span class="opt-label resize-lbl">高度</span>
+          <input type="number" id="resizeH" readonly class="resize-input resize-input-ro">
+          <span class="opt-label">px（等比例自動計算）</span>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" id="btnResizeCancel">取消</button>
+        <button class="btn-primary"   id="btnResizeConfirm">套用</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Save format modal -->

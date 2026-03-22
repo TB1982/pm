@@ -482,3 +482,29 @@ body {
 }
 
 .toast.toast-error { border-color: #c0392b; color: #ff6b6b; }
+
+/* ─── Resize modal fields ────────────────────────────────────────────────── */
+
+.resize-fields { display: flex; flex-direction: column; gap: 12px; margin-bottom: 4px; }
+
+.resize-row { display: flex; align-items: center; gap: 8px; }
+
+.resize-lbl { width: 36px; }
+
+.resize-input {
+  width: 84px;
+  background: #2e2e2e;
+  border: 1px solid #404040;
+  border-radius: 5px;
+  color: #e0e0e0;
+  font-size: 13px;
+  padding: 5px 8px;
+  text-align: right;
+  outline: none;
+}
+.resize-input:focus { border-color: #4a9eff; }
+.resize-input-ro { color: #777; cursor: default; }
+
+/* ─── Small inline buttons (for options bar) ─────────────────────────────── */
+
+.btn-sm { padding: 4px 12px; font-size: 12px; border-radius: 6px; }

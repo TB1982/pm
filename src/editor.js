@@ -69,6 +69,10 @@ let textPos      = null
 let textEditOrig = null   // restored on Escape during re-edit
 let isComposing  = false
 
+// Crop
+let cropRect   = null   // { x, y, w, h } in image coordinates
+let isCropping = false
+
 // ─── DOM ─────────────────────────────────────────────────────────────────────
 
 const baseCanvas    = document.getElementById('baseCanvas')
@@ -94,7 +98,7 @@ function getTextColor(hex) {
 // ─── Options bar helpers ──────────────────────────────────────────────────────
 
 function hideAllOptions() {
-  ['grpColor','grpThickness','grpLineStyle','grpCaps','grpFont','grpNumber','grpZoom'].forEach(id =>
+  ['grpColor','grpThickness','grpLineStyle','grpCaps','grpFont','grpNumber','grpZoom','grpCrop'].forEach(id =>
     document.getElementById(id).classList.add('hidden')
   )
   document.getElementById('numValueEdit').classList.add('hidden')
@@ -104,6 +108,10 @@ function showOptionsForTool(t) {
   hideAllOptions()
   if (t === 'zoom-in' || t === 'zoom-out') {
     document.getElementById('grpZoom').classList.remove('hidden')
+    return
+  }
+  if (t === 'crop') {
+    document.getElementById('grpCrop').classList.remove('hidden')
     return
   }
   if (!['rect','line','text','number'].includes(t)) return
@@ -259,6 +267,7 @@ document.getElementById('btnRedo').addEventListener('click', redo)
 
 function setTool(t) {
   commitText()
+  if (t !== 'crop') { cropRect = null; isCropping = false }
   tool       = t
   selectedId = null
   isDrawing  = false
@@ -436,6 +445,22 @@ function renderAnnotations() {
   if (selectedId) {
     const a = annotations.find(x => x.id === selectedId)
     if (a) drawSelection(annotCtx, a)
+  }
+
+  // Crop overlay: dim outside selection, dashed border inside
+  if (tool === 'crop' && cropRect && cropRect.w > 1 && cropRect.h > 1) {
+    const cr = cropRect
+    annotCtx.save()
+    annotCtx.fillStyle = 'rgba(0,0,0,0.50)'
+    annotCtx.beginPath()
+    annotCtx.rect(0, 0, annotCanvas.width, annotCanvas.height)
+    annotCtx.rect(c(cr.x), c(cr.y), c(cr.w), c(cr.h))
+    annotCtx.fill('evenodd')
+    annotCtx.strokeStyle = '#ffffff'
+    annotCtx.lineWidth = 1.5
+    annotCtx.setLineDash([5, 3])
+    annotCtx.strokeRect(c(cr.x), c(cr.y), c(cr.w), c(cr.h))
+    annotCtx.restore()
   }
 }
 
@@ -717,6 +742,14 @@ annotCanvas.addEventListener('mousedown', e => {
   // If text input is open and user clicks outside the textarea, commit it first
   if (textActive) commitText()
 
+  if (tool === 'crop') {
+    isCropping = true
+    cropRect   = { x: pos.x, y: pos.y, w: 0, h: 0 }
+    drawStart  = pos
+    document.getElementById('cropSizeLabel').textContent = '請拖曳選取範圍'
+    return
+  }
+
   if (tool === 'zoom-in' || tool === 'zoom-out') {
     isPanning = true
     panStart  = { x: e.clientX, y: e.clientY,
@@ -782,6 +815,21 @@ annotCanvas.addEventListener('mousemove', e => {
     return
   }
 
+  if (isCropping && drawStart) {
+    const s = drawStart
+    cropRect = {
+      x: Math.min(s.x, pos.x),
+      y: Math.min(s.y, pos.y),
+      w: Math.abs(pos.x - s.x),
+      h: Math.abs(pos.y - s.y)
+    }
+    const pw = Math.round(cropRect.w), ph = Math.round(cropRect.h)
+    document.getElementById('cropSizeLabel').textContent =
+      pw > 0 && ph > 0 ? `${pw} × ${ph} px` : '請拖曳選取範圍'
+    renderAnnotations()
+    return
+  }
+
   if (isResizing && selectedId) {
     const a = annotations.find(x => x.id === selectedId)
     if (a) applyResize(a, pos)
@@ -829,6 +877,13 @@ document.addEventListener('mouseup', e => {
       if (tool === 'zoom-out') zoomOut(e.clientX, e.clientY)
     }
     panStart = null
+    return
+  }
+
+  if (isCropping) {
+    isCropping = false
+    if (!cropRect || cropRect.w < 2 || cropRect.h < 2) cropRect = null
+    renderAnnotations()
     return
   }
 
@@ -966,13 +1021,18 @@ document.addEventListener('keydown', e => {
   if (meta && e.key === '-')                    { e.preventDefault(); setTool('zoom-out'); zoomOut();    return }
   if (meta && e.key === '0')                    { e.preventDefault(); fitToWindow();                     return }
 
+  if (e.key === 'Enter' && tool === 'crop') { e.preventDefault(); confirmCrop(); return }
+
   switch (e.key) {
     case 'v': case 'V': setTool('select'); break
     case 'r': case 'R': setTool('rect');   break
     case 'l': case 'L': setTool('line');   break
     case 't': case 'T': setTool('text');   break
     case 'n': case 'N': setTool('number'); break
+    case 'c': case 'C': setTool('crop');   break
+    case 's': case 'S': openResizeModal(); break
     case 'Escape':
+      if (tool === 'crop') { cancelCrop(); break }
       selectedId = null
       isDrawing  = false
       if (tool === 'select') hideAllOptions()
@@ -1010,6 +1070,131 @@ document.getElementById('btnSaveConfirm').addEventListener('click', async () => 
   const dataURL = burnIn(format)
   const result  = await ipcRenderer.invoke('save-image-as', { dataURL, format })
   if (result?.success) showToast(`已儲存：${result.path.split('/').pop()}`)
+})
+
+// ─── Crop ─────────────────────────────────────────────────────────────────────
+
+function confirmCrop() {
+  if (!cropRect || cropRect.w < 1 || cropRect.h < 1) {
+    showToast('請先拖曳選取裁切範圍', true); return
+  }
+  const cx = Math.max(0, Math.round(cropRect.x))
+  const cy = Math.max(0, Math.round(cropRect.y))
+  const cw = Math.min(Math.round(cropRect.w), imgWidth  - cx)
+  const ch = Math.min(Math.round(cropRect.h), imgHeight - cy)
+  if (cw < 1 || ch < 1) { showToast('裁切範圍超出圖片邊界', true); return }
+
+  const off = document.createElement('canvas')
+  off.width = cw; off.height = ch
+  off.getContext('2d').drawImage(imgElement, cx, cy, cw, ch, 0, 0, cw, ch)
+
+  const newImg = new Image()
+  newImg.onload = () => {
+    imgElement = newImg
+    imgWidth   = cw
+    imgHeight  = ch
+    // Translate annotation coordinates
+    annotations = annotations.map(a => {
+      a = JSON.parse(JSON.stringify(a))
+      switch (a.type) {
+        case 'rect': case 'text': case 'number': a.x -= cx; a.y -= cy; break
+        case 'line': a.x1 -= cx; a.y1 -= cy; a.x2 -= cx; a.y2 -= cy; break
+      }
+      return a
+    })
+    history    = [JSON.parse(JSON.stringify(annotations))]
+    historyIdx = 0
+    cropRect   = null
+    userZoomed = false
+    document.getElementById('imgInfo').textContent = `${imgWidth} × ${imgHeight} px`
+    fitCanvas()
+    drawBase()
+    setTool('rect')
+    showToast(`已裁切：${cw} × ${ch} px`)
+  }
+  newImg.src = off.toDataURL()
+}
+
+function cancelCrop() {
+  cropRect   = null
+  isCropping = false
+  setTool('rect')
+}
+
+document.getElementById('btnCropConfirm').addEventListener('click', confirmCrop)
+document.getElementById('btnCropCancel').addEventListener('click', cancelCrop)
+
+// ─── Resize ───────────────────────────────────────────────────────────────────
+
+const resizeModal = document.getElementById('resizeModal')
+
+function openResizeModal() {
+  if (!imgElement) return
+  document.getElementById('resizeW').value = imgWidth
+  document.getElementById('resizeH').value = imgHeight
+  resizeModal.classList.remove('hidden')
+  setTimeout(() => document.getElementById('resizeW').select(), 10)
+}
+
+document.getElementById('btnResize').addEventListener('click', openResizeModal)
+document.getElementById('resizeModalClose').addEventListener('click', () => resizeModal.classList.add('hidden'))
+document.getElementById('btnResizeCancel').addEventListener('click',  () => resizeModal.classList.add('hidden'))
+resizeModal.addEventListener('click', e => { if (e.target === resizeModal) resizeModal.classList.add('hidden') })
+
+document.getElementById('resizeW').addEventListener('input', e => {
+  const w = parseInt(e.target.value) || 0
+  document.getElementById('resizeH').value =
+    w > 0 && imgWidth > 0 ? Math.round(w * imgHeight / imgWidth) : ''
+})
+
+document.getElementById('btnResizeConfirm').addEventListener('click', () => {
+  const targetW = Math.max(1, parseInt(document.getElementById('resizeW').value) || 1)
+  const targetH = Math.max(1, parseInt(document.getElementById('resizeH').value) || 1)
+  const origW = imgWidth, origH = imgHeight
+
+  const off = document.createElement('canvas')
+  off.width = targetW; off.height = targetH
+  off.getContext('2d').drawImage(imgElement, 0, 0, targetW, targetH)
+
+  const newImg = new Image()
+  newImg.onload = () => {
+    imgElement = newImg
+    imgWidth   = targetW
+    imgHeight  = targetH
+    const sx = targetW / origW, sy = targetH / origH
+    annotations = annotations.map(a => {
+      a = JSON.parse(JSON.stringify(a))
+      switch (a.type) {
+        case 'rect':
+          a.x *= sx; a.y *= sy; a.w *= sx; a.h *= sy
+          a.thickness = Math.max(1, Math.round(a.thickness * sx))
+          break
+        case 'line':
+          a.x1 *= sx; a.y1 *= sy; a.x2 *= sx; a.y2 *= sy
+          a.thickness = Math.max(1, Math.round(a.thickness * sx))
+          break
+        case 'text':
+          a.x *= sx; a.y *= sy
+          a.fontSize = Math.max(8, Math.round(a.fontSize * sx))
+          break
+        case 'number':
+          a.x *= sx; a.y *= sy
+          a.size = Math.max(6, Math.round(a.size * sx))
+          break
+      }
+      return a
+    })
+    history    = [JSON.parse(JSON.stringify(annotations))]
+    historyIdx = 0
+    userZoomed = false
+    document.getElementById('imgInfo').textContent = `${imgWidth} × ${imgHeight} px`
+    fitCanvas()
+    drawBase()
+    renderAnnotations()
+    resizeModal.classList.add('hidden')
+    showToast(`已調整尺寸：${targetW} × ${targetH} px`)
+  }
+  newImg.src = off.toDataURL()
 })
 
 // Burn all annotations at full original resolution
