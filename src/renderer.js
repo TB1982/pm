@@ -171,6 +171,7 @@ document.getElementById('btnOpenImage').addEventListener('click', () => {
 let batchFiles       = []
 let selectedOutputDir = null
 let batchRunning     = false
+let warnPreemptive   = false   // true = warning shown before "開始轉換" was clicked
 
 const batchModal = document.getElementById('batchModal')
 
@@ -222,7 +223,7 @@ function addBatchFiles(newPaths) {
     if (!existing.has(p)) batchFiles.push(p)
   }
   renderFileList()
-  updateConditionalRows()
+  updateConditionalRows()   // 內部會呼叫 updateSameFormatWarning
 }
 
 function renderFileList() {
@@ -265,6 +266,7 @@ function updateConditionalRows() {
 
   document.getElementById('qualityRow').classList.toggle('hidden', fmt !== 'jpg' && fmt !== 'webp')
   document.getElementById('svgWidthRow').classList.toggle('hidden', !hasSvg)
+  updateSameFormatWarning()
 }
 
 document.getElementById('batchFormat').addEventListener('change', updateConditionalRows)
@@ -302,24 +304,60 @@ function normExt(p) {
   return e === 'jpeg' ? 'jpg' : e
 }
 
-function showWarning(sameFiles) {
-  const warning = document.getElementById('batchWarning')
+function showWarning(sameFiles, preemptive = false) {
   document.getElementById('warningFiles').textContent =
     sameFiles.map(p => p.split('/').pop()).join('、')
-  warning.classList.remove('hidden')
+  // 按鈕文字依場景切換
+  document.getElementById('warnSkipBtn').textContent =
+    preemptive ? '從清單移除' : '略過這些，繼續轉換'
+  document.getElementById('warnCancelBtn').textContent =
+    preemptive ? '忽略提示' : '取消全部'
+  document.getElementById('batchWarning').classList.remove('hidden')
 }
 
 function hideWarning() {
   document.getElementById('batchWarning').classList.add('hidden')
 }
 
-document.getElementById('warnCancelBtn').addEventListener('click', hideWarning)
+// 依目前 batchFiles 與選取格式，主動顯示 / 隱藏預警（pre-emptive 模式）
+function updateSameFormatWarning() {
+  if (batchFiles.length === 0) {
+    if (warnPreemptive) { hideWarning(); warnPreemptive = false }
+    return
+  }
+  const fmt       = document.getElementById('batchFormat').value
+  const sameFiles = batchFiles.filter(p => normExt(p) === fmt)
+  if (sameFiles.length > 0) {
+    warnPreemptive = true
+    showWarning(sameFiles, true)
+  } else if (warnPreemptive) {
+    hideWarning()
+    warnPreemptive = false
+  }
+}
 
+// 「從清單移除 / 略過這些，繼續轉換」
 document.getElementById('warnSkipBtn').addEventListener('click', () => {
-  hideWarning()
   const fmt = document.getElementById('batchFormat').value
-  const toConvert = batchFiles.filter(p => normExt(p) !== fmt)
-  runConversion(toConvert)
+  if (warnPreemptive) {
+    // pre-emptive 模式：把同格式檔從佇列移除
+    batchFiles = batchFiles.filter(p => normExt(p) !== fmt)
+    hideWarning()
+    warnPreemptive = false
+    renderFileList()
+    updateConditionalRows()
+  } else {
+    // 轉換意圖模式：略過並開始轉換
+    hideWarning()
+    const toConvert = batchFiles.filter(p => normExt(p) !== fmt)
+    runConversion(toConvert)
+  }
+})
+
+// 「忽略提示 / 取消全部」
+document.getElementById('warnCancelBtn').addEventListener('click', () => {
+  hideWarning()
+  warnPreemptive = false
 })
 
 // ── Start button ────────────────────────────────────────────────────────────
@@ -342,10 +380,11 @@ document.getElementById('batchStartBtn').addEventListener('click', () => {
 
   hideWarning()
 
-  // Detect same-format files
+  // Detect same-format files (transition from pre-emptive to conversion-intent mode)
   const sameFiles = batchFiles.filter(p => normExt(p) === fmt)
   if (sameFiles.length > 0) {
-    showWarning(sameFiles)
+    warnPreemptive = false
+    showWarning(sameFiles)   // 顯示轉換意圖版本（「略過這些，繼續轉換 / 取消全部」）
     return
   }
 

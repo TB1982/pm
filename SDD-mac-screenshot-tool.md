@@ -1,8 +1,9 @@
 # SDD：Mac 截圖與圖片編輯工具
-**版本：** 1.9
+**版本：** 2.0
 **日期：** 2026-03-22
 **狀態：** 待審閱
 **變更紀錄：**
+v2.0 — 批次轉檔佇列管理修正：① .file-remove 按鈕點擊區域放大（font-size 13px + padding 6px 10px），修正最後一個檔案難以刪除的問題；② 即時同格式預警：加入 updateSameFormatWarning()，在引入檔案 / 切換格式時主動顯示橘色警示，無須等到「開始轉換」；③ 預警 pre-emptive 模式按鈕切換為「從清單移除 / 忽略提示」，點擊「從清單移除」直接清除同格式檔案並更新佇列；④ 點擊「開始轉換」時自動轉為轉換意圖模式（warnPreemptive=false），按鈕恢復原始文字
 v1.9 — 新增延伸畫布功能（E1-C）：左側工具列「⊞ 延伸畫布（E）」按鈕開啟 modal；3×3 方向盤（8 方向 + 置中）；單方向（上/下/左/右）顯示單一輸入欄；斜角（右上/右下/左上/左下）顯示寬/高各自獨立輸入欄；置中顯示單一「四邊延伸」欄（新尺寸 = 原 + amount×2）；延伸區域白色填充；即時預覽結果尺寸；確認後 annotations 座標自動平移（向左/向上延伸時）
 v1.8 — 實作 E3 疊圖：左側工具列新增「⧉ 疊入圖片（O）」按鈕；type:'img' annotation 接入現有系統（undo/redo / move / 8把手 resize / bounds / hits 全部自動繼承）；角落把手等比例縮放（鎖定 aspectRatio），邊緣把手自由縮放；插入後預設尺寸 = 原始尺寸縮放至 50% 底圖，置中；限制一次只能插入一張疊入圖；O 鍵快捷鍵；HTMLImageElement 以 Map 快取，與 annotation JSON 資料分離
 v1.7 — 編輯器顏色工具列新增滴管選色（E2-F）與 Hex 色碼輸入（E2-G）：滴管按鈕優先使用 Chromium EyeDropper API（可吸取螢幕任意像素），API 不可用時 fallback 到 macOS 原生色票 picker；Hex 欄位即時同步（輸入 6 位元有效值立即套用）；所有顏色來源（色塊 / 滴管 / hex）統一走 applyColor()；syncColor() 連動更新 hex 欄位；hex 欄位的 keydown 事件 stopPropagation 防止觸發編輯器快捷鍵；支援貼上 #RRGGBB 格式自動去 #

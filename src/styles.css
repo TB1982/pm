@@ -426,9 +426,10 @@ kbd {
   border: none;
   color: #666;
   cursor: pointer;
-  font-size: 11px;
-  padding: 0 0 0 8px;
+  font-size: 13px;
+  padding: 6px 10px;   /* 放大點擊區域，更容易按到 */
   flex-shrink: 0;
+  line-height: 1;
   transition: color 0.12s;
 }
 .file-remove:hover { color: #ff6b6b; }
