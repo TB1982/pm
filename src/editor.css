@@ -214,13 +214,14 @@ body {
   background: #111;
 }
 
-/* Inner flex container: always fills at least the full canvas-area so
-   the wrapper stays centred when the image is small, but grows beyond
-   100% when the image is zoomed in — allowing normal scroll. */
+/* Inner flex container: always fills at least the full canvas-area.
+   Do NOT use justify-content/align-items: center here — flex centering
+   makes left/top overflow inaccessible when the image is larger than the
+   viewport (scrollLeft=0 shows the middle, not the left edge).
+   Instead, margin: auto on canvas-wrapper centres it when there is free
+   space, and collapses to 0 when the image overflows. */
 .canvas-scroll-content {
   display: flex;
-  align-items: center;
-  justify-content: center;
   min-width: 100%;
   min-height: 100%;
   box-sizing: border-box;
@@ -228,6 +229,7 @@ body {
 }
 
 .canvas-wrapper {
+  margin: auto;   /* centres when small; 0 when overflowing → scroll works */
   position: relative;
   flex-shrink: 0;
   box-shadow: 0 6px 40px rgba(0, 0, 0, 0.7);
