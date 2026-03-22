@@ -1972,10 +1972,12 @@ function hideCtxMenu() { ctxMenu.classList.add('hidden') }
 function showCtxMenu(clientX, clientY, targetId) {
   const idx  = annotations.findIndex(a => a.id === targetId)
   const last = annotations.length - 1
-  document.getElementById('ctxToTop').disabled    = idx === last
-  document.getElementById('ctxMoveUp').disabled   = idx === last
-  document.getElementById('ctxMoveDown').disabled = idx === 0
-  document.getElementById('ctxToBottom').disabled = idx === 0
+  const atTop    = idx === last
+  const atBottom = idx === 0
+  document.getElementById('ctxToTop').style.display    = atTop    ? 'none' : ''
+  document.getElementById('ctxMoveUp').style.display   = atTop    ? 'none' : ''
+  document.getElementById('ctxMoveDown').style.display = atBottom ? 'none' : ''
+  document.getElementById('ctxToBottom').style.display = atBottom ? 'none' : ''
 
   // Clamp to viewport
   ctxMenu.classList.remove('hidden')

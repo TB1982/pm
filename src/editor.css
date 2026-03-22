@@ -688,8 +688,7 @@ body {
   cursor: pointer;
   white-space: nowrap;
 }
-.ctx-menu button:hover:not(:disabled) { background: rgba(255,255,255,.09); }
-.ctx-menu button:disabled { color: #52576e; cursor: default; }
+.ctx-menu button:hover { background: rgba(255,255,255,.09); }
 
 /* ─── Resize modal fields ────────────────────────────────────────────────── */
 
