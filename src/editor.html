@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>圖片編輯器</title>
+  <link rel="stylesheet" href="editor.css">
+</head>
+<body>
+
+<div class="editor-layout">
+
+  <!-- Titlebar -->
+  <div class="editor-titlebar">
+    <span class="editor-title">圖片編輯器</span>
+    <span class="img-info" id="imgInfo"></span>
+  </div>
+
+  <!-- Options bar -->
+  <div class="options-bar">
+
+    <div class="opt-group" id="grpColor">
+      <span class="opt-label">顏色</span>
+      <div class="color-swatches" id="colorSwatches"></div>
+    </div>
+
+    <div class="opt-group" id="grpThickness">
+      <span class="opt-label">粗細</span>
+      <div class="sz-group">
+        <button class="sz-btn active" data-sz="2">細</button>
+        <button class="sz-btn"        data-sz="4">中</button>
+        <button class="sz-btn"        data-sz="7">粗</button>
+      </div>
+    </div>
+
+    <div class="opt-group hidden" id="grpLineStyle">
+      <span class="opt-label">線條</span>
+      <button class="style-btn active" data-ls="solid">實線</button>
+      <button class="style-btn"        data-ls="dashed">虛線</button>
+    </div>
+
+    <div class="opt-group hidden" id="grpCaps">
+      <span class="opt-label">起點</span>
+      <button class="cap-btn active" data-end="start" data-cap="none">─</button>
+      <button class="cap-btn"        data-end="start" data-cap="dot">●</button>
+      <button class="cap-btn"        data-end="start" data-cap="arrow">◀</button>
+      <span class="opt-label" style="margin-left:6px">終點</span>
+      <button class="cap-btn"        data-end="end" data-cap="none">─</button>
+      <button class="cap-btn"        data-end="end" data-cap="dot">●</button>
+      <button class="cap-btn active" data-end="end" data-cap="arrow">▶</button>
+    </div>
+
+    <div class="opt-group hidden" id="grpFont">
+      <span class="opt-label">字型大小</span>
+      <input type="number" id="fontSizeInput" value="48" min="8" max="400">
+      <span class="opt-label">px</span>
+    </div>
+
+    <div class="opt-group hidden" id="grpNumber">
+      <span class="opt-label">大小</span>
+      <div class="sz-group">
+        <button class="ns-btn"        data-ns="10">小</button>
+        <button class="ns-btn active" data-ns="14">標準</button>
+        <button class="ns-btn"        data-ns="22">大</button>
+      </div>
+      <div class="opt-sep"></div>
+      <button class="reset-btn" id="btnNumReset">重置編號</button>
+      <div id="numValueEdit" class="num-value-edit hidden">
+        <div class="opt-sep"></div>
+        <span class="opt-label">數值</span>
+        <input type="number" id="numValueInput" min="0" max="9999" value="1">
+      </div>
+    </div>
+
+    <div class="opt-group hidden" id="grpZoom">
+      <span class="opt-label">縮放比例</span>
+      <select id="zoomSelect" class="zoom-select">
+        <option id="zoomCustom" value="custom" disabled>--</option>
+        <option value="0.25">25%</option>
+        <option value="0.5">50%</option>
+        <option value="0.75">75%</option>
+        <option value="1">100%</option>
+        <option value="1.5">150%</option>
+        <option value="2">200%</option>
+        <option value="3">300%</option>
+        <option value="4">400%</option>
+      </select>
+    </div>
+
+  </div>
+
+  <!-- Body -->
+  <div class="editor-body">
+
+    <!-- Left toolbar -->
+    <div class="editor-toolbar">
+      <button class="tool-btn"        data-tool="select" title="選取 (V)">↖</button>
+      <div class="tool-sep"></div>
+      <button class="tool-btn active" data-tool="rect"   title="矩形框 (R)">□</button>
+      <button class="tool-btn"        data-tool="line"   title="線條 (L)">╱</button>
+      <button class="tool-btn"        data-tool="text"   title="文字 (T)">T</button>
+      <button class="tool-btn"        data-tool="number"   title="編號 (N)">①</button>
+      <div class="tool-sep"></div>
+      <button class="tool-btn"        data-tool="zoom-in"  title="放大 (⌘=)">⊕</button>
+      <button class="tool-btn"        data-tool="zoom-out" title="縮小 (⌘-)">⊖</button>
+      <button class="tool-btn" id="btnFitZoom"              title="適合視窗 (⌘0)">⊟</button>
+      <div class="tool-sep"></div>
+      <button class="tool-btn" id="btnUndo" title="撤銷 (⌘Z)">↩</button>
+      <button class="tool-btn" id="btnRedo" title="重做 (⌘⇧Z)">↪</button>
+    </div>
+
+    <!-- Canvas area -->
+    <div class="canvas-area" id="canvasArea">
+      <div class="canvas-scroll-content">
+        <div class="canvas-wrapper" id="canvasWrapper">
+          <canvas id="baseCanvas"></canvas>
+          <canvas id="annotCanvas"></canvas>
+          <!-- floating text input -->
+          <div id="textInputWrap" class="text-input-wrap hidden">
+            <textarea id="textInput" rows="1" spellcheck="false"></textarea>
+            <span id="textMirror" aria-hidden="true"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom bar -->
+  <div class="editor-bottombar">
+    <span class="zoom-label" id="zoomLabel">100%</span>
+    <div class="flex-spacer"></div>
+    <button class="save-btn" id="btnSave">完成並儲存</button>
+  </div>
+
+</div>
+
+<!-- Save format modal -->
+<div class="modal-overlay hidden" id="saveModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>儲存格式</h2>
+      <button class="modal-close" id="saveModalClose">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="format-options">
+        <label class="format-opt"><input type="radio" name="fmt" value="png" checked> PNG <span class="fmt-desc">無損，支援透明背景</span></label>
+        <label class="format-opt"><input type="radio" name="fmt" value="jpg"> JPG <span class="fmt-desc">有損壓縮，檔案較小</span></label>
+        <label class="format-opt"><input type="radio" name="fmt" value="webp"> WebP <span class="fmt-desc">現代格式，支援透明</span></label>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" id="btnSaveCancel">取消</button>
+        <button class="btn-primary"   id="btnSaveConfirm">儲存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script src="editor.js"></script>
+</body>
+</html>
