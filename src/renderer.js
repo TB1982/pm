@@ -145,9 +145,9 @@ async function doRect() {
 
 // ─── Shortcut events from main process ───────────────────────────────────────
 
-ipcRenderer.on('shortcut-fullscreen', doFullscreen)
+ipcRenderer.on('shortcut-fullscreen', () => delayedAction(doFullscreen))
 ipcRenderer.on('shortcut-window',     doWindow)
-ipcRenderer.on('shortcut-rect',       doRect)
+ipcRenderer.on('shortcut-rect',       () => delayedAction(doRect))
 
 // ─── Capture result callbacks ─────────────────────────────────────────────────
 
@@ -161,22 +161,18 @@ function setToolbarActive(btn) {
   btn.classList.add('tb-btn-highlight')
 }
 
-document.getElementById('btnFullscreen').addEventListener('click', e => { setToolbarActive(e.currentTarget); doFullscreen() })
-document.getElementById('btnRect').addEventListener('click',       e => { setToolbarActive(e.currentTarget); doRect() })
+document.getElementById('btnFullscreen').addEventListener('click', e => { setToolbarActive(e.currentTarget); delayedAction(doFullscreen) })
+document.getElementById('btnRect').addEventListener('click',       e => { setToolbarActive(e.currentTarget); delayedAction(doRect) })
 document.getElementById('btnWindow').addEventListener('click',     e => { setToolbarActive(e.currentTarget); doWindow() })
 
-// ─── Delayed capture ──────────────────────────────────────────────────────────
+// ─── Delay setting ────────────────────────────────────────────────────────────
 
-const DELAY_KEY  = 'delayCaptureSecs'
-const btnDelayed = document.getElementById('btnDelayed')
-const delayIcon  = document.getElementById('delayIcon')
-const delaySelect = document.getElementById('delaySelect')
+const DELAY_KEY      = 'delayCaptureSecs'
+const delaySelect    = document.getElementById('delaySelect')
+const countdownOverlay = document.getElementById('countdownOverlay')
+const countdownNum   = document.getElementById('countdownNum')
 
-// Restore last saved delay
-delaySelect.value = localStorage.getItem(DELAY_KEY) || '3'
-
-// Changing the select only saves preference; does not trigger capture
-delaySelect.addEventListener('click',  e => e.stopPropagation())
+delaySelect.value = localStorage.getItem(DELAY_KEY) || '0'
 delaySelect.addEventListener('change', () => localStorage.setItem(DELAY_KEY, delaySelect.value))
 
 let countdownTimer = null
@@ -185,37 +181,31 @@ function cancelCountdown() {
   if (countdownTimer === null) return
   clearTimeout(countdownTimer)
   countdownTimer = null
-  delayIcon.textContent = '⏱'
-  btnDelayed.disabled = false
+  countdownOverlay.classList.add('hidden')
 }
 
-function doDelayed() {
+// Run fn() after the configured delay (0 = immediate)
+function delayedAction(fn) {
   if (countdownTimer !== null) return   // already counting
-  let remaining = parseInt(delaySelect.value, 10)
-  btnDelayed.disabled = true
+  const secs = parseInt(delaySelect.value, 10)
+  if (secs === 0) { fn(); return }
+
+  let remaining = secs
+  countdownOverlay.classList.remove('hidden')
 
   function tick() {
     if (remaining <= 0) {
       countdownTimer = null
-      delayIcon.textContent = '⏱'
-      btnDelayed.disabled = false
-      doFullscreen()
+      countdownOverlay.classList.add('hidden')
+      fn()
       return
     }
-    delayIcon.textContent = String(remaining)
+    countdownNum.textContent = String(remaining)
     remaining--
     countdownTimer = setTimeout(tick, 1000)
   }
   tick()
 }
-
-btnDelayed.addEventListener('click', e => {
-  if (e.target === delaySelect) return
-  setToolbarActive(e.currentTarget)
-  doDelayed()
-})
-
-ipcRenderer.on('shortcut-delayed', doDelayed)
 
 document.getElementById('btnOpenImage').addEventListener('click', e => {
   setToolbarActive(e.currentTarget)
