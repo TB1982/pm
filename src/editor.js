@@ -79,7 +79,8 @@ let textBgColor     = '#000000'
 let textBgOpacity   = 0        // 0–100 %
 let textBold        = false
 let textItalic      = false
-let textUnderline   = false
+let textUnderline     = false
+let textStrikethrough = false
 
 // Shadow (per-tool default; each annotation also stores its own value)
 let rectShadow      = false
@@ -203,7 +204,7 @@ function showOptionsForTool(t) {
   if (t === 'text') {
     document.getElementById('grpFont').classList.remove('hidden')
     syncTextShadowCheck(textShadow)
-    syncTextBold(textBold); syncTextItalic(textItalic); syncTextUnderline(textUnderline)
+    syncTextBold(textBold); syncTextItalic(textItalic); syncTextUnderline(textUnderline); syncTextStrikethrough(textStrikethrough)
     syncTextStrokeColor(textStrokeColor); syncTextStrokeWidth(textStrokeWidth)
     syncTextBgColor(textBgColor); syncTextBgOpacity(textBgOpacity)
   }
@@ -246,7 +247,8 @@ function showOptionsForAnnot(a) {
     textShadow      = a.shadow ?? false;              syncTextShadowCheck(textShadow)
     textBold        = a.bold      ?? false;           syncTextBold(textBold)
     textItalic      = a.italic    ?? false;           syncTextItalic(textItalic)
-    textUnderline   = a.underline ?? false;           syncTextUnderline(textUnderline)
+    textUnderline     = a.underline     ?? false; syncTextUnderline(textUnderline)
+    textStrikethrough = a.strikethrough ?? false; syncTextStrikethrough(textStrikethrough)
     document.getElementById('grpFont').classList.remove('hidden')
   }
   if (t === 'number') {
@@ -362,7 +364,8 @@ function syncTextBgOpacity(v) {
 }
 function syncTextBold(v)      { document.getElementById('btnTextBold')     ?.classList.toggle('active', v) }
 function syncTextItalic(v)    { document.getElementById('btnTextItalic')   ?.classList.toggle('active', v) }
-function syncTextUnderline(v) { document.getElementById('btnTextUnderline')?.classList.toggle('active', v) }
+function syncTextUnderline(v)     { document.getElementById('btnTextUnderline')    ?.classList.toggle('active', v) }
+function syncTextStrikethrough(v) { document.getElementById('btnTextStrikethrough')?.classList.toggle('active', v) }
 
 function syncShadowCheck(val) {
   const el = document.getElementById('shadowCheck')
@@ -903,7 +906,8 @@ document.getElementById('textShadowCheck').addEventListener('change', e => {
 ;[
   ['btnTextBold',      () => { textBold      = !textBold;      syncTextBold(textBold);           if (selectedId) updateSelectedAnnot({ bold:      textBold      }) }],
   ['btnTextItalic',    () => { textItalic    = !textItalic;    syncTextItalic(textItalic);       if (selectedId) updateSelectedAnnot({ italic:    textItalic    }) }],
-  ['btnTextUnderline', () => { textUnderline = !textUnderline; syncTextUnderline(textUnderline); if (selectedId) updateSelectedAnnot({ underline: textUnderline }) }],
+  ['btnTextUnderline',     () => { textUnderline     = !textUnderline;     syncTextUnderline(textUnderline);         if (selectedId) updateSelectedAnnot({ underline:     textUnderline     }) }],
+  ['btnTextStrikethrough', () => { textStrikethrough = !textStrikethrough; syncTextStrikethrough(textStrikethrough); if (selectedId) updateSelectedAnnot({ strikethrough: textStrikethrough }) }],
 ].forEach(([id, fn]) => document.getElementById(id).addEventListener('click', fn))
 
 // Shared shadow checkbox (rect / fillrect / number)
@@ -1317,6 +1321,21 @@ function drawText(ctx, a) {
   if (a.shadow && bgOpacity === 0) setShadow(ctx)
   ctx.fillStyle = a.color
   lines.forEach((line, i) => ctx.fillText(line, c(a.x), c(a.y) + i * fs * 1.25))
+
+  // Strikethrough — through the middle of the glyphs (~45% from top)
+  if (a.strikethrough) {
+    ctx.save()
+    ctx.strokeStyle = a.color
+    ctx.lineWidth   = Math.max(1, fs * 0.055)
+    ctx.lineCap     = 'round'
+    lines.forEach((line, i) => {
+      const lineY = c(a.y) + i * fs * 1.25
+      const sy    = lineY + fs * 0.45
+      const w     = ctx.measureText(line).width
+      ctx.beginPath(); ctx.moveTo(c(a.x), sy); ctx.lineTo(c(a.x) + w, sy); ctx.stroke()
+    })
+    ctx.restore()
+  }
 
   // Underline — draw after fill so shadow (if any) doesn't double-render
   // Position: ~85% of em-size from top ≈ just below the alphabetic baseline for CJK & Latin,
@@ -1895,7 +1914,7 @@ function commitText() {
     pushHistory()
     annotations.push({ id:newId(), type:'text', color, fontSize, x:textPos.x, y:textPos.y, content,
                        textStrokeColor, textStrokeWidth, textBgColor, textBgOpacity, shadow: textShadow,
-                       bold: textBold, italic: textItalic, underline: textUnderline })
+                       bold: textBold, italic: textItalic, underline: textUnderline, strikethrough: textStrikethrough })
     renderAnnotations()
   }
   _closeTextInput()
