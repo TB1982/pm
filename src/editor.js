@@ -56,6 +56,8 @@ let fillGradientDir  = 'h'           // 'h' | 'v' | 'dr' | 'ur'
 let fillOpacity      = 100
 let fillBorderEnabled = true
 let fillBorderColor   = '#ffffff'    // border stroke colour
+let fillPrevColorA    = '#ffcc00'    // last non-transparent colorA (for 透 toggle)
+let fillPrevColorB    = '#333333'    // last non-transparent colorB (for 透 toggle)
 
 // Annotation clipboard (for Cmd+C / Cmd+V on number annotations)
 let annotClipboard = null
@@ -156,7 +158,9 @@ function showOptionsForAnnot(a) {
     fillMode = a.fillMode ?? 'solid'; syncFillMode(fillMode)
     fillColor = a.fillColor ?? '#ffcc00'; syncFillColor(fillColor)
     fillColorA = a.fillColorA ?? '#ffcc00'; syncFillColorA(fillColorA)
+    if (fillColorA !== 'transparent') fillPrevColorA = fillColorA
     fillColorB = a.fillColorB ?? 'transparent'; syncFillColorB(fillColorB)
+    if (fillColorB !== 'transparent') fillPrevColorB = fillColorB
     fillGradientDir = a.fillGradientDir ?? 'h'; syncFillGradientDir(fillGradientDir)
     fillOpacity = a.fillOpacity ?? 100; syncFillOpacity(fillOpacity)
     fillBorderEnabled = a.fillBorder !== false; syncFillBorder(fillBorderEnabled)
@@ -221,10 +225,12 @@ function syncFillColor(hex) {
 function syncFillColorA(hex) {
   const p = document.getElementById('fillColorAPreview')
   if (p) p.style.background = fillPreviewBg(hex)
+  document.getElementById('btnFillColorATransparent').classList.toggle('active', hex === 'transparent')
 }
 function syncFillColorB(hex) {
   const p = document.getElementById('fillColorBPreview')
   if (p) p.style.background = fillPreviewBg(hex)
+  document.getElementById('btnFillColorBTransparent').classList.toggle('active', hex === 'transparent')
 }
 function syncFillGradientDir(dir) {
   document.querySelectorAll('[data-fdir]').forEach(b => b.classList.toggle('active', b.dataset.fdir === dir))
@@ -252,10 +258,12 @@ function applyFillColor(hex) {
   if (selectedId) updateSelectedAnnot({ fillColor: hex })
 }
 function applyFillColorA(hex) {
+  if (hex !== 'transparent') fillPrevColorA = hex
   fillColorA = hex; syncFillColorA(hex)
   if (selectedId) updateSelectedAnnot({ fillColorA: hex })
 }
 function applyFillColorB(hex) {
+  if (hex !== 'transparent') fillPrevColorB = hex
   fillColorB = hex; syncFillColorB(hex)
   if (selectedId) updateSelectedAnnot({ fillColorB: hex })
 }
@@ -346,9 +354,13 @@ bindFillPicker('fillColorAPreview',       'fillNativePickerA',       () => fillC
 bindFillPicker('fillColorBPreview',       'fillNativePickerB',       () => fillColorB,      applyFillColorB)
 bindFillPicker('fillBorderColorPreview',  'fillBorderNativePicker',  () => fillBorderColor, applyFillBorderColor)
 
-// Transparent shortcuts
-document.getElementById('btnFillColorATransparent').addEventListener('click', () => applyFillColorA('transparent'))
-document.getElementById('btnFillColorBTransparent').addEventListener('click', () => applyFillColorB('transparent'))
+// Transparent toggle — press again to restore previous colour
+document.getElementById('btnFillColorATransparent').addEventListener('click', () =>
+  applyFillColorA(fillColorA === 'transparent' ? fillPrevColorA : 'transparent')
+)
+document.getElementById('btnFillColorBTransparent').addEventListener('click', () =>
+  applyFillColorB(fillColorB === 'transparent' ? fillPrevColorB : 'transparent')
+)
 
 // Mode toggle
 document.getElementById('btnFillSolid').addEventListener('click',    () => applyFillMode('solid'))
