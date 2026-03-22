@@ -87,6 +87,7 @@ body {
   border: 1.5px solid rgba(255,255,255,0.25);
   flex-shrink: 0;
   box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3);
+  cursor: pointer;
 }
 
 .swatch {
@@ -686,3 +687,72 @@ body {
 /* ─── Small inline buttons (for options bar) ─────────────────────────────── */
 
 .btn-sm { padding: 4px 12px; font-size: 12px; border-radius: 6px; }
+
+/* ─── Floating colour-picker panel ────────────────────────────────────────── */
+
+#colorPickerPanel {
+  position: fixed;
+  z-index: 9999;
+  background: #252525;
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 10px 32px rgba(0,0,0,0.65);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Theme grid: each hue is a column, shades are rows */
+#cppTheme {
+  display: flex;
+  gap: 3px;
+}
+.cpp-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+/* Standard colours: one flat row */
+#cppStandard {
+  display: flex;
+  gap: 3px;
+}
+
+/* Individual swatch tile */
+.cpp-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: transform 0.1s;
+  position: relative;
+}
+.cpp-swatch:hover { transform: scale(1.25); z-index: 1; }
+.cpp-swatch.active { box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px rgba(255,255,255,0.25); }
+
+/* Section label above standard colours */
+.cpp-section-label {
+  font-size: 10px;
+  color: #888;
+  letter-spacing: 0.4px;
+  line-height: 1;
+}
+
+/* Horizontal divider inside panel */
+.cpp-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.1);
+  margin: 0 -2px;
+}
+
+/* Tools row: eyedropper + hex input */
+#cppTools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}

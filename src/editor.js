@@ -2,15 +2,24 @@ const { ipcRenderer } = require('electron')
 
 // ─── Colour palette ──────────────────────────────────────────────────────────
 
-const COLORS = [
-  { hex: '#ff3b30', name: '紅' },
-  { hex: '#ff9500', name: '橙' },
-  { hex: '#ffcc00', name: '黃' },
-  { hex: '#34c759', name: '綠' },
-  { hex: '#007aff', name: '藍' },
-  { hex: '#af52de', name: '紫' },
-  { hex: '#1c1c1e', name: '黑' },
-  { hex: '#ffffff', name: '白' },
+// Theme palette: 10 columns (hues) × 6 rows (light → dark)
+const PALETTE_THEME = [
+  ['#e5e5e5','#c4c4c4','#9a9a9a','#6b6b6b','#3d3d3d','#141414'],  // Gray
+  ['#fecaca','#fca5a5','#f87171','#ef4444','#b91c1c','#7f1d1d'],  // Red
+  ['#fed7aa','#fdba74','#fb923c','#f97316','#c2410c','#7c2d12'],  // Orange
+  ['#fef08a','#fde047','#facc15','#eab308','#a16207','#713f12'],  // Yellow
+  ['#bbf7d0','#86efac','#4ade80','#22c55e','#15803d','#14532d'],  // Green
+  ['#99f6e4','#5eead4','#2dd4bf','#14b8a6','#0f766e','#042f2e'],  // Teal
+  ['#bae6fd','#7dd3fc','#38bdf8','#0ea5e9','#0369a1','#0c4a6e'],  // Sky
+  ['#bfdbfe','#93c5fd','#60a5fa','#3b82f6','#1d4ed8','#1e3a8a'],  // Blue
+  ['#e9d5ff','#d8b4fe','#c084fc','#a855f7','#7e22ce','#3b0764'],  // Purple
+  ['#fecdd3','#fda4af','#fb7185','#f43f5e','#be123c','#881337'],  // Rose
+]
+
+// Standard colours row (10 accent / neutral colours)
+const PALETTE_STANDARD = [
+  '#000000','#1c1c1e','#ff3b30','#ff9500','#ffcc00',
+  '#34c759','#00c7be','#007aff','#5856d6','#af52de',
 ]
 
 // ─── State ───────────────────────────────────────────────────────────────────
@@ -186,9 +195,6 @@ function showOptionsForAnnot(a) {
 
 // Sync UI controls
 function syncColor(col) {
-  document.querySelectorAll('.swatch').forEach(s => s.classList.toggle('active', s.dataset.hex === col))
-  const hexInput = document.getElementById('hexInput')
-  if (hexInput) hexInput.value = col.replace(/^#/, '').toUpperCase()
   const preview = document.getElementById('colorPreview')
   if (preview) preview.style.background = col
 }
@@ -312,64 +318,8 @@ function updateSelectedAnnot(props) {
 
 // ─── UI init ─────────────────────────────────────────────────────────────────
 
-// Colour swatches
-const swatchesEl = document.getElementById('colorSwatches')
-COLORS.forEach(c => {
-  const btn = document.createElement('button')
-  btn.className     = 'swatch' + (c.hex === color ? ' active' : '')
-  btn.style.background = c.hex
-  btn.dataset.hex   = c.hex
-  btn.title         = c.name
-  if (c.hex === '#ffffff') btn.style.boxShadow = 'inset 0 0 0 1px #555'
-  btn.addEventListener('click', () => applyColor(c.hex))
-  swatchesEl.appendChild(btn)
-})
-
-// Initialise colour preview + hex field to match the default colour
+// Initialise colour preview to match the default colour
 syncColor(color)
-
-// ── Fill UI init ───────────────────────────────────────────────────────────────
-// Helper: build colour swatches for a fill slot (solid / A / B)
-// includeTransparent=true adds a checkerboard "透明" swatch at the end
-function buildFillSwatches(containerId, getVal, applyFn, includeTransparent) {
-  const el = document.getElementById(containerId)
-  const items = includeTransparent
-    ? [...COLORS, { hex: 'transparent', name: '透明' }]
-    : COLORS
-  items.forEach(c => {
-    const btn = document.createElement('button')
-    btn.className = 'swatch fill-swatch'
-    btn.dataset.hex = c.hex
-    btn.title       = c.name
-    if (c.hex === 'transparent') {
-      btn.style.background = 'repeating-conic-gradient(#aaa 0% 25%, #eee 0% 50%) 0 0 / 8px 8px'
-    } else {
-      btn.style.background = c.hex
-      if (c.hex === '#ffffff') btn.style.boxShadow = 'inset 0 0 0 1px #555'
-    }
-    btn.classList.toggle('active', c.hex === getVal())
-    btn.addEventListener('click', () => applyFn(c.hex))
-    el.appendChild(btn)
-  })
-}
-
-// Helper: wire a fill-preview square to a native <input type="color">
-function bindFillPicker(previewId, pickerId, getVal, applyFn) {
-  const preview = document.getElementById(previewId)
-  const picker  = document.getElementById(pickerId)
-  preview.style.cursor = 'pointer'
-  preview.addEventListener('click', () => {
-    const v = getVal()
-    picker.value = (v === 'transparent' || !v.startsWith('#')) ? '#ffcc00' : v
-    picker.click()
-  })
-  picker.addEventListener('input', e => applyFn(e.target.value))
-}
-
-bindFillPicker('fillColorPreview',        'fillNativePicker',        () => fillColor,       applyFillColor)
-bindFillPicker('fillColorAPreview',       'fillNativePickerA',       () => fillColorA,      applyFillColorA)
-bindFillPicker('fillColorBPreview',       'fillNativePickerB',       () => fillColorB,      applyFillColorB)
-bindFillPicker('fillBorderColorPreview',  'fillBorderNativePicker',  () => fillBorderColor, applyFillBorderColor)
 
 // Transparent toggle — press again to restore previous colour
 document.getElementById('btnFillColorATransparent').addEventListener('click', () =>
@@ -593,56 +543,147 @@ syncFillBorderColor(fillBorderColor)
   })
 })()
 
-// Eyedropper
-;(function initEyedropper() {
-  const btn    = document.getElementById('btnEyedropper')
-  const native = document.getElementById('nativeColorPicker')
+// ─── Floating colour-picker panel ────────────────────────────────────────────
 
-  btn.addEventListener('click', async () => {
+let _cppApplyFn    = null
+let _cppGetCurrent = null
+
+function showColorPanel(anchorEl, applyFn, getCurrentFn) {
+  _cppApplyFn    = applyFn
+  _cppGetCurrent = getCurrentFn
+  const cur = (getCurrentFn() || '').toLowerCase()
+  // Sync active swatch
+  document.querySelectorAll('.cpp-swatch').forEach(s =>
+    s.classList.toggle('active', s.dataset.hex === cur)
+  )
+  // Sync hex input
+  document.getElementById('cppHexInput').value =
+    cur.startsWith('#') ? cur.slice(1).toUpperCase() : ''
+  // Show + position
+  const panel = document.getElementById('colorPickerPanel')
+  panel.classList.remove('hidden')
+  requestAnimationFrame(() => {
+    const ar = anchorEl.getBoundingClientRect()
+    let left = ar.left, top = ar.bottom + 6
+    panel.style.left = left + 'px'
+    panel.style.top  = top  + 'px'
+    const pr = panel.getBoundingClientRect()
+    if (pr.right  > window.innerWidth  - 8) panel.style.left = Math.max(8, window.innerWidth  - pr.width  - 8) + 'px'
+    if (pr.bottom > window.innerHeight - 8) panel.style.top  = Math.max(8, ar.top - pr.height - 6) + 'px'
+  })
+}
+
+function hideColorPanel() {
+  document.getElementById('colorPickerPanel').classList.add('hidden')
+  _cppApplyFn = _cppGetCurrent = null
+}
+
+;(function initColorPanel() {
+  // Build theme grid (column-by-column → each hue is one column, rows = shades)
+  const themeEl = document.getElementById('cppTheme')
+  PALETTE_THEME.forEach(col => {
+    const colEl = document.createElement('div')
+    colEl.className = 'cpp-col'
+    col.forEach(hex => {
+      const btn = document.createElement('button')
+      btn.className    = 'cpp-swatch'
+      btn.dataset.hex  = hex
+      btn.style.background = hex
+      // faint border for light swatches so they're visible on dark panel
+      const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16)
+      if (r + g + b > 500) btn.style.boxShadow = 'inset 0 0 0 1px rgba(0,0,0,0.15)'
+      btn.addEventListener('click', () => { if (_cppApplyFn) _cppApplyFn(hex); hideColorPanel() })
+      colEl.appendChild(btn)
+    })
+    themeEl.appendChild(colEl)
+  })
+
+  // Build standard colours row
+  const stdEl = document.getElementById('cppStandard')
+  PALETTE_STANDARD.forEach(hex => {
+    const btn = document.createElement('button')
+    btn.className    = 'cpp-swatch'
+    btn.dataset.hex  = hex
+    btn.style.background = hex
+    const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16)
+    if (r + g + b > 500) btn.style.boxShadow = 'inset 0 0 0 1px rgba(0,0,0,0.15)'
+    btn.addEventListener('click', () => { if (_cppApplyFn) _cppApplyFn(hex); hideColorPanel() })
+    stdEl.appendChild(btn)
+  })
+
+  // Eyedropper in panel
+  const eyeBtn = document.getElementById('cppEyedropper')
+  const native = document.getElementById('cppNativePicker')
+  eyeBtn.addEventListener('click', async () => {
     if (window.EyeDropper) {
-      // Chromium native eyedropper — lets user pick any pixel on screen
-      btn.classList.add('active')
+      eyeBtn.classList.add('active')
       try {
         const { sRGBHex } = await new EyeDropper().open()
-        applyColor(sRGBHex)
-      } catch {
-        // user pressed Escape — silently ignore
-      } finally {
-        btn.classList.remove('active')
-      }
+        if (_cppApplyFn) _cppApplyFn(sRGBHex)
+        hideColorPanel()
+      } catch { /* user cancelled */ } finally { eyeBtn.classList.remove('active') }
     } else {
-      // Fallback: OS native colour picker (macOS includes its own eyedropper)
-      native.value = color
+      const cur = _cppGetCurrent ? _cppGetCurrent() : '#000000'
+      native.value = (cur === 'transparent' || !cur.startsWith('#')) ? '#ffcc00' : cur
       native.click()
     }
   })
-
-  native.addEventListener('input', () => applyColor(native.value))
-})()
-
-// Hex colour input
-;(function initHexInput() {
-  const input = document.getElementById('hexInput')
-
-  // Block editor keyboard shortcuts while the field is focused
-  input.addEventListener('keydown', (e) => e.stopPropagation())
-
-  // Sanitise typing: only allow hex chars; apply when 6 chars reached
-  input.addEventListener('input', () => {
-    const clean = input.value.replace(/[^0-9a-fA-F]/g, '')
-    input.value  = clean.toUpperCase()
-    if (clean.length === 6) applyColor('#' + clean)
+  native.addEventListener('input', () => {
+    if (_cppApplyFn) _cppApplyFn(native.value)
+    hideColorPanel()
   })
 
-  // Handle paste: strip leading # and non-hex chars
-  input.addEventListener('paste', (e) => {
+  // Hex input in panel
+  const hexIn = document.getElementById('cppHexInput')
+  hexIn.addEventListener('keydown', e => e.stopPropagation())
+  hexIn.addEventListener('input', () => {
+    const clean = hexIn.value.replace(/[^0-9a-fA-F]/g, '')
+    hexIn.value = clean.toUpperCase()
+    if (clean.length === 6 && _cppApplyFn) {
+      const hex = '#' + clean.toLowerCase()
+      _cppApplyFn('#' + clean)
+      document.querySelectorAll('.cpp-swatch').forEach(s =>
+        s.classList.toggle('active', s.dataset.hex === hex)
+      )
+    }
+  })
+  hexIn.addEventListener('paste', e => {
     e.preventDefault()
     const text  = (e.clipboardData || window.clipboardData).getData('text')
     const clean = text.replace(/^#/, '').replace(/[^0-9a-fA-F]/g, '').slice(0, 6)
-    input.value = clean.toUpperCase()
-    if (clean.length === 6) applyColor('#' + clean)
+    hexIn.value = clean.toUpperCase()
+    if (clean.length === 6 && _cppApplyFn) {
+      _cppApplyFn('#' + clean)
+      hideColorPanel()
+    }
   })
+
+  // Close panel when clicking outside
+  document.addEventListener('click', e => {
+    const panel = document.getElementById('colorPickerPanel')
+    if (panel.classList.contains('hidden')) return
+    if (panel.contains(e.target)) return
+    if (e.target.closest('.color-preview')) return  // preview click reopens — handled separately
+    hideColorPanel()
+  }, true)
 })()
+
+// Wire ALL colour preview squares → floating panel
+document.getElementById('colorPreview').addEventListener('click', () =>
+  showColorPanel(document.getElementById('colorPreview'), applyColor, () => color)
+)
+document.getElementById('fillColorPreview').addEventListener('click', () =>
+  showColorPanel(document.getElementById('fillColorPreview'), applyFillColor, () => fillColor)
+)
+document.getElementById('fillColorAPreview').addEventListener('click', () =>
+  showColorPanel(document.getElementById('fillColorAPreview'), applyFillColorA, () => fillColorA)
+)
+document.getElementById('fillColorBPreview').addEventListener('click', () =>
+  showColorPanel(document.getElementById('fillColorBPreview'), applyFillColorB, () => fillColorB)
+)
+document.getElementById('fillBorderColorPreview').addEventListener('click', () =>
+  showColorPanel(document.getElementById('fillBorderColorPreview'), applyFillBorderColor, () => fillBorderColor)
+)
 
 // Thickness
 document.querySelectorAll('.sz-btn').forEach(btn =>
