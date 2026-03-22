@@ -150,6 +150,8 @@ function syncColor(col) {
   document.querySelectorAll('.swatch').forEach(s => s.classList.toggle('active', s.dataset.hex === col))
   const hexInput = document.getElementById('hexInput')
   if (hexInput) hexInput.value = col.replace(/^#/, '').toUpperCase()
+  const preview = document.getElementById('colorPreview')
+  if (preview) preview.style.background = col
 }
 
 // Central colour-apply helper — use this instead of setting `color` directly
@@ -197,6 +199,9 @@ COLORS.forEach(c => {
   btn.addEventListener('click', () => applyColor(c.hex))
   swatchesEl.appendChild(btn)
 })
+
+// Initialise colour preview + hex field to match the default colour
+syncColor(color)
 
 // Eyedropper
 ;(function initEyedropper() {
