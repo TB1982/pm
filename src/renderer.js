@@ -68,7 +68,8 @@ function handleCaptureResult(result) {
 
 async function doFullscreen() {
   const result = await ipcRenderer.invoke('capture-fullscreen')
-  handleCaptureResult(result)
+  // Multi-display: returns { awaitingSelection: true }; result arrives via capture-result channel
+  if (!result.awaitingSelection) handleCaptureResult(result)
 }
 
 // ─── Capture: window picker ───────────────────────────────────────────────────

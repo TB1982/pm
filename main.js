@@ -12,8 +12,9 @@ const sharp = require('sharp')
 
 const execAsync = promisify(exec)
 
-let mainWindow    = null
-let overlayWindows = []   // one per display
+let mainWindow         = null
+let overlayWindows     = []   // rect-selection overlays, one per display
+let screenSelectWindows = []  // screen-selection overlays, one per display
 
 // ─── Main window ─────────────────────────────────────────────────────────────
 
@@ -119,15 +120,13 @@ async function captureGlobalRect(x, y, w, h) {
 // ─── IPC: full-screen capture ─────────────────────────────────────────────────
 
 ipcMain.handle('capture-fullscreen', async () => {
-  // Sort displays left-to-right by their virtual x position
   const displays = screen.getAllDisplays().sort((a, b) => a.bounds.x - b.bounds.x)
 
-  mainWindow.minimize()
-  await wait(450) // wait for macOS minimize animation
-
-  try {
-    if (displays.length === 1) {
-      // Single display — original behaviour
+  if (displays.length === 1) {
+    // Single display — minimize, capture, restore
+    mainWindow.minimize()
+    await wait(450)
+    try {
       const { bounds } = displays[0]
       const { image, tmpPath } = await captureGlobalRect(
         bounds.x, bounds.y, bounds.width, bounds.height
@@ -137,10 +136,113 @@ ipcMain.handle('capture-fullscreen', async () => {
       mainWindow.restore()
       openEditorWindow(tmpPath)
       return { success: true, path: tmpPath, width, height }
+    } catch (err) {
+      mainWindow.restore()
+      if (err.message === 'PERMISSION') return { success: false, needsPermission: true }
+      return { success: false, error: err.message }
     }
+  }
 
-    // Multiple displays — capture each screen then stitch horizontally.
-    // Per SDD v0.6: use the smallest height as the common height (crop taller screens).
+  // Multiple displays — show screen-selection overlay; user picks or presses Enter
+  openScreenSelectOverlays(displays)
+  return { awaitingSelection: true }
+})
+
+// ─── Screen-select overlay helpers ───────────────────────────────────────────
+
+function openScreenSelectOverlays(displays) {
+  screenSelectWindows = displays.map((display, index) => {
+    const { bounds } = display
+    const win = new BrowserWindow({
+      x: bounds.x,
+      y: bounds.y,
+      width:  bounds.width,
+      height: bounds.height,
+      frame:       false,
+      transparent: true,
+      alwaysOnTop: true,
+      skipTaskbar: true,
+      resizable:   false,
+      movable:     false,
+      webPreferences: {
+        nodeIntegration: true,
+        contextIsolation: false
+      }
+    })
+    win.setAlwaysOnTop(true, 'screen-saver')
+    win.setVisibleOnAllWorkspaces(true)
+    win.loadFile('src/screen-select.html')
+    win.webContents.once('did-finish-load', () => {
+      win.webContents.send('screen-select-init', {
+        index,
+        total: displays.length
+      })
+    })
+    return { win, display }
+  })
+}
+
+function closeAllScreenSelectWindows() {
+  screenSelectWindows.forEach(e => { try { e.win.close() } catch {} })
+  screenSelectWindows = []
+}
+
+// ─── IPC: capture a single selected screen ───────────────────────────────────
+
+ipcMain.handle('capture-selected-screen', async (event) => {
+  const senderId   = event.sender.id
+  const activeEntry = screenSelectWindows.find(
+    e => !e.win.isDestroyed() && e.win.webContents.id === senderId
+  )
+
+  closeAllScreenSelectWindows()
+
+  if (!activeEntry) return
+
+  const targetDisplay = activeEntry.display
+  const mainDisplay   = mainWindowDisplay()
+  const needsMinimize = targetDisplay.id === mainDisplay.id
+
+  if (needsMinimize) {
+    mainWindow.minimize()
+    await wait(450)
+  } else {
+    await wait(100)
+  }
+
+  try {
+    const { bounds } = targetDisplay
+    const { image, tmpPath } = await captureGlobalRect(
+      bounds.x, bounds.y, bounds.width, bounds.height
+    )
+    clipboard.writeImage(image)
+    const { width, height } = image.getSize()
+    if (needsMinimize) mainWindow.restore()
+    openEditorWindow(tmpPath)
+    mainWindow.webContents.send('capture-result', { success: true, path: tmpPath, width, height })
+  } catch (err) {
+    if (needsMinimize) mainWindow.restore()
+    const needsPermission = err.message === 'PERMISSION'
+    mainWindow.webContents.send('capture-result', {
+      success: false,
+      needsPermission,
+      error: needsPermission ? undefined : err.message
+    })
+  }
+})
+
+// ─── IPC: capture all screens merged (Enter key from screen-select overlay) ──
+
+ipcMain.handle('capture-all-screens-merged', async () => {
+  closeAllScreenSelectWindows()
+
+  const displays = screen.getAllDisplays().sort((a, b) => a.bounds.x - b.bounds.x)
+
+  // Always minimize: main window is on one of the screens being captured
+  mainWindow.minimize()
+  await wait(450)
+
+  try {
     const captures = []
     for (const d of displays) {
       const { bounds } = d
@@ -150,18 +252,23 @@ ipcMain.handle('capture-fullscreen', async () => {
       captures.push({ tmpPath, size: image.getSize() })
     }
 
-    const minHeight  = Math.min(...captures.map(c => c.size.height))
-    const totalWidth = captures.reduce((sum, c) => sum + c.size.width, 0)
+    // Per SDD v0.9: proportional resize — scale each screen to minHeight, maintain aspect ratio
+    const minHeight = Math.min(...captures.map(c => c.size.height))
 
+    const resized = await Promise.all(captures.map(async c => {
+      const { width, height } = c.size
+      if (height === minHeight) return { input: c.tmpPath, width }
+      const newWidth = Math.round(width * minHeight / height)
+      const buf = await sharp(c.tmpPath).resize(newWidth, minHeight).toBuffer()
+      return { input: buf, width: newWidth }
+    }))
+
+    const totalWidth = resized.reduce((sum, r) => sum + r.width, 0)
     const compositeInputs = []
     let offsetX = 0
-    for (const c of captures) {
-      const { width, height } = c.size
-      const input = height > minHeight
-        ? await sharp(c.tmpPath).extract({ left: 0, top: 0, width, height: minHeight }).toBuffer()
-        : c.tmpPath
-      compositeInputs.push({ input, left: offsetX, top: 0 })
-      offsetX += width
+    for (const r of resized) {
+      compositeInputs.push({ input: r.input, left: offsetX, top: 0 })
+      offsetX += r.width
     }
 
     const stitchedPath = path.join(os.tmpdir(), `screenshot-${Date.now()}.png`)
@@ -173,7 +280,6 @@ ipcMain.handle('capture-fullscreen', async () => {
       .png()
       .toFile(stitchedPath)
 
-    // Clean up individual screen captures
     captures.forEach(c => fs.unlink(c.tmpPath, () => {}))
 
     const finalImage = nativeImage.createFromPath(stitchedPath)
@@ -182,14 +288,21 @@ ipcMain.handle('capture-fullscreen', async () => {
 
     mainWindow.restore()
     openEditorWindow(stitchedPath)
-    return { success: true, path: stitchedPath, width, height }
-
+    mainWindow.webContents.send('capture-result', { success: true, path: stitchedPath, width, height })
   } catch (err) {
     mainWindow.restore()
-    if (err.message === 'PERMISSION') return { success: false, needsPermission: true }
-    return { success: false, error: err.message }
+    const needsPermission = err.message === 'PERMISSION'
+    mainWindow.webContents.send('capture-result', {
+      success: false,
+      needsPermission,
+      error: needsPermission ? undefined : err.message
+    })
   }
 })
+
+// ─── IPC: cancel screen-select overlay ───────────────────────────────────────
+
+ipcMain.handle('cancel-screen-select', () => closeAllScreenSelectWindows())
 
 // ─── IPC: open rectangle-selection overlay ────────────────────────────────────
 
@@ -283,8 +396,9 @@ ipcMain.handle('capture-window', async (_, sourceId) => {
   if (!match) return { success: false, error: '無效的視窗 ID' }
   const windowId = match[1]
 
-  mainWindow.minimize()
-  await wait(450)
+  // No minimize needed: screencapture -l captures the target window directly by
+  // CGWindowID from the window server, regardless of what's visible on screen.
+  await wait(150)
 
   const tmpPath = path.join(os.tmpdir(), `screenshot-${Date.now()}.png`)
   try {
@@ -298,11 +412,9 @@ ipcMain.handle('capture-window', async (_, sourceId) => {
     }
     clipboard.writeImage(image)
     const { width, height } = image.getSize()
-    mainWindow.restore()
     openEditorWindow(tmpPath)
     return { success: true, path: tmpPath, width, height }
   } catch (err) {
-    mainWindow.restore()
     if (err.message === 'PERMISSION') return { success: false, needsPermission: true }
     return { success: false, error: err.message }
   }
