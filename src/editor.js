@@ -1319,18 +1319,20 @@ function drawText(ctx, a) {
   lines.forEach((line, i) => ctx.fillText(line, c(a.x), c(a.y) + i * fs * 1.25))
 
   // Underline — draw after fill so shadow (if any) doesn't double-render
+  // Position: ~85% of em-size from top ≈ just below the alphabetic baseline for CJK & Latin,
+  // then add a small gap so it doesn't overlap descenders.
   if (a.underline) {
     ctx.save()
     ctx.strokeStyle = a.color
-    ctx.lineWidth   = Math.max(1, fs * 0.06)
+    ctx.lineWidth   = Math.max(1, fs * 0.055)
     ctx.lineCap     = 'round'
     lines.forEach((line, i) => {
-      const lineY   = c(a.y) + i * fs * 1.25
-      const metrics = ctx.measureText(line)
-      const uy      = lineY + metrics.actualBoundingBoxAscent + 2 * viewScale
+      const lineY = c(a.y) + i * fs * 1.25
+      const uy    = lineY + fs * 0.85 + 4 * viewScale
+      const w     = ctx.measureText(line).width
       ctx.beginPath()
       ctx.moveTo(c(a.x), uy)
-      ctx.lineTo(c(a.x) + metrics.width, uy)
+      ctx.lineTo(c(a.x) + w, uy)
       ctx.stroke()
     })
     ctx.restore()
