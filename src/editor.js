@@ -1940,21 +1940,27 @@ textInputEl.addEventListener('input', resizeTextInput)
 // ─── Keyboard shortcuts ───────────────────────────────────────────────────────
 
 document.addEventListener('keydown', e => {
+  // Never intercept when an <input> or <textarea> has focus
+  const tag = document.activeElement?.tagName
+  if (tag === 'INPUT' || tag === 'TEXTAREA') return
   if (textActive) return
   const meta = e.metaKey || e.ctrlKey
   if (meta && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); return }
   if (meta && (e.key === 'Z' || (e.key === 'z' && e.shiftKey))) { e.preventDefault(); redo(); return }
   if (meta && e.key === 's') { e.preventDefault(); openSaveModal(); return }
 
-  // Copy/paste for number annotations
+  // Copy / paste for all annotation types (except overlay images)
   if (meta && (e.key === 'c' || e.key === 'C')) {
     const a = annotations.find(x => x.id === selectedId)
-    if (a && a.type === 'number') { annotClipboard = { ...a }; return }
+    if (a && a.type !== 'img') { annotClipboard = JSON.parse(JSON.stringify(a)); return }
   }
   if (meta && (e.key === 'v' || e.key === 'V')) {
-    if (annotClipboard && annotClipboard.type === 'number') {
+    if (annotClipboard) {
       e.preventDefault()
-      const newA = { ...annotClipboard, id: newId(), x: annotClipboard.x + 8, y: annotClipboard.y + 8 }
+      const newA = JSON.parse(JSON.stringify(annotClipboard))
+      newA.id = newId()
+      if (newA.type === 'line') { newA.x1 += 8; newA.y1 += 8; newA.x2 += 8; newA.y2 += 8 }
+      else                      { newA.x  += 8; newA.y  += 8 }
       pushHistory()
       annotations.push(newA)
       selectedId = newA.id
