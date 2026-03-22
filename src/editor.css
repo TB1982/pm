@@ -690,6 +690,8 @@ body {
 
 /* ─── Floating colour-picker panel ────────────────────────────────────────── */
 
+#colorPickerPanel.hidden { display: none; }
+
 #colorPickerPanel {
   position: fixed;
   z-index: 9999;

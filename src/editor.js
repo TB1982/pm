@@ -770,6 +770,7 @@ document.getElementById('btnRedo').addEventListener('click', redo)
 
 function setTool(t) {
   commitText()
+  hideColorPanel()
   if (t !== 'crop') { cropRect = null; isCropping = false; cropMoving = false; cropResizeH = null; cropMoveStart = null }
   tool       = t
   selectedId = null
