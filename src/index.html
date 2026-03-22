@@ -8,52 +8,46 @@
 </head>
 <body>
 
-  <div class="titlebar">
-    <span class="app-title">Screenshot Tool</span>
-    <button class="help-btn" id="helpBtn" title="快捷鍵說明">?</button>
+  <!-- Compact floating toolbar -->
+  <div class="toolbar">
+    <div class="toolbar-buttons">
+
+      <button class="tb-btn" id="btnFullscreen">
+        <span class="tb-icon">⬛</span>
+        <span class="tb-label">全螢幕</span>
+        <span class="tb-shortcut">⌘⌃1</span>
+      </button>
+
+      <button class="tb-btn" id="btnWindow">
+        <span class="tb-icon">◻</span>
+        <span class="tb-label">視窗</span>
+        <span class="tb-shortcut">⌘⌃2</span>
+      </button>
+
+      <button class="tb-btn tb-btn-highlight" id="btnRect">
+        <span class="tb-icon">⬚</span>
+        <span class="tb-label">矩形</span>
+        <span class="tb-shortcut">⌘⌃X</span>
+      </button>
+
+      <button class="tb-btn" id="btnWebCapture">
+        <span class="tb-icon">🌐</span>
+        <span class="tb-label">網頁</span>
+      </button>
+
+      <button class="tb-btn" id="btnOpenImage">
+        <span class="tb-icon">🖼</span>
+        <span class="tb-label">開啟</span>
+      </button>
+
+    </div>
+
+    <div class="tb-divider"></div>
+
+    <button class="tb-help" id="helpBtn" aria-label="快捷鍵說明">?</button>
   </div>
 
-  <main class="main-screen">
-
-    <section class="action-group">
-      <h2 class="group-label">截圖</h2>
-      <div class="action-row">
-        <button class="action-btn primary" id="btnFullscreen">
-          <span class="btn-icon">⬛</span>
-          <span class="btn-label">全螢幕</span>
-          <span class="btn-shortcut">⌘⌃1</span>
-        </button>
-        <button class="action-btn primary" id="btnWindow">
-          <span class="btn-icon">◻</span>
-          <span class="btn-label">視窗</span>
-          <span class="btn-shortcut">⌘⌃2</span>
-        </button>
-        <button class="action-btn primary highlight" id="btnRect">
-          <span class="btn-icon">⬚</span>
-          <span class="btn-label">矩形選取</span>
-          <span class="btn-shortcut">⌘⌃X</span>
-        </button>
-      </div>
-    </section>
-
-    <section class="action-group">
-      <h2 class="group-label">其他</h2>
-      <div class="action-row">
-        <button class="action-btn" id="btnWebCapture">
-          <span class="btn-icon">🌐</span>
-          <span class="btn-label">網頁截圖</span>
-        </button>
-        <button class="action-btn" id="btnOpenImage">
-          <span class="btn-icon">🖼</span>
-          <span class="btn-label">開啟圖片</span>
-          <span class="btn-sub">支援 PNG / JPG / WebP / SVG</span>
-        </button>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- Keyboard shortcut help modal -->
+  <!-- Keyboard shortcut help modal (shown when window expands) -->
   <div class="modal-overlay hidden" id="helpModal">
     <div class="modal">
       <div class="modal-header">
@@ -67,7 +61,6 @@
             <tr><td>全螢幕截圖</td><td><kbd>⌘</kbd><kbd>⌃</kbd><kbd>1</kbd></td></tr>
             <tr><td>視窗截圖</td><td><kbd>⌘</kbd><kbd>⌃</kbd><kbd>2</kbd></td></tr>
             <tr><td>矩形選取截圖</td><td><kbd>⌘</kbd><kbd>⌃</kbd><kbd>X</kbd></td></tr>
-            <tr><td>開啟主視窗</td><td><kbd>⌘</kbd><kbd>⌃</kbd><kbd>0</kbd></td></tr>
           </table>
         </div>
         <div class="shortcut-section">
@@ -97,7 +90,7 @@
     </div>
   </div>
 
-  <!-- Window picker modal -->
+  <!-- Window picker modal (shown when window expands) -->
   <div class="modal-overlay hidden" id="windowPickerModal">
     <div class="modal modal-wide">
       <div class="modal-header">

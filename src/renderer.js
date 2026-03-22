@@ -1,19 +1,39 @@
 const { ipcRenderer } = require('electron')
 
+// ─── Modal resize helpers ──────────────────────────────────────────────────────
+
+async function expandForModal(width, height) {
+  await ipcRenderer.invoke('resize-for-modal', { width, height })
+}
+
+function collapseToToolbar() {
+  ipcRenderer.invoke('resize-to-toolbar')
+}
+
 // ─── Help modal ───────────────────────────────────────────────────────────────
 
 const helpBtn   = document.getElementById('helpBtn')
 const helpModal = document.getElementById('helpModal')
 const modalClose = document.getElementById('modalClose')
 
-helpBtn.addEventListener('click', () => helpModal.classList.remove('hidden'))
-modalClose.addEventListener('click', () => helpModal.classList.add('hidden'))
-helpModal.addEventListener('click', (e) => {
-  if (e.target === helpModal) helpModal.classList.add('hidden')
+helpBtn.addEventListener('click', async () => {
+  await expandForModal(560, 480)
+  helpModal.classList.remove('hidden')
 })
+
+function closeHelp() {
+  helpModal.classList.add('hidden')
+  collapseToToolbar()
+}
+
+modalClose.addEventListener('click', closeHelp)
+helpModal.addEventListener('click', (e) => {
+  if (e.target === helpModal) closeHelp()
+})
+
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
-    helpModal.classList.add('hidden')
+    closeHelp()
     hideWindowPicker()
   }
 })
@@ -68,7 +88,6 @@ function handleCaptureResult(result) {
 
 async function doFullscreen() {
   const result = await ipcRenderer.invoke('capture-fullscreen')
-  // Multi-display: returns { awaitingSelection: true }; result arrives via capture-result channel
   if (!result.awaitingSelection) handleCaptureResult(result)
 }
 
@@ -85,6 +104,7 @@ windowPickerModal.addEventListener('click', (e) => {
 
 function hideWindowPicker() {
   windowPickerModal.classList.add('hidden')
+  collapseToToolbar()
 }
 
 async function doWindow() {
@@ -109,6 +129,8 @@ async function doWindow() {
     })
     windowPickerGrid.appendChild(card)
   })
+
+  await expandForModal(760, 540)
   windowPickerModal.classList.remove('hidden')
 }
 
@@ -126,19 +148,13 @@ ipcRenderer.on('shortcut-window',     doWindow)
 ipcRenderer.on('shortcut-rect',       doRect)
 
 // ─── Capture result callbacks ─────────────────────────────────────────────────
-// (overlay calls capture-rect IPC directly; main process sends result back
-//  by showing the window — we listen for a focus event to confirm success)
-// For now, capture-rect resolves in main.js; renderer shows toast via
-// a dedicated channel when the window regains focus after capture.
 
 ipcRenderer.on('capture-result', (_, result) => handleCaptureResult(result))
 
 // ─── Button wiring ────────────────────────────────────────────────────────────
 
 document.getElementById('btnFullscreen').addEventListener('click', doFullscreen)
-
 document.getElementById('btnRect').addEventListener('click', doRect)
-
 document.getElementById('btnWindow').addEventListener('click', doWindow)
 
 document.getElementById('btnWebCapture').addEventListener('click', () => {
