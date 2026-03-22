@@ -1695,7 +1695,9 @@ annotCanvas.addEventListener('mousedown', e => {
 
   if (tool === 'number') {
     pushHistory()
-    annotations.push({ id:newId(), type:'number', color, thickness, x:pos.x, y:pos.y, value:numCount++, size:numSize, shadow: numShadow })
+    const numAnn = { id:newId(), type:'number', color, thickness, x:pos.x, y:pos.y, value:numCount++, size:numSize, shadow: numShadow }
+    annotations.push(numAnn)
+    setTool('select'); selectedId = numAnn.id; showOptionsForAnnot(numAnn)
     renderAnnotations()
     return
   }
@@ -1847,7 +1849,10 @@ document.addEventListener('mouseup', e => {
 
   const end = evToImg(e)
   const ann = commitShape(drawStart, end)
-  if (ann) { pushHistory(); annotations.push(ann) }
+  if (ann) {
+    pushHistory(); annotations.push(ann)
+    setTool('select'); selectedId = ann.id; showOptionsForAnnot(ann)
+  }
   renderAnnotations()
 })
 
@@ -1912,9 +1917,11 @@ function commitText() {
   textEditOrig  = null   // discard original; new content replaces it
   if (content.trim()) {
     pushHistory()
-    annotations.push({ id:newId(), type:'text', color, fontSize, x:textPos.x, y:textPos.y, content,
-                       textStrokeColor, textStrokeWidth, textBgColor, textBgOpacity, shadow: textShadow,
-                       bold: textBold, italic: textItalic, underline: textUnderline, strikethrough: textStrikethrough })
+    const txtAnn = { id:newId(), type:'text', color, fontSize, x:textPos.x, y:textPos.y, content,
+                     textStrokeColor, textStrokeWidth, textBgColor, textBgOpacity, shadow: textShadow,
+                     bold: textBold, italic: textItalic, underline: textUnderline, strikethrough: textStrikethrough }
+    annotations.push(txtAnn)
+    setTool('select'); selectedId = txtAnn.id; showOptionsForAnnot(txtAnn)
     renderAnnotations()
   }
   _closeTextInput()
