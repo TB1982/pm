@@ -112,6 +112,35 @@ body {
   line-height: 1;
 }
 
+/* ─── Delayed capture button ────────────────────────────────────────────────── */
+
+.tb-label-sel {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.tb-delay-sel {
+  -webkit-app-region: no-drag;
+  appearance: none;
+  -webkit-appearance: none;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.20);
+  border-radius: 4px;
+  color: #c8c8cc;
+  font-size: 9px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  padding: 1px 3px;
+  cursor: pointer;
+  width: 24px;
+  text-align: center;
+}
+
+.tb-delay-sel:focus {
+  outline: none;
+  border-color: rgba(74, 158, 255, 0.5);
+}
+
 /* ─── Help button ───────────────────────────────────────────────────────────── */
 
 .tb-help {

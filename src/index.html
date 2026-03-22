@@ -30,9 +30,16 @@
         <span class="tb-shortcut">⌘⌃X</span>
       </button>
 
-      <button class="tb-btn" id="btnWebCapture">
-        <span class="tb-icon">🌐</span>
-        <span class="tb-label">網頁</span>
+      <button class="tb-btn" id="btnDelayed">
+        <span class="tb-icon" id="delayIcon">⏱</span>
+        <div class="tb-label-sel">
+          <span class="tb-label">延遲</span>
+          <select class="tb-delay-sel" id="delaySelect">
+            <option value="1">1s</option>
+            <option value="2">2s</option>
+            <option value="3">3s</option>
+          </select>
+        </div>
       </button>
 
       <button class="tb-btn" id="btnOpenImage">
@@ -66,6 +73,7 @@
             <tr><td>全螢幕截圖</td><td><kbd>⌘</kbd><kbd>⌃</kbd><kbd>1</kbd></td></tr>
             <tr><td>視窗截圖</td><td><kbd>⌘</kbd><kbd>⌃</kbd><kbd>2</kbd></td></tr>
             <tr><td>矩形選取截圖</td><td><kbd>⌘</kbd><kbd>⌃</kbd><kbd>X</kbd></td></tr>
+            <tr><td>延遲截圖</td><td><kbd>⌘</kbd><kbd>⌃</kbd><kbd>3</kbd></td></tr>
           </table>
         </div>
         <div class="shortcut-section">

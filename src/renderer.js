@@ -33,6 +33,7 @@ helpModal.addEventListener('click', (e) => {
 
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
+    cancelCountdown()
     closeHelp()
     hideWindowPicker()
     closeBatch()
@@ -164,10 +165,57 @@ document.getElementById('btnFullscreen').addEventListener('click', e => { setToo
 document.getElementById('btnRect').addEventListener('click',       e => { setToolbarActive(e.currentTarget); doRect() })
 document.getElementById('btnWindow').addEventListener('click',     e => { setToolbarActive(e.currentTarget); doWindow() })
 
-document.getElementById('btnWebCapture').addEventListener('click', e => {
+// ─── Delayed capture ──────────────────────────────────────────────────────────
+
+const DELAY_KEY  = 'delayCaptureSecs'
+const btnDelayed = document.getElementById('btnDelayed')
+const delayIcon  = document.getElementById('delayIcon')
+const delaySelect = document.getElementById('delaySelect')
+
+// Restore last saved delay
+delaySelect.value = localStorage.getItem(DELAY_KEY) || '3'
+
+// Changing the select only saves preference; does not trigger capture
+delaySelect.addEventListener('click',  e => e.stopPropagation())
+delaySelect.addEventListener('change', () => localStorage.setItem(DELAY_KEY, delaySelect.value))
+
+let countdownTimer = null
+
+function cancelCountdown() {
+  if (countdownTimer === null) return
+  clearTimeout(countdownTimer)
+  countdownTimer = null
+  delayIcon.textContent = '⏱'
+  btnDelayed.disabled = false
+}
+
+function doDelayed() {
+  if (countdownTimer !== null) return   // already counting
+  let remaining = parseInt(delaySelect.value, 10)
+  btnDelayed.disabled = true
+
+  function tick() {
+    if (remaining <= 0) {
+      countdownTimer = null
+      delayIcon.textContent = '⏱'
+      btnDelayed.disabled = false
+      doFullscreen()
+      return
+    }
+    delayIcon.textContent = String(remaining)
+    remaining--
+    countdownTimer = setTimeout(tick, 1000)
+  }
+  tick()
+}
+
+btnDelayed.addEventListener('click', e => {
+  if (e.target === delaySelect) return
   setToolbarActive(e.currentTarget)
-  showToast('網頁截圖即將推出')
+  doDelayed()
 })
+
+ipcRenderer.on('shortcut-delayed', doDelayed)
 
 document.getElementById('btnOpenImage').addEventListener('click', e => {
   setToolbarActive(e.currentTarget)

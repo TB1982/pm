@@ -598,6 +598,11 @@ app.whenReady().then(() => {
   globalShortcut.register('CommandOrControl+Ctrl+X', () => {
     mainWindow.webContents.send('shortcut-rect')
   })
+  globalShortcut.register('CommandOrControl+Ctrl+3', () => {
+    mainWindow.show()
+    mainWindow.focus()
+    mainWindow.webContents.send('shortcut-delayed')
+  })
 })
 
 app.on('window-all-closed', () => {
