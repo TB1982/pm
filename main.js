@@ -133,7 +133,6 @@ ipcMain.handle('capture-fullscreen', async () => {
       )
       clipboard.writeImage(image)
       const { width, height } = image.getSize()
-      mainWindow.restore()
       openEditorWindow(tmpPath)
       return { success: true, path: tmpPath, width, height }
     } catch (err) {
@@ -217,7 +216,6 @@ ipcMain.handle('capture-selected-screen', async (event) => {
     )
     clipboard.writeImage(image)
     const { width, height } = image.getSize()
-    if (needsMinimize) mainWindow.restore()
     openEditorWindow(tmpPath)
     mainWindow.webContents.send('capture-result', { success: true, path: tmpPath, width, height })
   } catch (err) {
@@ -286,7 +284,6 @@ ipcMain.handle('capture-all-screens-merged', async () => {
     clipboard.writeImage(finalImage)
     const { width, height } = finalImage.getSize()
 
-    mainWindow.restore()
     openEditorWindow(stitchedPath)
     mainWindow.webContents.send('capture-result', { success: true, path: stitchedPath, width, height })
   } catch (err) {
