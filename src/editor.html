@@ -57,7 +57,6 @@
 
       <!-- Solid fill controls -->
       <div id="fillSolidCtrl">
-        <div class="color-swatches" id="fillColorSwatches"></div>
         <div class="color-preview fill-preview" id="fillColorPreview" title="點擊選任意色"></div>
         <input type="color" id="fillNativePicker" class="native-color-picker" tabindex="-1" aria-hidden="true">
       </div>
@@ -65,14 +64,14 @@
       <!-- Gradient fill controls (hidden by default) -->
       <div id="fillGradientCtrl" class="hidden">
         <span class="opt-label">A</span>
-        <div class="color-swatches" id="fillColorASwatches"></div>
         <div class="color-preview fill-preview" id="fillColorAPreview" title="點擊選任意色"></div>
         <input type="color" id="fillNativePickerA" class="native-color-picker" tabindex="-1" aria-hidden="true">
+        <button class="style-btn" id="btnFillColorATransparent" title="設為透明">透</button>
         <span class="opt-label" style="margin:0 6px;opacity:.6">→</span>
         <span class="opt-label">B</span>
-        <div class="color-swatches" id="fillColorBSwatches"></div>
         <div class="color-preview fill-preview" id="fillColorBPreview" title="點擊選任意色"></div>
         <input type="color" id="fillNativePickerB" class="native-color-picker" tabindex="-1" aria-hidden="true">
+        <button class="style-btn" id="btnFillColorBTransparent" title="設為透明">透</button>
         <div class="opt-sep"></div>
         <button class="style-btn active" data-fdir="h"  title="左→右">→</button>
         <button class="style-btn"        data-fdir="v"  title="上→下">↓</button>

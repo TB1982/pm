@@ -130,8 +130,8 @@ function showOptionsForTool(t) {
     return
   }
   if (!['rect','fillrect','line','text','number'].includes(t)) return
-  document.getElementById('grpColor').classList.remove('hidden')
-  if (t === 'fillrect') document.getElementById('grpFillColor').classList.remove('hidden')
+  if (t !== 'fillrect') document.getElementById('grpColor').classList.remove('hidden')
+  if (t === 'fillrect') { document.getElementById('grpFillColor').classList.remove('hidden'); syncFillMode(fillMode) }
   if (['rect','fillrect','line'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
   if (t === 'line')   { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden') }
   if (t === 'text')   document.getElementById('grpFont').classList.remove('hidden')
@@ -142,7 +142,7 @@ function showOptionsForAnnot(a) {
   hideAllOptions()
   if (a.type === 'img') return   // overlay image has no editable colour/thickness options
   const t = a.type
-  document.getElementById('grpColor').classList.remove('hidden')
+  if (t !== 'fillrect') document.getElementById('grpColor').classList.remove('hidden')
   if (t === 'fillrect') document.getElementById('grpFillColor').classList.remove('hidden')
   if (['rect','fillrect','line'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
   if (t === 'line')   { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden') }
@@ -213,17 +213,14 @@ function syncFillMode(mode) {
   document.getElementById('fillGradientCtrl').classList.toggle('hidden', mode !== 'gradient')
 }
 function syncFillColor(hex) {
-  document.querySelectorAll('#fillColorSwatches .fill-swatch').forEach(s => s.classList.toggle('active', s.dataset.hex === hex))
   const p = document.getElementById('fillColorPreview')
   if (p) p.style.background = fillPreviewBg(hex)
 }
 function syncFillColorA(hex) {
-  document.querySelectorAll('#fillColorASwatches .fill-swatch').forEach(s => s.classList.toggle('active', s.dataset.hex === hex))
   const p = document.getElementById('fillColorAPreview')
   if (p) p.style.background = fillPreviewBg(hex)
 }
 function syncFillColorB(hex) {
-  document.querySelectorAll('#fillColorBSwatches .fill-swatch').forEach(s => s.classList.toggle('active', s.dataset.hex === hex))
   const p = document.getElementById('fillColorBPreview')
   if (p) p.style.background = fillPreviewBg(hex)
 }
@@ -333,13 +330,13 @@ function bindFillPicker(previewId, pickerId, getVal, applyFn) {
   picker.addEventListener('input', e => applyFn(e.target.value))
 }
 
-buildFillSwatches('fillColorSwatches',  () => fillColor,  applyFillColor,  false)
-buildFillSwatches('fillColorASwatches', () => fillColorA, applyFillColorA, true)
-buildFillSwatches('fillColorBSwatches', () => fillColorB, applyFillColorB, true)
-
 bindFillPicker('fillColorPreview',  'fillNativePicker',  () => fillColor,  applyFillColor)
 bindFillPicker('fillColorAPreview', 'fillNativePickerA', () => fillColorA, applyFillColorA)
 bindFillPicker('fillColorBPreview', 'fillNativePickerB', () => fillColorB, applyFillColorB)
+
+// Transparent shortcuts
+document.getElementById('btnFillColorATransparent').addEventListener('click', () => applyFillColorA('transparent'))
+document.getElementById('btnFillColorBTransparent').addEventListener('click', () => applyFillColorB('transparent'))
 
 // Mode toggle
 document.getElementById('btnFillSolid').addEventListener('click',    () => applyFillMode('solid'))
