@@ -70,8 +70,11 @@ let textEditOrig = null   // restored on Escape during re-edit
 let isComposing  = false
 
 // Crop
-let cropRect   = null   // { x, y, w, h } in image coordinates
-let isCropping = false
+let cropRect      = null   // { x, y, w, h } in image coordinates
+let isCropping    = false  // currently drawing initial rect
+let cropMoving    = false  // dragging rect to reposition
+let cropResizeH   = null   // handle id being dragged ('nw','n','ne','e','se','s','sw','w')
+let cropMoveStart = null   // { pos, origRect } snapshot at drag start
 
 // ─── DOM ─────────────────────────────────────────────────────────────────────
 
@@ -267,7 +270,7 @@ document.getElementById('btnRedo').addEventListener('click', redo)
 
 function setTool(t) {
   commitText()
-  if (t !== 'crop') { cropRect = null; isCropping = false }
+  if (t !== 'crop') { cropRect = null; isCropping = false; cropMoving = false; cropResizeH = null; cropMoveStart = null }
   tool       = t
   selectedId = null
   isDrawing  = false
@@ -447,7 +450,7 @@ function renderAnnotations() {
     if (a) drawSelection(annotCtx, a)
   }
 
-  // Crop overlay: dim outside selection, dashed border inside
+  // Crop overlay: dim outside selection, dashed border + resize handles
   if (tool === 'crop' && cropRect && cropRect.w > 1 && cropRect.h > 1) {
     const cr = cropRect
     annotCtx.save()
@@ -461,6 +464,20 @@ function renderAnnotations() {
     annotCtx.setLineDash([5, 3])
     annotCtx.strokeRect(c(cr.x), c(cr.y), c(cr.w), c(cr.h))
     annotCtx.restore()
+    // Resize handles
+    if (!isCropping) {
+      getCropHandles(cr).forEach(h => {
+        annotCtx.save()
+        annotCtx.fillStyle   = '#ffffff'
+        annotCtx.strokeStyle = '#4a9eff'
+        annotCtx.lineWidth   = 1.5
+        annotCtx.setLineDash([])
+        annotCtx.beginPath()
+        annotCtx.arc(c(h.x), c(h.y), HANDLE_R, 0, Math.PI * 2)
+        annotCtx.fill(); annotCtx.stroke()
+        annotCtx.restore()
+      })
+    }
   }
 }
 
@@ -743,6 +760,17 @@ annotCanvas.addEventListener('mousedown', e => {
   if (textActive) commitText()
 
   if (tool === 'crop') {
+    if (cropRect) {
+      const h = findCropHandle(pos)
+      if (h) { cropResizeH = h.id; return }
+      if (insideCropRect(pos)) {
+        cropMoving    = true
+        cropMoveStart = { pos, origRect: { ...cropRect } }
+        annotCanvas.style.cursor = 'grabbing'
+        return
+      }
+    }
+    // Start a new crop rect
     isCropping = true
     cropRect   = { x: pos.x, y: pos.y, w: 0, h: 0 }
     drawStart  = pos
@@ -815,17 +843,35 @@ annotCanvas.addEventListener('mousemove', e => {
     return
   }
 
+  if (cropResizeH) {
+    applyCropResize(pos)
+    renderAnnotations()
+    return
+  }
+
+  if (cropMoving && cropMoveStart) {
+    const dx = pos.x - cropMoveStart.pos.x
+    const dy = pos.y - cropMoveStart.pos.y
+    cropRect = {
+      x: cropMoveStart.origRect.x + dx,
+      y: cropMoveStart.origRect.y + dy,
+      w: cropMoveStart.origRect.w,
+      h: cropMoveStart.origRect.h,
+    }
+    updateCropSizeLabel()
+    renderAnnotations()
+    return
+  }
+
   if (isCropping && drawStart) {
     const s = drawStart
     cropRect = {
       x: Math.min(s.x, pos.x),
       y: Math.min(s.y, pos.y),
       w: Math.abs(pos.x - s.x),
-      h: Math.abs(pos.y - s.y)
+      h: Math.abs(pos.y - s.y),
     }
-    const pw = Math.round(cropRect.w), ph = Math.round(cropRect.h)
-    document.getElementById('cropSizeLabel').textContent =
-      pw > 0 && ph > 0 ? `${pw} × ${ph} px` : '請拖曳選取範圍'
+    updateCropSizeLabel()
     renderAnnotations()
     return
   }
@@ -865,6 +911,14 @@ annotCanvas.addEventListener('mousemove', e => {
     }
     annotCanvas.style.cursor = cur
   }
+
+  // Update cursor for crop tool (hover state)
+  if (tool === 'crop' && cropRect && !isCropping && !cropMoving && !cropResizeH) {
+    const h = findCropHandle(pos)
+    if (h) annotCanvas.style.cursor = h.cursor
+    else if (insideCropRect(pos)) annotCanvas.style.cursor = 'move'
+    else annotCanvas.style.cursor = 'crosshair'
+  }
 })
 
 document.addEventListener('mouseup', e => {
@@ -877,6 +931,19 @@ document.addEventListener('mouseup', e => {
       if (tool === 'zoom-out') zoomOut(e.clientX, e.clientY)
     }
     panStart = null
+    return
+  }
+
+  if (cropResizeH) {
+    cropResizeH = null
+    renderAnnotations()
+    return
+  }
+
+  if (cropMoving) {
+    cropMoving    = false
+    cropMoveStart = null
+    annotCanvas.style.cursor = 'move'
     return
   }
 
@@ -1071,6 +1138,64 @@ document.getElementById('btnSaveConfirm').addEventListener('click', async () => 
   const result  = await ipcRenderer.invoke('save-image-as', { dataURL, format })
   if (result?.success) showToast(`已儲存：${result.path.split('/').pop()}`)
 })
+
+// ─── Crop helpers ─────────────────────────────────────────────────────────────
+
+function getCropHandles(cr) {
+  const { x, y, w, h } = cr
+  const mx = x + w / 2, my = y + h / 2
+  return [
+    { id: 'nw', x,     y,     cursor: 'nwse-resize' },
+    { id: 'n',  x: mx, y,     cursor: 'ns-resize'   },
+    { id: 'ne', x: x+w,y,     cursor: 'nesw-resize' },
+    { id: 'e',  x: x+w,y: my, cursor: 'ew-resize'   },
+    { id: 'se', x: x+w,y: y+h,cursor: 'nwse-resize' },
+    { id: 's',  x: mx, y: y+h,cursor: 'ns-resize'   },
+    { id: 'sw', x,     y: y+h,cursor: 'nesw-resize' },
+    { id: 'w',  x,     y: my, cursor: 'ew-resize'   },
+  ]
+}
+
+function findCropHandle(pos) {
+  if (!cropRect) return null
+  const hitR = (HANDLE_R + 4) / viewScale
+  return getCropHandles(cropRect).find(h => Math.hypot(h.x - pos.x, h.y - pos.y) <= hitR) ?? null
+}
+
+function insideCropRect(pos) {
+  if (!cropRect) return false
+  const { x, y, w, h } = cropRect
+  return pos.x >= x && pos.x <= x + w && pos.y >= y && pos.y <= y + h
+}
+
+function applyCropResize(pos) {
+  const { x, y, w, h } = cropRect
+  let x1, y1, x2, y2
+  switch (cropResizeH) {
+    case 'nw': x1=pos.x; y1=pos.y; x2=x+w;  y2=y+h;  break
+    case 'n':  x1=x;     y1=pos.y; x2=x+w;  y2=y+h;  break
+    case 'ne': x1=x;     y1=pos.y; x2=pos.x;y2=y+h;  break
+    case 'e':  x1=x;     y1=y;     x2=pos.x;y2=y+h;  break
+    case 'se': x1=x;     y1=y;     x2=pos.x;y2=pos.y; break
+    case 's':  x1=x;     y1=y;     x2=x+w;  y2=pos.y; break
+    case 'sw': x1=pos.x; y1=y;     x2=x+w;  y2=pos.y; break
+    case 'w':  x1=pos.x; y1=y;     x2=x+w;  y2=y+h;  break
+    default: return
+  }
+  cropRect = {
+    x: Math.min(x1, x2),
+    y: Math.min(y1, y2),
+    w: Math.max(Math.abs(x2 - x1), 1),
+    h: Math.max(Math.abs(y2 - y1), 1),
+  }
+  updateCropSizeLabel()
+}
+
+function updateCropSizeLabel() {
+  const pw = Math.round(cropRect?.w ?? 0), ph = Math.round(cropRect?.h ?? 0)
+  document.getElementById('cropSizeLabel').textContent =
+    pw > 0 && ph > 0 ? `${pw} × ${ph} px` : '請拖曳選取範圍'
+}
 
 // ─── Crop ─────────────────────────────────────────────────────────────────────
 
