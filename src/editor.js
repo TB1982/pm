@@ -55,7 +55,7 @@ let startCap  = 'none'
 let endCap    = 'arrow'
 let fontSize  = 48
 let numCount  = 1
-let numSize   = 36    // radius, image pixels
+let numSize   = 48    // radius, image pixels
 
 // Fill rect (色塊工具) state
 let fillMode         = 'solid'       // 'solid' | 'gradient'
@@ -252,7 +252,7 @@ function showOptionsForAnnot(a) {
     document.getElementById('grpFont').classList.remove('hidden')
   }
   if (t === 'number') {
-    numSize   = a.size ?? 36; syncNumSize(numSize)
+    numSize   = a.size ?? 48; syncNumSize(numSize)
     numShadow = a.shadow ?? false; syncShadowCheck(numShadow)
     document.getElementById('numValueEdit').classList.remove('hidden')
     document.getElementById('numValueInput').value = a.value
@@ -965,7 +965,7 @@ document.getElementById('btnRedo').addEventListener('click', redo)
 // ─── Tool activation ─────────────────────────────────────────────────────────
 
 function setTool(t) {
-  commitText()
+  commitText(false)
   hideColorPanel()
   if (t !== 'crop') { cropRect = null; isCropping = false; cropMoving = false; cropResizeH = null; cropMoveStart = null }
   tool       = t
@@ -1635,7 +1635,7 @@ annotCanvas.addEventListener('mousedown', e => {
   hideColorPanel()
 
   // If text input is open and user clicks outside the textarea, commit it first
-  if (textActive) commitText()
+  if (textActive) commitText(false)
 
   if (tool === 'crop') {
     if (cropRect) {
@@ -1701,7 +1701,7 @@ annotCanvas.addEventListener('mousedown', e => {
   }
 
   if (tool === 'text') {
-    commitText()
+    commitText(false)
     showTextInput(pos)
     return
   }
@@ -1909,20 +1909,31 @@ function showTextInput(pos) {
   setTimeout(() => textInputEl.focus(), 10)
 }
 
-function commitText() {
+// autoSelect: Shift+Enter 觸發時自動切換到選取工具並選中；
+//             由 setTool / mousedown 觸發時傳 false，讓呼叫者決定工具狀態。
+function commitText(autoSelect = true) {
   if (!textActive) return
   const content = textInputEl.value
-  textEditOrig  = null   // discard original; new content replaces it
-  _closeTextInput()   // 先關閉（textActive=false），避免 setTool→commitText 循環呼叫
-  if (content.trim()) {
-    pushHistory()
-    const txtAnn = { id:newId(), type:'text', color, fontSize, x:textPos.x, y:textPos.y, content,
-                     textStrokeColor, textStrokeWidth, textBgColor, textBgOpacity, shadow: textShadow,
-                     bold: textBold, italic: textItalic, underline: textUnderline, strikethrough: textStrikethrough }
-    annotations.push(txtAnn)
-    setTool('select'); selectedId = txtAnn.id; showOptionsForAnnot(txtAnn)
-    renderAnnotations()
+  const pos     = textPos          // 在 _closeTextInput() 將 textPos 設為 null 之前先存起來
+  textEditOrig  = null
+  _closeTextInput()                // textActive=false；不再有循環風險
+  if (!content.trim()) return
+  pushHistory()
+  const txtAnn = { id:newId(), type:'text', color, fontSize, x:pos.x, y:pos.y, content,
+                   textStrokeColor, textStrokeWidth, textBgColor, textBgOpacity, shadow: textShadow,
+                   bold: textBold, italic: textItalic, underline: textUnderline, strikethrough: textStrikethrough }
+  annotations.push(txtAnn)
+  if (autoSelect) {
+    // 直接更新狀態，不呼叫 setTool()，避免 selectedId 被重置
+    tool = 'select'
+    selectedId = txtAnn.id
+    document.querySelectorAll('.tool-btn[data-tool]').forEach(b =>
+      b.classList.toggle('active', b.dataset.tool === 'select')
+    )
+    annotCanvas.style.cursor = 'default'
+    showOptionsForAnnot(txtAnn)
   }
+  renderAnnotations()
 }
 
 function cancelText() {
@@ -2098,7 +2109,7 @@ document.addEventListener('keydown', e => {
 const saveModal = document.getElementById('saveModal')
 
 function openSaveModal() {
-  commitText()
+  commitText(false)
   saveModal.classList.remove('hidden')
 }
 
