@@ -756,3 +756,23 @@ body {
   align-items: center;
   gap: 6px;
 }
+
+/* Transparent swatch — white background with diagonal red "no" line */
+.cpp-swatch-transparent {
+  background: #ffffff !important;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.15) !important;
+  position: relative;
+  overflow: hidden;
+}
+.cpp-swatch-transparent::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -20%;
+  width: 140%;
+  height: 2px;
+  background: #d42020;
+  transform: rotate(45deg) translateY(-50%);
+  transform-origin: center;
+  pointer-events: none;
+}

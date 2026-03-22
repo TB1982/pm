@@ -16,10 +16,11 @@ const PALETTE_THEME = [
   ['#fecdd3','#fda4af','#fb7185','#f43f5e','#be123c','#881337'],  // Rose
 ]
 
-// Standard colours row (10 accent / neutral colours)
+// Standard colours row (10 accent / neutral colours + transparent)
 const PALETTE_STANDARD = [
   '#000000','#1c1c1e','#ff3b30','#ff9500','#ffcc00',
   '#34c759','#00c7be','#007aff','#5856d6','#af52de',
+  'transparent',
 ]
 
 // ─── State ───────────────────────────────────────────────────────────────────
@@ -54,7 +55,7 @@ let startCap  = 'none'
 let endCap    = 'arrow'
 let fontSize  = 48
 let numCount  = 1
-let numSize   = 14    // radius, image pixels
+let numSize   = 36    // radius, image pixels
 
 // Fill rect (色塊工具) state
 let fillMode         = 'solid'       // 'solid' | 'gradient'
@@ -187,7 +188,7 @@ function showOptionsForAnnot(a) {
   if (t === 'line')   { lineStyle = a.lineStyle; startCap = a.startCap; endCap = a.endCap; syncLineStyle(lineStyle); syncCaps(startCap, endCap) }
   if (t === 'text')   { fontSize = a.fontSize;   syncFontSize(fontSize) }
   if (t === 'number') {
-    numSize = a.size ?? 14; syncNumSize(numSize)
+    numSize = a.size ?? 36; syncNumSize(numSize)
     document.getElementById('numValueEdit').classList.remove('hidden')
     document.getElementById('numValueInput').value = a.value
   }
@@ -547,10 +548,12 @@ syncFillBorderColor(fillBorderColor)
 
 let _cppApplyFn    = null
 let _cppGetCurrent = null
+let _cppAnchorEl   = null
 
 function showColorPanel(anchorEl, applyFn, getCurrentFn) {
   _cppApplyFn    = applyFn
   _cppGetCurrent = getCurrentFn
+  _cppAnchorEl   = anchorEl
   const cur = (getCurrentFn() || '').toLowerCase()
   // Sync active swatch
   document.querySelectorAll('.cpp-swatch').forEach(s =>
@@ -559,14 +562,14 @@ function showColorPanel(anchorEl, applyFn, getCurrentFn) {
   // Sync hex input
   document.getElementById('cppHexInput').value =
     cur.startsWith('#') ? cur.slice(1).toUpperCase() : ''
-  // Show + position
+  // Position BEFORE showing to avoid flash at wrong location
   const panel = document.getElementById('colorPickerPanel')
+  const ar = anchorEl.getBoundingClientRect()
+  panel.style.left = ar.left + 'px'
+  panel.style.top  = (ar.bottom + 6) + 'px'
   panel.classList.remove('hidden')
+  // Clamp to viewport after first paint
   requestAnimationFrame(() => {
-    const ar = anchorEl.getBoundingClientRect()
-    let left = ar.left, top = ar.bottom + 6
-    panel.style.left = left + 'px'
-    panel.style.top  = top  + 'px'
     const pr = panel.getBoundingClientRect()
     if (pr.right  > window.innerWidth  - 8) panel.style.left = Math.max(8, window.innerWidth  - pr.width  - 8) + 'px'
     if (pr.bottom > window.innerHeight - 8) panel.style.top  = Math.max(8, ar.top - pr.height - 6) + 'px'
@@ -575,7 +578,7 @@ function showColorPanel(anchorEl, applyFn, getCurrentFn) {
 
 function hideColorPanel() {
   document.getElementById('colorPickerPanel').classList.add('hidden')
-  _cppApplyFn = _cppGetCurrent = null
+  _cppApplyFn = _cppGetCurrent = _cppAnchorEl = null
 }
 
 ;(function initColorPanel() {
@@ -598,15 +601,20 @@ function hideColorPanel() {
     themeEl.appendChild(colEl)
   })
 
-  // Build standard colours row
+  // Build standard colours row (including transparent swatch at end)
   const stdEl = document.getElementById('cppStandard')
   PALETTE_STANDARD.forEach(hex => {
     const btn = document.createElement('button')
-    btn.className    = 'cpp-swatch'
-    btn.dataset.hex  = hex
-    btn.style.background = hex
-    const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16)
-    if (r + g + b > 500) btn.style.boxShadow = 'inset 0 0 0 1px rgba(0,0,0,0.15)'
+    btn.className   = 'cpp-swatch'
+    btn.dataset.hex = hex
+    if (hex === 'transparent') {
+      btn.classList.add('cpp-swatch-transparent')
+      btn.title = '透明'
+    } else {
+      btn.style.background = hex
+      const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16)
+      if (r + g + b > 500) btn.style.boxShadow = 'inset 0 0 0 1px rgba(0,0,0,0.15)'
+    }
     btn.addEventListener('click', () => { if (_cppApplyFn) _cppApplyFn(hex); hideColorPanel() })
     stdEl.appendChild(btn)
   })
@@ -658,32 +666,44 @@ function hideColorPanel() {
     }
   })
 
-  // Close panel when clicking outside
-  document.addEventListener('click', e => {
-    const panel = document.getElementById('colorPickerPanel')
+  // Panel absorbs its own mousedown so document listener below ignores panel clicks
+  const panel = document.getElementById('colorPickerPanel')
+  panel.addEventListener('mousedown', e => e.stopPropagation())
+
+  // Close panel on mousedown outside — catches drag-starts, not just plain clicks
+  document.addEventListener('mousedown', e => {
     if (panel.classList.contains('hidden')) return
-    if (panel.contains(e.target)) return
-    if (e.target.closest('.color-preview')) return  // preview click reopens — handled separately
+    if (e.target.closest('.color-preview')) return  // preview handles its own toggle
     hideColorPanel()
-  }, true)
+  })
 })()
 
-// Wire ALL colour preview squares → floating panel
-document.getElementById('colorPreview').addEventListener('click', () =>
-  showColorPanel(document.getElementById('colorPreview'), applyColor, () => color)
-)
-document.getElementById('fillColorPreview').addEventListener('click', () =>
-  showColorPanel(document.getElementById('fillColorPreview'), applyFillColor, () => fillColor)
-)
-document.getElementById('fillColorAPreview').addEventListener('click', () =>
-  showColorPanel(document.getElementById('fillColorAPreview'), applyFillColorA, () => fillColorA)
-)
-document.getElementById('fillColorBPreview').addEventListener('click', () =>
-  showColorPanel(document.getElementById('fillColorBPreview'), applyFillColorB, () => fillColorB)
-)
-document.getElementById('fillBorderColorPreview').addEventListener('click', () =>
-  showColorPanel(document.getElementById('fillBorderColorPreview'), applyFillBorderColor, () => fillBorderColor)
-)
+// openColorPanel: toggle (click same anchor again = close) or open for new anchor
+function openColorPanel(anchorEl, applyFn, getCurrentFn) {
+  const panel = document.getElementById('colorPickerPanel')
+  if (_cppAnchorEl === anchorEl && !panel.classList.contains('hidden')) {
+    hideColorPanel()
+  } else {
+    showColorPanel(anchorEl, applyFn, getCurrentFn)
+  }
+}
+
+// Wire ALL colour preview squares → floating panel (with toggle)
+document.getElementById('colorPreview').addEventListener('click', function() {
+  openColorPanel(this, applyColor, () => color)
+})
+document.getElementById('fillColorPreview').addEventListener('click', function() {
+  openColorPanel(this, applyFillColor, () => fillColor)
+})
+document.getElementById('fillColorAPreview').addEventListener('click', function() {
+  openColorPanel(this, applyFillColorA, () => fillColorA)
+})
+document.getElementById('fillColorBPreview').addEventListener('click', function() {
+  openColorPanel(this, applyFillColorB, () => fillColorB)
+})
+document.getElementById('fillBorderColorPreview').addEventListener('click', function() {
+  openColorPanel(this, applyFillBorderColor, () => fillBorderColor)
+})
 
 // Thickness
 document.querySelectorAll('.sz-btn').forEach(btn =>
