@@ -47,6 +47,14 @@ let fontSize  = 48
 let numCount  = 1
 let numSize   = 14    // radius, image pixels
 
+// Fill rect (色塊工具) state
+let fillColor        = '#ffcc00'
+let fillOpacity      = 50
+let fillBorderEnabled = true
+
+// Annotation clipboard (for Cmd+C / Cmd+V on number annotations)
+let annotClipboard = null
+
 // Drawing
 let isDrawing   = false
 let drawStart   = null
@@ -101,7 +109,7 @@ function getTextColor(hex) {
 // ─── Options bar helpers ──────────────────────────────────────────────────────
 
 function hideAllOptions() {
-  ['grpColor','grpThickness','grpLineStyle','grpCaps','grpFont','grpNumber','grpZoom','grpCrop'].forEach(id =>
+  ['grpColor','grpFillColor','grpThickness','grpLineStyle','grpCaps','grpFont','grpNumber','grpZoom','grpCrop'].forEach(id =>
     document.getElementById(id).classList.add('hidden')
   )
   document.getElementById('numValueEdit').classList.add('hidden')
@@ -117,9 +125,10 @@ function showOptionsForTool(t) {
     document.getElementById('grpCrop').classList.remove('hidden')
     return
   }
-  if (!['rect','line','text','number'].includes(t)) return
+  if (!['rect','fillrect','line','text','number'].includes(t)) return
   document.getElementById('grpColor').classList.remove('hidden')
-  if (['rect','line'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
+  if (t === 'fillrect') document.getElementById('grpFillColor').classList.remove('hidden')
+  if (['rect','fillrect','line'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
   if (t === 'line')   { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden') }
   if (t === 'text')   document.getElementById('grpFont').classList.remove('hidden')
   if (t === 'number') document.getElementById('grpNumber').classList.remove('hidden')
@@ -130,13 +139,19 @@ function showOptionsForAnnot(a) {
   if (a.type === 'img') return   // overlay image has no editable colour/thickness options
   const t = a.type
   document.getElementById('grpColor').classList.remove('hidden')
-  if (['rect','line'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
+  if (t === 'fillrect') document.getElementById('grpFillColor').classList.remove('hidden')
+  if (['rect','fillrect','line'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
   if (t === 'line')   { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden') }
   if (t === 'text')   document.getElementById('grpFont').classList.remove('hidden')
   if (t === 'number') document.getElementById('grpNumber').classList.remove('hidden')
   // Sync UI state to annotation values
   color = a.color; syncColor(color)
   if ('thickness' in a) { thickness = a.thickness; syncThickness(thickness) }
+  if (t === 'fillrect') {
+    fillColor = a.fillColor; syncFillColor(fillColor)
+    fillOpacity = a.fillOpacity; syncFillOpacity(fillOpacity)
+    fillBorderEnabled = a.fillBorder; syncFillBorder(fillBorderEnabled)
+  }
   if (t === 'line')   { lineStyle = a.lineStyle; startCap = a.startCap; endCap = a.endCap; syncLineStyle(lineStyle); syncCaps(startCap, endCap) }
   if (t === 'text')   { fontSize = a.fontSize;   syncFontSize(fontSize) }
   if (t === 'number') {
@@ -176,6 +191,34 @@ function syncFontSize(fs) { document.getElementById('fontSizeInput').value = fs 
 function syncNumSize(ns) {
   document.querySelectorAll('.ns-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.ns) === ns))
 }
+function syncFillColor(hex) {
+  document.querySelectorAll('.fill-swatch').forEach(s => s.classList.toggle('active', s.dataset.hex === hex))
+  const preview = document.getElementById('fillColorPreview')
+  if (preview) preview.style.background = hex
+}
+function syncFillOpacity(val) {
+  const inp = document.getElementById('fillOpacityInput')
+  if (inp) inp.value = val
+}
+function syncFillBorder(enabled) {
+  document.getElementById('btnFillBorderOn').classList.toggle('active', enabled)
+  document.getElementById('btnFillBorderOff').classList.toggle('active', !enabled)
+}
+function applyFillColor(hex) {
+  fillColor = hex
+  syncFillColor(hex)
+  if (selectedId) updateSelectedAnnot({ fillColor: hex })
+}
+function applyFillOpacity(val) {
+  fillOpacity = val
+  syncFillOpacity(val)
+  if (selectedId) updateSelectedAnnot({ fillOpacity: val })
+}
+function applyFillBorder(enabled) {
+  fillBorderEnabled = enabled
+  syncFillBorder(enabled)
+  if (selectedId) updateSelectedAnnot({ fillBorder: enabled })
+}
 
 // Update selected annotation's properties + push history
 function updateSelectedAnnot(props) {
@@ -203,6 +246,32 @@ COLORS.forEach(c => {
 
 // Initialise colour preview + hex field to match the default colour
 syncColor(color)
+
+// Fill colour swatches
+const fillSwatchesEl = document.getElementById('fillColorSwatches')
+COLORS.forEach(c => {
+  const btn = document.createElement('button')
+  btn.className     = 'swatch fill-swatch' + (c.hex === fillColor ? ' active' : '')
+  btn.style.background = c.hex
+  btn.dataset.hex   = c.hex
+  btn.title         = c.name
+  if (c.hex === '#ffffff') btn.style.boxShadow = 'inset 0 0 0 1px #555'
+  btn.addEventListener('click', () => applyFillColor(c.hex))
+  fillSwatchesEl.appendChild(btn)
+})
+syncFillColor(fillColor)
+syncFillOpacity(fillOpacity)
+syncFillBorder(fillBorderEnabled)
+
+// Fill opacity input
+document.getElementById('fillOpacityInput').addEventListener('change', e => {
+  applyFillOpacity(Math.max(0, Math.min(100, parseInt(e.target.value) || 0)))
+})
+document.getElementById('fillOpacityInput').addEventListener('keydown', e => e.stopPropagation())
+
+// Fill border toggle
+document.getElementById('btnFillBorderOn').addEventListener('click',  () => applyFillBorder(true))
+document.getElementById('btnFillBorderOff').addEventListener('click', () => applyFillBorder(false))
 
 // ─── Extend canvas ────────────────────────────────────────────────────────────
 
@@ -756,16 +825,29 @@ function drawOne(ctx, a) {
   ctx.fillStyle   = a.color
   ctx.lineWidth   = a.thickness * viewScale
   switch (a.type) {
-    case 'rect':   drawRect(ctx, a);   break
-    case 'line':   drawLine(ctx, a);   break
-    case 'text':   drawText(ctx, a);   break
-    case 'number': drawNumber(ctx, a); break
+    case 'rect':     drawRect(ctx, a);     break
+    case 'fillrect': drawFillRect(ctx, a); break
+    case 'line':     drawLine(ctx, a);     break
+    case 'text':     drawText(ctx, a);     break
+    case 'number':   drawNumber(ctx, a);   break
   }
   ctx.restore()
 }
 
 function drawRect(ctx, a) {
   ctx.strokeRect(c(a.x), c(a.y), c(a.w), c(a.h))
+}
+
+function drawFillRect(ctx, a) {
+  const rx = c(a.x), ry = c(a.y), rw = c(a.w), rh = c(a.h)
+  ctx.save()
+  ctx.globalAlpha = (a.fillOpacity ?? 50) / 100
+  ctx.fillStyle = a.fillColor ?? '#ffcc00'
+  ctx.fillRect(rx, ry, rw, rh)
+  ctx.restore()
+  if (a.fillBorder !== false) {
+    ctx.strokeRect(rx, ry, rw, rh)
+  }
 }
 
 function drawLine(ctx, a) {
@@ -969,6 +1051,9 @@ function buildPreview() {
   const s = drawStart, e = drawCurrent
   if (tool === 'rect')
     return { ...base, type:'rect', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y) }
+  if (tool === 'fillrect')
+    return { ...base, type:'fillrect', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y),
+             fillColor, fillOpacity, fillBorder: fillBorderEnabled }
   if (tool === 'line')
     return { ...base, type:'line', x1:s.x, y1:s.y, x2:e.x, y2:e.y, lineStyle, startCap, endCap }
   return null
@@ -980,6 +1065,12 @@ function commitShape(start, end) {
     const w = Math.abs(end.x - start.x), h = Math.abs(end.y - start.y)
     if (w < 2 || h < 2) return null
     return { ...base, type:'rect', x:Math.min(start.x,end.x), y:Math.min(start.y,end.y), w, h }
+  }
+  if (tool === 'fillrect') {
+    const w = Math.abs(end.x - start.x), h = Math.abs(end.y - start.y)
+    if (w < 2 || h < 2) return null
+    return { ...base, type:'fillrect', x:Math.min(start.x,end.x), y:Math.min(start.y,end.y), w, h,
+             fillColor, fillOpacity, fillBorder: fillBorderEnabled }
   }
   if (tool === 'line') {
     if (Math.hypot(end.x-start.x, end.y-start.y) < 2) return null
@@ -1026,6 +1117,7 @@ function recalcNumCount() {
 function bounds(a) {
   switch (a.type) {
     case 'rect':
+    case 'fillrect':
     case 'img':    return { x: a.x, y: a.y, w: a.w, h: a.h }
     case 'line': {
       const minX = Math.min(a.x1,a.x2), maxX = Math.max(a.x1,a.x2)
@@ -1283,6 +1375,7 @@ document.addEventListener('mouseup', e => {
 function moveAnnot(a, dx, dy) {
   switch (a.type) {
     case 'rect':
+    case 'fillrect':
     case 'img':
     case 'text':
     case 'number': a.x += dx; a.y += dy; break
@@ -1392,6 +1485,24 @@ document.addEventListener('keydown', e => {
   if (meta && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); return }
   if (meta && (e.key === 'Z' || (e.key === 'z' && e.shiftKey))) { e.preventDefault(); redo(); return }
   if (meta && e.key === 's') { e.preventDefault(); openSaveModal(); return }
+
+  // Copy/paste for number annotations
+  if (meta && (e.key === 'c' || e.key === 'C')) {
+    const a = annotations.find(x => x.id === selectedId)
+    if (a && a.type === 'number') { annotClipboard = { ...a }; return }
+  }
+  if (meta && (e.key === 'v' || e.key === 'V')) {
+    if (annotClipboard && annotClipboard.type === 'number') {
+      e.preventDefault()
+      const newA = { ...annotClipboard, id: newId(), x: annotClipboard.x + 8, y: annotClipboard.y + 8 }
+      pushHistory()
+      annotations.push(newA)
+      selectedId = newA.id
+      showOptionsForAnnot(newA)
+      renderAnnotations()
+      return
+    }
+  }
   if (meta && (e.key === '=' || e.key === '+')) { e.preventDefault(); setTool('zoom-in');  zoomIn();     return }
   if (meta && e.key === '-')                    { e.preventDefault(); setTool('zoom-out'); zoomOut();    return }
   if (meta && e.key === '0')                    { e.preventDefault(); fitToWindow();                     return }
@@ -1400,8 +1511,9 @@ document.addEventListener('keydown', e => {
 
   switch (e.key) {
     case 'v': case 'V': setTool('select'); break
-    case 'r': case 'R': setTool('rect');   break
-    case 'l': case 'L': setTool('line');   break
+    case 'r': case 'R': setTool('rect');     break
+    case 'b': case 'B': setTool('fillrect'); break
+    case 'l': case 'L': setTool('line');     break
     case 't': case 'T': setTool('text');   break
     case 'n': case 'N': setTool('number'); break
     case 'o': case 'O': document.getElementById('btnOverlayImg').click(); break
@@ -1535,7 +1647,7 @@ function confirmCrop() {
     annotations = annotations.map(a => {
       a = JSON.parse(JSON.stringify(a))
       switch (a.type) {
-        case 'rect': case 'text': case 'number': a.x -= cx; a.y -= cy; break
+        case 'rect': case 'fillrect': case 'text': case 'number': a.x -= cx; a.y -= cy; break
         case 'line': a.x1 -= cx; a.y1 -= cy; a.x2 -= cx; a.y2 -= cy; break
       }
       return a
@@ -1604,6 +1716,7 @@ document.getElementById('btnResizeConfirm').addEventListener('click', () => {
       a = JSON.parse(JSON.stringify(a))
       switch (a.type) {
         case 'rect':
+        case 'fillrect':
           a.x *= sx; a.y *= sy; a.w *= sx; a.h *= sy
           a.thickness = Math.max(1, Math.round(a.thickness * sx))
           break
