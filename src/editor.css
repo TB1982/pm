@@ -759,6 +759,12 @@ body {
   gap: 6px;
 }
 
+/* B / I / U buttons */
+.biu-btn { min-width: 24px; font-size: 13px; }
+#btnTextBold      b { font-weight: 700; pointer-events: none; }
+#btnTextItalic    i { font-style: italic; pointer-events: none; }
+#btnTextUnderline   { pointer-events: auto; }
+
 /* Transparent swatch — white background with diagonal red "no" line */
 .cpp-swatch-transparent {
   background: #ffffff !important;

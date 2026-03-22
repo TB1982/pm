@@ -72,11 +72,14 @@ let fillPrevColorB    = '#333333'    // last non-transparent colorB (for 透 tog
 // Annotation clipboard (for Cmd+C / Cmd+V on number annotations)
 let annotClipboard = null
 
-// Text style (描邊 + 背景色塊)
+// Text style (描邊 + 背景色塊 + B/I/U)
 let textStrokeColor = '#000000'
 let textStrokeWidth = 0        // 0=none 1=細 2=中 3=粗
 let textBgColor     = '#000000'
 let textBgOpacity   = 0        // 0–100 %
+let textBold        = false
+let textItalic      = false
+let textUnderline   = false
 
 // Shadow (per-tool default; each annotation also stores its own value)
 let rectShadow      = false
@@ -197,7 +200,13 @@ function showOptionsForTool(t) {
   }
   if (['rect','fillrect','line'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
   if (t === 'line')   { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden') }
-  if (t === 'text')   { document.getElementById('grpFont').classList.remove('hidden'); syncTextShadowCheck(textShadow) }
+  if (t === 'text') {
+    document.getElementById('grpFont').classList.remove('hidden')
+    syncTextShadowCheck(textShadow)
+    syncTextBold(textBold); syncTextItalic(textItalic); syncTextUnderline(textUnderline)
+    syncTextStrokeColor(textStrokeColor); syncTextStrokeWidth(textStrokeWidth)
+    syncTextBgColor(textBgColor); syncTextBgOpacity(textBgOpacity)
+  }
   if (t === 'number') { document.getElementById('grpNumber').classList.remove('hidden'); document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(numShadow) }
   if (t === 'rect')   { document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(rectShadow) }
   if (t === 'fillrect') document.getElementById('grpShadow').classList.remove('hidden')
@@ -235,6 +244,9 @@ function showOptionsForAnnot(a) {
     textBgColor     = a.textBgColor     ?? '#000000'; syncTextBgColor(textBgColor)
     textBgOpacity   = a.textBgOpacity   ?? 0;         syncTextBgOpacity(textBgOpacity)
     textShadow      = a.shadow ?? false;              syncTextShadowCheck(textShadow)
+    textBold        = a.bold      ?? false;           syncTextBold(textBold)
+    textItalic      = a.italic    ?? false;           syncTextItalic(textItalic)
+    textUnderline   = a.underline ?? false;           syncTextUnderline(textUnderline)
     document.getElementById('grpFont').classList.remove('hidden')
   }
   if (t === 'number') {
@@ -348,6 +360,10 @@ function syncTextBgOpacity(v) {
   const el = document.getElementById('textBgOpacityInput')
   if (el) el.value = v
 }
+function syncTextBold(v)      { document.getElementById('btnTextBold')     ?.classList.toggle('active', v) }
+function syncTextItalic(v)    { document.getElementById('btnTextItalic')   ?.classList.toggle('active', v) }
+function syncTextUnderline(v) { document.getElementById('btnTextUnderline')?.classList.toggle('active', v) }
+
 function syncShadowCheck(val) {
   const el = document.getElementById('shadowCheck')
   if (el) el.checked = val
@@ -883,6 +899,13 @@ document.getElementById('textShadowCheck').addEventListener('change', e => {
   if (selectedId) updateSelectedAnnot({ shadow: textShadow })
 })
 
+// B / I / U toggles
+;[
+  ['btnTextBold',      () => { textBold      = !textBold;      syncTextBold(textBold);           if (selectedId) updateSelectedAnnot({ bold:      textBold      }) }],
+  ['btnTextItalic',    () => { textItalic    = !textItalic;    syncTextItalic(textItalic);       if (selectedId) updateSelectedAnnot({ italic:    textItalic    }) }],
+  ['btnTextUnderline', () => { textUnderline = !textUnderline; syncTextUnderline(textUnderline); if (selectedId) updateSelectedAnnot({ underline: textUnderline }) }],
+].forEach(([id, fn]) => document.getElementById(id).addEventListener('click', fn))
+
 // Shared shadow checkbox (rect / fillrect / number)
 document.getElementById('shadowCheck').addEventListener('change', e => {
   const val = e.target.checked
@@ -1255,29 +1278,36 @@ function drawCap(ctx, type, fx, fy, tx, ty, col, sz) {
 }
 
 function drawText(ctx, a) {
-  const fs    = a.fontSize * viewScale
-  const lines = a.content.split('\n')
-  ctx.font         = `${fs}px -apple-system, "Helvetica Neue", sans-serif`
+  const fs      = a.fontSize * viewScale
+  const lines   = a.content.split('\n')
+  const fontMod = [a.italic ? 'italic' : '', a.bold ? 'bold' : ''].filter(Boolean).join(' ')
+  ctx.font         = `${fontMod} ${fs}px -apple-system, "Helvetica Neue", sans-serif`.trimStart()
   ctx.textAlign    = 'left'
   ctx.textBaseline = 'top'
 
   // Background colour block (drawn first, shadow applied here if enabled)
+  // Height = visual text height (no extra trailing line-gap), so padding is uniform on all sides.
   const bgOpacity = a.textBgOpacity ?? 0
   if (bgOpacity > 0) {
     ctx.save()
     if (a.shadow) setShadow(ctx)
-    const maxW = Math.max(...lines.map(l => ctx.measureText(l).width))
+    const maxW   = Math.max(...lines.map(l => ctx.measureText(l).width))
+    const pad    = 5
+    const totalH = (lines.length - 1) * fs * 1.25 + fs   // last line uses fs not fs*1.25
     ctx.fillStyle = hexToRgba(a.textBgColor ?? '#000000', bgOpacity / 100)
-    ctx.fillRect(c(a.x) - 3, c(a.y) - 3, maxW + 6, lines.length * fs * 1.25 + 6)
+    ctx.fillRect(c(a.x) - pad, c(a.y) - pad, maxW + pad * 2, totalH + pad * 2)
     ctx.restore()
   }
 
   // Stroke (outline) — no shadow on stroke layer
+  // strokeText draws centred on the text path: half inside (covered by fill), half outside.
+  // Multiply by 2 so the *visible* outside width equals the design values 3/6/10 px.
   const strokeW = a.textStrokeWidth ?? 0
+  const strokePxMap = [0, 6, 12, 20]   // lineWidth → visible outside: 0/3/6/10 px
   if (strokeW > 0) {
     ctx.save()
     ctx.strokeStyle = a.textStrokeColor ?? '#000000'
-    ctx.lineWidth   = strokeW * viewScale
+    ctx.lineWidth   = strokePxMap[strokeW] * viewScale
     ctx.lineJoin    = 'round'
     lines.forEach((line, i) => ctx.strokeText(line, c(a.x), c(a.y) + i * fs * 1.25))
     ctx.restore()
@@ -1287,6 +1317,24 @@ function drawText(ctx, a) {
   if (a.shadow && bgOpacity === 0) setShadow(ctx)
   ctx.fillStyle = a.color
   lines.forEach((line, i) => ctx.fillText(line, c(a.x), c(a.y) + i * fs * 1.25))
+
+  // Underline — draw after fill so shadow (if any) doesn't double-render
+  if (a.underline) {
+    ctx.save()
+    ctx.strokeStyle = a.color
+    ctx.lineWidth   = Math.max(1, fs * 0.06)
+    ctx.lineCap     = 'round'
+    lines.forEach((line, i) => {
+      const lineY   = c(a.y) + i * fs * 1.25
+      const metrics = ctx.measureText(line)
+      const uy      = lineY + metrics.actualBoundingBoxAscent + 2 * viewScale
+      ctx.beginPath()
+      ctx.moveTo(c(a.x), uy)
+      ctx.lineTo(c(a.x) + metrics.width, uy)
+      ctx.stroke()
+    })
+    ctx.restore()
+  }
 }
 
 function drawNumber(ctx, a) {
@@ -1561,6 +1609,9 @@ function findAt(pos) {
 annotCanvas.addEventListener('mousedown', e => {
   if (e.button !== 0) return
   const pos = evToImg(e)
+
+  // Close colour panel on any canvas interaction
+  hideColorPanel()
 
   // If text input is open and user clicks outside the textarea, commit it first
   if (textActive) commitText()
@@ -1841,7 +1892,8 @@ function commitText() {
   if (content.trim()) {
     pushHistory()
     annotations.push({ id:newId(), type:'text', color, fontSize, x:textPos.x, y:textPos.y, content,
-                       textStrokeColor, textStrokeWidth, textBgColor, textBgOpacity, shadow: textShadow })
+                       textStrokeColor, textStrokeWidth, textBgColor, textBgOpacity, shadow: textShadow,
+                       bold: textBold, italic: textItalic, underline: textUnderline })
     renderAnnotations()
   }
   _closeTextInput()
