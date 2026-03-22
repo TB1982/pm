@@ -33,6 +33,7 @@ helpModal.addEventListener('click', (e) => {
 
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
+    cancelCountdown()
     closeHelp()
     hideWindowPicker()
     closeBatch()
@@ -144,9 +145,9 @@ async function doRect() {
 
 // ─── Shortcut events from main process ───────────────────────────────────────
 
-ipcRenderer.on('shortcut-fullscreen', doFullscreen)
+ipcRenderer.on('shortcut-fullscreen', () => delayedAction(doFullscreen))
 ipcRenderer.on('shortcut-window',     doWindow)
-ipcRenderer.on('shortcut-rect',       doRect)
+ipcRenderer.on('shortcut-rect',       () => delayedAction(doRect))
 
 // ─── Capture result callbacks ─────────────────────────────────────────────────
 
@@ -160,14 +161,51 @@ function setToolbarActive(btn) {
   btn.classList.add('tb-btn-highlight')
 }
 
-document.getElementById('btnFullscreen').addEventListener('click', e => { setToolbarActive(e.currentTarget); doFullscreen() })
-document.getElementById('btnRect').addEventListener('click',       e => { setToolbarActive(e.currentTarget); doRect() })
+document.getElementById('btnFullscreen').addEventListener('click', e => { setToolbarActive(e.currentTarget); delayedAction(doFullscreen) })
+document.getElementById('btnRect').addEventListener('click',       e => { setToolbarActive(e.currentTarget); delayedAction(doRect) })
 document.getElementById('btnWindow').addEventListener('click',     e => { setToolbarActive(e.currentTarget); doWindow() })
 
-document.getElementById('btnWebCapture').addEventListener('click', e => {
-  setToolbarActive(e.currentTarget)
-  showToast('網頁截圖即將推出')
-})
+// ─── Delay setting ────────────────────────────────────────────────────────────
+
+const DELAY_KEY      = 'delayCaptureSecs'
+const delaySelect    = document.getElementById('delaySelect')
+const countdownOverlay = document.getElementById('countdownOverlay')
+const countdownNum   = document.getElementById('countdownNum')
+
+delaySelect.value = localStorage.getItem(DELAY_KEY) || '0'
+delaySelect.addEventListener('change', () => localStorage.setItem(DELAY_KEY, delaySelect.value))
+
+let countdownTimer = null
+
+function cancelCountdown() {
+  if (countdownTimer === null) return
+  clearTimeout(countdownTimer)
+  countdownTimer = null
+  countdownOverlay.classList.add('hidden')
+}
+
+// Run fn() after the configured delay (0 = immediate)
+function delayedAction(fn) {
+  if (countdownTimer !== null) return   // already counting
+  const secs = parseInt(delaySelect.value, 10)
+  if (secs === 0) { fn(); return }
+
+  let remaining = secs
+  countdownOverlay.classList.remove('hidden')
+
+  function tick() {
+    if (remaining <= 0) {
+      countdownTimer = null
+      countdownOverlay.classList.add('hidden')
+      fn()
+      return
+    }
+    countdownNum.textContent = String(remaining)
+    remaining--
+    countdownTimer = setTimeout(tick, 1000)
+  }
+  tick()
+}
 
 document.getElementById('btnOpenImage').addEventListener('click', e => {
   setToolbarActive(e.currentTarget)

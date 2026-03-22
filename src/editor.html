@@ -47,6 +47,49 @@
       <input type="color" id="nativeColorPicker" class="native-color-picker" tabindex="-1" aria-hidden="true">
     </div>
 
+    <!-- Fill colour + gradient (色塊工具專用) -->
+    <div class="opt-group hidden" id="grpFillColor">
+
+      <!-- Mode toggle: 實色 / 漸層 -->
+      <button class="style-btn active" id="btnFillSolid">實色</button>
+      <button class="style-btn"        id="btnFillGradient">漸層</button>
+      <div class="opt-sep"></div>
+
+      <!-- Solid fill controls -->
+      <div id="fillSolidCtrl">
+        <div class="color-swatches" id="fillColorSwatches"></div>
+        <div class="color-preview fill-preview" id="fillColorPreview" title="點擊選任意色"></div>
+        <input type="color" id="fillNativePicker" class="native-color-picker" tabindex="-1" aria-hidden="true">
+      </div>
+
+      <!-- Gradient fill controls (hidden by default) -->
+      <div id="fillGradientCtrl" class="hidden">
+        <span class="opt-label">A</span>
+        <div class="color-swatches" id="fillColorASwatches"></div>
+        <div class="color-preview fill-preview" id="fillColorAPreview" title="點擊選任意色"></div>
+        <input type="color" id="fillNativePickerA" class="native-color-picker" tabindex="-1" aria-hidden="true">
+        <span class="opt-label" style="margin:0 6px;opacity:.6">→</span>
+        <span class="opt-label">B</span>
+        <div class="color-swatches" id="fillColorBSwatches"></div>
+        <div class="color-preview fill-preview" id="fillColorBPreview" title="點擊選任意色"></div>
+        <input type="color" id="fillNativePickerB" class="native-color-picker" tabindex="-1" aria-hidden="true">
+        <div class="opt-sep"></div>
+        <button class="style-btn active" data-fdir="h"  title="左→右">→</button>
+        <button class="style-btn"        data-fdir="v"  title="上→下">↓</button>
+        <button class="style-btn"        data-fdir="dr" title="左上→右下">↘</button>
+        <button class="style-btn"        data-fdir="ur" title="左下→右上">↗</button>
+      </div>
+
+      <div class="opt-sep"></div>
+      <span class="opt-label">透明度</span>
+      <input type="number" id="fillOpacityInput" value="100" min="0" max="100" style="width:44px">
+      <span class="opt-label">%</span>
+      <div class="opt-sep"></div>
+      <span class="opt-label">邊框</span>
+      <button class="style-btn active" id="btnFillBorderOn">有</button>
+      <button class="style-btn"        id="btnFillBorderOff">無</button>
+    </div>
+
     <div class="opt-group" id="grpThickness">
       <span class="opt-label">粗細</span>
       <div class="sz-group">
@@ -126,7 +169,8 @@
     <div class="editor-toolbar">
       <button class="tool-btn"        data-tool="select" title="選取 (V)">↖</button>
       <div class="tool-sep"></div>
-      <button class="tool-btn active" data-tool="rect"   title="矩形框 (R)">□</button>
+      <button class="tool-btn active" data-tool="rect"     title="矩形框 (R)">□</button>
+      <button class="tool-btn"        data-tool="fillrect" title="色塊 (B)">■</button>
       <button class="tool-btn"        data-tool="line"   title="線條 (L)">╱</button>
       <button class="tool-btn"        data-tool="text"   title="文字 (T)">T</button>
       <button class="tool-btn"        data-tool="number"   title="編號 (N)">①</button>

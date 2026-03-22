@@ -30,10 +30,24 @@
         <span class="tb-shortcut">⌘⌃X</span>
       </button>
 
-      <button class="tb-btn" id="btnWebCapture">
-        <span class="tb-icon">🌐</span>
-        <span class="tb-label">網頁</span>
-      </button>
+      <div class="tb-btn tb-delay-widget" id="btnDelayed">
+        <span class="tb-icon">⏱</span>
+        <div class="tb-label-sel">
+          <span class="tb-label">延遲</span>
+          <select class="tb-delay-sel" id="delaySelect">
+            <option value="0">0s</option>
+            <option value="1">1s</option>
+            <option value="2">2s</option>
+            <option value="3">3s</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Countdown overlay (shown inside toolbar during delay) -->
+      <div class="countdown-overlay hidden" id="countdownOverlay">
+        <span class="countdown-num" id="countdownNum">3</span>
+        <span class="countdown-esc">Esc 取消</span>
+      </div>
 
       <button class="tb-btn" id="btnOpenImage">
         <span class="tb-icon">🖼</span>

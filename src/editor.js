@@ -47,6 +47,18 @@ let fontSize  = 48
 let numCount  = 1
 let numSize   = 14    // radius, image pixels
 
+// Fill rect (色塊工具) state
+let fillMode         = 'solid'       // 'solid' | 'gradient'
+let fillColor        = '#ffcc00'     // solid mode fill colour
+let fillColorA       = '#ffcc00'     // gradient start colour
+let fillColorB       = 'transparent' // gradient end colour ('transparent' or hex)
+let fillGradientDir  = 'h'           // 'h' | 'v' | 'dr' | 'ur'
+let fillOpacity      = 100
+let fillBorderEnabled = true
+
+// Annotation clipboard (for Cmd+C / Cmd+V on number annotations)
+let annotClipboard = null
+
 // Drawing
 let isDrawing   = false
 let drawStart   = null
@@ -101,7 +113,7 @@ function getTextColor(hex) {
 // ─── Options bar helpers ──────────────────────────────────────────────────────
 
 function hideAllOptions() {
-  ['grpColor','grpThickness','grpLineStyle','grpCaps','grpFont','grpNumber','grpZoom','grpCrop'].forEach(id =>
+  ['grpColor','grpFillColor','grpThickness','grpLineStyle','grpCaps','grpFont','grpNumber','grpZoom','grpCrop'].forEach(id =>
     document.getElementById(id).classList.add('hidden')
   )
   document.getElementById('numValueEdit').classList.add('hidden')
@@ -117,9 +129,10 @@ function showOptionsForTool(t) {
     document.getElementById('grpCrop').classList.remove('hidden')
     return
   }
-  if (!['rect','line','text','number'].includes(t)) return
+  if (!['rect','fillrect','line','text','number'].includes(t)) return
   document.getElementById('grpColor').classList.remove('hidden')
-  if (['rect','line'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
+  if (t === 'fillrect') document.getElementById('grpFillColor').classList.remove('hidden')
+  if (['rect','fillrect','line'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
   if (t === 'line')   { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden') }
   if (t === 'text')   document.getElementById('grpFont').classList.remove('hidden')
   if (t === 'number') document.getElementById('grpNumber').classList.remove('hidden')
@@ -130,13 +143,23 @@ function showOptionsForAnnot(a) {
   if (a.type === 'img') return   // overlay image has no editable colour/thickness options
   const t = a.type
   document.getElementById('grpColor').classList.remove('hidden')
-  if (['rect','line'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
+  if (t === 'fillrect') document.getElementById('grpFillColor').classList.remove('hidden')
+  if (['rect','fillrect','line'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
   if (t === 'line')   { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden') }
   if (t === 'text')   document.getElementById('grpFont').classList.remove('hidden')
   if (t === 'number') document.getElementById('grpNumber').classList.remove('hidden')
   // Sync UI state to annotation values
   color = a.color; syncColor(color)
   if ('thickness' in a) { thickness = a.thickness; syncThickness(thickness) }
+  if (t === 'fillrect') {
+    fillMode = a.fillMode ?? 'solid'; syncFillMode(fillMode)
+    fillColor = a.fillColor ?? '#ffcc00'; syncFillColor(fillColor)
+    fillColorA = a.fillColorA ?? '#ffcc00'; syncFillColorA(fillColorA)
+    fillColorB = a.fillColorB ?? 'transparent'; syncFillColorB(fillColorB)
+    fillGradientDir = a.fillGradientDir ?? 'h'; syncFillGradientDir(fillGradientDir)
+    fillOpacity = a.fillOpacity ?? 100; syncFillOpacity(fillOpacity)
+    fillBorderEnabled = a.fillBorder !== false; syncFillBorder(fillBorderEnabled)
+  }
   if (t === 'line')   { lineStyle = a.lineStyle; startCap = a.startCap; endCap = a.endCap; syncLineStyle(lineStyle); syncCaps(startCap, endCap) }
   if (t === 'text')   { fontSize = a.fontSize;   syncFontSize(fontSize) }
   if (t === 'number') {
@@ -176,6 +199,74 @@ function syncFontSize(fs) { document.getElementById('fontSizeInput').value = fs 
 function syncNumSize(ns) {
   document.querySelectorAll('.ns-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.ns) === ns))
 }
+// ── Fill colour helpers ────────────────────────────────────────────────────────
+function fillPreviewBg(hex) {
+  return hex === 'transparent'
+    ? 'repeating-conic-gradient(#aaa 0% 25%, #eee 0% 50%) 0 0 / 8px 8px'
+    : hex
+}
+
+function syncFillMode(mode) {
+  document.getElementById('btnFillSolid').classList.toggle('active', mode === 'solid')
+  document.getElementById('btnFillGradient').classList.toggle('active', mode === 'gradient')
+  document.getElementById('fillSolidCtrl').classList.toggle('hidden', mode !== 'solid')
+  document.getElementById('fillGradientCtrl').classList.toggle('hidden', mode !== 'gradient')
+}
+function syncFillColor(hex) {
+  document.querySelectorAll('#fillColorSwatches .fill-swatch').forEach(s => s.classList.toggle('active', s.dataset.hex === hex))
+  const p = document.getElementById('fillColorPreview')
+  if (p) p.style.background = fillPreviewBg(hex)
+}
+function syncFillColorA(hex) {
+  document.querySelectorAll('#fillColorASwatches .fill-swatch').forEach(s => s.classList.toggle('active', s.dataset.hex === hex))
+  const p = document.getElementById('fillColorAPreview')
+  if (p) p.style.background = fillPreviewBg(hex)
+}
+function syncFillColorB(hex) {
+  document.querySelectorAll('#fillColorBSwatches .fill-swatch').forEach(s => s.classList.toggle('active', s.dataset.hex === hex))
+  const p = document.getElementById('fillColorBPreview')
+  if (p) p.style.background = fillPreviewBg(hex)
+}
+function syncFillGradientDir(dir) {
+  document.querySelectorAll('[data-fdir]').forEach(b => b.classList.toggle('active', b.dataset.fdir === dir))
+}
+function syncFillOpacity(val) {
+  const inp = document.getElementById('fillOpacityInput')
+  if (inp) inp.value = val
+}
+function syncFillBorder(enabled) {
+  document.getElementById('btnFillBorderOn').classList.toggle('active', enabled)
+  document.getElementById('btnFillBorderOff').classList.toggle('active', !enabled)
+}
+
+function applyFillMode(mode) {
+  fillMode = mode; syncFillMode(mode)
+  if (selectedId) updateSelectedAnnot({ fillMode: mode })
+}
+function applyFillColor(hex) {
+  fillColor = hex; syncFillColor(hex)
+  if (selectedId) updateSelectedAnnot({ fillColor: hex })
+}
+function applyFillColorA(hex) {
+  fillColorA = hex; syncFillColorA(hex)
+  if (selectedId) updateSelectedAnnot({ fillColorA: hex })
+}
+function applyFillColorB(hex) {
+  fillColorB = hex; syncFillColorB(hex)
+  if (selectedId) updateSelectedAnnot({ fillColorB: hex })
+}
+function applyFillGradientDir(dir) {
+  fillGradientDir = dir; syncFillGradientDir(dir)
+  if (selectedId) updateSelectedAnnot({ fillGradientDir: dir })
+}
+function applyFillOpacity(val) {
+  fillOpacity = val; syncFillOpacity(val)
+  if (selectedId) updateSelectedAnnot({ fillOpacity: val })
+}
+function applyFillBorder(enabled) {
+  fillBorderEnabled = enabled; syncFillBorder(enabled)
+  if (selectedId) updateSelectedAnnot({ fillBorder: enabled })
+}
 
 // Update selected annotation's properties + push history
 function updateSelectedAnnot(props) {
@@ -203,6 +294,80 @@ COLORS.forEach(c => {
 
 // Initialise colour preview + hex field to match the default colour
 syncColor(color)
+
+// ── Fill UI init ───────────────────────────────────────────────────────────────
+// Helper: build colour swatches for a fill slot (solid / A / B)
+// includeTransparent=true adds a checkerboard "透明" swatch at the end
+function buildFillSwatches(containerId, getVal, applyFn, includeTransparent) {
+  const el = document.getElementById(containerId)
+  const items = includeTransparent
+    ? [...COLORS, { hex: 'transparent', name: '透明' }]
+    : COLORS
+  items.forEach(c => {
+    const btn = document.createElement('button')
+    btn.className = 'swatch fill-swatch'
+    btn.dataset.hex = c.hex
+    btn.title       = c.name
+    if (c.hex === 'transparent') {
+      btn.style.background = 'repeating-conic-gradient(#aaa 0% 25%, #eee 0% 50%) 0 0 / 8px 8px'
+    } else {
+      btn.style.background = c.hex
+      if (c.hex === '#ffffff') btn.style.boxShadow = 'inset 0 0 0 1px #555'
+    }
+    btn.classList.toggle('active', c.hex === getVal())
+    btn.addEventListener('click', () => applyFn(c.hex))
+    el.appendChild(btn)
+  })
+}
+
+// Helper: wire a fill-preview square to a native <input type="color">
+function bindFillPicker(previewId, pickerId, getVal, applyFn) {
+  const preview = document.getElementById(previewId)
+  const picker  = document.getElementById(pickerId)
+  preview.style.cursor = 'pointer'
+  preview.addEventListener('click', () => {
+    const v = getVal()
+    picker.value = (v === 'transparent' || !v.startsWith('#')) ? '#ffcc00' : v
+    picker.click()
+  })
+  picker.addEventListener('input', e => applyFn(e.target.value))
+}
+
+buildFillSwatches('fillColorSwatches',  () => fillColor,  applyFillColor,  false)
+buildFillSwatches('fillColorASwatches', () => fillColorA, applyFillColorA, true)
+buildFillSwatches('fillColorBSwatches', () => fillColorB, applyFillColorB, true)
+
+bindFillPicker('fillColorPreview',  'fillNativePicker',  () => fillColor,  applyFillColor)
+bindFillPicker('fillColorAPreview', 'fillNativePickerA', () => fillColorA, applyFillColorA)
+bindFillPicker('fillColorBPreview', 'fillNativePickerB', () => fillColorB, applyFillColorB)
+
+// Mode toggle
+document.getElementById('btnFillSolid').addEventListener('click',    () => applyFillMode('solid'))
+document.getElementById('btnFillGradient').addEventListener('click', () => applyFillMode('gradient'))
+
+// Gradient direction buttons
+document.querySelectorAll('[data-fdir]').forEach(btn =>
+  btn.addEventListener('click', () => applyFillGradientDir(btn.dataset.fdir))
+)
+
+// Opacity input
+document.getElementById('fillOpacityInput').addEventListener('change', e =>
+  applyFillOpacity(Math.max(0, Math.min(100, parseInt(e.target.value) || 0)))
+)
+document.getElementById('fillOpacityInput').addEventListener('keydown', e => e.stopPropagation())
+
+// Border toggle
+document.getElementById('btnFillBorderOn').addEventListener('click',  () => applyFillBorder(true))
+document.getElementById('btnFillBorderOff').addEventListener('click', () => applyFillBorder(false))
+
+// Sync initial state
+syncFillMode(fillMode)
+syncFillColor(fillColor)
+syncFillColorA(fillColorA)
+syncFillColorB(fillColorB)
+syncFillGradientDir(fillGradientDir)
+syncFillOpacity(fillOpacity)
+syncFillBorder(fillBorderEnabled)
 
 // ─── Extend canvas ────────────────────────────────────────────────────────────
 
@@ -756,16 +921,50 @@ function drawOne(ctx, a) {
   ctx.fillStyle   = a.color
   ctx.lineWidth   = a.thickness * viewScale
   switch (a.type) {
-    case 'rect':   drawRect(ctx, a);   break
-    case 'line':   drawLine(ctx, a);   break
-    case 'text':   drawText(ctx, a);   break
-    case 'number': drawNumber(ctx, a); break
+    case 'rect':     drawRect(ctx, a);     break
+    case 'fillrect': drawFillRect(ctx, a); break
+    case 'line':     drawLine(ctx, a);     break
+    case 'text':     drawText(ctx, a);     break
+    case 'number':   drawNumber(ctx, a);   break
   }
   ctx.restore()
 }
 
 function drawRect(ctx, a) {
   ctx.strokeRect(c(a.x), c(a.y), c(a.w), c(a.h))
+}
+
+function resolveGradientColor(col) {
+  return col === 'transparent' ? 'rgba(0,0,0,0)' : (col || 'rgba(0,0,0,0)')
+}
+
+function drawFillRect(ctx, a) {
+  const rx = c(a.x), ry = c(a.y), rw = c(a.w), rh = c(a.h)
+  ctx.save()
+  ctx.globalAlpha = (a.fillOpacity ?? 100) / 100
+
+  if (a.fillMode === 'gradient') {
+    const ca = resolveGradientColor(a.fillColorA ?? '#ffcc00')
+    const cb = resolveGradientColor(a.fillColorB ?? 'transparent')
+    let grad
+    switch (a.fillGradientDir ?? 'h') {
+      case 'h':  grad = ctx.createLinearGradient(rx,      ry,      rx+rw, ry     ); break
+      case 'v':  grad = ctx.createLinearGradient(rx,      ry,      rx,    ry+rh  ); break
+      case 'dr': grad = ctx.createLinearGradient(rx,      ry,      rx+rw, ry+rh  ); break
+      case 'ur': grad = ctx.createLinearGradient(rx,      ry+rh,   rx+rw, ry     ); break
+    }
+    grad.addColorStop(0, ca)
+    grad.addColorStop(1, cb)
+    ctx.fillStyle = grad
+  } else {
+    ctx.fillStyle = a.fillColor ?? '#ffcc00'
+  }
+
+  ctx.fillRect(rx, ry, rw, rh)
+  ctx.restore()
+  if (a.fillBorder !== false) {
+    ctx.strokeRect(rx, ry, rw, rh)
+  }
 }
 
 function drawLine(ctx, a) {
@@ -969,6 +1168,9 @@ function buildPreview() {
   const s = drawStart, e = drawCurrent
   if (tool === 'rect')
     return { ...base, type:'rect', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y) }
+  if (tool === 'fillrect')
+    return { ...base, type:'fillrect', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y),
+             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled }
   if (tool === 'line')
     return { ...base, type:'line', x1:s.x, y1:s.y, x2:e.x, y2:e.y, lineStyle, startCap, endCap }
   return null
@@ -980,6 +1182,12 @@ function commitShape(start, end) {
     const w = Math.abs(end.x - start.x), h = Math.abs(end.y - start.y)
     if (w < 2 || h < 2) return null
     return { ...base, type:'rect', x:Math.min(start.x,end.x), y:Math.min(start.y,end.y), w, h }
+  }
+  if (tool === 'fillrect') {
+    const w = Math.abs(end.x - start.x), h = Math.abs(end.y - start.y)
+    if (w < 2 || h < 2) return null
+    return { ...base, type:'fillrect', x:Math.min(start.x,end.x), y:Math.min(start.y,end.y), w, h,
+             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled }
   }
   if (tool === 'line') {
     if (Math.hypot(end.x-start.x, end.y-start.y) < 2) return null
@@ -1026,6 +1234,7 @@ function recalcNumCount() {
 function bounds(a) {
   switch (a.type) {
     case 'rect':
+    case 'fillrect':
     case 'img':    return { x: a.x, y: a.y, w: a.w, h: a.h }
     case 'line': {
       const minX = Math.min(a.x1,a.x2), maxX = Math.max(a.x1,a.x2)
@@ -1283,6 +1492,7 @@ document.addEventListener('mouseup', e => {
 function moveAnnot(a, dx, dy) {
   switch (a.type) {
     case 'rect':
+    case 'fillrect':
     case 'img':
     case 'text':
     case 'number': a.x += dx; a.y += dy; break
@@ -1392,6 +1602,24 @@ document.addEventListener('keydown', e => {
   if (meta && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); return }
   if (meta && (e.key === 'Z' || (e.key === 'z' && e.shiftKey))) { e.preventDefault(); redo(); return }
   if (meta && e.key === 's') { e.preventDefault(); openSaveModal(); return }
+
+  // Copy/paste for number annotations
+  if (meta && (e.key === 'c' || e.key === 'C')) {
+    const a = annotations.find(x => x.id === selectedId)
+    if (a && a.type === 'number') { annotClipboard = { ...a }; return }
+  }
+  if (meta && (e.key === 'v' || e.key === 'V')) {
+    if (annotClipboard && annotClipboard.type === 'number') {
+      e.preventDefault()
+      const newA = { ...annotClipboard, id: newId(), x: annotClipboard.x + 8, y: annotClipboard.y + 8 }
+      pushHistory()
+      annotations.push(newA)
+      selectedId = newA.id
+      showOptionsForAnnot(newA)
+      renderAnnotations()
+      return
+    }
+  }
   if (meta && (e.key === '=' || e.key === '+')) { e.preventDefault(); setTool('zoom-in');  zoomIn();     return }
   if (meta && e.key === '-')                    { e.preventDefault(); setTool('zoom-out'); zoomOut();    return }
   if (meta && e.key === '0')                    { e.preventDefault(); fitToWindow();                     return }
@@ -1400,8 +1628,9 @@ document.addEventListener('keydown', e => {
 
   switch (e.key) {
     case 'v': case 'V': setTool('select'); break
-    case 'r': case 'R': setTool('rect');   break
-    case 'l': case 'L': setTool('line');   break
+    case 'r': case 'R': setTool('rect');     break
+    case 'b': case 'B': setTool('fillrect'); break
+    case 'l': case 'L': setTool('line');     break
     case 't': case 'T': setTool('text');   break
     case 'n': case 'N': setTool('number'); break
     case 'o': case 'O': document.getElementById('btnOverlayImg').click(); break
@@ -1535,7 +1764,7 @@ function confirmCrop() {
     annotations = annotations.map(a => {
       a = JSON.parse(JSON.stringify(a))
       switch (a.type) {
-        case 'rect': case 'text': case 'number': a.x -= cx; a.y -= cy; break
+        case 'rect': case 'fillrect': case 'text': case 'number': a.x -= cx; a.y -= cy; break
         case 'line': a.x1 -= cx; a.y1 -= cy; a.x2 -= cx; a.y2 -= cy; break
       }
       return a
@@ -1604,6 +1833,7 @@ document.getElementById('btnResizeConfirm').addEventListener('click', () => {
       a = JSON.parse(JSON.stringify(a))
       switch (a.type) {
         case 'rect':
+        case 'fillrect':
           a.x *= sx; a.y *= sy; a.w *= sx; a.h *= sy
           a.thickness = Math.max(1, Math.round(a.thickness * sx))
           break
