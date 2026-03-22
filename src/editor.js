@@ -72,6 +72,18 @@ let fillPrevColorB    = '#333333'    // last non-transparent colorB (for 透 tog
 // Annotation clipboard (for Cmd+C / Cmd+V on number annotations)
 let annotClipboard = null
 
+// Text style (描邊 + 背景色塊)
+let textStrokeColor = '#000000'
+let textStrokeWidth = 0        // 0=none 1=細 2=中 3=粗
+let textBgColor     = '#000000'
+let textBgOpacity   = 0        // 0–100 %
+
+// Shadow (per-tool default; each annotation also stores its own value)
+let rectShadow      = false
+let fillrectShadow  = false
+let textShadow      = false
+let numShadow       = false
+
 // Recent colours (shared across all colour pickers, max 10, session-only)
 let recentColors     = []
 let _rebuildRecentRow = null   // set by initColorPanel
@@ -128,6 +140,22 @@ const textMirrorEl  = document.getElementById('textMirror')
 
 // ─── Utility ─────────────────────────────────────────────────────────────────
 
+// hex + alpha → rgba string
+function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1,3), 16)
+  const g = parseInt(hex.slice(3,5), 16)
+  const b = parseInt(hex.slice(5,7), 16)
+  return `rgba(${r},${g},${b},${alpha})`
+}
+
+// Apply drop-shadow to canvas context (cleared by ctx.restore())
+function setShadow(ctx) {
+  ctx.shadowColor   = 'rgba(0,0,0,0.45)'
+  ctx.shadowBlur    = 8  * viewScale
+  ctx.shadowOffsetX = 3  * viewScale
+  ctx.shadowOffsetY = 3  * viewScale
+}
+
 // WCAG perceived luminance → AA-compliant text colour
 function getTextColor(hex) {
   const r = parseInt(hex.slice(1, 3), 16) / 255
@@ -139,7 +167,7 @@ function getTextColor(hex) {
 // ─── Options bar helpers ──────────────────────────────────────────────────────
 
 function hideAllOptions() {
-  ['grpColor','grpFillColor','grpThickness','grpLineStyle','grpCaps','grpFont','grpNumber','grpZoom','grpCrop'].forEach(id =>
+  ['grpColor','grpFillColor','grpThickness','grpLineStyle','grpCaps','grpFont','grpNumber','grpShadow','grpZoom','grpCrop'].forEach(id =>
     document.getElementById(id).classList.add('hidden')
   )
   document.getElementById('numValueEdit').classList.add('hidden')
@@ -169,8 +197,10 @@ function showOptionsForTool(t) {
   }
   if (['rect','fillrect','line'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
   if (t === 'line')   { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden') }
-  if (t === 'text')   document.getElementById('grpFont').classList.remove('hidden')
-  if (t === 'number') document.getElementById('grpNumber').classList.remove('hidden')
+  if (t === 'text')   { document.getElementById('grpFont').classList.remove('hidden'); syncTextShadowCheck(textShadow) }
+  if (t === 'number') { document.getElementById('grpNumber').classList.remove('hidden'); document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(numShadow) }
+  if (t === 'rect')   { document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(rectShadow) }
+  if (t === 'fillrect') document.getElementById('grpShadow').classList.remove('hidden')
 }
 
 function showOptionsForAnnot(a) {
@@ -181,7 +211,6 @@ function showOptionsForAnnot(a) {
   if (t === 'fillrect') document.getElementById('grpFillColor').classList.remove('hidden')
   if (['rect','fillrect','line'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
   if (t === 'line')   { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden') }
-  if (t === 'text')   document.getElementById('grpFont').classList.remove('hidden')
   if (t === 'number') document.getElementById('grpNumber').classList.remove('hidden')
   // Sync UI state to annotation values
   color = a.color; syncColor(color)
@@ -199,11 +228,29 @@ function showOptionsForAnnot(a) {
     fillBorderColor = a.fillBorderColor ?? '#ffffff'; syncFillBorderColor(fillBorderColor)
   }
   if (t === 'line')   { lineStyle = a.lineStyle; startCap = a.startCap; endCap = a.endCap; syncLineStyle(lineStyle); syncCaps(startCap, endCap) }
-  if (t === 'text')   { fontSize = a.fontSize;   syncFontSize(fontSize) }
+  if (t === 'text') {
+    fontSize        = a.fontSize;                     syncFontSize(fontSize)
+    textStrokeColor = a.textStrokeColor ?? '#000000'; syncTextStrokeColor(textStrokeColor)
+    textStrokeWidth = a.textStrokeWidth ?? 0;         syncTextStrokeWidth(textStrokeWidth)
+    textBgColor     = a.textBgColor     ?? '#000000'; syncTextBgColor(textBgColor)
+    textBgOpacity   = a.textBgOpacity   ?? 0;         syncTextBgOpacity(textBgOpacity)
+    textShadow      = a.shadow ?? false;              syncTextShadowCheck(textShadow)
+    document.getElementById('grpFont').classList.remove('hidden')
+  }
   if (t === 'number') {
-    numSize = a.size ?? 36; syncNumSize(numSize)
+    numSize   = a.size ?? 36; syncNumSize(numSize)
+    numShadow = a.shadow ?? false; syncShadowCheck(numShadow)
     document.getElementById('numValueEdit').classList.remove('hidden')
     document.getElementById('numValueInput').value = a.value
+    document.getElementById('grpShadow').classList.remove('hidden')
+  }
+  if (t === 'rect') {
+    rectShadow = a.shadow ?? false; syncShadowCheck(rectShadow)
+    document.getElementById('grpShadow').classList.remove('hidden')
+  }
+  if (t === 'fillrect') {
+    fillrectShadow = a.shadow ?? false; syncShadowCheck(fillrectShadow)
+    document.getElementById('grpShadow').classList.remove('hidden')
   }
 }
 
@@ -283,6 +330,33 @@ function syncFillBorderColor(hex) {
   if (p) p.style.background = fillPreviewBg(hex)
 }
 
+// ── Text style sync ───────────────────────────────────────────────────────────
+function syncTextStrokeColor(hex) {
+  const p = document.getElementById('textStrokeColorPreview')
+  if (p) p.style.background = hex
+}
+function syncTextStrokeWidth(w) {
+  document.querySelectorAll('.tsw-btn').forEach(b =>
+    b.classList.toggle('active', parseInt(b.dataset.tsw) === w)
+  )
+}
+function syncTextBgColor(hex) {
+  const p = document.getElementById('textBgColorPreview')
+  if (p) p.style.background = hex
+}
+function syncTextBgOpacity(v) {
+  const el = document.getElementById('textBgOpacityInput')
+  if (el) el.value = v
+}
+function syncShadowCheck(val) {
+  const el = document.getElementById('shadowCheck')
+  if (el) el.checked = val
+}
+function syncTextShadowCheck(val) {
+  const el = document.getElementById('textShadowCheck')
+  if (el) el.checked = val
+}
+
 function applyFillMode(mode) {
   fillMode = mode; syncFillMode(mode)
   if (selectedId) updateSelectedAnnot({ fillMode: mode })
@@ -319,6 +393,16 @@ function applyFillBorder(enabled) {
 function applyFillBorderColor(hex) {
   fillBorderColor = hex; syncFillBorderColor(hex)
   if (selectedId) updateSelectedAnnot({ fillBorderColor: hex })
+  pushRecentColor(hex)
+}
+function applyTextStrokeColor(hex) {
+  textStrokeColor = hex; syncTextStrokeColor(hex)
+  if (selectedId) updateSelectedAnnot({ textStrokeColor: hex })
+  pushRecentColor(hex)
+}
+function applyTextBgColor(hex) {
+  textBgColor = hex; syncTextBgColor(hex)
+  if (selectedId) updateSelectedAnnot({ textBgColor: hex })
   pushRecentColor(hex)
 }
 
@@ -768,6 +852,55 @@ document.getElementById('fontSizeInput').addEventListener('input', e => {
   }
 })
 
+// Text stroke width buttons
+document.querySelectorAll('.tsw-btn').forEach(btn =>
+  btn.addEventListener('click', () => {
+    textStrokeWidth = parseInt(btn.dataset.tsw)
+    syncTextStrokeWidth(textStrokeWidth)
+    if (selectedId) updateSelectedAnnot({ textStrokeWidth })
+  })
+)
+
+// Text stroke colour preview
+document.getElementById('textStrokeColorPreview').addEventListener('click', function() {
+  openColorPanel(this, applyTextStrokeColor, () => textStrokeColor)
+})
+
+// Text background colour preview
+document.getElementById('textBgColorPreview').addEventListener('click', function() {
+  openColorPanel(this, applyTextBgColor, () => textBgColor)
+})
+
+// Text background opacity
+document.getElementById('textBgOpacityInput').addEventListener('input', e => {
+  textBgOpacity = Math.max(0, Math.min(100, parseInt(e.target.value) || 0))
+  if (selectedId) updateSelectedAnnot({ textBgOpacity })
+})
+
+// Text shadow checkbox
+document.getElementById('textShadowCheck').addEventListener('change', e => {
+  textShadow = e.target.checked
+  if (selectedId) updateSelectedAnnot({ shadow: textShadow })
+})
+
+// Shared shadow checkbox (rect / fillrect / number)
+document.getElementById('shadowCheck').addEventListener('change', e => {
+  const val = e.target.checked
+  if      (tool === 'rect')     rectShadow     = val
+  else if (tool === 'fillrect') fillrectShadow = val
+  else if (tool === 'number')   numShadow      = val
+  // also reflect selected annotation's tool type when using Select tool
+  if (selectedId) {
+    const a = annotations.find(x => x.id === selectedId)
+    if (a) {
+      if (a.type === 'rect')     rectShadow     = val
+      if (a.type === 'fillrect') fillrectShadow = val
+      if (a.type === 'number')   numShadow      = val
+      updateSelectedAnnot({ shadow: val })
+    }
+  }
+})
+
 // Number size
 document.querySelectorAll('.ns-btn').forEach(btn =>
   btn.addEventListener('click', () => {
@@ -1056,6 +1189,7 @@ function drawOne(ctx, a) {
 }
 
 function drawRect(ctx, a) {
+  if (a.shadow) setShadow(ctx)
   ctx.strokeRect(c(a.x), c(a.y), c(a.w), c(a.h))
 }
 
@@ -1066,6 +1200,7 @@ function resolveGradientColor(col) {
 function drawFillRect(ctx, a) {
   const rx = c(a.x), ry = c(a.y), rw = c(a.w), rh = c(a.h)
   ctx.save()
+  if (a.shadow) setShadow(ctx)
   ctx.globalAlpha = (a.fillOpacity ?? 100) / 100
 
   if (a.fillMode === 'gradient') {
@@ -1120,19 +1255,48 @@ function drawCap(ctx, type, fx, fy, tx, ty, col, sz) {
 }
 
 function drawText(ctx, a) {
-  const fs = a.fontSize * viewScale
+  const fs    = a.fontSize * viewScale
+  const lines = a.content.split('\n')
   ctx.font         = `${fs}px -apple-system, "Helvetica Neue", sans-serif`
-  ctx.fillStyle    = a.color
   ctx.textAlign    = 'left'
   ctx.textBaseline = 'top'
-  a.content.split('\n').forEach((line, i) => ctx.fillText(line, c(a.x), c(a.y) + i * fs * 1.25))
+
+  // Background colour block (drawn first, shadow applied here if enabled)
+  const bgOpacity = a.textBgOpacity ?? 0
+  if (bgOpacity > 0) {
+    ctx.save()
+    if (a.shadow) setShadow(ctx)
+    const maxW = Math.max(...lines.map(l => ctx.measureText(l).width))
+    ctx.fillStyle = hexToRgba(a.textBgColor ?? '#000000', bgOpacity / 100)
+    ctx.fillRect(c(a.x) - 3, c(a.y) - 3, maxW + 6, lines.length * fs * 1.25 + 6)
+    ctx.restore()
+  }
+
+  // Stroke (outline) — no shadow on stroke layer
+  const strokeW = a.textStrokeWidth ?? 0
+  if (strokeW > 0) {
+    ctx.save()
+    ctx.strokeStyle = a.textStrokeColor ?? '#000000'
+    ctx.lineWidth   = strokeW * viewScale
+    ctx.lineJoin    = 'round'
+    lines.forEach((line, i) => ctx.strokeText(line, c(a.x), c(a.y) + i * fs * 1.25))
+    ctx.restore()
+  }
+
+  // Fill text (shadow applied here when no background)
+  if (a.shadow && bgOpacity === 0) setShadow(ctx)
+  ctx.fillStyle = a.color
+  lines.forEach((line, i) => ctx.fillText(line, c(a.x), c(a.y) + i * fs * 1.25))
 }
 
 function drawNumber(ctx, a) {
   const r  = (a.size ?? 14) * viewScale
   const cx = c(a.x), cy = c(a.y)
+  if (a.shadow) setShadow(ctx)
   ctx.fillStyle = a.color
   ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill()
+  // Clear shadow before inner text so it doesn't cast its own shadow
+  ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0
   ctx.fillStyle    = getTextColor(a.color)
   ctx.font         = `bold ${Math.round(r * 0.9)}px -apple-system`
   ctx.textAlign    = 'center'
@@ -1293,10 +1457,10 @@ function buildPreview() {
   const base = { id: '_p', color, thickness }
   const s = drawStart, e = drawCurrent
   if (tool === 'rect')
-    return { ...base, type:'rect', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y) }
+    return { ...base, type:'rect', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y), shadow: rectShadow }
   if (tool === 'fillrect')
     return { ...base, type:'fillrect', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y),
-             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled, fillBorderColor }
+             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled, fillBorderColor, shadow: fillrectShadow }
   if (tool === 'line')
     return { ...base, type:'line', x1:s.x, y1:s.y, x2:e.x, y2:e.y, lineStyle, startCap, endCap }
   return null
@@ -1307,13 +1471,13 @@ function commitShape(start, end) {
   if (tool === 'rect') {
     const w = Math.abs(end.x - start.x), h = Math.abs(end.y - start.y)
     if (w < 2 || h < 2) return null
-    return { ...base, type:'rect', x:Math.min(start.x,end.x), y:Math.min(start.y,end.y), w, h }
+    return { ...base, type:'rect', x:Math.min(start.x,end.x), y:Math.min(start.y,end.y), w, h, shadow: rectShadow }
   }
   if (tool === 'fillrect') {
     const w = Math.abs(end.x - start.x), h = Math.abs(end.y - start.y)
     if (w < 2 || h < 2) return null
     return { ...base, type:'fillrect', x:Math.min(start.x,end.x), y:Math.min(start.y,end.y), w, h,
-             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled, fillBorderColor }
+             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled, fillBorderColor, shadow: fillrectShadow }
   }
   if (tool === 'line') {
     if (Math.hypot(end.x-start.x, end.y-start.y) < 2) return null
@@ -1459,7 +1623,7 @@ annotCanvas.addEventListener('mousedown', e => {
 
   if (tool === 'number') {
     pushHistory()
-    annotations.push({ id:newId(), type:'number', color, thickness, x:pos.x, y:pos.y, value:numCount++, size:numSize })
+    annotations.push({ id:newId(), type:'number', color, thickness, x:pos.x, y:pos.y, value:numCount++, size:numSize, shadow: numShadow })
     renderAnnotations()
     return
   }
@@ -1676,7 +1840,8 @@ function commitText() {
   textEditOrig  = null   // discard original; new content replaces it
   if (content.trim()) {
     pushHistory()
-    annotations.push({ id:newId(), type:'text', color, fontSize, x:textPos.x, y:textPos.y, content })
+    annotations.push({ id:newId(), type:'text', color, fontSize, x:textPos.x, y:textPos.y, content,
+                       textStrokeColor, textStrokeWidth, textBgColor, textBgOpacity, shadow: textShadow })
     renderAnnotations()
   }
   _closeTextInput()

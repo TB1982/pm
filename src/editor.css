@@ -778,3 +778,41 @@ body {
   transform-origin: center;
   pointer-events: none;
 }
+
+/* ─── Text style controls ────────────────────────────────────────────────── */
+
+/* Stroke-width buttons reuse .sz-btn sizing but need their own selector */
+.tsw-btn {
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid #444;
+  background: #2a2a2a;
+  color: #ccc;
+  font-size: 11px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.tsw-btn.active {
+  background: #4a90d9;
+  border-color: #4a90d9;
+  color: #fff;
+}
+.tsw-btn:hover:not(.active) { background: #383838; }
+
+/* Shadow checkbox label */
+.shadow-lbl {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #ccc;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.shadow-lbl input[type="checkbox"] {
+  width: 13px;
+  height: 13px;
+  accent-color: #4a90d9;
+  cursor: pointer;
+}
