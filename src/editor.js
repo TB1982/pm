@@ -280,7 +280,7 @@ function applyColor(hex) {
   color = hex
   syncColor(hex)
   if (selectedId) updateSelectedAnnot({ color: hex })
-  if (textActive) textInputEl.style.color = hex
+  if (textActive) { textInputEl.style.color = hex; renderAnnotations() }
   pushRecentColor(hex)
 }
 function syncThickness(t) {
@@ -418,6 +418,7 @@ function applyFillBorderColor(hex) {
 function applyTextStrokeColor(hex) {
   textStrokeColor = hex; syncTextStrokeColor(hex)
   if (selectedId) updateSelectedAnnot({ textStrokeColor: hex })
+  if (textActive) renderAnnotations()
   pushRecentColor(hex)
 }
 function applyTextBgColor(hex) {
@@ -425,10 +426,12 @@ function applyTextBgColor(hex) {
     // 選「透明」= 關閉背景（將 opacity 歸零）
     textBgOpacity = 0; syncTextBgOpacity(0)
     if (selectedId) updateSelectedAnnot({ textBgOpacity: 0 })
+    if (textActive) renderAnnotations()
     return
   }
   textBgColor = hex; syncTextBgColor(hex)
   if (selectedId) updateSelectedAnnot({ textBgColor: hex })
+  if (textActive) renderAnnotations()
   pushRecentColor(hex)
 }
 
@@ -884,6 +887,7 @@ document.querySelectorAll('.tsw-btn').forEach(btn =>
     textStrokeWidth = parseInt(btn.dataset.tsw)
     syncTextStrokeWidth(textStrokeWidth)
     if (selectedId) updateSelectedAnnot({ textStrokeWidth })
+    if (textActive) renderAnnotations()
   })
 )
 
@@ -901,12 +905,14 @@ document.getElementById('textBgColorPreview').addEventListener('click', function
 document.getElementById('textBgOpacityInput').addEventListener('input', e => {
   textBgOpacity = Math.max(0, Math.min(100, parseInt(e.target.value) || 0))
   if (selectedId) updateSelectedAnnot({ textBgOpacity })
+  if (textActive) renderAnnotations()
 })
 
 // Text shadow checkbox
 document.getElementById('textShadowCheck').addEventListener('change', e => {
   textShadow = e.target.checked
   if (selectedId) updateSelectedAnnot({ shadow: textShadow })
+  if (textActive) renderAnnotations()
 })
 
 // B / I / U toggles
@@ -1197,6 +1203,21 @@ function renderAnnotations() {
         annotCtx.restore()
       })
     }
+  }
+
+  // 輸入中的文字即時預覽：在 canvas 畫出背景色塊、描邊、陰影效果，
+  // textarea 的文字字元疊在正上方（定位相同），不會跑位
+  if (textActive && textPos) {
+    const previewContent = textInputEl.value || ' '
+    annotCtx.save()
+    drawText(annotCtx, {
+      type: 'text', color, fontSize,
+      x: textPos.x, y: textPos.y, content: previewContent,
+      textStrokeColor, textStrokeWidth, textBgColor, textBgOpacity,
+      shadow: textShadow,
+      bold: textBold, italic: textItalic, underline: textUnderline, strikethrough: textStrikethrough,
+    })
+    annotCtx.restore()
   }
 }
 
