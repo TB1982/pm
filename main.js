@@ -98,12 +98,44 @@ function openEditorWindow(imagePath) {
 
 // ─── IPC: modal resize ────────────────────────────────────────────────────────
 
+let savedToolbarBounds = null   // snapshot before modal expansion
+
 ipcMain.handle('resize-for-modal', (_, { width, height }) => {
-  mainWindow.setSize(width, height)
+  const [x, y] = mainWindow.getPosition()
+  savedToolbarBounds = { x, y }   // remember original toolbar position
+
+  const display = screen.getDisplayNearestPoint({ x, y })
+  const db = display.bounds
+
+  // Horizontal: if not enough room to the right, shift left
+  let newX = x
+  if (newX + width > db.x + db.width) {
+    newX = db.x + db.width - width
+    if (newX < db.x) newX = db.x
+  }
+
+  // Vertical: if not enough room below, grow upward (anchor toolbar bottom edge)
+  let newY = y
+  if (y + height > db.y + db.height) {
+    newY = y + TOOLBAR_H - height
+    if (newY < db.y) newY = db.y
+  }
+
+  mainWindow.setBounds({ x: newX, y: newY, width, height })
 })
 
 ipcMain.handle('resize-to-toolbar', () => {
-  mainWindow.setSize(TOOLBAR_W, TOOLBAR_H)
+  if (savedToolbarBounds) {
+    mainWindow.setBounds({
+      x: savedToolbarBounds.x,
+      y: savedToolbarBounds.y,
+      width:  TOOLBAR_W,
+      height: TOOLBAR_H
+    })
+    savedToolbarBounds = null
+  } else {
+    mainWindow.setSize(TOOLBAR_W, TOOLBAR_H)
+  }
 })
 
 // ─── Save final image (called from editor renderer after burn-in) ─────────────
