@@ -177,6 +177,7 @@ ipcMain.handle('open-image-file', async (event) => {
     properties: ['openFile']
   })
   if (result.canceled || result.filePaths.length === 0) return
+  mainWindow.hide()
   openEditorWindow(result.filePaths[0])
 })
 
