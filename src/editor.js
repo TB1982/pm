@@ -127,6 +127,7 @@ function showOptionsForTool(t) {
 
 function showOptionsForAnnot(a) {
   hideAllOptions()
+  if (a.type === 'img') return   // overlay image has no editable colour/thickness options
   const t = a.type
   document.getElementById('grpColor').classList.remove('hidden')
   if (['rect','line'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
@@ -202,6 +203,59 @@ COLORS.forEach(c => {
 
 // Initialise colour preview + hex field to match the default colour
 syncColor(color)
+
+// ─── Overlay image (E3) ───────────────────────────────────────────────────────
+
+;(function initOverlayImg() {
+  // Use a hidden <input type="file"> — no IPC needed in this renderer context
+  const fileInput = document.createElement('input')
+  fileInput.type    = 'file'
+  fileInput.accept  = 'image/png,image/jpeg,image/webp,image/gif,image/svg+xml'
+  fileInput.style.display = 'none'
+  document.body.appendChild(fileInput)
+
+  document.getElementById('btnOverlayImg').addEventListener('click', () => {
+    if (annotations.some(a => a.type === 'img')) {
+      showToast('請先刪除現有疊入圖（Delete 鍵），再插入新圖', true)
+      return
+    }
+    fileInput.click()
+  })
+
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files[0]
+    if (!file) return
+    fileInput.value = ''   // allow re-selecting the same file next time
+
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      const src = ev.target.result
+      const tempImg = new Image()
+      tempImg.onload = () => {
+        const nw = tempImg.naturalWidth
+        const nh = tempImg.naturalHeight
+        // Default size: fit within 50% of base image; never exceed natural size
+        const scale = Math.min(1, (imgWidth * 0.5) / nw, (imgHeight * 0.5) / nh)
+        const w = Math.max(10, Math.round(nw * scale))
+        const h = Math.max(10, Math.round(nh * scale))
+        // Centre on base image
+        const x = Math.round((imgWidth  - w) / 2)
+        const y = Math.round((imgHeight - h) / 2)
+
+        const id = newId()
+        _imgCache.set(id, tempImg)   // pre-populate cache so first render is instant
+        pushHistory()
+        annotations.push({ id, type: 'img', x, y, w, h, src, aspectRatio: nw / nh })
+        setTool('select')
+        selectedId = id              // set AFTER setTool (setTool clears selectedId)
+        renderAnnotations()
+        showToast('疊入圖片已插入，拖動可移動，拖角落可等比縮放')
+      }
+      tempImg.src = src
+    }
+    reader.readAsDataURL(file)
+  })
+})()
 
 // Eyedropper
 ;(function initEyedropper() {
@@ -493,6 +547,21 @@ function c(v) { return v * viewScale }
 let _annId = 0
 function newId() { return `a${++_annId}` }
 
+// ─── Overlay-image cache ───────────────────────────────────────────────────────
+// Annotations are plain JSON objects; HTMLImageElement is kept separately.
+
+const _imgCache = new Map()
+
+function getImg(a) {
+  if (!_imgCache.has(a.id)) {
+    const img = new Image()
+    _imgCache.set(a.id, img)
+    img.onload = () => renderAnnotations()
+    img.src = a.src
+  }
+  return _imgCache.get(a.id)
+}
+
 // ─── Rendering ────────────────────────────────────────────────────────────────
 
 function renderAnnotations() {
@@ -543,6 +612,13 @@ function renderAnnotations() {
 }
 
 function drawOne(ctx, a) {
+  if (a.type === 'img') {
+    const img = getImg(a)
+    if (img.complete && img.naturalWidth > 0) {
+      ctx.drawImage(img, c(a.x), c(a.y), c(a.w), c(a.h))
+    }
+    return
+  }
   ctx.save()
   ctx.strokeStyle = a.color
   ctx.fillStyle   = a.color
@@ -610,7 +686,7 @@ function drawNumber(ctx, a) {
 // ─── Resize handles ───────────────────────────────────────────────────────────
 
 function getHandles(a) {
-  if (a.type === 'rect') {
+  if (a.type === 'rect' || a.type === 'img') {
     const { x, y, w, h } = a
     const mx = x + w / 2, my = y + h / 2
     return [
@@ -647,7 +723,7 @@ function startResize(hId, a) {
   if (a.type === 'number') {
     info.cx = a.x; info.cy = a.y
   }
-  if (a.type === 'rect') {
+  if (a.type === 'rect' || a.type === 'img') {
     const { x, y, w, h } = a
     switch (hId) {
       case 'nw': info.fixX = x+w; info.fixY = y+h; break
@@ -666,6 +742,43 @@ function startResize(hId, a) {
 
 function applyResize(a, pos) {
   const h = resizeHandle
+
+  if (a.type === 'img') {
+    const ar = a.aspectRatio
+    const corners = ['nw', 'ne', 'se', 'sw']
+    if (corners.includes(h.id)) {
+      // Corner drag: lock aspect ratio — opposite corner stays fixed
+      let newW
+      switch (h.id) {
+        case 'se': newW = Math.max(10, pos.x - h.fixX);   break
+        case 'sw': newW = Math.max(10, h.fixX - pos.x);   break
+        case 'ne': newW = Math.max(10, pos.x - h.fixX);   break
+        case 'nw': newW = Math.max(10, h.fixX - pos.x);   break
+      }
+      const newH = newW / ar
+      switch (h.id) {
+        case 'se': a.x = h.fixX;        a.y = h.fixY;        break
+        case 'sw': a.x = h.fixX - newW; a.y = h.fixY;        break
+        case 'ne': a.x = h.fixX;        a.y = h.fixY - newH; break
+        case 'nw': a.x = h.fixX - newW; a.y = h.fixY - newH; break
+      }
+      a.w = newW; a.h = newH
+    } else {
+      // Edge drag: free resize (allows stretching)
+      let x1, y1, x2, y2
+      switch (h.id) {
+        case 'n': x1=h.fixX; y1=pos.y;   x2=h.fixX+h.fixW; y2=h.fixY;        break
+        case 's': x1=h.fixX; y1=h.fixY;  x2=h.fixX+h.fixW; y2=pos.y;         break
+        case 'e': x1=h.fixX; y1=h.fixY;  x2=pos.x;         y2=h.fixY+h.fixH; break
+        case 'w': x1=pos.x;  y1=h.fixY;  x2=h.fixX;        y2=h.fixY+h.fixH; break
+      }
+      a.x = Math.min(x1, x2); a.y = Math.min(y1, y2)
+      a.w = Math.max(10, Math.abs(x2 - x1))
+      a.h = Math.max(10, Math.abs(y2 - y1))
+    }
+    return
+  }
+
   if (a.type === 'rect') {
     let x1, y1, x2, y2
     switch (h.id) {
@@ -780,7 +893,8 @@ function recalcNumCount() {
 
 function bounds(a) {
   switch (a.type) {
-    case 'rect':   return { x: a.x, y: a.y, w: a.w, h: a.h }
+    case 'rect':
+    case 'img':    return { x: a.x, y: a.y, w: a.w, h: a.h }
     case 'line': {
       const minX = Math.min(a.x1,a.x2), maxX = Math.max(a.x1,a.x2)
       const minY = Math.min(a.y1,a.y2), maxY = Math.max(a.y1,a.y2)
@@ -1037,6 +1151,7 @@ document.addEventListener('mouseup', e => {
 function moveAnnot(a, dx, dy) {
   switch (a.type) {
     case 'rect':
+    case 'img':
     case 'text':
     case 'number': a.x += dx; a.y += dy; break
     case 'line':   a.x1 += dx; a.y1 += dy; a.x2 += dx; a.y2 += dy; break
@@ -1157,6 +1272,7 @@ document.addEventListener('keydown', e => {
     case 'l': case 'L': setTool('line');   break
     case 't': case 'T': setTool('text');   break
     case 'n': case 'N': setTool('number'); break
+    case 'o': case 'O': document.getElementById('btnOverlayImg').click(); break
     case 'c': case 'C': setTool('crop');   break
     case 's': case 'S': openResizeModal(); break
     case 'Escape':
