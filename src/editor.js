@@ -79,8 +79,7 @@ let _rebuildRecentRow = null   // set by initColorPanel
 function pushRecentColor(hex) {
   if (!hex || hex === 'transparent') return
   const norm = hex.toLowerCase()
-  const idx  = recentColors.indexOf(norm)
-  if (idx !== -1) recentColors.splice(idx, 1)
+  if (recentColors.includes(norm)) return   // already present — keep its position
   recentColors.unshift(norm)
   if (recentColors.length > 10) recentColors.length = 10
   if (_rebuildRecentRow) _rebuildRecentRow()
