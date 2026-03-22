@@ -148,6 +148,16 @@ function showOptionsForAnnot(a) {
 // Sync UI controls
 function syncColor(col) {
   document.querySelectorAll('.swatch').forEach(s => s.classList.toggle('active', s.dataset.hex === col))
+  const hexInput = document.getElementById('hexInput')
+  if (hexInput) hexInput.value = col.replace(/^#/, '').toUpperCase()
+}
+
+// Central colour-apply helper — use this instead of setting `color` directly
+function applyColor(hex) {
+  color = hex
+  syncColor(hex)
+  if (selectedId) updateSelectedAnnot({ color: hex })
+  if (textActive) textInputEl.style.color = hex
 }
 function syncThickness(t) {
   document.querySelectorAll('.sz-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.sz) === t))
@@ -184,14 +194,60 @@ COLORS.forEach(c => {
   btn.dataset.hex   = c.hex
   btn.title         = c.name
   if (c.hex === '#ffffff') btn.style.boxShadow = 'inset 0 0 0 1px #555'
-  btn.addEventListener('click', () => {
-    color = c.hex
-    syncColor(color)
-    if (selectedId) updateSelectedAnnot({ color })
-    if (textActive) textInputEl.style.color = color
-  })
+  btn.addEventListener('click', () => applyColor(c.hex))
   swatchesEl.appendChild(btn)
 })
+
+// Eyedropper
+;(function initEyedropper() {
+  const btn    = document.getElementById('btnEyedropper')
+  const native = document.getElementById('nativeColorPicker')
+
+  btn.addEventListener('click', async () => {
+    if (window.EyeDropper) {
+      // Chromium native eyedropper — lets user pick any pixel on screen
+      btn.classList.add('active')
+      try {
+        const { sRGBHex } = await new EyeDropper().open()
+        applyColor(sRGBHex)
+      } catch {
+        // user pressed Escape — silently ignore
+      } finally {
+        btn.classList.remove('active')
+      }
+    } else {
+      // Fallback: OS native colour picker (macOS includes its own eyedropper)
+      native.value = color
+      native.click()
+    }
+  })
+
+  native.addEventListener('input', () => applyColor(native.value))
+})()
+
+// Hex colour input
+;(function initHexInput() {
+  const input = document.getElementById('hexInput')
+
+  // Block editor keyboard shortcuts while the field is focused
+  input.addEventListener('keydown', (e) => e.stopPropagation())
+
+  // Sanitise typing: only allow hex chars; apply when 6 chars reached
+  input.addEventListener('input', () => {
+    const clean = input.value.replace(/[^0-9a-fA-F]/g, '')
+    input.value  = clean.toUpperCase()
+    if (clean.length === 6) applyColor('#' + clean)
+  })
+
+  // Handle paste: strip leading # and non-hex chars
+  input.addEventListener('paste', (e) => {
+    e.preventDefault()
+    const text  = (e.clipboardData || window.clipboardData).getData('text')
+    const clean = text.replace(/^#/, '').replace(/[^0-9a-fA-F]/g, '').slice(0, 6)
+    input.value = clean.toUpperCase()
+    if (clean.length === 6) applyColor('#' + clean)
+  })
+})()
 
 // Thickness
 document.querySelectorAll('.sz-btn').forEach(btn =>
