@@ -419,8 +419,17 @@ async function runConversion(files) {
   const ok  = results.filter(r => r.success).length
   const err = results.length - ok
   if (err > 0) {
+    // 只保留失敗的檔案，方便重試
+    const failedPaths = results.filter(r => !r.success).map(r => r.path)
+    batchFiles = batchFiles.filter(p => failedPaths.includes(p))
+    renderFileList()
+    updateConditionalRows()
     showToast(`完成：${ok} 個成功，${err} 個失敗`, true)
   } else {
+    // 全部成功 → 清空佇列
+    batchFiles = []
+    renderFileList()
+    updateConditionalRows()
     showToast(`已轉換 ${ok} 個檔案`)
   }
 }
