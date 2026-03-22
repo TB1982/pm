@@ -72,6 +72,19 @@ let fillPrevColorB    = '#333333'    // last non-transparent colorB (for 透 tog
 // Annotation clipboard (for Cmd+C / Cmd+V on number annotations)
 let annotClipboard = null
 
+// Recent colours (shared across all colour pickers, max 10, session-only)
+let recentColors     = []
+let _rebuildRecentRow = null   // set by initColorPanel
+
+function pushRecentColor(hex) {
+  if (!hex || hex === 'transparent') return
+  const norm = hex.toLowerCase()
+  if (recentColors.includes(norm)) return   // already present — keep its position
+  recentColors.unshift(norm)
+  if (recentColors.length > 10) recentColors.length = 10
+  if (_rebuildRecentRow) _rebuildRecentRow()
+}
+
 // Drawing
 let isDrawing   = false
 let drawStart   = null
@@ -206,6 +219,7 @@ function applyColor(hex) {
   syncColor(hex)
   if (selectedId) updateSelectedAnnot({ color: hex })
   if (textActive) textInputEl.style.color = hex
+  pushRecentColor(hex)
 }
 function syncThickness(t) {
   document.querySelectorAll('.sz-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.sz) === t))
@@ -276,16 +290,19 @@ function applyFillMode(mode) {
 function applyFillColor(hex) {
   fillColor = hex; syncFillColor(hex)
   if (selectedId) updateSelectedAnnot({ fillColor: hex })
+  pushRecentColor(hex)
 }
 function applyFillColorA(hex) {
   if (hex !== 'transparent') fillPrevColorA = hex
   fillColorA = hex; syncFillColorA(hex)
   if (selectedId) updateSelectedAnnot({ fillColorA: hex })
+  pushRecentColor(hex)
 }
 function applyFillColorB(hex) {
   if (hex !== 'transparent') fillPrevColorB = hex
   fillColorB = hex; syncFillColorB(hex)
   if (selectedId) updateSelectedAnnot({ fillColorB: hex })
+  pushRecentColor(hex)
 }
 function applyFillGradientDir(dir) {
   fillGradientDir = dir; syncFillGradientDir(dir)
@@ -302,6 +319,7 @@ function applyFillBorder(enabled) {
 function applyFillBorderColor(hex) {
   fillBorderColor = hex; syncFillBorderColor(hex)
   if (selectedId) updateSelectedAnnot({ fillBorderColor: hex })
+  pushRecentColor(hex)
 }
 
 // Update selected annotation's properties + push history
@@ -661,6 +679,24 @@ function hideColorPanel() {
       cppSyncDisplay('#' + clean.toLowerCase())
     }
   })
+
+  // Build / rebuild recent colours row
+  const recentEl      = document.getElementById('cppRecent')
+  const recentSection = document.getElementById('cppRecentSection')
+  _rebuildRecentRow = function() {
+    recentEl.innerHTML = ''
+    recentSection.style.display = recentColors.length > 0 ? '' : 'none'
+    recentColors.forEach(hex => {
+      const btn = document.createElement('button')
+      btn.className   = 'cpp-swatch'
+      btn.dataset.hex = hex
+      btn.style.background = hex
+      const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16)
+      if (r + g + b > 500) btn.style.boxShadow = 'inset 0 0 0 1px rgba(0,0,0,0.15)'
+      btn.addEventListener('click', () => { if (_cppApplyFn) { _cppApplyFn(hex); cppSyncDisplay(hex) } })
+      recentEl.appendChild(btn)
+    })
+  }
 
   // Panel closes ONLY when user clicks the colour preview again (toggle in openColorPanel).
   // No auto-close on outside click — avoids conflicts with canvas editing actions.
