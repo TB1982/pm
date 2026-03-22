@@ -1,0 +1,26 @@
+{
+  "name": "mac-screenshot-tool",
+  "version": "0.1.0",
+  "description": "Mac screenshot and image editing tool",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test:window": "electron test-window-capture.js",
+    "build": "electron-builder --mac --dmg"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.0.0"
+  },
+  "dependencies": {
+    "sharp": "^0.33.0"
+  },
+  "build": {
+    "appId": "com.yourname.mac-screenshot-tool",
+    "productName": "Screenshot Tool",
+    "mac": {
+      "category": "public.app-category.graphics-design",
+      "target": "dmg"
+    }
+  }
+}
