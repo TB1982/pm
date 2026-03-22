@@ -154,15 +154,23 @@ ipcRenderer.on('capture-result', (_, result) => handleCaptureResult(result))
 
 // ─── Button wiring ────────────────────────────────────────────────────────────
 
-document.getElementById('btnFullscreen').addEventListener('click', doFullscreen)
-document.getElementById('btnRect').addEventListener('click', doRect)
-document.getElementById('btnWindow').addEventListener('click', doWindow)
+// 工具列高亮（一次只有一個按鈕呈現 active 狀態）
+function setToolbarActive(btn) {
+  document.querySelectorAll('.tb-btn').forEach(b => b.classList.remove('tb-btn-highlight'))
+  btn.classList.add('tb-btn-highlight')
+}
 
-document.getElementById('btnWebCapture').addEventListener('click', () => {
+document.getElementById('btnFullscreen').addEventListener('click', e => { setToolbarActive(e.currentTarget); doFullscreen() })
+document.getElementById('btnRect').addEventListener('click',       e => { setToolbarActive(e.currentTarget); doRect() })
+document.getElementById('btnWindow').addEventListener('click',     e => { setToolbarActive(e.currentTarget); doWindow() })
+
+document.getElementById('btnWebCapture').addEventListener('click', e => {
+  setToolbarActive(e.currentTarget)
   showToast('網頁截圖即將推出')
 })
 
-document.getElementById('btnOpenImage').addEventListener('click', () => {
+document.getElementById('btnOpenImage').addEventListener('click', e => {
+  setToolbarActive(e.currentTarget)
   ipcRenderer.invoke('open-image-file')
 })
 
@@ -175,7 +183,8 @@ let warnPreemptive   = false   // true = warning shown before "開始轉換" was
 
 const batchModal = document.getElementById('batchModal')
 
-document.getElementById('btnBatch').addEventListener('click', async () => {
+document.getElementById('btnBatch').addEventListener('click', async e => {
+  setToolbarActive(e.currentTarget)
   await expandForModal(560, 620)
   batchModal.classList.remove('hidden')
 })
@@ -184,6 +193,8 @@ function closeBatch() {
   if (batchRunning) return   // don't close during conversion
   batchModal.classList.add('hidden')
   collapseToToolbar()
+  // 關閉批次轉後，將 active 歸位到矩形截圖（預設模式）
+  setToolbarActive(document.getElementById('btnRect'))
 }
 
 document.getElementById('batchModalClose').addEventListener('click', closeBatch)
@@ -246,17 +257,24 @@ function renderFileList() {
     const name = p.split('/').pop()
     const item = document.createElement('div')
     item.className = 'file-item'
-    item.innerHTML = `<span class="file-name" title="${p}">${name}</span><button class="file-remove" data-idx="${i}">✕</button>`
-    item.querySelector('.file-remove').addEventListener('click', () => {
-      batchFiles.splice(i, 1)
-      renderFileList()
-      updateConditionalRows()
-    })
+    // 不在這裡綁 listener——由下方事件委派統一處理，避免 re-render 後 listener 失效
+    item.innerHTML = `<span class="file-name" title="${p}">${name}</span><button class="file-remove" data-idx="${i}" aria-label="移除 ${name}">✕</button>`
     scroll.appendChild(item)
   })
 
   countEl.textContent = `共 ${batchFiles.length} 個檔案`
 }
+
+// ✕ 事件委派（一次性綁在容器上，re-render 後仍有效）
+document.getElementById('filelistScroll').addEventListener('click', (e) => {
+  const btn = e.target.closest('.file-remove')
+  if (!btn) return
+  const idx = parseInt(btn.dataset.idx, 10)
+  if (isNaN(idx) || idx < 0 || idx >= batchFiles.length) return
+  batchFiles.splice(idx, 1)
+  renderFileList()
+  updateConditionalRows()
+})
 
 // ── Conditional row visibility ─────────────────────────────────────────────
 
