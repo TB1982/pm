@@ -66,6 +66,21 @@
       <button class="reset-btn" id="btnNumReset">重置編號</button>
     </div>
 
+    <div class="opt-group hidden" id="grpZoom">
+      <span class="opt-label">縮放比例</span>
+      <select id="zoomSelect" class="zoom-select">
+        <option value="0.1">10%</option>
+        <option value="0.25">25%</option>
+        <option value="0.5">50%</option>
+        <option value="0.75">75%</option>
+        <option value="1">100%</option>
+        <option value="1.5">150%</option>
+        <option value="2">200%</option>
+        <option value="3">300%</option>
+        <option value="4">400%</option>
+      </select>
+    </div>
+
   </div>
 
   <!-- Body -->
@@ -78,7 +93,11 @@
       <button class="tool-btn active" data-tool="rect"   title="矩形框 (R)">□</button>
       <button class="tool-btn"        data-tool="line"   title="線條 (L)">╱</button>
       <button class="tool-btn"        data-tool="text"   title="文字 (T)">T</button>
-      <button class="tool-btn"        data-tool="number" title="編號 (N)">①</button>
+      <button class="tool-btn"        data-tool="number"   title="編號 (N)">①</button>
+      <div class="tool-sep"></div>
+      <button class="tool-btn"        data-tool="zoom-in"  title="放大 (⌘=)">⊕</button>
+      <button class="tool-btn"        data-tool="zoom-out" title="縮小 (⌘-)">⊖</button>
+      <button class="tool-btn" id="btnFitZoom"              title="適合視窗 (⌘0)">⊟</button>
       <div class="tool-sep"></div>
       <button class="tool-btn" id="btnUndo" title="撤銷 (⌘Z)">↩</button>
       <button class="tool-btn" id="btnRedo" title="重做 (⌘⇧Z)">↪</button>
@@ -86,13 +105,15 @@
 
     <!-- Canvas area -->
     <div class="canvas-area" id="canvasArea">
-      <div class="canvas-wrapper" id="canvasWrapper">
-        <canvas id="baseCanvas"></canvas>
-        <canvas id="annotCanvas"></canvas>
-        <!-- floating text input -->
-        <div id="textInputWrap" class="text-input-wrap hidden">
-          <textarea id="textInput" rows="1" spellcheck="false"></textarea>
-          <span id="textMirror" aria-hidden="true"></span>
+      <div class="canvas-scroll-content">
+        <div class="canvas-wrapper" id="canvasWrapper">
+          <canvas id="baseCanvas"></canvas>
+          <canvas id="annotCanvas"></canvas>
+          <!-- floating text input -->
+          <div id="textInputWrap" class="text-input-wrap hidden">
+            <textarea id="textInput" rows="1" spellcheck="false"></textarea>
+            <span id="textMirror" aria-hidden="true"></span>
+          </div>
         </div>
       </div>
     </div>

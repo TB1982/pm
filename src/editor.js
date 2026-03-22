@@ -20,6 +20,16 @@ let imgElement = null
 let imgWidth   = 0
 let imgHeight  = 0
 let viewScale  = 1    // display pixels per image pixel
+let fitScale   = 1    // scale at which image fits the window
+let userZoomed = false
+
+// Zoom / pan
+let isPanning = false
+let panStart  = null  // { x, y, sl, st, moved }
+
+const MIN_SCALE = 0.1
+const MAX_SCALE = 4.0
+const ZOOM_STEP = 1.25
 
 // Annotation history
 let annotations = []
@@ -84,13 +94,17 @@ function getTextColor(hex) {
 // ─── Options bar helpers ──────────────────────────────────────────────────────
 
 function hideAllOptions() {
-  ['grpColor','grpThickness','grpLineStyle','grpCaps','grpFont','grpNumber'].forEach(id =>
+  ['grpColor','grpThickness','grpLineStyle','grpCaps','grpFont','grpNumber','grpZoom'].forEach(id =>
     document.getElementById(id).classList.add('hidden')
   )
 }
 
 function showOptionsForTool(t) {
   hideAllOptions()
+  if (t === 'zoom-in' || t === 'zoom-out') {
+    document.getElementById('grpZoom').classList.remove('hidden')
+    return
+  }
   if (!['rect','line','text','number'].includes(t)) return
   document.getElementById('grpColor').classList.remove('hidden')
   if (['rect','line'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
@@ -217,10 +231,16 @@ document.getElementById('btnNumReset').addEventListener('click', () => {
   showToast('編號已重置，下一個從 1 開始')
 })
 
-// Tool buttons
+// Tool buttons — zoom-in/out also fire an immediate zoom step
 document.querySelectorAll('.tool-btn[data-tool]').forEach(btn =>
-  btn.addEventListener('click', () => setTool(btn.dataset.tool))
+  btn.addEventListener('click', () => {
+    const t = btn.dataset.tool
+    setTool(t)
+    if (t === 'zoom-in')  zoomIn()
+    if (t === 'zoom-out') zoomOut()
+  })
 )
+document.getElementById('btnFitZoom').addEventListener('click', fitToWindow)
 document.getElementById('btnUndo').addEventListener('click', undo)
 document.getElementById('btnRedo').addEventListener('click', redo)
 
@@ -231,11 +251,16 @@ function setTool(t) {
   tool       = t
   selectedId = null
   isDrawing  = false
+  isPanning  = false
 
   document.querySelectorAll('.tool-btn[data-tool]').forEach(b =>
     b.classList.toggle('active', b.dataset.tool === t)
   )
-  annotCanvas.style.cursor = t === 'select' ? 'default' : 'crosshair'
+
+  if      (t === 'zoom-in')  annotCanvas.style.cursor = 'zoom-in'
+  else if (t === 'zoom-out') annotCanvas.style.cursor = 'zoom-out'
+  else if (t === 'select')   annotCanvas.style.cursor = 'default'
+  else                       annotCanvas.style.cursor = 'crosshair'
 
   if (t === 'select') hideAllOptions()
   else                showOptionsForTool(t)
@@ -251,6 +276,7 @@ ipcRenderer.on('load-image', (_, path) => {
     imgElement = img
     imgWidth   = img.naturalWidth
     imgHeight  = img.naturalHeight
+    userZoomed = false   // always fit new image to window
     document.getElementById('imgInfo').textContent = `${imgWidth} × ${imgHeight} px`
     fitCanvas()
     drawBase()
@@ -262,7 +288,14 @@ ipcRenderer.on('load-image', (_, path) => {
 function fitCanvas() {
   const aw = canvasArea.clientWidth  - 64
   const ah = canvasArea.clientHeight - 64
-  viewScale = Math.min(aw / imgWidth, ah / imgHeight, 1)
+  fitScale = Math.min(aw / imgWidth, ah / imgHeight, 1)
+  if (!userZoomed) {
+    viewScale = fitScale
+    _applyCanvasSize()
+  }
+}
+
+function _applyCanvasSize() {
   const dw = Math.round(imgWidth  * viewScale)
   const dh = Math.round(imgHeight * viewScale)
   baseCanvas.width  = annotCanvas.width  = dw
@@ -270,7 +303,77 @@ function fitCanvas() {
   canvasWrapper.style.width  = dw + 'px'
   canvasWrapper.style.height = dh + 'px'
   document.getElementById('zoomLabel').textContent = Math.round(viewScale * 100) + '%'
+  syncZoomSelect()
 }
+
+// ─── Zoom helpers ─────────────────────────────────────────────────────────────
+
+function applyZoom(newScale, pivotClientX, pivotClientY) {
+  const clamped = Math.max(MIN_SCALE, Math.min(MAX_SCALE, newScale))
+  if (Math.abs(clamped - viewScale) < 0.0001) return
+
+  // Capture image coordinate at pivot before scale change
+  let imgX, imgY
+  const cR = annotCanvas.getBoundingClientRect()
+  if (pivotClientX !== undefined) {
+    imgX = (pivotClientX - cR.left) / viewScale
+    imgY = (pivotClientY - cR.top)  / viewScale
+  } else {
+    // Pivot at centre of the visible canvas-area
+    const aR = canvasArea.getBoundingClientRect()
+    pivotClientX = aR.left + aR.width  / 2
+    pivotClientY = aR.top  + aR.height / 2
+    imgX = (pivotClientX - cR.left) / viewScale
+    imgY = (pivotClientY - cR.top)  / viewScale
+  }
+
+  viewScale  = clamped
+  userZoomed = true
+  _applyCanvasSize()
+  drawBase()
+  renderAnnotations()
+
+  // getBoundingClientRect forces a synchronous layout pass — values are fresh
+  const r2 = annotCanvas.getBoundingClientRect()
+  canvasArea.scrollLeft += r2.left + imgX * viewScale - pivotClientX
+  canvasArea.scrollTop  += r2.top  + imgY * viewScale - pivotClientY
+}
+
+function zoomIn(cx, cy)  { applyZoom(viewScale * ZOOM_STEP, cx, cy) }
+function zoomOut(cx, cy) { applyZoom(viewScale / ZOOM_STEP, cx, cy) }
+
+function fitToWindow() {
+  userZoomed = false
+  viewScale  = fitScale
+  _applyCanvasSize()
+  drawBase()
+  renderAnnotations()
+  canvasArea.scrollLeft = 0
+  canvasArea.scrollTop  = 0
+}
+
+function syncZoomSelect() {
+  const sel = document.getElementById('zoomSelect')
+  if (!sel) return
+  const pct = Math.round(viewScale * 100)
+  for (const opt of sel.options) {
+    if (Math.round(parseFloat(opt.value) * 100) === pct) { sel.value = opt.value; return }
+  }
+  sel.value = ''
+}
+
+// Zoom dropdown
+document.getElementById('zoomSelect').addEventListener('change', e => {
+  applyZoom(parseFloat(e.target.value))
+})
+
+// Wheel / trackpad pinch — ctrlKey is set by macOS for pinch gestures
+canvasArea.addEventListener('wheel', e => {
+  if (!e.ctrlKey) return
+  e.preventDefault()
+  const factor = e.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP
+  applyZoom(viewScale * factor, e.clientX, e.clientY)
+}, { passive: false })
 
 function drawBase() {
   if (!imgElement) return
@@ -280,7 +383,9 @@ function drawBase() {
 
 new ResizeObserver(() => {
   if (!imgElement) return
-  fitCanvas(); drawBase(); renderAnnotations()
+  fitCanvas()   // recalcs fitScale; resizes canvas only when !userZoomed
+  drawBase()
+  renderAnnotations()
 }).observe(canvasArea)
 
 // ─── Coordinate helpers ───────────────────────────────────────────────────────
@@ -582,6 +687,15 @@ annotCanvas.addEventListener('mousedown', e => {
   // If text input is open and user clicks outside the textarea, commit it first
   if (textActive) commitText()
 
+  if (tool === 'zoom-in' || tool === 'zoom-out') {
+    isPanning = true
+    panStart  = { x: e.clientX, y: e.clientY,
+                  sl: canvasArea.scrollLeft, st: canvasArea.scrollTop,
+                  moved: false }
+    annotCanvas.style.cursor = 'grabbing'
+    return
+  }
+
   if (tool === 'select') {
     // 1. Check resize handles on selected annotation
     if (selectedId) {
@@ -629,6 +743,15 @@ annotCanvas.addEventListener('mousedown', e => {
 annotCanvas.addEventListener('mousemove', e => {
   const pos = evToImg(e)
 
+  if (isPanning && panStart) {
+    const dx = e.clientX - panStart.x
+    const dy = e.clientY - panStart.y
+    if (Math.abs(dx) > 2 || Math.abs(dy) > 2) panStart.moved = true
+    canvasArea.scrollLeft = panStart.sl - dx
+    canvasArea.scrollTop  = panStart.st - dy
+    return
+  }
+
   if (isResizing && selectedId) {
     const a = annotations.find(x => x.id === selectedId)
     if (a) applyResize(a, pos)
@@ -667,6 +790,18 @@ annotCanvas.addEventListener('mousemove', e => {
 })
 
 document.addEventListener('mouseup', e => {
+  if (isPanning) {
+    isPanning = false
+    annotCanvas.style.cursor = tool === 'zoom-in' ? 'zoom-in' : 'zoom-out'
+    if (!panStart.moved) {
+      // Short click (no drag) → zoom at cursor position
+      if (tool === 'zoom-in')  zoomIn(e.clientX, e.clientY)
+      if (tool === 'zoom-out') zoomOut(e.clientX, e.clientY)
+    }
+    panStart = null
+    return
+  }
+
   if (isResizing) {
     isResizing = false
     pushHistory()
@@ -797,6 +932,9 @@ document.addEventListener('keydown', e => {
   if (meta && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); return }
   if (meta && (e.key === 'Z' || (e.key === 'z' && e.shiftKey))) { e.preventDefault(); redo(); return }
   if (meta && e.key === 's') { e.preventDefault(); openSaveModal(); return }
+  if (meta && (e.key === '=' || e.key === '+')) { e.preventDefault(); setTool('zoom-in');  zoomIn();     return }
+  if (meta && e.key === '-')                    { e.preventDefault(); setTool('zoom-out'); zoomOut();    return }
+  if (meta && e.key === '0')                    { e.preventDefault(); fitToWindow();                     return }
 
   switch (e.key) {
     case 'v': case 'V': setTool('select'); break

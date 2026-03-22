@@ -211,10 +211,20 @@ body {
 .canvas-area {
   flex: 1;
   overflow: auto;
+  background: #111;
+}
+
+/* Inner flex container: always fills at least the full canvas-area so
+   the wrapper stays centred when the image is small, but grows beyond
+   100% when the image is zoomed in — allowing normal scroll. */
+.canvas-scroll-content {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #111;
+  min-width: 100%;
+  min-height: 100%;
+  box-sizing: border-box;
+  padding: 32px;
 }
 
 .canvas-wrapper {
@@ -273,6 +283,19 @@ body {
   font-family: -apple-system, 'Helvetica Neue', sans-serif;
   line-height: 1.25;
 }
+
+/* Zoom level dropdown */
+.zoom-select {
+  background: #2e2e2e;
+  border: 1px solid #404040;
+  border-radius: 5px;
+  color: #e0e0e0;
+  font-size: 11px;
+  padding: 3px 6px;
+  cursor: pointer;
+  outline: none;
+}
+.zoom-select:hover { border-color: #555; }
 
 /* ─── Bottom bar ─────────────────────────────────────────────────────────── */
 
