@@ -14,12 +14,14 @@ const execAsync = promisify(exec)
 
 // ─── Window dimensions ────────────────────────────────────────────────────────
 
-const TOOLBAR_W  = 440
+const TOOLBAR_W  = 514   // 6 buttons × 72 + 5 gaps × 2 + divider + help + padding
 const TOOLBAR_H  = 68
 const PICKER_W   = 760
 const PICKER_H   = 540
 const HELP_W     = 560
 const HELP_H     = 480
+const BATCH_W    = 560
+const BATCH_H    = 620
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
@@ -176,6 +178,88 @@ ipcMain.handle('open-image-file', async (event) => {
   })
   if (result.canceled || result.filePaths.length === 0) return
   openEditorWindow(result.filePaths[0])
+})
+
+// ─── Batch conversion ─────────────────────────────────────────────────────────
+
+ipcMain.handle('select-batch-files', async (event) => {
+  const win = BrowserWindow.fromWebContents(event.sender)
+  const result = await dialog.showOpenDialog(win, {
+    filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg'] }],
+    properties: ['openFile', 'multiSelections']
+  })
+  if (result.canceled) return []
+  return result.filePaths
+})
+
+ipcMain.handle('select-output-dir', async (event) => {
+  const win = BrowserWindow.fromWebContents(event.sender)
+  const result = await dialog.showOpenDialog(win, {
+    properties: ['openDirectory', 'createDirectory']
+  })
+  if (result.canceled) return null
+  return result.filePaths[0]
+})
+
+ipcMain.handle('batch-convert', async (event, {
+  files, format, quality, svgWidth, resize, outputMode, outputDir, deleteOriginals
+}) => {
+  const results = []
+
+  for (const filePath of files) {
+    const ext  = path.extname(filePath).toLowerCase().slice(1)
+    const base = path.basename(filePath, path.extname(filePath))
+    const outExt  = format === 'jpg' ? 'jpg' : format
+    const destDir = outputMode === 'same' ? path.dirname(filePath) : outputDir
+    const outPath = path.join(destDir, `${base}.${outExt}`)
+
+    try {
+      // Build sharp pipeline
+      let s
+      if (ext === 'svg') {
+        // Render SVG at target width; density=150 avoids blurry output
+        s = sharp(filePath, { density: 150 }).resize({ width: svgWidth }).withMetadata()
+      } else {
+        const buf = await fs.promises.readFile(filePath)
+        s = sharp(buf).withMetadata()
+      }
+
+      // Optional resize (after SVG rasterisation)
+      if (resize) {
+        if (resize.axis === 'width') {
+          s = s.resize({ width: resize.value, height: null, fit: 'inside' })
+        } else {
+          s = s.resize({ width: null, height: resize.value, fit: 'inside' })
+        }
+      }
+
+      // Format
+      if      (format === 'jpg')  s = s.jpeg({ quality })
+      else if (format === 'webp') s = s.webp({ quality })
+      else if (format === 'gif')  s = s.gif()
+      else                        s = s.png()
+
+      await s.toFile(outPath)
+
+      if (deleteOriginals && filePath !== outPath) {
+        await fs.promises.unlink(filePath)
+      }
+
+      results.push({ path: filePath, outPath, success: true })
+      event.sender.send('batch-progress', {
+        path: filePath, outPath, success: true,
+        done: results.length, total: files.length
+      })
+    } catch (err) {
+      results.push({ path: filePath, success: false, error: err.message })
+      event.sender.send('batch-progress', {
+        path: filePath, success: false, error: err.message,
+        done: results.length, total: files.length
+      })
+    }
+  }
+
+  return results
 })
 
 // ─── Capture helpers ──────────────────────────────────────────────────────────
