@@ -47,13 +47,42 @@
       <input type="color" id="nativeColorPicker" class="native-color-picker" tabindex="-1" aria-hidden="true">
     </div>
 
-    <!-- Fill colour + opacity (色塊工具專用) -->
+    <!-- Fill colour + gradient (色塊工具專用) -->
     <div class="opt-group hidden" id="grpFillColor">
-      <span class="opt-label">填色</span>
-      <div class="color-swatches" id="fillColorSwatches"></div>
-      <div class="color-preview" id="fillColorPreview" title="目前填色"></div>
-      <span class="opt-label" style="margin-left:6px">透明度</span>
-      <input type="number" id="fillOpacityInput" value="50" min="0" max="100" style="width:44px">
+
+      <!-- Mode toggle: 實色 / 漸層 -->
+      <button class="style-btn active" id="btnFillSolid">實色</button>
+      <button class="style-btn"        id="btnFillGradient">漸層</button>
+      <div class="opt-sep"></div>
+
+      <!-- Solid fill controls -->
+      <div id="fillSolidCtrl">
+        <div class="color-swatches" id="fillColorSwatches"></div>
+        <div class="color-preview fill-preview" id="fillColorPreview" title="點擊選任意色"></div>
+        <input type="color" id="fillNativePicker" class="native-color-picker" tabindex="-1" aria-hidden="true">
+      </div>
+
+      <!-- Gradient fill controls (hidden by default) -->
+      <div id="fillGradientCtrl" class="hidden">
+        <span class="opt-label">A</span>
+        <div class="color-swatches" id="fillColorASwatches"></div>
+        <div class="color-preview fill-preview" id="fillColorAPreview" title="點擊選任意色"></div>
+        <input type="color" id="fillNativePickerA" class="native-color-picker" tabindex="-1" aria-hidden="true">
+        <span class="opt-label" style="margin:0 6px;opacity:.6">→</span>
+        <span class="opt-label">B</span>
+        <div class="color-swatches" id="fillColorBSwatches"></div>
+        <div class="color-preview fill-preview" id="fillColorBPreview" title="點擊選任意色"></div>
+        <input type="color" id="fillNativePickerB" class="native-color-picker" tabindex="-1" aria-hidden="true">
+        <div class="opt-sep"></div>
+        <button class="style-btn active" data-fdir="h"  title="左→右">→</button>
+        <button class="style-btn"        data-fdir="v"  title="上→下">↓</button>
+        <button class="style-btn"        data-fdir="dr" title="左上→右下">↘</button>
+        <button class="style-btn"        data-fdir="ur" title="左下→右上">↗</button>
+      </div>
+
+      <div class="opt-sep"></div>
+      <span class="opt-label">透明度</span>
+      <input type="number" id="fillOpacityInput" value="100" min="0" max="100" style="width:44px">
       <span class="opt-label">%</span>
       <div class="opt-sep"></div>
       <span class="opt-label">邊框</span>

@@ -48,8 +48,12 @@ let numCount  = 1
 let numSize   = 14    // radius, image pixels
 
 // Fill rect (色塊工具) state
-let fillColor        = '#ffcc00'
-let fillOpacity      = 50
+let fillMode         = 'solid'       // 'solid' | 'gradient'
+let fillColor        = '#ffcc00'     // solid mode fill colour
+let fillColorA       = '#ffcc00'     // gradient start colour
+let fillColorB       = 'transparent' // gradient end colour ('transparent' or hex)
+let fillGradientDir  = 'h'           // 'h' | 'v' | 'dr' | 'ur'
+let fillOpacity      = 100
 let fillBorderEnabled = true
 
 // Annotation clipboard (for Cmd+C / Cmd+V on number annotations)
@@ -148,9 +152,13 @@ function showOptionsForAnnot(a) {
   color = a.color; syncColor(color)
   if ('thickness' in a) { thickness = a.thickness; syncThickness(thickness) }
   if (t === 'fillrect') {
-    fillColor = a.fillColor; syncFillColor(fillColor)
-    fillOpacity = a.fillOpacity; syncFillOpacity(fillOpacity)
-    fillBorderEnabled = a.fillBorder; syncFillBorder(fillBorderEnabled)
+    fillMode = a.fillMode ?? 'solid'; syncFillMode(fillMode)
+    fillColor = a.fillColor ?? '#ffcc00'; syncFillColor(fillColor)
+    fillColorA = a.fillColorA ?? '#ffcc00'; syncFillColorA(fillColorA)
+    fillColorB = a.fillColorB ?? 'transparent'; syncFillColorB(fillColorB)
+    fillGradientDir = a.fillGradientDir ?? 'h'; syncFillGradientDir(fillGradientDir)
+    fillOpacity = a.fillOpacity ?? 100; syncFillOpacity(fillOpacity)
+    fillBorderEnabled = a.fillBorder !== false; syncFillBorder(fillBorderEnabled)
   }
   if (t === 'line')   { lineStyle = a.lineStyle; startCap = a.startCap; endCap = a.endCap; syncLineStyle(lineStyle); syncCaps(startCap, endCap) }
   if (t === 'text')   { fontSize = a.fontSize;   syncFontSize(fontSize) }
@@ -191,10 +199,36 @@ function syncFontSize(fs) { document.getElementById('fontSizeInput').value = fs 
 function syncNumSize(ns) {
   document.querySelectorAll('.ns-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.ns) === ns))
 }
+// ── Fill colour helpers ────────────────────────────────────────────────────────
+function fillPreviewBg(hex) {
+  return hex === 'transparent'
+    ? 'repeating-conic-gradient(#aaa 0% 25%, #eee 0% 50%) 0 0 / 8px 8px'
+    : hex
+}
+
+function syncFillMode(mode) {
+  document.getElementById('btnFillSolid').classList.toggle('active', mode === 'solid')
+  document.getElementById('btnFillGradient').classList.toggle('active', mode === 'gradient')
+  document.getElementById('fillSolidCtrl').classList.toggle('hidden', mode !== 'solid')
+  document.getElementById('fillGradientCtrl').classList.toggle('hidden', mode !== 'gradient')
+}
 function syncFillColor(hex) {
-  document.querySelectorAll('.fill-swatch').forEach(s => s.classList.toggle('active', s.dataset.hex === hex))
-  const preview = document.getElementById('fillColorPreview')
-  if (preview) preview.style.background = hex
+  document.querySelectorAll('#fillColorSwatches .fill-swatch').forEach(s => s.classList.toggle('active', s.dataset.hex === hex))
+  const p = document.getElementById('fillColorPreview')
+  if (p) p.style.background = fillPreviewBg(hex)
+}
+function syncFillColorA(hex) {
+  document.querySelectorAll('#fillColorASwatches .fill-swatch').forEach(s => s.classList.toggle('active', s.dataset.hex === hex))
+  const p = document.getElementById('fillColorAPreview')
+  if (p) p.style.background = fillPreviewBg(hex)
+}
+function syncFillColorB(hex) {
+  document.querySelectorAll('#fillColorBSwatches .fill-swatch').forEach(s => s.classList.toggle('active', s.dataset.hex === hex))
+  const p = document.getElementById('fillColorBPreview')
+  if (p) p.style.background = fillPreviewBg(hex)
+}
+function syncFillGradientDir(dir) {
+  document.querySelectorAll('[data-fdir]').forEach(b => b.classList.toggle('active', b.dataset.fdir === dir))
 }
 function syncFillOpacity(val) {
   const inp = document.getElementById('fillOpacityInput')
@@ -204,19 +238,33 @@ function syncFillBorder(enabled) {
   document.getElementById('btnFillBorderOn').classList.toggle('active', enabled)
   document.getElementById('btnFillBorderOff').classList.toggle('active', !enabled)
 }
+
+function applyFillMode(mode) {
+  fillMode = mode; syncFillMode(mode)
+  if (selectedId) updateSelectedAnnot({ fillMode: mode })
+}
 function applyFillColor(hex) {
-  fillColor = hex
-  syncFillColor(hex)
+  fillColor = hex; syncFillColor(hex)
   if (selectedId) updateSelectedAnnot({ fillColor: hex })
 }
+function applyFillColorA(hex) {
+  fillColorA = hex; syncFillColorA(hex)
+  if (selectedId) updateSelectedAnnot({ fillColorA: hex })
+}
+function applyFillColorB(hex) {
+  fillColorB = hex; syncFillColorB(hex)
+  if (selectedId) updateSelectedAnnot({ fillColorB: hex })
+}
+function applyFillGradientDir(dir) {
+  fillGradientDir = dir; syncFillGradientDir(dir)
+  if (selectedId) updateSelectedAnnot({ fillGradientDir: dir })
+}
 function applyFillOpacity(val) {
-  fillOpacity = val
-  syncFillOpacity(val)
+  fillOpacity = val; syncFillOpacity(val)
   if (selectedId) updateSelectedAnnot({ fillOpacity: val })
 }
 function applyFillBorder(enabled) {
-  fillBorderEnabled = enabled
-  syncFillBorder(enabled)
+  fillBorderEnabled = enabled; syncFillBorder(enabled)
   if (selectedId) updateSelectedAnnot({ fillBorder: enabled })
 }
 
@@ -247,31 +295,79 @@ COLORS.forEach(c => {
 // Initialise colour preview + hex field to match the default colour
 syncColor(color)
 
-// Fill colour swatches
-const fillSwatchesEl = document.getElementById('fillColorSwatches')
-COLORS.forEach(c => {
-  const btn = document.createElement('button')
-  btn.className     = 'swatch fill-swatch' + (c.hex === fillColor ? ' active' : '')
-  btn.style.background = c.hex
-  btn.dataset.hex   = c.hex
-  btn.title         = c.name
-  if (c.hex === '#ffffff') btn.style.boxShadow = 'inset 0 0 0 1px #555'
-  btn.addEventListener('click', () => applyFillColor(c.hex))
-  fillSwatchesEl.appendChild(btn)
-})
-syncFillColor(fillColor)
-syncFillOpacity(fillOpacity)
-syncFillBorder(fillBorderEnabled)
+// ── Fill UI init ───────────────────────────────────────────────────────────────
+// Helper: build colour swatches for a fill slot (solid / A / B)
+// includeTransparent=true adds a checkerboard "透明" swatch at the end
+function buildFillSwatches(containerId, getVal, applyFn, includeTransparent) {
+  const el = document.getElementById(containerId)
+  const items = includeTransparent
+    ? [...COLORS, { hex: 'transparent', name: '透明' }]
+    : COLORS
+  items.forEach(c => {
+    const btn = document.createElement('button')
+    btn.className = 'swatch fill-swatch'
+    btn.dataset.hex = c.hex
+    btn.title       = c.name
+    if (c.hex === 'transparent') {
+      btn.style.background = 'repeating-conic-gradient(#aaa 0% 25%, #eee 0% 50%) 0 0 / 8px 8px'
+    } else {
+      btn.style.background = c.hex
+      if (c.hex === '#ffffff') btn.style.boxShadow = 'inset 0 0 0 1px #555'
+    }
+    btn.classList.toggle('active', c.hex === getVal())
+    btn.addEventListener('click', () => applyFn(c.hex))
+    el.appendChild(btn)
+  })
+}
 
-// Fill opacity input
-document.getElementById('fillOpacityInput').addEventListener('change', e => {
+// Helper: wire a fill-preview square to a native <input type="color">
+function bindFillPicker(previewId, pickerId, getVal, applyFn) {
+  const preview = document.getElementById(previewId)
+  const picker  = document.getElementById(pickerId)
+  preview.style.cursor = 'pointer'
+  preview.addEventListener('click', () => {
+    const v = getVal()
+    picker.value = (v === 'transparent' || !v.startsWith('#')) ? '#ffcc00' : v
+    picker.click()
+  })
+  picker.addEventListener('input', e => applyFn(e.target.value))
+}
+
+buildFillSwatches('fillColorSwatches',  () => fillColor,  applyFillColor,  false)
+buildFillSwatches('fillColorASwatches', () => fillColorA, applyFillColorA, true)
+buildFillSwatches('fillColorBSwatches', () => fillColorB, applyFillColorB, true)
+
+bindFillPicker('fillColorPreview',  'fillNativePicker',  () => fillColor,  applyFillColor)
+bindFillPicker('fillColorAPreview', 'fillNativePickerA', () => fillColorA, applyFillColorA)
+bindFillPicker('fillColorBPreview', 'fillNativePickerB', () => fillColorB, applyFillColorB)
+
+// Mode toggle
+document.getElementById('btnFillSolid').addEventListener('click',    () => applyFillMode('solid'))
+document.getElementById('btnFillGradient').addEventListener('click', () => applyFillMode('gradient'))
+
+// Gradient direction buttons
+document.querySelectorAll('[data-fdir]').forEach(btn =>
+  btn.addEventListener('click', () => applyFillGradientDir(btn.dataset.fdir))
+)
+
+// Opacity input
+document.getElementById('fillOpacityInput').addEventListener('change', e =>
   applyFillOpacity(Math.max(0, Math.min(100, parseInt(e.target.value) || 0)))
-})
+)
 document.getElementById('fillOpacityInput').addEventListener('keydown', e => e.stopPropagation())
 
-// Fill border toggle
+// Border toggle
 document.getElementById('btnFillBorderOn').addEventListener('click',  () => applyFillBorder(true))
 document.getElementById('btnFillBorderOff').addEventListener('click', () => applyFillBorder(false))
+
+// Sync initial state
+syncFillMode(fillMode)
+syncFillColor(fillColor)
+syncFillColorA(fillColorA)
+syncFillColorB(fillColorB)
+syncFillGradientDir(fillGradientDir)
+syncFillOpacity(fillOpacity)
+syncFillBorder(fillBorderEnabled)
 
 // ─── Extend canvas ────────────────────────────────────────────────────────────
 
@@ -838,11 +934,32 @@ function drawRect(ctx, a) {
   ctx.strokeRect(c(a.x), c(a.y), c(a.w), c(a.h))
 }
 
+function resolveGradientColor(col) {
+  return col === 'transparent' ? 'rgba(0,0,0,0)' : (col || 'rgba(0,0,0,0)')
+}
+
 function drawFillRect(ctx, a) {
   const rx = c(a.x), ry = c(a.y), rw = c(a.w), rh = c(a.h)
   ctx.save()
-  ctx.globalAlpha = (a.fillOpacity ?? 50) / 100
-  ctx.fillStyle = a.fillColor ?? '#ffcc00'
+  ctx.globalAlpha = (a.fillOpacity ?? 100) / 100
+
+  if (a.fillMode === 'gradient') {
+    const ca = resolveGradientColor(a.fillColorA ?? '#ffcc00')
+    const cb = resolveGradientColor(a.fillColorB ?? 'transparent')
+    let grad
+    switch (a.fillGradientDir ?? 'h') {
+      case 'h':  grad = ctx.createLinearGradient(rx,      ry,      rx+rw, ry     ); break
+      case 'v':  grad = ctx.createLinearGradient(rx,      ry,      rx,    ry+rh  ); break
+      case 'dr': grad = ctx.createLinearGradient(rx,      ry,      rx+rw, ry+rh  ); break
+      case 'ur': grad = ctx.createLinearGradient(rx,      ry+rh,   rx+rw, ry     ); break
+    }
+    grad.addColorStop(0, ca)
+    grad.addColorStop(1, cb)
+    ctx.fillStyle = grad
+  } else {
+    ctx.fillStyle = a.fillColor ?? '#ffcc00'
+  }
+
   ctx.fillRect(rx, ry, rw, rh)
   ctx.restore()
   if (a.fillBorder !== false) {
@@ -1053,7 +1170,7 @@ function buildPreview() {
     return { ...base, type:'rect', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y) }
   if (tool === 'fillrect')
     return { ...base, type:'fillrect', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y),
-             fillColor, fillOpacity, fillBorder: fillBorderEnabled }
+             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled }
   if (tool === 'line')
     return { ...base, type:'line', x1:s.x, y1:s.y, x2:e.x, y2:e.y, lineStyle, startCap, endCap }
   return null
@@ -1070,7 +1187,7 @@ function commitShape(start, end) {
     const w = Math.abs(end.x - start.x), h = Math.abs(end.y - start.y)
     if (w < 2 || h < 2) return null
     return { ...base, type:'fillrect', x:Math.min(start.x,end.x), y:Math.min(start.y,end.y), w, h,
-             fillColor, fillOpacity, fillBorder: fillBorderEnabled }
+             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled }
   }
   if (tool === 'line') {
     if (Math.hypot(end.x-start.x, end.y-start.y) < 2) return null
