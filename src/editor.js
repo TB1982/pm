@@ -76,7 +76,7 @@ let annotClipboard = null
 let textStrokeColor = '#000000'
 let textStrokeWidth = 0        // 0=none 1=細 2=中 3=粗
 let textBgColor     = '#000000'
-let textBgOpacity   = 0        // 0–100 %
+let textBgOpacity   = 50       // 0–100 %
 let textBold        = false
 let textItalic      = false
 let textUnderline     = false
@@ -146,6 +146,7 @@ const textMirrorEl  = document.getElementById('textMirror')
 
 // hex + alpha → rgba string
 function hexToRgba(hex, alpha) {
+  if (!hex || hex === 'transparent') return `rgba(0,0,0,0)`
   const r = parseInt(hex.slice(1,3), 16)
   const g = parseInt(hex.slice(3,5), 16)
   const b = parseInt(hex.slice(5,7), 16)
@@ -420,6 +421,12 @@ function applyTextStrokeColor(hex) {
   pushRecentColor(hex)
 }
 function applyTextBgColor(hex) {
+  if (hex === 'transparent') {
+    // 選「透明」= 關閉背景（將 opacity 歸零）
+    textBgOpacity = 0; syncTextBgOpacity(0)
+    if (selectedId) updateSelectedAnnot({ textBgOpacity: 0 })
+    return
+  }
   textBgColor = hex; syncTextBgColor(hex)
   if (selectedId) updateSelectedAnnot({ textBgColor: hex })
   pushRecentColor(hex)
@@ -904,10 +911,10 @@ document.getElementById('textShadowCheck').addEventListener('change', e => {
 
 // B / I / U toggles
 ;[
-  ['btnTextBold',      () => { textBold      = !textBold;      syncTextBold(textBold);           if (selectedId) updateSelectedAnnot({ bold:      textBold      }) }],
-  ['btnTextItalic',    () => { textItalic    = !textItalic;    syncTextItalic(textItalic);       if (selectedId) updateSelectedAnnot({ italic:    textItalic    }) }],
-  ['btnTextUnderline',     () => { textUnderline     = !textUnderline;     syncTextUnderline(textUnderline);         if (selectedId) updateSelectedAnnot({ underline:     textUnderline     }) }],
-  ['btnTextStrikethrough', () => { textStrikethrough = !textStrikethrough; syncTextStrikethrough(textStrikethrough); if (selectedId) updateSelectedAnnot({ strikethrough: textStrikethrough }) }],
+  ['btnTextBold',      () => { textBold      = !textBold;      syncTextBold(textBold);           if (selectedId) updateSelectedAnnot({ bold:      textBold      }); applyTextStyleToInput() }],
+  ['btnTextItalic',    () => { textItalic    = !textItalic;    syncTextItalic(textItalic);       if (selectedId) updateSelectedAnnot({ italic:    textItalic    }); applyTextStyleToInput() }],
+  ['btnTextUnderline',     () => { textUnderline     = !textUnderline;     syncTextUnderline(textUnderline);         if (selectedId) updateSelectedAnnot({ underline:     textUnderline     }); applyTextStyleToInput() }],
+  ['btnTextStrikethrough', () => { textStrikethrough = !textStrikethrough; syncTextStrikethrough(textStrikethrough); if (selectedId) updateSelectedAnnot({ strikethrough: textStrikethrough }); applyTextStyleToInput() }],
 ].forEach(([id, fn]) => document.getElementById(id).addEventListener('click', fn))
 
 // Shared shadow checkbox (rect / fillrect / number)
@@ -1892,6 +1899,16 @@ annotCanvas.addEventListener('dblclick', e => {
 
 // ─── Text input ───────────────────────────────────────────────────────────────
 
+// 把 B/I/U/S 狀態同步到 textarea 的 CSS，讓使用者在輸入時即時看到效果
+function applyTextStyleToInput() {
+  const decs = []
+  if (textUnderline)     decs.push('underline')
+  if (textStrikethrough) decs.push('line-through')
+  textInputEl.style.fontWeight     = textBold   ? 'bold'   : ''
+  textInputEl.style.fontStyle      = textItalic ? 'italic' : ''
+  textInputEl.style.textDecoration = decs.join(' ')
+}
+
 function showTextInput(pos) {
   textActive = true
   textPos    = pos
@@ -1904,6 +1921,7 @@ function showTextInput(pos) {
   textInputEl.style.color      = color
   textInputEl.style.lineHeight = '1.25'
   textInputEl.value            = ''
+  applyTextStyleToInput()
 
   textInputWrap.classList.remove('hidden')
   setTimeout(() => textInputEl.focus(), 10)
