@@ -243,14 +243,10 @@ function syncFillColor(hex) {
 function syncFillColorA(hex) {
   const p = document.getElementById('fillColorAPreview')
   if (p) p.style.background = fillPreviewBg(hex)
-  const btn = document.getElementById('btnFillColorATransparent')
-  if (hex === 'transparent') btn.classList.add('active'); else btn.classList.remove('active')
 }
 function syncFillColorB(hex) {
   const p = document.getElementById('fillColorBPreview')
   if (p) p.style.background = fillPreviewBg(hex)
-  const btn = document.getElementById('btnFillColorBTransparent')
-  if (hex === 'transparent') btn.classList.add('active'); else btn.classList.remove('active')
 }
 function syncFillGradientDir(dir) {
   document.querySelectorAll('[data-fdir]').forEach(b => {
@@ -321,14 +317,6 @@ function updateSelectedAnnot(props) {
 
 // Initialise colour preview to match the default colour
 syncColor(color)
-
-// Transparent toggle — press again to restore previous colour
-document.getElementById('btnFillColorATransparent').addEventListener('click', () =>
-  applyFillColorA(fillColorA === 'transparent' ? fillPrevColorA : 'transparent')
-)
-document.getElementById('btnFillColorBTransparent').addEventListener('click', () =>
-  applyFillColorB(fillColorB === 'transparent' ? fillPrevColorB : 'transparent')
-)
 
 // Mode toggle
 document.getElementById('btnFillSolid').addEventListener('click',    () => applyFillMode('solid'))
@@ -582,6 +570,15 @@ function hideColorPanel() {
 }
 
 ;(function initColorPanel() {
+  // Update the panel's active-swatch highlight + hex field after a colour is applied
+  function cppSyncDisplay(hex) {
+    document.querySelectorAll('.cpp-swatch').forEach(s =>
+      s.classList.toggle('active', s.dataset.hex === hex)
+    )
+    const hexIn = document.getElementById('cppHexInput')
+    if (hexIn && hex && hex.startsWith('#')) hexIn.value = hex.slice(1).toUpperCase()
+  }
+
   // Build theme grid (column-by-column → each hue is one column, rows = shades)
   const themeEl = document.getElementById('cppTheme')
   PALETTE_THEME.forEach(col => {
@@ -595,7 +592,8 @@ function hideColorPanel() {
       // faint border for light swatches so they're visible on dark panel
       const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16)
       if (r + g + b > 500) btn.style.boxShadow = 'inset 0 0 0 1px rgba(0,0,0,0.15)'
-      btn.addEventListener('click', () => { if (_cppApplyFn) _cppApplyFn(hex); hideColorPanel() })
+      // Panel stays open — user can freely browse colours
+      btn.addEventListener('click', () => { if (_cppApplyFn) { _cppApplyFn(hex); cppSyncDisplay(hex) } })
       colEl.appendChild(btn)
     })
     themeEl.appendChild(colEl)
@@ -615,7 +613,7 @@ function hideColorPanel() {
       const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16)
       if (r + g + b > 500) btn.style.boxShadow = 'inset 0 0 0 1px rgba(0,0,0,0.15)'
     }
-    btn.addEventListener('click', () => { if (_cppApplyFn) _cppApplyFn(hex); hideColorPanel() })
+    btn.addEventListener('click', () => { if (_cppApplyFn) { _cppApplyFn(hex); cppSyncDisplay(hex) } })
     stdEl.appendChild(btn)
   })
 
@@ -627,8 +625,7 @@ function hideColorPanel() {
       eyeBtn.classList.add('active')
       try {
         const { sRGBHex } = await new EyeDropper().open()
-        if (_cppApplyFn) _cppApplyFn(sRGBHex)
-        hideColorPanel()
+        if (_cppApplyFn) { _cppApplyFn(sRGBHex); cppSyncDisplay(sRGBHex) }
       } catch { /* user cancelled */ } finally { eyeBtn.classList.remove('active') }
     } else {
       const cur = _cppGetCurrent ? _cppGetCurrent() : '#000000'
@@ -637,8 +634,7 @@ function hideColorPanel() {
     }
   })
   native.addEventListener('input', () => {
-    if (_cppApplyFn) _cppApplyFn(native.value)
-    hideColorPanel()
+    if (_cppApplyFn) { _cppApplyFn(native.value); cppSyncDisplay(native.value) }
   })
 
   // Hex input in panel
@@ -662,20 +658,12 @@ function hideColorPanel() {
     hexIn.value = clean.toUpperCase()
     if (clean.length === 6 && _cppApplyFn) {
       _cppApplyFn('#' + clean)
-      hideColorPanel()
+      cppSyncDisplay('#' + clean.toLowerCase())
     }
   })
 
-  // Panel absorbs its own mousedown so document listener below ignores panel clicks
-  const panel = document.getElementById('colorPickerPanel')
-  panel.addEventListener('mousedown', e => e.stopPropagation())
-
-  // Close panel on mousedown outside — catches drag-starts, not just plain clicks
-  document.addEventListener('mousedown', e => {
-    if (panel.classList.contains('hidden')) return
-    if (e.target.closest('.color-preview')) return  // preview handles its own toggle
-    hideColorPanel()
-  })
+  // Panel closes ONLY when user clicks the colour preview again (toggle in openColorPanel).
+  // No auto-close on outside click — avoids conflicts with canvas editing actions.
 })()
 
 // openColorPanel: toggle (click same anchor again = close) or open for new anchor
