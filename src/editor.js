@@ -105,6 +105,7 @@ let fontFamily        = 'system'   // FONT_FAMILIES id
 
 // Shadow (per-tool default; each annotation also stores its own value)
 let rectShadow      = false
+let ellipseShadow   = false
 let fillrectShadow  = false
 let textShadow      = false
 let numShadow       = false
@@ -216,7 +217,7 @@ function showOptionsForTool(t) {
     document.getElementById('grpCrop').classList.remove('hidden')
     return
   }
-  if (!['rect','fillrect','line','text','number'].includes(t)) return
+  if (!['rect','ellipse','fillrect','line','text','number'].includes(t)) return
   // (polyline 由 line tool + lineOrtho 切換控制，此處不需獨立 tool id)
   if (t !== 'fillrect') document.getElementById('grpColor').classList.remove('hidden')
   if (t === 'fillrect') {
@@ -229,7 +230,7 @@ function showOptionsForTool(t) {
     syncFillBorder(fillBorderEnabled)
     syncFillBorderColor(fillBorderColor)
   }
-  if (['rect','fillrect','line'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
+  if (['rect','ellipse','fillrect','line'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
   if (t === 'line')   { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden'); syncLineOrtho(lineOrtho) }
   if (['rect','fillrect'].includes(t)) { document.getElementById('grpRadius').classList.remove('hidden'); syncCornerRadius(cornerRadius) }
   if (t === 'text') {
@@ -242,7 +243,8 @@ function showOptionsForTool(t) {
     syncFontFamily(fontFamily)
   }
   if (t === 'number') { document.getElementById('grpNumber').classList.remove('hidden'); document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(numShadow) }
-  if (t === 'rect')   { document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(rectShadow) }
+  if (t === 'rect')    { document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(rectShadow) }
+  if (t === 'ellipse') { document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(ellipseShadow) }
   if (t === 'fillrect') document.getElementById('grpShadow').classList.remove('hidden')
 }
 
@@ -252,7 +254,7 @@ function showOptionsForAnnot(a) {
   const t = a.type
   if (t !== 'fillrect') document.getElementById('grpColor').classList.remove('hidden')
   if (t === 'fillrect') document.getElementById('grpFillColor').classList.remove('hidden')
-  if (['rect','fillrect','line','polyline'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
+  if (['rect','ellipse','fillrect','line','polyline'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
   if (['line','polyline'].includes(t)) { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden') }
   if (['rect','fillrect'].includes(t)) document.getElementById('grpRadius').classList.remove('hidden')
   if (t === 'number') document.getElementById('grpNumber').classList.remove('hidden')
@@ -298,6 +300,10 @@ function showOptionsForAnnot(a) {
   }
   if (t === 'rect') {
     rectShadow = a.shadow ?? false; syncShadowCheck(rectShadow)
+    document.getElementById('grpShadow').classList.remove('hidden')
+  }
+  if (t === 'ellipse') {
+    ellipseShadow = a.shadow ?? false; syncShadowCheck(ellipseShadow)
     document.getElementById('grpShadow').classList.remove('hidden')
   }
   if (t === 'fillrect') {
@@ -1048,10 +1054,11 @@ document.getElementById('fontFamilySelect').addEventListener('change', e => {
     })
 })
 
-// Shared shadow checkbox (rect / fillrect / number)
+// Shared shadow checkbox (rect / ellipse / fillrect / number)
 document.getElementById('shadowCheck').addEventListener('change', e => {
   const val = e.target.checked
   if      (tool === 'rect')     rectShadow     = val
+  else if (tool === 'ellipse')  ellipseShadow  = val
   else if (tool === 'fillrect') fillrectShadow = val
   else if (tool === 'number')   numShadow      = val
   // also reflect selected annotation's tool type when using Select tool
@@ -1059,6 +1066,7 @@ document.getElementById('shadowCheck').addEventListener('change', e => {
     const a = annotations.find(x => x.id === selectedId)
     if (a) {
       if (a.type === 'rect')     rectShadow     = val
+      if (a.type === 'ellipse')  ellipseShadow  = val
       if (a.type === 'fillrect') fillrectShadow = val
       if (a.type === 'number')   numShadow      = val
       updateSelectedAnnot({ shadow: val })
@@ -1384,6 +1392,7 @@ function drawOne(ctx, a) {
   ctx.lineWidth   = a.thickness * viewScale
   switch (a.type) {
     case 'rect':     drawRect(ctx, a);     break
+    case 'ellipse':  drawEllipse(ctx, a);  break
     case 'fillrect': drawFillRect(ctx, a); break
     case 'line':     drawLine(ctx, a);     break
     case 'text':     drawText(ctx, a);     break
@@ -1406,6 +1415,13 @@ function drawRect(ctx, a) {
   } else {
     ctx.strokeRect(c(a.x), c(a.y), c(a.w), c(a.h))
   }
+}
+
+function drawEllipse(ctx, a) {
+  if (a.shadow) setShadow(ctx)
+  const cx = c(a.x + a.w / 2), cy = c(a.y + a.h / 2)
+  const rx = c(a.w / 2),       ry = c(a.h / 2)
+  ctx.beginPath(); ctx.ellipse(cx, cy, Math.max(rx, 1), Math.max(ry, 1), 0, 0, Math.PI * 2); ctx.stroke()
 }
 
 function resolveGradientColor(col) {
@@ -1650,7 +1666,7 @@ function drawNumber(ctx, a) {
 // ─── Resize handles ───────────────────────────────────────────────────────────
 
 function getHandles(a) {
-  if (a.type === 'rect' || a.type === 'img') {
+  if (a.type === 'rect' || a.type === 'ellipse' || a.type === 'img') {
     const { x, y, w, h } = a
     const mx = x + w / 2, my = y + h / 2
     return [
@@ -1690,7 +1706,7 @@ function startResize(hId, a) {
   if (a.type === 'number') {
     info.cx = a.x; info.cy = a.y
   }
-  if (a.type === 'rect' || a.type === 'img') {
+  if (a.type === 'rect' || a.type === 'ellipse' || a.type === 'img') {
     const { x, y, w, h } = a
     switch (hId) {
       case 'nw': info.fixX = x+w; info.fixY = y+h; break
@@ -1763,7 +1779,7 @@ function applyResize(a, pos) {
     return
   }
 
-  if (a.type === 'rect') {
+  if (a.type === 'rect' || a.type === 'ellipse') {
     let x1, y1, x2, y2
     switch (h.id) {
       case 'nw': x1=pos.x;    y1=pos.y;    x2=h.fixX;        y2=h.fixY;        break
@@ -1840,6 +1856,8 @@ function buildPreview() {
   const s = drawStart, e = drawCurrent
   if (tool === 'rect')
     return { ...base, type:'rect', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y), shadow: rectShadow, cornerRadius }
+  if (tool === 'ellipse')
+    return { ...base, type:'ellipse', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y), shadow: ellipseShadow }
   if (tool === 'fillrect')
     return { ...base, type:'fillrect', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y),
              fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled, fillBorderColor, shadow: fillrectShadow, cornerRadius }
@@ -1860,6 +1878,11 @@ function commitShape(start, end) {
     const w = Math.abs(end.x - start.x), h = Math.abs(end.y - start.y)
     if (w < 2 || h < 2) return null
     return { ...base, type:'rect', x:Math.min(start.x,end.x), y:Math.min(start.y,end.y), w, h, shadow: rectShadow, cornerRadius }
+  }
+  if (tool === 'ellipse') {
+    const w = Math.abs(end.x - start.x), h = Math.abs(end.y - start.y)
+    if (w < 2 || h < 2) return null
+    return { ...base, type:'ellipse', x:Math.min(start.x,end.x), y:Math.min(start.y,end.y), w, h, shadow: ellipseShadow }
   }
   if (tool === 'fillrect') {
     const w = Math.abs(end.x - start.x), h = Math.abs(end.y - start.y)
@@ -1917,6 +1940,7 @@ function recalcNumCount() {
 function bounds(a) {
   switch (a.type) {
     case 'rect':
+    case 'ellipse':
     case 'fillrect':
     case 'img':    return { x: a.x, y: a.y, w: a.w, h: a.h }
     case 'line': {
@@ -2128,7 +2152,7 @@ annotCanvas.addEventListener('mousemove', e => {
     if (e.shiftKey && tool === 'line' && drawStart) {
       const dx = Math.abs(pos.x - drawStart.x), dy = Math.abs(pos.y - drawStart.y)
       drawCurrent = dx >= dy ? { x: pos.x, y: drawStart.y } : { x: drawStart.x, y: pos.y }
-    } else if (e.shiftKey && (tool === 'rect' || tool === 'fillrect') && drawStart) {
+    } else if (e.shiftKey && (tool === 'rect' || tool === 'fillrect' || tool === 'ellipse') && drawStart) {
       const side = Math.min(Math.abs(pos.x - drawStart.x), Math.abs(pos.y - drawStart.y))
       drawCurrent = {
         x: drawStart.x + Math.sign(pos.x - drawStart.x) * side,
@@ -2224,6 +2248,7 @@ document.addEventListener('mouseup', e => {
 function moveAnnot(a, dx, dy) {
   switch (a.type) {
     case 'rect':
+    case 'ellipse':
     case 'fillrect':
     case 'img':
     case 'text':
