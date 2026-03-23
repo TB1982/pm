@@ -25,12 +25,16 @@ const PALETTE_STANDARD = [
 
 // Font families available in the text tool
 const FONT_FAMILIES = [
-  { id: 'system',   label: '系統',   css: '-apple-system, "Helvetica Neue", sans-serif' },
-  { id: 'pingfang', label: '蘋方',   css: '"PingFang TC", "Heiti TC", sans-serif' },
-  { id: 'songti',   label: '宋體',   css: '"Songti TC", "STSong", serif' },
-  { id: 'kaiti',    label: '楷體',   css: '"Kaiti TC", "STKaiti", cursive' },
-  { id: 'impact',   label: 'Impact', css: 'Impact, "Arial Black", sans-serif' },
-  { id: 'mono',     label: '等寬',   css: 'Menlo, "Courier New", monospace' },
+  { id: 'system',    label: '系統預設',       css: '-apple-system, "Helvetica Neue", sans-serif' },
+  { id: 'pingfang',  label: '蘋方-繁',        css: '"PingFang TC", "Heiti TC", sans-serif' },
+  { id: 'heiti',     label: '黑體-繁',        css: '"Heiti TC", "STHeiti", sans-serif' },
+  { id: 'songti',    label: '宋體-繁',        css: '"Songti TC", "STSong", serif' },
+  { id: 'kaiti',     label: '楷體-繁',        css: '"Kaiti TC", "STKaiti", cursive' },
+  { id: 'helvetica', label: 'Helvetica Neue', css: '"Helvetica Neue", Helvetica, Arial, sans-serif' },
+  { id: 'georgia',   label: 'Georgia',        css: 'Georgia, "Times New Roman", serif' },
+  { id: 'verdana',   label: 'Verdana',        css: 'Verdana, Geneva, sans-serif' },
+  { id: 'impact',    label: 'Impact',         css: 'Impact, "Arial Black", sans-serif' },
+  { id: 'mono',      label: '等寬 Menlo',     css: 'Menlo, "Courier New", monospace' },
 ]
 function getFontCss(id) {
   return (FONT_FAMILIES.find(f => f.id === id) ?? FONT_FAMILIES[0]).css
@@ -89,7 +93,7 @@ let annotClipboard = null
 let textStrokeColor = '#000000'
 let textStrokeWidth = 0        // 0=none 1=細 2=中 3=粗
 let textBgColor     = '#000000'
-let textBgOpacity   = 50       // 0–100 %
+let textBgOpacity   = 0        // 0–100 %（預設透明；使用者選色後自動升至 50）
 let textBold        = false
 let textItalic      = false
 let textUnderline     = false
@@ -380,7 +384,8 @@ function syncTextBgOpacity(v) {
   if (el) el.value = v
 }
 function syncFontFamily(id) {
-  document.querySelectorAll('.ff-btn').forEach(b => b.classList.toggle('active', b.dataset.ff === id))
+  const sel = document.getElementById('fontFamilySelect')
+  if (sel) sel.value = id
 }
 function syncTextBold(v)      { document.getElementById('btnTextBold')     ?.classList.toggle('active', v) }
 function syncTextItalic(v)    { document.getElementById('btnTextItalic')   ?.classList.toggle('active', v) }
@@ -936,16 +941,13 @@ document.getElementById('textShadowCheck').addEventListener('change', e => {
   if (textActive) renderAnnotations()
 })
 
-// Font family buttons
-document.querySelectorAll('.ff-btn').forEach(btn =>
-  btn.addEventListener('click', () => {
-    fontFamily = btn.dataset.ff
-    syncFontFamily(fontFamily)
-    if (selectedId) updateSelectedAnnot({ fontFamily })
-    applyTextStyleToInput()
-    if (textActive) renderAnnotations()
-  })
-)
+// Font family select
+document.getElementById('fontFamilySelect').addEventListener('change', e => {
+  fontFamily = e.target.value
+  if (selectedId) updateSelectedAnnot({ fontFamily })
+  applyTextStyleToInput()
+  if (textActive) renderAnnotations()
+})
 
 // B / I / U toggles
 ;[

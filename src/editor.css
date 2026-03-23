@@ -235,7 +235,7 @@ body {
 
 /* Font size input */
 #fontSizeInput {
-  width: 54px;
+  width: 62px;
   background: #2e2e2e;
   border: 1px solid #404040;
   border-radius: 5px;
@@ -833,20 +833,19 @@ body {
 }
 .tsw-btn:hover:not(.active) { background: #383838; }
 
-/* Font family buttons */
-.ff-btn {
-  padding: 2px 8px;
-  border-radius: 4px;
-  border: 1px solid #444;
-  background: #2a2a2a;
-  color: #ccc;
+/* Font family select */
+.ff-select {
+  background: #2e2e2e;
+  border: 1px solid #404040;
+  border-radius: 5px;
+  color: #e0e0e0;
   font-size: 11px;
+  padding: 3px 4px;
   cursor: pointer;
-  transition: background 0.15s;
-  white-space: nowrap;
+  outline: none;
+  max-width: 110px;
 }
-.ff-btn.active { background: #4a90d9; border-color: #4a90d9; color: #fff; }
-.ff-btn:hover:not(.active) { background: #383838; }
+.ff-select:focus { border-color: #4a9eff; }
 
 /* Shadow checkbox label */
 .shadow-lbl {
