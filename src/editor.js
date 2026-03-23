@@ -1996,14 +1996,18 @@ function applyTextStyleToInput() {
 function showTextInput(pos) {
   textActive = true
   textPos    = pos
-  const fs   = Math.max(fontSize * viewScale, 14)
+  const fs      = Math.max(fontSize * viewScale, 14)
+  const lineH   = 1.25
+  // half-leading: CSS line-height pushes text down by (lineH-1)*fs/2 within each line box.
+  // Subtract it from the top so the visual glyph top aligns with canvas textBaseline='top'.
+  const halfLead = Math.round((lineH - 1) * fs / 2)
 
-  // Offset by textarea padding (4px left, 2px top) so inner text aligns with canvas text
+  // left: compensate for 4px left-padding;  top: compensate for 2px top-padding + half-leading
   textInputEl.style.left       = (c(pos.x) - 4) + 'px'
-  textInputEl.style.top        = (c(pos.y) - 2) + 'px'
+  textInputEl.style.top        = (c(pos.y) - 2 - halfLead) + 'px'
   textInputEl.style.fontSize   = fs + 'px'
   textInputEl.style.color      = color
-  textInputEl.style.lineHeight = '1.25'
+  textInputEl.style.lineHeight = String(lineH)
   textInputEl.value            = ''
   applyTextStyleToInput()
 
