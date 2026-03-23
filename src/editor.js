@@ -914,10 +914,21 @@ document.getElementById('cornerRadiusInput').addEventListener('input', e => {
 })
 
 // Line ortho toggle
+// 畫線時：吸附只在 liveAnnotation() 中判斷（已有效）
+// 選中已存在線條後點直角：若啟用則同時吸附 x2/y2，讓使用者不必重畫
 document.getElementById('btnLineOrtho').addEventListener('click', () => {
   lineOrtho = !lineOrtho
   syncLineOrtho(lineOrtho)
-  if (selectedId) updateSelectedAnnot({ lineOrtho })
+  if (selectedId) {
+    const ann = annotations.find(x => x.id === selectedId)
+    if (ann && ann.type === 'line' && lineOrtho) {
+      const dx = Math.abs(ann.x2 - ann.x1), dy = Math.abs(ann.y2 - ann.y1)
+      const snapped = dx >= dy ? { y2: ann.y1 } : { x2: ann.x1 }
+      updateSelectedAnnot({ lineOrtho, ...snapped })
+    } else {
+      updateSelectedAnnot({ lineOrtho })
+    }
+  }
 })
 
 // Line style
@@ -1021,6 +1032,8 @@ document.getElementById('fontFamilySelect').addEventListener('change', e => {
       syncTextAlign(v)
       if (selectedId) updateSelectedAnnot({ textAlign: v })
       applyTextStyleToInput()
+      _repositionTextInput()          // 輸入中時同步移動 textarea 錨點
+      if (textActive) renderAnnotations()
     })
 })
 
@@ -1642,6 +1655,22 @@ function applyResize(a, pos) {
     a.w = Math.max(Math.abs(x2 - x1), 2)
     a.h = Math.max(Math.abs(y2 - y1), 2)
   }
+  if (a.type === 'fillrect') {
+    let x1, y1, x2, y2
+    switch (h.id) {
+      case 'nw': x1=pos.x;    y1=pos.y;    x2=h.fixX;        y2=h.fixY;        break
+      case 'ne': x1=h.fixX;   y1=pos.y;    x2=pos.x;         y2=h.fixY;        break
+      case 'se': x1=h.fixX;   y1=h.fixY;   x2=pos.x;         y2=pos.y;         break
+      case 'sw': x1=pos.x;    y1=h.fixY;   x2=h.fixX;        y2=pos.y;         break
+      case 'n':  x1=h.fixX;   y1=pos.y;    x2=h.fixX+h.fixW; y2=h.fixY;        break
+      case 's':  x1=h.fixX;   y1=h.fixY;   x2=h.fixX+h.fixW; y2=pos.y;         break
+      case 'e':  x1=h.fixX;   y1=h.fixY;   x2=pos.x;         y2=h.fixY+h.fixH; break
+      case 'w':  x1=pos.x;    y1=h.fixY;   x2=h.fixX;        y2=h.fixY+h.fixH; break
+    }
+    a.x = Math.min(x1, x2); a.y = Math.min(y1, y2)
+    a.w = Math.max(Math.abs(x2 - x1), 2)
+    a.h = Math.max(Math.abs(y2 - y1), 2)
+  }
   if (a.type === 'line') {
     if (h.id === 'p1') { a.x1 = pos.x; a.y1 = pos.y }
     if (h.id === 'p2') { a.x2 = pos.x; a.y2 = pos.y }
@@ -2074,6 +2103,22 @@ function applyTextStyleToInput() {
   textInputEl.style.textAlign      = textAlign
 }
 
+// 依目前 textAlign 更新 textarea 的水平錨點（left + transform）。
+// 在 showTextInput 以及對齊按鈕切換時都需要呼叫，確保輸入框始終對齊 canvas 錨點。
+function _repositionTextInput() {
+  if (!textActive || !textPos) return
+  if (textAlign === 'center') {
+    textInputEl.style.left      = c(textPos.x) + 'px'
+    textInputEl.style.transform = 'translateX(-50%)'
+  } else if (textAlign === 'right') {
+    textInputEl.style.left      = (c(textPos.x) + 5.5) + 'px'
+    textInputEl.style.transform = 'translateX(-100%)'
+  } else {
+    textInputEl.style.left      = (c(textPos.x) - 5.5) + 'px'
+    textInputEl.style.transform = ''
+  }
+}
+
 function showTextInput(pos) {
   textActive = true
   textPos    = pos
@@ -2083,17 +2128,7 @@ function showTextInput(pos) {
   // Subtract it from the top so the visual glyph top aligns with canvas textBaseline='top'.
   const halfLead = Math.round((lineH - 1) * fs / 2)
 
-  // left: anchor 依對齊方式補償。中/右對齊使用 CSS transform 讓文字框跟 canvas 錨點對齊
-  if (textAlign === 'center') {
-    textInputEl.style.left      = c(pos.x) + 'px'
-    textInputEl.style.transform = 'translateX(-50%)'
-  } else if (textAlign === 'right') {
-    textInputEl.style.left      = (c(pos.x) + 5.5) + 'px'
-    textInputEl.style.transform = 'translateX(-100%)'
-  } else {
-    textInputEl.style.left      = (c(pos.x) - 5.5) + 'px'
-    textInputEl.style.transform = ''
-  }
+  _repositionTextInput()
   textInputEl.style.top        = (c(pos.y) - 3.5 - halfLead) + 'px'
   textInputEl.style.fontSize   = fs + 'px'
   textInputEl.style.color      = color
