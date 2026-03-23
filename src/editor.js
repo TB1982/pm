@@ -98,6 +98,7 @@ let textBold        = false
 let textItalic      = false
 let textUnderline     = false
 let textStrikethrough = false
+let textAlign         = 'left'     // 'left' | 'center' | 'right'
 let fontFamily        = 'system'   // FONT_FAMILIES id
 
 // Shadow (per-tool default; each annotation also stores its own value)
@@ -224,6 +225,7 @@ function showOptionsForTool(t) {
     document.getElementById('grpFont').classList.remove('hidden')
     syncTextShadowCheck(textShadow)
     syncTextBold(textBold); syncTextItalic(textItalic); syncTextUnderline(textUnderline); syncTextStrikethrough(textStrikethrough)
+    syncTextAlign(textAlign)
     syncTextStrokeColor(textStrokeColor); syncTextStrokeWidth(textStrokeWidth)
     syncTextBgOpacity(textBgOpacity); syncTextBgPreview()
     syncFontFamily(fontFamily)
@@ -269,6 +271,7 @@ function showOptionsForAnnot(a) {
     textItalic      = a.italic    ?? false;           syncTextItalic(textItalic)
     textUnderline     = a.underline     ?? false; syncTextUnderline(textUnderline)
     textStrikethrough = a.strikethrough ?? false; syncTextStrikethrough(textStrikethrough)
+    textAlign         = a.textAlign     ?? 'left';    syncTextAlign(textAlign)
     fontFamily        = a.fontFamily    ?? 'system';  syncFontFamily(fontFamily)
     document.getElementById('grpFont').classList.remove('hidden')
   }
@@ -402,6 +405,12 @@ function syncTextBold(v)      { document.getElementById('btnTextBold')     ?.cla
 function syncTextItalic(v)    { document.getElementById('btnTextItalic')   ?.classList.toggle('active', v) }
 function syncTextUnderline(v)     { document.getElementById('btnTextUnderline')    ?.classList.toggle('active', v) }
 function syncTextStrikethrough(v) { document.getElementById('btnTextStrikethrough')?.classList.toggle('active', v) }
+function syncTextAlign(v) {
+  textAlign = v
+  document.getElementById('btnAlignLeft')  ?.classList.toggle('active', v === 'left')
+  document.getElementById('btnAlignCenter')?.classList.toggle('active', v === 'center')
+  document.getElementById('btnAlignRight') ?.classList.toggle('active', v === 'right')
+}
 
 function syncShadowCheck(val) {
   const el = document.getElementById('shadowCheck')
@@ -983,6 +992,16 @@ document.getElementById('fontFamilySelect').addEventListener('change', e => {
   ['btnTextStrikethrough', () => { textStrikethrough = !textStrikethrough; syncTextStrikethrough(textStrikethrough); if (selectedId) updateSelectedAnnot({ strikethrough: textStrikethrough }); applyTextStyleToInput() }],
 ].forEach(([id, fn]) => document.getElementById(id).addEventListener('click', fn))
 
+// 對齊按鈕
+;['left','center','right'].forEach(v => {
+  document.getElementById(`btnAlign${v.charAt(0).toUpperCase()}${v.slice(1)}`)
+    .addEventListener('click', () => {
+      syncTextAlign(v)
+      if (selectedId) updateSelectedAnnot({ textAlign: v })
+      applyTextStyleToInput()
+    })
+})
+
 // Shared shadow checkbox (rect / fillrect / number)
 document.getElementById('shadowCheck').addEventListener('change', e => {
   const val = e.target.checked
@@ -1276,7 +1295,7 @@ function renderAnnotations() {
       textStrokeColor, textStrokeWidth, textBgColor, textBgOpacity,
       shadow: textShadow,
       bold: textBold, italic: textItalic, underline: textUnderline, strikethrough: textStrikethrough,
-      fontFamily,
+      textAlign, fontFamily,
     }, { previewOnly: true })
     annotCtx.restore()
   }
@@ -1374,9 +1393,13 @@ function drawText(ctx, a, { previewOnly = false } = {}) {
   const fs      = a.fontSize * viewScale
   const lines   = a.content.split('\n')
   const fontMod = [a.italic ? 'italic' : '', a.bold ? 'bold' : ''].filter(Boolean).join(' ')
+  const align   = a.textAlign ?? 'left'
   ctx.font         = `${fontMod} ${fs}px ${getFontCss(a.fontFamily ?? 'system')}`.trimStart()
-  ctx.textAlign    = 'left'
+  ctx.textAlign    = align
   ctx.textBaseline = 'top'
+  const ax = c(a.x)
+  // 各行裝飾線（底線/刪除線）的起始 X，依對齊方式計算
+  const lineX = (w) => align === 'center' ? ax - w / 2 : align === 'right' ? ax - w : ax
 
   // Background colour block (drawn first, shadow applied here if enabled)
   // Height = visual text height (no extra trailing line-gap), so padding is uniform on all sides.
@@ -1387,8 +1410,9 @@ function drawText(ctx, a, { previewOnly = false } = {}) {
     const maxW   = Math.max(...lines.map(l => ctx.measureText(l).width))
     const pad    = 5
     const totalH = (lines.length - 1) * fs * 1.25 + fs   // last line uses fs not fs*1.25
+    const bgX    = lineX(maxW)
     ctx.fillStyle = hexToRgba(a.textBgColor ?? '#000000', bgOpacity / 100)
-    ctx.fillRect(c(a.x) - pad, c(a.y) - pad, maxW + pad * 2, totalH + pad * 2)
+    ctx.fillRect(bgX - pad, c(a.y) - pad, maxW + pad * 2, totalH + pad * 2)
     ctx.restore()
   }
 
@@ -1402,7 +1426,7 @@ function drawText(ctx, a, { previewOnly = false } = {}) {
     ctx.strokeStyle = a.textStrokeColor ?? '#000000'
     ctx.lineWidth   = strokePxMap[strokeW] * viewScale
     ctx.lineJoin    = 'round'
-    lines.forEach((line, i) => ctx.strokeText(line, c(a.x), c(a.y) + i * fs * 1.25))
+    lines.forEach((line, i) => ctx.strokeText(line, ax, c(a.y) + i * fs * 1.25))
     ctx.restore()
   }
 
@@ -1410,7 +1434,7 @@ function drawText(ctx, a, { previewOnly = false } = {}) {
   if (previewOnly) return
   if (a.shadow && bgOpacity === 0) setShadow(ctx)
   ctx.fillStyle = a.color
-  lines.forEach((line, i) => ctx.fillText(line, c(a.x), c(a.y) + i * fs * 1.25))
+  lines.forEach((line, i) => ctx.fillText(line, ax, c(a.y) + i * fs * 1.25))
 
   // Strikethrough — through the middle of the glyphs (~45% from top)
   if (a.strikethrough) {
@@ -1422,7 +1446,8 @@ function drawText(ctx, a, { previewOnly = false } = {}) {
       const lineY = c(a.y) + i * fs * 1.25
       const sy    = lineY + fs * 0.45
       const w     = ctx.measureText(line).width
-      ctx.beginPath(); ctx.moveTo(c(a.x), sy); ctx.lineTo(c(a.x) + w, sy); ctx.stroke()
+      const x0    = lineX(w)
+      ctx.beginPath(); ctx.moveTo(x0, sy); ctx.lineTo(x0 + w, sy); ctx.stroke()
     })
     ctx.restore()
   }
@@ -1439,9 +1464,10 @@ function drawText(ctx, a, { previewOnly = false } = {}) {
       const lineY = c(a.y) + i * fs * 1.25
       const uy    = lineY + fs * 0.95 + 8 * viewScale
       const w     = ctx.measureText(line).width
+      const x0    = lineX(w)
       ctx.beginPath()
-      ctx.moveTo(c(a.x), uy)
-      ctx.lineTo(c(a.x) + w, uy)
+      ctx.moveTo(x0, uy)
+      ctx.lineTo(x0 + w, uy)
       ctx.stroke()
     })
     ctx.restore()
@@ -1693,8 +1719,10 @@ function bounds(a) {
     case 'text': {
       const lines = a.content.split('\n')
       annotCtx.font = `${a.fontSize}px -apple-system, "Helvetica Neue", sans-serif`
-      const maxW = lines.reduce((m, l) => Math.max(m, annotCtx.measureText(l).width), 0)
-      return { x:a.x, y:a.y, w:maxW, h:lines.length*a.fontSize*1.25 }
+      const maxW  = lines.reduce((m, l) => Math.max(m, annotCtx.measureText(l).width), 0)
+      const tal   = a.textAlign ?? 'left'
+      const bx    = tal === 'center' ? a.x - maxW / 2 : tal === 'right' ? a.x - maxW : a.x
+      return { x:bx, y:a.y, w:maxW, h:lines.length*a.fontSize*1.25 }
     }
     case 'number': { const r = a.size ?? 14; return { x:a.x-r, y:a.y-r, w:r*2, h:r*2 } }
   }
@@ -1991,6 +2019,7 @@ function applyTextStyleToInput() {
   textInputEl.style.fontStyle      = textItalic ? 'italic' : ''
   textInputEl.style.textDecoration = decs.join(' ')
   textInputEl.style.fontFamily     = getFontCss(fontFamily)
+  textInputEl.style.textAlign      = textAlign
 }
 
 function showTextInput(pos) {
@@ -2002,8 +2031,17 @@ function showTextInput(pos) {
   // Subtract it from the top so the visual glyph top aligns with canvas textBaseline='top'.
   const halfLead = Math.round((lineH - 1) * fs / 2)
 
-  // left: compensate for 4px left-padding;  top: compensate for 2px top-padding + half-leading
-  textInputEl.style.left       = (c(pos.x) - 5.5) + 'px'
+  // left: anchor 依對齊方式補償。中/右對齊使用 CSS transform 讓文字框跟 canvas 錨點對齊
+  if (textAlign === 'center') {
+    textInputEl.style.left      = c(pos.x) + 'px'
+    textInputEl.style.transform = 'translateX(-50%)'
+  } else if (textAlign === 'right') {
+    textInputEl.style.left      = (c(pos.x) + 5.5) + 'px'
+    textInputEl.style.transform = 'translateX(-100%)'
+  } else {
+    textInputEl.style.left      = (c(pos.x) - 5.5) + 'px'
+    textInputEl.style.transform = ''
+  }
   textInputEl.style.top        = (c(pos.y) - 3.5 - halfLead) + 'px'
   textInputEl.style.fontSize   = fs + 'px'
   textInputEl.style.color      = color
@@ -2028,7 +2066,7 @@ function commitText(autoSelect = true) {
   const txtAnn = { id:newId(), type:'text', color, fontSize, x:pos.x, y:pos.y, content,
                    textStrokeColor, textStrokeWidth, textBgColor, textBgOpacity, shadow: textShadow,
                    bold: textBold, italic: textItalic, underline: textUnderline, strikethrough: textStrikethrough,
-                   fontFamily }
+                   textAlign, fontFamily }
   annotations.push(txtAnn)
   if (autoSelect) {
     // 直接更新狀態，不呼叫 setTool()，避免 selectedId 被重置
