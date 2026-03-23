@@ -430,7 +430,9 @@ function applyTextBgColor(hex) {
     return
   }
   textBgColor = hex; syncTextBgColor(hex)
-  if (selectedId) updateSelectedAnnot({ textBgColor: hex })
+  // 若之前因選透明而歸零，選新色時自動恢復預設 50%
+  if (textBgOpacity === 0) { textBgOpacity = 50; syncTextBgOpacity(50) }
+  if (selectedId) updateSelectedAnnot({ textBgColor: hex, textBgOpacity: textBgOpacity })
   if (textActive) renderAnnotations()
   pushRecentColor(hex)
 }
@@ -1216,7 +1218,7 @@ function renderAnnotations() {
       textStrokeColor, textStrokeWidth, textBgColor, textBgOpacity,
       shadow: textShadow,
       bold: textBold, italic: textItalic, underline: textUnderline, strikethrough: textStrikethrough,
-    })
+    }, { previewOnly: true })
     annotCtx.restore()
   }
 }
@@ -1309,7 +1311,7 @@ function drawCap(ctx, type, fx, fy, tx, ty, col, sz) {
   }
 }
 
-function drawText(ctx, a) {
+function drawText(ctx, a, { previewOnly = false } = {}) {
   const fs      = a.fontSize * viewScale
   const lines   = a.content.split('\n')
   const fontMod = [a.italic ? 'italic' : '', a.bold ? 'bold' : ''].filter(Boolean).join(' ')
@@ -1345,7 +1347,8 @@ function drawText(ctx, a) {
     ctx.restore()
   }
 
-  // Fill text (shadow applied here when no background)
+  // Fill text + decorations — 預覽模式跳過（文字字元由 textarea 負責顯示）
+  if (previewOnly) return
   if (a.shadow && bgOpacity === 0) setShadow(ctx)
   ctx.fillStyle = a.color
   lines.forEach((line, i) => ctx.fillText(line, c(a.x), c(a.y) + i * fs * 1.25))
