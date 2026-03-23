@@ -151,6 +151,13 @@ let cropMoving    = false  // dragging rect to reposition
 let cropResizeH   = null   // handle id being dragged ('nw','n','ne','e','se','s','sw','w')
 let cropMoveStart = null   // { pos, origRect } snapshot at drag start
 
+// Polyline drawing (line tool + lineOrtho = true)
+// 互動：點擊加點 → 雙擊完成；各段自動折直角（H→V 或 V→H）
+let polylineActive = false
+let polylinePoints = []      // {x,y}[] 已確認的頂點
+let polylineMouse  = null    // 游標即時位置，供 live 預覽用
+let polylineLastMs = 0       // 上次 mousedown 時間戳，用於雙擊判斷
+
 // ─── DOM ─────────────────────────────────────────────────────────────────────
 
 const baseCanvas    = document.getElementById('baseCanvas')
@@ -210,6 +217,7 @@ function showOptionsForTool(t) {
     return
   }
   if (!['rect','fillrect','line','text','number'].includes(t)) return
+  // (polyline 由 line tool + lineOrtho 切換控制，此處不需獨立 tool id)
   if (t !== 'fillrect') document.getElementById('grpColor').classList.remove('hidden')
   if (t === 'fillrect') {
     document.getElementById('grpFillColor').classList.remove('hidden')
@@ -244,8 +252,8 @@ function showOptionsForAnnot(a) {
   const t = a.type
   if (t !== 'fillrect') document.getElementById('grpColor').classList.remove('hidden')
   if (t === 'fillrect') document.getElementById('grpFillColor').classList.remove('hidden')
-  if (['rect','fillrect','line'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
-  if (t === 'line')   { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden') }
+  if (['rect','fillrect','line','polyline'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
+  if (['line','polyline'].includes(t)) { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden') }
   if (['rect','fillrect'].includes(t)) document.getElementById('grpRadius').classList.remove('hidden')
   if (t === 'number') document.getElementById('grpNumber').classList.remove('hidden')
   // Sync UI state to annotation values
@@ -263,7 +271,8 @@ function showOptionsForAnnot(a) {
     fillBorderEnabled = a.fillBorder !== false; syncFillBorder(fillBorderEnabled)
     fillBorderColor = a.fillBorderColor ?? '#ffffff'; syncFillBorderColor(fillBorderColor)
   }
-  if (t === 'line')   { lineStyle = a.lineStyle; startCap = a.startCap; endCap = a.endCap; lineOrtho = a.lineOrtho ?? false; syncLineStyle(lineStyle); syncCaps(startCap, endCap); syncLineOrtho(lineOrtho) }
+  if (t === 'line')     { lineStyle = a.lineStyle; startCap = a.startCap; endCap = a.endCap; lineOrtho = a.lineOrtho ?? false; syncLineStyle(lineStyle); syncCaps(startCap, endCap); syncLineOrtho(lineOrtho) }
+  if (t === 'polyline') { lineStyle = a.lineStyle; startCap = a.startCap; endCap = a.endCap; syncLineStyle(lineStyle); syncCaps(startCap, endCap) }
   if (['rect','fillrect'].includes(t)) { cornerRadius = a.cornerRadius ?? 0; syncCornerRadius(cornerRadius) }
   if (t === 'text') {
     fontSize        = a.fontSize;                     syncFontSize(fontSize)
@@ -914,18 +923,20 @@ document.getElementById('cornerRadiusInput').addEventListener('input', e => {
 })
 
 // Line ortho toggle
-// 畫線時：吸附只在 liveAnnotation() 中判斷（已有效）
-// 選中已存在線條後點直角：若啟用則同時吸附 x2/y2，讓使用者不必重畫
+// OFF → ON（tool=line，無選取）：切換成折線繪製模式（click-click-雙擊）
+// OFF → ON（有選取 line）：吸附已選線段至水平/垂直
+// ON  → OFF：取消進行中折線（如有）
 document.getElementById('btnLineOrtho').addEventListener('click', () => {
   lineOrtho = !lineOrtho
   syncLineOrtho(lineOrtho)
+  if (!lineOrtho) { _cancelPolyline(); renderAnnotations() }
   if (selectedId) {
     const ann = annotations.find(x => x.id === selectedId)
     if (ann && ann.type === 'line' && lineOrtho) {
       const dx = Math.abs(ann.x2 - ann.x1), dy = Math.abs(ann.y2 - ann.y1)
       const snapped = dx >= dy ? { y2: ann.y1 } : { x2: ann.x1 }
       updateSelectedAnnot({ lineOrtho, ...snapped })
-    } else {
+    } else if (ann && ann.type === 'line') {
       updateSelectedAnnot({ lineOrtho })
     }
   }
@@ -1095,6 +1106,7 @@ function setTool(t) {
   commitText(false)
   hideColorPanel()
   if (t !== 'crop') { cropRect = null; isCropping = false; cropMoving = false; cropResizeH = null; cropMoveStart = null }
+  _cancelPolyline()   // 切換工具時取消任何進行中的折線
   tool       = t
   selectedId = null
   isDrawing  = false
@@ -1284,6 +1296,28 @@ function renderAnnotations() {
       annotCtx.restore()
     }
   }
+
+  // 折線即時預覽：已確認頂點 + 游標位置
+  if (polylineActive && polylinePoints.length >= 1 && polylineMouse) {
+    const previewAnn = {
+      id: '_pl', type: 'polyline',
+      color, thickness, lineStyle, startCap, endCap,
+      points: polylinePoints,
+    }
+    annotCtx.save(); annotCtx.globalAlpha = 0.65
+    annotCtx.strokeStyle = color
+    annotCtx.fillStyle   = color
+    annotCtx.lineWidth   = thickness * viewScale
+    drawPolyline(annotCtx, previewAnn, { x: polylineMouse.x, y: polylineMouse.y })
+    annotCtx.restore()
+    // 已確認頂點標記（小圓點）
+    annotCtx.save()
+    annotCtx.fillStyle = color
+    polylinePoints.forEach(p => {
+      annotCtx.beginPath(); annotCtx.arc(c(p.x), c(p.y), 3 * viewScale, 0, Math.PI * 2); annotCtx.fill()
+    })
+    annotCtx.restore()
+  }
   if (selectedId) {
     const a = annotations.find(x => x.id === selectedId)
     if (a) drawSelection(annotCtx, a)
@@ -1354,6 +1388,7 @@ function drawOne(ctx, a) {
     case 'line':     drawLine(ctx, a);     break
     case 'text':     drawText(ctx, a);     break
     case 'number':   drawNumber(ctx, a);   break
+    case 'polyline': drawPolyline(ctx, a); break
   }
   ctx.restore()
 }
@@ -1528,6 +1563,75 @@ function drawText(ctx, a, { previewOnly = false } = {}) {
   }
 }
 
+// ─── Polyline drawing ─────────────────────────────────────────────────────────
+// 每段 p[i-1]→p[i] 自動折直角：|ΔX|≥|ΔY| → 先水平後垂直，否則先垂直後水平
+// liveEnd: 如果傳入，追加為末尾點（繪製中即時預覽用，不畫端點箭頭）
+
+function _polylineRouteThrough(ctx, p0, p1) {
+  const dx = Math.abs(p1.x - p0.x), dy = Math.abs(p1.y - p0.y)
+  if (dx >= dy) { ctx.lineTo(p1.x, p0.y); ctx.lineTo(p1.x, p1.y) }
+  else          { ctx.lineTo(p0.x, p1.y); ctx.lineTo(p1.x, p1.y) }
+}
+
+function drawPolyline(ctx, a, liveEnd) {
+  const rawPts = liveEnd ? [...a.points, liveEnd] : a.points
+  if (rawPts.length < 2) return
+
+  const pts = rawPts.map(p => ({ x: c(p.x), y: c(p.y) }))
+  const sz  = (a.thickness * 4 + 8) * viewScale
+  if (a.lineStyle === 'dashed') ctx.setLineDash([sz * 1.2, sz * 0.7])
+
+  ctx.beginPath()
+  ctx.moveTo(pts[0].x, pts[0].y)
+  for (let i = 1; i < pts.length; i++) _polylineRouteThrough(ctx, pts[i-1], pts[i])
+  ctx.stroke()
+  ctx.setLineDash([])
+
+  if (liveEnd) return   // 預覽時不畫箭頭
+
+  // 起點箭頭：依第一段出發方向決定
+  const p0 = pts[0], p1 = pts[1]
+  const sdx = p1.x - p0.x, sdy = p1.y - p0.y
+  let sFx, sFy
+  if (Math.abs(sdx) >= Math.abs(sdy)) { sFx = p0.x + Math.sign(sdx || 1); sFy = p0.y }
+  else                                 { sFx = p0.x;                        sFy = p0.y + Math.sign(sdy || 1) }
+  drawCap(ctx, a.startCap, sFx, sFy, p0.x, p0.y, a.color, sz)
+
+  // 終點箭頭：依最後一段到達方向決定
+  const pN = pts[pts.length - 1], pN1 = pts[pts.length - 2]
+  const edx = pN.x - pN1.x, edy = pN.y - pN1.y
+  let eFx, eFy
+  if (Math.abs(edx) >= Math.abs(edy)) {
+    if (Math.abs(edy) > 0) { eFx = pN.x;                         eFy = pN.y - Math.sign(edy) }
+    else                    { eFx = pN.x - Math.sign(edx || 1);  eFy = pN.y }
+  } else {
+    if (Math.abs(edx) > 0) { eFx = pN.x - Math.sign(edx);       eFy = pN.y }
+    else                    { eFx = pN.x;                         eFy = pN.y - Math.sign(edy || 1) }
+  }
+  drawCap(ctx, a.endCap, eFx, eFy, pN.x, pN.y, a.color, sz)
+}
+
+function _cancelPolyline() {
+  polylineActive = false; polylinePoints = []; polylineMouse = null
+}
+
+function _commitPolyline() {
+  if (polylinePoints.length < 2) { _cancelPolyline(); renderAnnotations(); return }
+  const ann = {
+    id: newId(), type: 'polyline',
+    color, thickness, lineStyle, startCap, endCap,
+    points: [...polylinePoints],
+    shadow: false,
+  }
+  _cancelPolyline()
+  pushHistory()
+  annotations.push(ann)
+  setTool('select')
+  selectedId = ann.id
+  showOptionsForAnnot(ann)
+  renderAnnotations()
+}
+
 function drawNumber(ctx, a) {
   const r  = (a.size ?? 14) * viewScale
   const cx = c(a.x), cy = c(a.y)
@@ -1570,6 +1674,9 @@ function getHandles(a) {
     const r = a.size ?? 14
     return [{ id: 'se', x: a.x + r, y: a.y + r, cursor: 'nwse-resize' }]
   }
+  if (a.type === 'polyline') {
+    return a.points.map((p, i) => ({ id: `v${i}`, x: p.x, y: p.y, cursor: 'crosshair' }))
+  }
   return []
 }
 
@@ -1595,6 +1702,23 @@ function startResize(hId, a) {
       case 'e':  info.fixX = x;   info.fixY = y;   info.fixH = h; break
       case 'w':  info.fixX = x+w; info.fixY = y;   info.fixH = h; break
     }
+  }
+  if (a.type === 'fillrect') {
+    const { x, y, w, h } = a
+    switch (hId) {
+      case 'nw': info.fixX = x+w; info.fixY = y+h; break
+      case 'ne': info.fixX = x;   info.fixY = y+h; break
+      case 'se': info.fixX = x;   info.fixY = y;   break
+      case 'sw': info.fixX = x+w; info.fixY = y;   break
+      case 'n':  info.fixX = x;   info.fixY = y+h; info.fixW = w; break
+      case 's':  info.fixX = x;   info.fixY = y;   info.fixW = w; break
+      case 'e':  info.fixX = x;   info.fixY = y;   info.fixH = h; break
+      case 'w':  info.fixX = x+w; info.fixY = y;   info.fixH = h; break
+    }
+  }
+  // polyline: id 格式為 'vN'，記錄頂點 index
+  if (a.type === 'polyline') {
+    info.ptIdx = parseInt(hId.slice(1))
   }
   resizeHandle = info
   isResizing   = true
@@ -1678,6 +1802,9 @@ function applyResize(a, pos) {
   if (a.type === 'number') {
     const d = Math.max(Math.abs(pos.x - h.cx), Math.abs(pos.y - h.cy))
     a.size = Math.max(d, 6)
+  }
+  if (a.type === 'polyline' && typeof h.ptIdx === 'number') {
+    a.points[h.ptIdx] = { x: pos.x, y: pos.y }
   }
 }
 
@@ -1806,6 +1933,12 @@ function bounds(a) {
       return { x:bx, y:a.y, w:maxW, h:lines.length*a.fontSize*1.25 }
     }
     case 'number': { const r = a.size ?? 14; return { x:a.x-r, y:a.y-r, w:r*2, h:r*2 } }
+    case 'polyline': {
+      const xs = a.points.map(p => p.x), ys = a.points.map(p => p.y)
+      const minX = Math.min(...xs), maxX = Math.max(...xs)
+      const minY = Math.min(...ys), maxY = Math.max(...ys)
+      return { x: minX, y: minY, w: Math.max(maxX - minX, 1), h: Math.max(maxY - minY, 1) }
+    }
   }
   return null
 }
@@ -1905,6 +2038,24 @@ annotCanvas.addEventListener('mousedown', e => {
     return
   }
 
+  // 折線模式（line tool + lineOrtho = true）：點擊加點，雙擊完成
+  if (tool === 'line' && lineOrtho) {
+    const now = Date.now()
+    const isDouble = polylineActive && (now - polylineLastMs) < 380
+    polylineLastMs = now
+    if (isDouble) {
+      // 雙擊第二下已被第一次 mousedown 加進去了，移除再 commit
+      if (polylinePoints.length > 1) polylinePoints.pop()
+      _commitPolyline()
+    } else {
+      if (!polylineActive) { polylineActive = true; polylinePoints = [] }
+      polylinePoints.push({ ...pos })
+      polylineMouse = pos
+      renderAnnotations()
+    }
+    return
+  }
+
   isDrawing = true; drawStart = pos; drawCurrent = pos
 })
 
@@ -1971,6 +2122,7 @@ annotCanvas.addEventListener('mousemove', e => {
     return
   }
 
+  if (polylineActive) { polylineMouse = pos; renderAnnotations(); return }
   if (isDrawing) { drawCurrent = pos; renderAnnotations(); return }
 
   // Update cursor for select tool
@@ -2060,13 +2212,17 @@ function moveAnnot(a, dx, dy) {
     case 'img':
     case 'text':
     case 'number': a.x += dx; a.y += dy; break
-    case 'line':   a.x1 += dx; a.y1 += dy; a.x2 += dx; a.y2 += dy; break
+    case 'line':     a.x1 += dx; a.y1 += dy; a.x2 += dx; a.y2 += dy; break
+    case 'polyline': a.points.forEach(p => { p.x += dx; p.y += dy }); break
   }
 }
 
 // ─── Double-click: re-edit text ───────────────────────────────────────────────
 
 annotCanvas.addEventListener('dblclick', e => {
+  // 折線模式下，雙擊第二下的 mousedown 已被timing偵測處理，dblclick 不再重複 commit
+  // （但以防萬一：若 polylineActive 仍為 true，再次 commit）
+  if (polylineActive) { _commitPolyline(); return }
   if (tool !== 'select') return
   const pos = evToImg(e)
   const a = findAt(pos)
@@ -2289,8 +2445,9 @@ document.addEventListener('keydown', e => {
       e.preventDefault()
       const newA = JSON.parse(JSON.stringify(annotClipboard))
       newA.id = newId()
-      if (newA.type === 'line') { newA.x1 += 8; newA.y1 += 8; newA.x2 += 8; newA.y2 += 8 }
-      else                      { newA.x  += 8; newA.y  += 8 }
+      if (newA.type === 'line')     { newA.x1 += 8; newA.y1 += 8; newA.x2 += 8; newA.y2 += 8 }
+      else if (newA.type === 'polyline') { newA.points.forEach(p => { p.x += 8; p.y += 8 }) }
+      else                               { newA.x  += 8; newA.y  += 8 }
       pushHistory()
       annotations.push(newA)
       selectedId = newA.id
@@ -2318,6 +2475,7 @@ document.addEventListener('keydown', e => {
     case 's': case 'S': openResizeModal(); break
     case 'Escape':
       hideCtxMenu()
+      if (polylineActive) { _cancelPolyline(); renderAnnotations(); break }
       if (tool === 'crop') { cancelCrop(); break }
       selectedId = null
       isDrawing  = false
