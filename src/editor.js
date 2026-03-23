@@ -2003,8 +2003,8 @@ function showTextInput(pos) {
   const halfLead = Math.round((lineH - 1) * fs / 2)
 
   // left: compensate for 4px left-padding;  top: compensate for 2px top-padding + half-leading
-  textInputEl.style.left       = (c(pos.x) - 4) + 'px'
-  textInputEl.style.top        = (c(pos.y) - 2 - halfLead) + 'px'
+  textInputEl.style.left       = (c(pos.x) - 5.5) + 'px'
+  textInputEl.style.top        = (c(pos.y) - 3.5 - halfLead) + 'px'
   textInputEl.style.fontSize   = fs + 'px'
   textInputEl.style.color      = color
   textInputEl.style.lineHeight = String(lineH)
