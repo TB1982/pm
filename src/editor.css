@@ -847,6 +847,21 @@ body {
 }
 .ff-select:focus { border-color: #4a9eff; }
 
+/* Font size preset quick-select */
+.fs-preset {
+  background: #2e2e2e;
+  border: 1px solid #404040;
+  border-radius: 5px;
+  color: #999;
+  font-size: 11px;
+  padding: 3px 1px;
+  cursor: pointer;
+  outline: none;
+  width: 32px;
+}
+.fs-preset:focus { border-color: #4a9eff; }
+.ff-select:focus { border-color: #4a9eff; }
+
 /* Shadow checkbox label */
 .shadow-lbl {
   display: flex;

@@ -225,7 +225,7 @@ function showOptionsForTool(t) {
     syncTextShadowCheck(textShadow)
     syncTextBold(textBold); syncTextItalic(textItalic); syncTextUnderline(textUnderline); syncTextStrikethrough(textStrikethrough)
     syncTextStrokeColor(textStrokeColor); syncTextStrokeWidth(textStrokeWidth)
-    syncTextBgColor(textBgColor); syncTextBgOpacity(textBgOpacity)
+    syncTextBgOpacity(textBgOpacity); syncTextBgPreview()
     syncFontFamily(fontFamily)
   }
   if (t === 'number') { document.getElementById('grpNumber').classList.remove('hidden'); document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(numShadow) }
@@ -262,8 +262,8 @@ function showOptionsForAnnot(a) {
     fontSize        = a.fontSize;                     syncFontSize(fontSize)
     textStrokeColor = a.textStrokeColor ?? '#000000'; syncTextStrokeColor(textStrokeColor)
     textStrokeWidth = a.textStrokeWidth ?? 0;         syncTextStrokeWidth(textStrokeWidth)
-    textBgColor     = a.textBgColor     ?? '#000000'; syncTextBgColor(textBgColor)
-    textBgOpacity   = a.textBgOpacity   ?? 0;         syncTextBgOpacity(textBgOpacity)
+    textBgColor     = a.textBgColor   ?? '#000000'
+    textBgOpacity   = a.textBgOpacity ?? 0;  syncTextBgOpacity(textBgOpacity); syncTextBgPreview()
     textShadow      = a.shadow ?? false;              syncTextShadowCheck(textShadow)
     textBold        = a.bold      ?? false;           syncTextBold(textBold)
     textItalic      = a.italic    ?? false;           syncTextItalic(textItalic)
@@ -377,7 +377,18 @@ function syncTextStrokeWidth(w) {
 }
 function syncTextBgColor(hex) {
   const p = document.getElementById('textBgColorPreview')
-  if (p) p.style.background = hex
+  if (!p) return
+  if (hex === 'transparent') {
+    p.style.background = ''
+    p.classList.add('cpp-swatch-transparent')
+  } else {
+    p.style.background = hex
+    p.classList.remove('cpp-swatch-transparent')
+  }
+}
+// 根據當前 textBgOpacity 決定預覽色塊顯示透明或實色
+function syncTextBgPreview() {
+  syncTextBgColor(textBgOpacity === 0 ? 'transparent' : textBgColor)
 }
 function syncTextBgOpacity(v) {
   const el = document.getElementById('textBgOpacityInput')
@@ -448,14 +459,15 @@ function applyTextStrokeColor(hex) {
 function applyTextBgColor(hex) {
   if (hex === 'transparent') {
     // 選「透明」= 關閉背景（將 opacity 歸零）
-    textBgOpacity = 0; syncTextBgOpacity(0)
+    textBgOpacity = 0; syncTextBgOpacity(0); syncTextBgPreview()
     if (selectedId) updateSelectedAnnot({ textBgOpacity: 0 })
     if (textActive) renderAnnotations()
     return
   }
-  textBgColor = hex; syncTextBgColor(hex)
+  textBgColor = hex
   // 若之前因選透明而歸零，選新色時自動恢復預設 50%
   if (textBgOpacity === 0) { textBgOpacity = 50; syncTextBgOpacity(50) }
+  syncTextBgPreview()   // opacity 已確定後再更新色塊
   if (selectedId) updateSelectedAnnot({ textBgColor: hex, textBgOpacity: textBgOpacity })
   if (textActive) renderAnnotations()
   pushRecentColor(hex)
@@ -897,9 +909,22 @@ document.querySelectorAll('.cap-btn').forEach(btn =>
   })
 )
 
-// Font size
+// Font size — manual input
 document.getElementById('fontSizeInput').addEventListener('input', e => {
   fontSize = Math.max(8, Math.min(400, parseInt(e.target.value) || 48))
+  if (selectedId) updateSelectedAnnot({ fontSize })
+  if (textActive) {
+    textInputEl.style.fontSize = Math.max(fontSize * viewScale, 14) + 'px'
+    resizeTextInput()
+  }
+})
+
+// Font size — quick preset select
+document.getElementById('fontSizePreset').addEventListener('change', e => {
+  if (!e.target.value) return
+  fontSize = parseInt(e.target.value)
+  syncFontSize(fontSize)
+  e.target.value = ''   // reset to "—" placeholder
   if (selectedId) updateSelectedAnnot({ fontSize })
   if (textActive) {
     textInputEl.style.fontSize = Math.max(fontSize * viewScale, 14) + 'px'
@@ -930,6 +955,7 @@ document.getElementById('textBgColorPreview').addEventListener('click', function
 // Text background opacity
 document.getElementById('textBgOpacityInput').addEventListener('input', e => {
   textBgOpacity = Math.max(0, Math.min(100, parseInt(e.target.value) || 0))
+  syncTextBgPreview()
   if (selectedId) updateSelectedAnnot({ textBgOpacity })
   if (textActive) renderAnnotations()
 })

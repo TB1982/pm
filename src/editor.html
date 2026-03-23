@@ -88,19 +88,38 @@
       <button class="cap-btn active" data-end="end" data-cap="arrow">▶</button>
     </div>
 
-    <datalist id="fontSizeList">
-      <option value="36"><option value="48"><option value="64">
-      <option value="96"><option value="128"><option value="192">
-    </datalist>
 
     <div class="opt-group hidden" id="grpFont">
-      <span class="opt-label">字型大小</span>
-      <input type="text" inputmode="numeric" id="fontSizeInput" value="48" list="fontSizeList" autocomplete="off">
+      <span class="opt-label">字體</span>
+      <select id="fontFamilySelect" class="ff-select">
+        <option value="system">系統預設</option>
+        <option value="pingfang">蘋方-繁</option>
+        <option value="heiti">黑體-繁</option>
+        <option value="songti">宋體-繁</option>
+        <option value="kaiti">楷體-繁</option>
+        <option value="helvetica">Helvetica Neue</option>
+        <option value="georgia">Georgia</option>
+        <option value="verdana">Verdana</option>
+        <option value="impact">Impact</option>
+        <option value="mono">等寬 Menlo</option>
+      </select>
+      <div class="opt-sep"></div>
+      <span class="opt-label">大小</span>
+      <input type="number" id="fontSizeInput" value="48" min="8" max="400">
+      <select id="fontSizePreset" class="fs-preset" title="快速選擇大小">
+        <option value="">—</option>
+        <option value="36">36</option>
+        <option value="48">48</option>
+        <option value="64">64</option>
+        <option value="96">96</option>
+        <option value="128">128</option>
+        <option value="192">192</option>
+      </select>
       <span class="opt-label">px</span>
       <div class="opt-sep"></div>
-      <button class="sz-btn biu-btn" id="btnTextBold"      title="粗體"><b>B</b></button>
-      <button class="sz-btn biu-btn" id="btnTextItalic"    title="斜體"><i>I</i></button>
-      <button class="sz-btn biu-btn" id="btnTextUnderline"     title="底線" style="text-decoration:underline">U</button>
+      <button class="sz-btn biu-btn" id="btnTextBold"          title="粗體"><b>B</b></button>
+      <button class="sz-btn biu-btn" id="btnTextItalic"        title="斜體"><i>I</i></button>
+      <button class="sz-btn biu-btn" id="btnTextUnderline"     title="底線"   style="text-decoration:underline">U</button>
       <button class="sz-btn biu-btn" id="btnTextStrikethrough" title="刪除線" style="text-decoration:line-through">S</button>
       <div class="opt-sep"></div>
       <span class="opt-label">描邊</span>
@@ -116,20 +135,6 @@
       <span class="opt-label">%</span>
       <div class="opt-sep"></div>
       <label class="shadow-lbl"><input type="checkbox" id="textShadowCheck"> 陰影</label>
-      <div class="opt-sep"></div>
-      <span class="opt-label">字體</span>
-      <select id="fontFamilySelect" class="ff-select">
-        <option value="system">系統預設</option>
-        <option value="pingfang">蘋方-繁</option>
-        <option value="heiti">黑體-繁</option>
-        <option value="songti">宋體-繁</option>
-        <option value="kaiti">楷體-繁</option>
-        <option value="helvetica">Helvetica Neue</option>
-        <option value="georgia">Georgia</option>
-        <option value="verdana">Verdana</option>
-        <option value="impact">Impact</option>
-        <option value="mono">等寬 Menlo</option>
-      </select>
     </div>
 
     <div class="opt-group hidden" id="grpShadow">
