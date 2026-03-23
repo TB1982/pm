@@ -23,6 +23,19 @@ const PALETTE_STANDARD = [
   'transparent',
 ]
 
+// Font families available in the text tool
+const FONT_FAMILIES = [
+  { id: 'system',   label: '系統',   css: '-apple-system, "Helvetica Neue", sans-serif' },
+  { id: 'pingfang', label: '蘋方',   css: '"PingFang TC", "Heiti TC", sans-serif' },
+  { id: 'songti',   label: '宋體',   css: '"Songti TC", "STSong", serif' },
+  { id: 'kaiti',    label: '楷體',   css: '"Kaiti TC", "STKaiti", cursive' },
+  { id: 'impact',   label: 'Impact', css: 'Impact, "Arial Black", sans-serif' },
+  { id: 'mono',     label: '等寬',   css: 'Menlo, "Courier New", monospace' },
+]
+function getFontCss(id) {
+  return (FONT_FAMILIES.find(f => f.id === id) ?? FONT_FAMILIES[0]).css
+}
+
 // ─── State ───────────────────────────────────────────────────────────────────
 
 // Image
@@ -81,6 +94,7 @@ let textBold        = false
 let textItalic      = false
 let textUnderline     = false
 let textStrikethrough = false
+let fontFamily        = 'system'   // FONT_FAMILIES id
 
 // Shadow (per-tool default; each annotation also stores its own value)
 let rectShadow      = false
@@ -208,6 +222,7 @@ function showOptionsForTool(t) {
     syncTextBold(textBold); syncTextItalic(textItalic); syncTextUnderline(textUnderline); syncTextStrikethrough(textStrikethrough)
     syncTextStrokeColor(textStrokeColor); syncTextStrokeWidth(textStrokeWidth)
     syncTextBgColor(textBgColor); syncTextBgOpacity(textBgOpacity)
+    syncFontFamily(fontFamily)
   }
   if (t === 'number') { document.getElementById('grpNumber').classList.remove('hidden'); document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(numShadow) }
   if (t === 'rect')   { document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(rectShadow) }
@@ -250,6 +265,7 @@ function showOptionsForAnnot(a) {
     textItalic      = a.italic    ?? false;           syncTextItalic(textItalic)
     textUnderline     = a.underline     ?? false; syncTextUnderline(textUnderline)
     textStrikethrough = a.strikethrough ?? false; syncTextStrikethrough(textStrikethrough)
+    fontFamily        = a.fontFamily    ?? 'system';  syncFontFamily(fontFamily)
     document.getElementById('grpFont').classList.remove('hidden')
   }
   if (t === 'number') {
@@ -362,6 +378,9 @@ function syncTextBgColor(hex) {
 function syncTextBgOpacity(v) {
   const el = document.getElementById('textBgOpacityInput')
   if (el) el.value = v
+}
+function syncFontFamily(id) {
+  document.querySelectorAll('.ff-btn').forEach(b => b.classList.toggle('active', b.dataset.ff === id))
 }
 function syncTextBold(v)      { document.getElementById('btnTextBold')     ?.classList.toggle('active', v) }
 function syncTextItalic(v)    { document.getElementById('btnTextItalic')   ?.classList.toggle('active', v) }
@@ -917,6 +936,17 @@ document.getElementById('textShadowCheck').addEventListener('change', e => {
   if (textActive) renderAnnotations()
 })
 
+// Font family buttons
+document.querySelectorAll('.ff-btn').forEach(btn =>
+  btn.addEventListener('click', () => {
+    fontFamily = btn.dataset.ff
+    syncFontFamily(fontFamily)
+    if (selectedId) updateSelectedAnnot({ fontFamily })
+    applyTextStyleToInput()
+    if (textActive) renderAnnotations()
+  })
+)
+
 // B / I / U toggles
 ;[
   ['btnTextBold',      () => { textBold      = !textBold;      syncTextBold(textBold);           if (selectedId) updateSelectedAnnot({ bold:      textBold      }); applyTextStyleToInput() }],
@@ -1218,6 +1248,7 @@ function renderAnnotations() {
       textStrokeColor, textStrokeWidth, textBgColor, textBgOpacity,
       shadow: textShadow,
       bold: textBold, italic: textItalic, underline: textUnderline, strikethrough: textStrikethrough,
+      fontFamily,
     }, { previewOnly: true })
     annotCtx.restore()
   }
@@ -1315,7 +1346,7 @@ function drawText(ctx, a, { previewOnly = false } = {}) {
   const fs      = a.fontSize * viewScale
   const lines   = a.content.split('\n')
   const fontMod = [a.italic ? 'italic' : '', a.bold ? 'bold' : ''].filter(Boolean).join(' ')
-  ctx.font         = `${fontMod} ${fs}px -apple-system, "Helvetica Neue", sans-serif`.trimStart()
+  ctx.font         = `${fontMod} ${fs}px ${getFontCss(a.fontFamily ?? 'system')}`.trimStart()
   ctx.textAlign    = 'left'
   ctx.textBaseline = 'top'
 
@@ -1931,6 +1962,7 @@ function applyTextStyleToInput() {
   textInputEl.style.fontWeight     = textBold   ? 'bold'   : ''
   textInputEl.style.fontStyle      = textItalic ? 'italic' : ''
   textInputEl.style.textDecoration = decs.join(' ')
+  textInputEl.style.fontFamily     = getFontCss(fontFamily)
 }
 
 function showTextInput(pos) {
@@ -1963,7 +1995,8 @@ function commitText(autoSelect = true) {
   pushHistory()
   const txtAnn = { id:newId(), type:'text', color, fontSize, x:pos.x, y:pos.y, content,
                    textStrokeColor, textStrokeWidth, textBgColor, textBgOpacity, shadow: textShadow,
-                   bold: textBold, italic: textItalic, underline: textUnderline, strikethrough: textStrikethrough }
+                   bold: textBold, italic: textItalic, underline: textUnderline, strikethrough: textStrikethrough,
+                   fontFamily }
   annotations.push(txtAnn)
   if (autoSelect) {
     // 直接更新狀態，不呼叫 setTool()，避免 selectedId 被重置

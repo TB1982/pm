@@ -88,9 +88,14 @@
       <button class="cap-btn active" data-end="end" data-cap="arrow">▶</button>
     </div>
 
+    <datalist id="fontSizeList">
+      <option value="36"><option value="48"><option value="64">
+      <option value="96"><option value="128"><option value="192">
+    </datalist>
+
     <div class="opt-group hidden" id="grpFont">
       <span class="opt-label">字型大小</span>
-      <input type="number" id="fontSizeInput" value="48" min="8" max="400">
+      <input type="number" id="fontSizeInput" value="48" min="8" max="400" list="fontSizeList">
       <span class="opt-label">px</span>
       <div class="opt-sep"></div>
       <button class="sz-btn biu-btn" id="btnTextBold"      title="粗體"><b>B</b></button>
@@ -111,6 +116,14 @@
       <span class="opt-label">%</span>
       <div class="opt-sep"></div>
       <label class="shadow-lbl"><input type="checkbox" id="textShadowCheck"> 陰影</label>
+      <div class="opt-sep"></div>
+      <span class="opt-label">字體</span>
+      <button class="ff-btn active" data-ff="system">系統</button>
+      <button class="ff-btn"        data-ff="pingfang">蘋方</button>
+      <button class="ff-btn"        data-ff="songti">宋體</button>
+      <button class="ff-btn"        data-ff="kaiti">楷體</button>
+      <button class="ff-btn"        data-ff="impact">Impact</button>
+      <button class="ff-btn"        data-ff="mono">等寬</button>
     </div>
 
     <div class="opt-group hidden" id="grpShadow">
