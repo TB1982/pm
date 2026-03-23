@@ -88,17 +88,64 @@
       <button class="cap-btn active" data-end="end" data-cap="arrow">▶</button>
     </div>
 
+
     <div class="opt-group hidden" id="grpFont">
-      <span class="opt-label">字型大小</span>
+      <span class="opt-label">字體</span>
+      <select id="fontFamilySelect" class="ff-select">
+        <option value="system">系統預設</option>
+        <option value="pingfang">蘋方-繁</option>
+        <option value="heiti">黑體-繁</option>
+        <option value="songti">宋體-繁</option>
+        <option value="kaiti">楷體-繁</option>
+        <option value="helvetica">Helvetica Neue</option>
+        <option value="georgia">Georgia</option>
+        <option value="verdana">Verdana</option>
+        <option value="impact">Impact</option>
+        <option value="mono">等寬 Menlo</option>
+      </select>
+      <div class="opt-sep"></div>
+      <span class="opt-label">大小</span>
       <input type="number" id="fontSizeInput" value="48" min="8" max="400">
+      <select id="fontSizePreset" class="fs-preset" title="快速選擇大小">
+        <option value="">—</option>
+        <option value="36">36</option>
+        <option value="48">48</option>
+        <option value="64">64</option>
+        <option value="96">96</option>
+        <option value="128">128</option>
+        <option value="192">192</option>
+      </select>
       <span class="opt-label">px</span>
+      <div class="opt-sep"></div>
+      <button class="sz-btn biu-btn" id="btnTextBold"          title="粗體"><b>B</b></button>
+      <button class="sz-btn biu-btn" id="btnTextItalic"        title="斜體"><i>I</i></button>
+      <button class="sz-btn biu-btn" id="btnTextUnderline"     title="底線"   style="text-decoration:underline">U</button>
+      <button class="sz-btn biu-btn" id="btnTextStrikethrough" title="刪除線" style="text-decoration:line-through">S</button>
+      <div class="opt-sep"></div>
+      <span class="opt-label">描邊</span>
+      <div class="color-preview fill-preview" id="textStrokeColorPreview" title="點擊選色"></div>
+      <button class="tsw-btn active" data-tsw="0">無</button>
+      <button class="tsw-btn"        data-tsw="1">細</button>
+      <button class="tsw-btn"        data-tsw="2">中</button>
+      <button class="tsw-btn"        data-tsw="3">粗</button>
+      <div class="opt-sep"></div>
+      <span class="opt-label">背景</span>
+      <div class="color-preview fill-preview" id="textBgColorPreview" title="點擊選色"></div>
+      <input type="number" id="textBgOpacityInput" value="0" min="0" max="100" style="width:44px">
+      <span class="opt-label">%</span>
+      <div class="opt-sep"></div>
+      <label class="shadow-lbl"><input type="checkbox" id="textShadowCheck"> 陰影</label>
+    </div>
+
+    <div class="opt-group hidden" id="grpShadow">
+      <label class="shadow-lbl"><input type="checkbox" id="shadowCheck"> 陰影</label>
     </div>
 
     <div class="opt-group hidden" id="grpNumber">
       <span class="opt-label">大小</span>
       <div class="sz-group">
-        <button class="ns-btn"        data-ns="24">小</button>
-        <button class="ns-btn active" data-ns="36">標準</button>
+        <button class="ns-btn"        data-ns="36">小</button>
+        <button class="ns-btn active" data-ns="48">標準</button>
         <button class="ns-btn"        data-ns="56">大</button>
       </div>
       <div class="opt-sep"></div>
@@ -325,6 +372,14 @@
     </div>
     <input type="color" id="cppNativePicker" class="native-color-picker" tabindex="-1" aria-hidden="true">
   </div>
+</div>
+
+<!-- Right-click context menu: layer ordering -->
+<div id="ctxMenu" class="ctx-menu hidden" role="menu">
+  <button id="ctxToTop"    data-dir="top">移到最上層</button>
+  <button id="ctxMoveUp"   data-dir="up">上移一層</button>
+  <button id="ctxMoveDown" data-dir="down">下移一層</button>
+  <button id="ctxToBottom" data-dir="bottom">移到最下層</button>
 </div>
 
 <script src="editor.js"></script>
