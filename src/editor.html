@@ -75,6 +75,14 @@
       <span class="opt-label">線條</span>
       <button class="style-btn active" data-ls="solid">實線</button>
       <button class="style-btn"        data-ls="dashed">虛線</button>
+      <div class="opt-sep"></div>
+      <button class="style-btn" id="btnLineOrtho" title="正交折線（水平/垂直吸附）">直角</button>
+    </div>
+
+    <div class="opt-group hidden" id="grpRadius">
+      <span class="opt-label">圓角</span>
+      <input type="number" id="cornerRadiusInput" value="0" min="0" max="100" style="width:44px">
+      <span class="opt-label">%</span>
     </div>
 
     <div class="opt-group hidden" id="grpCaps">

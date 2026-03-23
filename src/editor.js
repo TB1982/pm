@@ -67,9 +67,11 @@ let historyIdx  = 0
 let tool      = 'rect'
 let color     = '#ff3b30'
 let thickness = 2
-let lineStyle = 'solid'
-let startCap  = 'none'
-let endCap    = 'arrow'
+let lineStyle   = 'solid'
+let lineOrtho   = false   // 正交折線：true = 水平/垂直吸附
+let startCap    = 'none'
+let endCap      = 'arrow'
+let cornerRadius = 0      // 0–100%，套用於 rect / fillrect 的圓角半徑
 let fontSize  = 48
 let numCount  = 1
 let numSize   = 48    // radius, image pixels
@@ -191,7 +193,7 @@ function getTextColor(hex) {
 // ─── Options bar helpers ──────────────────────────────────────────────────────
 
 function hideAllOptions() {
-  ['grpColor','grpFillColor','grpThickness','grpLineStyle','grpCaps','grpFont','grpNumber','grpShadow','grpZoom','grpCrop'].forEach(id =>
+  ['grpColor','grpFillColor','grpThickness','grpLineStyle','grpCaps','grpRadius','grpFont','grpNumber','grpShadow','grpZoom','grpCrop'].forEach(id =>
     document.getElementById(id).classList.add('hidden')
   )
   document.getElementById('numValueEdit').classList.add('hidden')
@@ -220,7 +222,8 @@ function showOptionsForTool(t) {
     syncFillBorderColor(fillBorderColor)
   }
   if (['rect','fillrect','line'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
-  if (t === 'line')   { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden') }
+  if (t === 'line')   { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden'); syncLineOrtho(lineOrtho) }
+  if (['rect','fillrect'].includes(t)) { document.getElementById('grpRadius').classList.remove('hidden'); syncCornerRadius(cornerRadius) }
   if (t === 'text') {
     document.getElementById('grpFont').classList.remove('hidden')
     syncTextShadowCheck(textShadow)
@@ -243,6 +246,7 @@ function showOptionsForAnnot(a) {
   if (t === 'fillrect') document.getElementById('grpFillColor').classList.remove('hidden')
   if (['rect','fillrect','line'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
   if (t === 'line')   { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden') }
+  if (['rect','fillrect'].includes(t)) document.getElementById('grpRadius').classList.remove('hidden')
   if (t === 'number') document.getElementById('grpNumber').classList.remove('hidden')
   // Sync UI state to annotation values
   color = a.color; syncColor(color)
@@ -259,7 +263,8 @@ function showOptionsForAnnot(a) {
     fillBorderEnabled = a.fillBorder !== false; syncFillBorder(fillBorderEnabled)
     fillBorderColor = a.fillBorderColor ?? '#ffffff'; syncFillBorderColor(fillBorderColor)
   }
-  if (t === 'line')   { lineStyle = a.lineStyle; startCap = a.startCap; endCap = a.endCap; syncLineStyle(lineStyle); syncCaps(startCap, endCap) }
+  if (t === 'line')   { lineStyle = a.lineStyle; startCap = a.startCap; endCap = a.endCap; lineOrtho = a.lineOrtho ?? false; syncLineStyle(lineStyle); syncCaps(startCap, endCap); syncLineOrtho(lineOrtho) }
+  if (['rect','fillrect'].includes(t)) { cornerRadius = a.cornerRadius ?? 0; syncCornerRadius(cornerRadius) }
   if (t === 'text') {
     fontSize        = a.fontSize;                     syncFontSize(fontSize)
     textStrokeColor = a.textStrokeColor ?? '#000000'; syncTextStrokeColor(textStrokeColor)
@@ -309,6 +314,8 @@ function applyColor(hex) {
 function syncThickness(t) {
   document.querySelectorAll('.sz-btn[data-sz]').forEach(b => b.classList.toggle('active', parseInt(b.dataset.sz) === t))
 }
+function syncCornerRadius(v) { document.getElementById('cornerRadiusInput').value = v }
+function syncLineOrtho(v) { document.getElementById('btnLineOrtho')?.classList.toggle('active', v) }
 function syncLineStyle(ls) {
   document.querySelectorAll('.style-btn[data-ls]').forEach(b => b.classList.toggle('active', b.dataset.ls === ls))
 }
@@ -898,6 +905,21 @@ document.querySelectorAll('.sz-btn[data-sz]').forEach(btn =>
   })
 )
 
+// Corner radius (rect / fillrect)
+document.getElementById('cornerRadiusInput').addEventListener('input', e => {
+  cornerRadius = Math.max(0, Math.min(100, parseInt(e.target.value) || 0))
+  syncCornerRadius(cornerRadius)
+  if (selectedId) updateSelectedAnnot({ cornerRadius })
+  else redraw()
+})
+
+// Line ortho toggle
+document.getElementById('btnLineOrtho').addEventListener('click', () => {
+  lineOrtho = !lineOrtho
+  syncLineOrtho(lineOrtho)
+  if (selectedId) updateSelectedAnnot({ lineOrtho })
+})
+
 // Line style
 document.querySelectorAll('.style-btn[data-ls]').forEach(btn =>
   btn.addEventListener('click', () => {
@@ -1323,9 +1345,19 @@ function drawOne(ctx, a) {
   ctx.restore()
 }
 
+function cornerRadiusPx(a) {
+  const cr = a.cornerRadius ?? 0
+  return cr === 0 ? 0 : c((cr / 100) * Math.min(a.w, a.h) / 2)
+}
+
 function drawRect(ctx, a) {
   if (a.shadow) setShadow(ctx)
-  ctx.strokeRect(c(a.x), c(a.y), c(a.w), c(a.h))
+  const r = cornerRadiusPx(a)
+  if (r > 0) {
+    ctx.beginPath(); ctx.roundRect(c(a.x), c(a.y), c(a.w), c(a.h), r); ctx.stroke()
+  } else {
+    ctx.strokeRect(c(a.x), c(a.y), c(a.w), c(a.h))
+  }
 }
 
 function resolveGradientColor(col) {
@@ -1355,11 +1387,20 @@ function drawFillRect(ctx, a) {
     ctx.fillStyle = a.fillColor ?? '#ffcc00'
   }
 
-  ctx.fillRect(rx, ry, rw, rh)
+  const r = cornerRadiusPx(a)
+  if (r > 0) {
+    ctx.beginPath(); ctx.roundRect(rx, ry, rw, rh, r); ctx.fill()
+  } else {
+    ctx.fillRect(rx, ry, rw, rh)
+  }
   ctx.restore()
   if (a.fillBorder !== false) {
     ctx.strokeStyle = a.fillBorderColor ?? '#ffffff'
-    ctx.strokeRect(rx, ry, rw, rh)
+    if (r > 0) {
+      ctx.beginPath(); ctx.roundRect(rx, ry, rw, rh, r); ctx.stroke()
+    } else {
+      ctx.strokeRect(rx, ry, rw, rh)
+    }
   }
 }
 
@@ -1642,12 +1683,18 @@ function buildPreview() {
   const base = { id: '_p', color, thickness }
   const s = drawStart, e = drawCurrent
   if (tool === 'rect')
-    return { ...base, type:'rect', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y), shadow: rectShadow }
+    return { ...base, type:'rect', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y), shadow: rectShadow, cornerRadius }
   if (tool === 'fillrect')
     return { ...base, type:'fillrect', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y),
-             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled, fillBorderColor, shadow: fillrectShadow }
-  if (tool === 'line')
-    return { ...base, type:'line', x1:s.x, y1:s.y, x2:e.x, y2:e.y, lineStyle, startCap, endCap }
+             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled, fillBorderColor, shadow: fillrectShadow, cornerRadius }
+  if (tool === 'line') {
+    let x2 = e.x, y2 = e.y
+    if (lineOrtho) {
+      if (Math.abs(e.x - s.x) >= Math.abs(e.y - s.y)) y2 = s.y
+      else x2 = s.x
+    }
+    return { ...base, type:'line', x1:s.x, y1:s.y, x2, y2, lineStyle, startCap, endCap, lineOrtho }
+  }
   return null
 }
 
@@ -1656,17 +1703,22 @@ function commitShape(start, end) {
   if (tool === 'rect') {
     const w = Math.abs(end.x - start.x), h = Math.abs(end.y - start.y)
     if (w < 2 || h < 2) return null
-    return { ...base, type:'rect', x:Math.min(start.x,end.x), y:Math.min(start.y,end.y), w, h, shadow: rectShadow }
+    return { ...base, type:'rect', x:Math.min(start.x,end.x), y:Math.min(start.y,end.y), w, h, shadow: rectShadow, cornerRadius }
   }
   if (tool === 'fillrect') {
     const w = Math.abs(end.x - start.x), h = Math.abs(end.y - start.y)
     if (w < 2 || h < 2) return null
     return { ...base, type:'fillrect', x:Math.min(start.x,end.x), y:Math.min(start.y,end.y), w, h,
-             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled, fillBorderColor, shadow: fillrectShadow }
+             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled, fillBorderColor, shadow: fillrectShadow, cornerRadius }
   }
   if (tool === 'line') {
-    if (Math.hypot(end.x-start.x, end.y-start.y) < 2) return null
-    return { ...base, type:'line', x1:start.x, y1:start.y, x2:end.x, y2:end.y, lineStyle, startCap, endCap }
+    let ex = end.x, ey = end.y
+    if (lineOrtho) {
+      if (Math.abs(end.x - start.x) >= Math.abs(end.y - start.y)) ey = start.y
+      else ex = start.x
+    }
+    if (Math.hypot(ex-start.x, ey-start.y) < 2) return null
+    return { ...base, type:'line', x1:start.x, y1:start.y, x2:ex, y2:ey, lineStyle, startCap, endCap, lineOrtho }
   }
   return null
 }
