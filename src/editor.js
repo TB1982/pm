@@ -201,7 +201,7 @@ function getTextColor(hex) {
 // ─── Options bar helpers ──────────────────────────────────────────────────────
 
 function hideAllOptions() {
-  ['grpColor','grpFillColor','grpThickness','grpLineStyle','grpCaps','grpRadius','grpFont','grpNumber','grpShadow','grpZoom','grpCrop'].forEach(id =>
+  ['grpRectShape','grpColor','grpFillColor','grpThickness','grpLineStyle','grpCaps','grpRadius','grpFont','grpNumber','grpShadow','grpZoom','grpCrop'].forEach(id =>
     document.getElementById(id).classList.add('hidden')
   )
   document.getElementById('numValueEdit').classList.add('hidden')
@@ -243,6 +243,7 @@ function showOptionsForTool(t) {
     syncFontFamily(fontFamily)
   }
   if (t === 'number') { document.getElementById('grpNumber').classList.remove('hidden'); document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(numShadow) }
+  if (t === 'rect' || t === 'ellipse') { document.getElementById('grpRectShape').classList.remove('hidden'); syncRectShape(t) }
   if (t === 'rect')    { document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(rectShadow) }
   if (t === 'ellipse') { document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(ellipseShadow) }
   if (t === 'fillrect') document.getElementById('grpShadow').classList.remove('hidden')
@@ -298,6 +299,7 @@ function showOptionsForAnnot(a) {
     document.getElementById('numValueInput').value = a.value
     document.getElementById('grpShadow').classList.remove('hidden')
   }
+  if (t === 'rect' || t === 'ellipse') { document.getElementById('grpRectShape').classList.remove('hidden'); syncRectShape(t) }
   if (t === 'rect') {
     rectShadow = a.shadow ?? false; syncShadowCheck(rectShadow)
     document.getElementById('grpShadow').classList.remove('hidden')
@@ -434,6 +436,10 @@ function syncTextAlign(v) {
   document.getElementById('btnAlignRight') ?.classList.toggle('active', v === 'right')
 }
 
+function syncRectShape(shape) {
+  document.getElementById('btnShapeRect')   ?.classList.toggle('active', shape === 'rect')
+  document.getElementById('btnShapeEllipse')?.classList.toggle('active', shape === 'ellipse')
+}
 function syncShadowCheck(val) {
   const el = document.getElementById('shadowCheck')
   if (el) el.checked = val
@@ -1074,6 +1080,23 @@ document.getElementById('shadowCheck').addEventListener('change', e => {
   }
 })
 
+// 矩形框 ↔ 橢圓框 切換（grpRectShape 按鈕）
+;['rect','ellipse'].forEach(shape => {
+  document.getElementById(shape === 'rect' ? 'btnShapeRect' : 'btnShapeEllipse').addEventListener('click', () => {
+    const a = selectedId ? annotations.find(x => x.id === selectedId) : null
+    if (a && (a.type === 'rect' || a.type === 'ellipse')) {
+      // 已選取 rect/ellipse 標注：直接轉換形狀，留在 select 模式
+      if (a.type !== shape) { a.type = shape; pushHistory() }
+      syncRectShape(shape)
+      showOptionsForAnnot(a)
+      renderAnnotations()
+    } else {
+      // 無選取標注：切換繪圖工具
+      setTool(shape)
+    }
+  })
+})
+
 // Number size
 document.querySelectorAll('.ns-btn').forEach(btn =>
   btn.addEventListener('click', () => {
@@ -1120,9 +1143,11 @@ function setTool(t) {
   isDrawing  = false
   isPanning  = false
 
-  document.querySelectorAll('.tool-btn[data-tool]').forEach(b =>
-    b.classList.toggle('active', b.dataset.tool === t)
-  )
+  document.querySelectorAll('.tool-btn[data-tool]').forEach(b => {
+    // ellipse 屬於 rect 群組，左側工具列以 rect 按鈕表示 active
+    const match = b.dataset.tool === t || (t === 'ellipse' && b.dataset.tool === 'rect')
+    b.classList.toggle('active', match)
+  })
 
   if      (t === 'zoom-in')  annotCanvas.style.cursor = 'zoom-in'
   else if (t === 'zoom-out') annotCanvas.style.cursor = 'zoom-out'
@@ -1590,41 +1615,29 @@ function _polylineRouteThrough(ctx, p0, p1) {
 }
 
 function drawPolyline(ctx, a, liveEnd) {
-  const rawPts = liveEnd ? [...a.points, liveEnd] : a.points
-  if (rawPts.length < 2) return
+  const pts = a.points.map(p => ({ x: c(p.x), y: c(p.y) }))
+  if (pts.length < 1) return
 
-  const pts = rawPts.map(p => ({ x: c(p.x), y: c(p.y) }))
-  const sz  = (a.thickness * 4 + 8) * viewScale
+  const sz = (a.thickness * 4 + 8) * viewScale
   if (a.lineStyle === 'dashed') ctx.setLineDash([sz * 1.2, sz * 0.7])
 
   ctx.beginPath()
   ctx.moveTo(pts[0].x, pts[0].y)
-  for (let i = 1; i < pts.length; i++) _polylineRouteThrough(ctx, pts[i-1], pts[i])
+  // 儲存的頂點已 snap 至 H/V，每段為純直線
+  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y)
+  // live 段：從最後頂點路由至游標（仍需 H/V elbow）
+  if (liveEnd) _polylineRouteThrough(ctx, pts[pts.length - 1], { x: c(liveEnd.x), y: c(liveEnd.y) })
   ctx.stroke()
   ctx.setLineDash([])
 
-  if (liveEnd) return   // 預覽時不畫箭頭
+  if (liveEnd || pts.length < 2) return
 
-  // 起點箭頭：依第一段出發方向決定
+  // 箭頭方向：段為純直線，直接用相鄰頂點決定方向
   const p0 = pts[0], p1 = pts[1]
-  const sdx = p1.x - p0.x, sdy = p1.y - p0.y
-  let sFx, sFy
-  if (Math.abs(sdx) >= Math.abs(sdy)) { sFx = p0.x + Math.sign(sdx || 1); sFy = p0.y }
-  else                                 { sFx = p0.x;                        sFy = p0.y + Math.sign(sdy || 1) }
-  drawCap(ctx, a.startCap, sFx, sFy, p0.x, p0.y, a.color, sz)
+  drawCap(ctx, a.startCap, p1.x, p1.y, p0.x, p0.y, a.color, sz)
 
-  // 終點箭頭：依最後一段到達方向決定
   const pN = pts[pts.length - 1], pN1 = pts[pts.length - 2]
-  const edx = pN.x - pN1.x, edy = pN.y - pN1.y
-  let eFx, eFy
-  if (Math.abs(edx) >= Math.abs(edy)) {
-    if (Math.abs(edy) > 0) { eFx = pN.x;                         eFy = pN.y - Math.sign(edy) }
-    else                    { eFx = pN.x - Math.sign(edx || 1);  eFy = pN.y }
-  } else {
-    if (Math.abs(edx) > 0) { eFx = pN.x - Math.sign(edx);       eFy = pN.y }
-    else                    { eFx = pN.x;                         eFy = pN.y - Math.sign(edy || 1) }
-  }
-  drawCap(ctx, a.endCap, eFx, eFy, pN.x, pN.y, a.color, sz)
+  drawCap(ctx, a.endCap, pN1.x, pN1.y, pN.x, pN.y, a.color, sz)
 }
 
 function _cancelPolyline() {
@@ -1666,7 +1679,7 @@ function drawNumber(ctx, a) {
 // ─── Resize handles ───────────────────────────────────────────────────────────
 
 function getHandles(a) {
-  if (a.type === 'rect' || a.type === 'ellipse' || a.type === 'img') {
+  if (a.type === 'rect' || a.type === 'ellipse' || a.type === 'fillrect' || a.type === 'img') {
     const { x, y, w, h } = a
     const mx = x + w / 2, my = y + h / 2
     return [
@@ -2073,7 +2086,16 @@ annotCanvas.addEventListener('mousedown', e => {
       _commitPolyline()
     } else {
       if (!polylineActive) { polylineActive = true; polylinePoints = [] }
-      polylinePoints.push({ ...pos })
+      let newPt
+      if (polylinePoints.length === 0) {
+        newPt = { ...pos }  // 第一點：不 snap
+      } else {
+        // 第二點起：snap 至前一頂點的水平或垂直，使每段都是純直線
+        const prev = polylinePoints[polylinePoints.length - 1]
+        const adx = Math.abs(pos.x - prev.x), ady = Math.abs(pos.y - prev.y)
+        newPt = adx >= ady ? { x: pos.x, y: prev.y } : { x: prev.x, y: pos.y }
+      }
+      polylinePoints.push(newPt)
       polylineMouse = pos
       renderAnnotations()
     }
