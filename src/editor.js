@@ -1622,9 +1622,9 @@ function showTextInput(pos) {
   textPos    = pos
   const fs   = Math.max(fontSize * viewScale, 14)
 
-  // Offset by textarea padding (4px left, 2px top) so inner text aligns with canvas text
-  textInputEl.style.left       = (c(pos.x) - 4) + 'px'
-  textInputEl.style.top        = (c(pos.y) - 2) + 'px'
+  // Offset by border (1.5px) + padding (4px left, 2px top) so inner text aligns with canvas text
+  textInputEl.style.left       = (c(pos.x) - 5.5) + 'px'
+  textInputEl.style.top        = (c(pos.y) - 3.5) + 'px'
   textInputEl.style.fontSize   = fs + 'px'
   textInputEl.style.color      = color
   textInputEl.style.lineHeight = '1.25'
