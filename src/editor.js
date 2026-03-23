@@ -2123,7 +2123,22 @@ annotCanvas.addEventListener('mousemove', e => {
   }
 
   if (polylineActive) { polylineMouse = pos; renderAnnotations(); return }
-  if (isDrawing) { drawCurrent = pos; renderAnnotations(); return }
+  if (isDrawing) {
+    // Shift 鍵：線條鎖定水平／垂直（類 PPT 行為）；矩形鎖正方形
+    if (e.shiftKey && tool === 'line' && drawStart) {
+      const dx = Math.abs(pos.x - drawStart.x), dy = Math.abs(pos.y - drawStart.y)
+      drawCurrent = dx >= dy ? { x: pos.x, y: drawStart.y } : { x: drawStart.x, y: pos.y }
+    } else if (e.shiftKey && (tool === 'rect' || tool === 'fillrect') && drawStart) {
+      const side = Math.min(Math.abs(pos.x - drawStart.x), Math.abs(pos.y - drawStart.y))
+      drawCurrent = {
+        x: drawStart.x + Math.sign(pos.x - drawStart.x) * side,
+        y: drawStart.y + Math.sign(pos.y - drawStart.y) * side,
+      }
+    } else {
+      drawCurrent = pos
+    }
+    renderAnnotations(); return
+  }
 
   // Update cursor for select tool
   if (tool === 'select') {
@@ -2196,7 +2211,8 @@ document.addEventListener('mouseup', e => {
   if (!isDrawing) return
   isDrawing = false
 
-  const end = evToImg(e)
+  // 使用 drawCurrent（mousemove 已套用 Shift 吸附）；fallback 至 evToImg
+  const end = drawCurrent ?? evToImg(e)
   const ann = commitShape(drawStart, end)
   if (ann) {
     pushHistory(); annotations.push(ann)
