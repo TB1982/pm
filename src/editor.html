@@ -178,10 +178,11 @@
     </div>
 
     <div class="opt-group" id="grpThickness">
-      <span class="opt-label">粗細</span>
-      <input type="number" id="strokeWidthInput" value="2" min="1" max="999">
+      <span class="opt-label" id="thicknessLabel">粗細</span>
+      <input type="number" id="strokeWidthInput" value="2" min="0" max="999">
       <select id="strokeWidthPreset" class="fs-preset" title="快速選擇粗細">
         <option value="">—</option>
+        <option value="0">0</option>
         <option value="1">1</option>
         <option value="2">2</option>
         <option value="3">3</option>
@@ -194,6 +195,7 @@
         <option value="10">10</option>
       </select>
       <span class="opt-label">px</span>
+      <div class="color-preview" id="numStrokeColorPreview" title="描邊顏色" style="display:none"></div>
     </div>
 
     <div class="opt-group hidden" id="grpLineStyle">

@@ -75,7 +75,9 @@ let cornerRadius = 0      // 0–100%，套用於 rect / fillrect 的圓角半�
 let fontSize  = 48
 let numCount  = 1
 let numSize   = 48    // radius, image pixels
-let numberStyle = 'dot'  // dot | circle | circle-fill | roman | cjk-paren | cjk-circle
+let numberStyle   = 'dot'   // dot | circle | circle-fill | roman | cjk-paren | cjk-circle
+let numThickness  = 0       // 描邊粗細，獨立於全域 thickness
+let numStrokeColor = '#ffffff'  // 描邊顏色
 const STYLE_LIMITS = { dot: Infinity, circle: 50, 'circle-fill': 10, roman: 12, 'cjk-paren': 10, 'cjk-circle': 10 }
 const STYLE_LABELS = { dot: '實心圓點', circle: '空心圓圈①', 'circle-fill': '實心圓圈➊', roman: '羅馬數字Ⅰ', 'cjk-paren': '中文括號㈠', 'cjk-circle': '中文圓圈㊀' }
 function getStyleLimit(style) { return STYLE_LIMITS[style] ?? Infinity }
@@ -249,6 +251,7 @@ function showOptionsForTool(t) {
     syncFillBorderColor(fillBorderColor)
   }
   if (['rect','ellipse','fillrect','fillellipse','line','number'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
+  syncNumStrokeUI(t === 'number')
   if (t === 'line')   { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden'); syncLineOrtho(lineOrtho) }
   if (['rect','fillrect'].includes(t)) { document.getElementById('grpRadius').classList.remove('hidden'); syncCornerRadius(cornerRadius) }
   if (t === 'text') {
@@ -277,6 +280,7 @@ function showOptionsForAnnot(a) {
   if (!isFill) document.getElementById('grpColor').classList.remove('hidden')
   if (isFill)  document.getElementById('grpFillColor').classList.remove('hidden')
   if (['rect','ellipse','fillrect','fillellipse','line','polyline','number'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
+  syncNumStrokeUI(t === 'number')
   if (['line','polyline'].includes(t)) { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden') }
   if (['rect','fillrect'].includes(t)) document.getElementById('grpRadius').classList.remove('hidden')
   if (t === 'number') document.getElementById('grpNumber').classList.remove('hidden')
@@ -317,9 +321,11 @@ function showOptionsForAnnot(a) {
     document.getElementById('grpFont').classList.remove('hidden')
   }
   if (t === 'number') {
-    numSize     = a.size ?? 48;            syncNumSize(numSize)
-    numShadow   = a.shadow ?? false;       syncShadowCheck(numShadow)
-    numberStyle = a.numberStyle ?? 'dot';  syncNumStyle(numberStyle)
+    numSize        = a.size ?? 48;             syncNumSize(numSize)
+    numShadow      = a.shadow ?? false;        syncShadowCheck(numShadow)
+    numberStyle    = a.numberStyle ?? 'dot';   syncNumStyle(numberStyle)
+    numThickness   = a.thickness ?? 0;         syncThickness(numThickness)
+    numStrokeColor = a.numStrokeColor ?? '#ffffff'; syncNumStrokeColor(numStrokeColor)
     document.getElementById('numValueEdit').classList.remove('hidden')
     document.getElementById('numValueInput').value = a.value
     document.getElementById('grpShadow').classList.remove('hidden')
@@ -362,6 +368,18 @@ function syncCaps(sc, ec) {
 function syncFontSize(fs) { document.getElementById('fontSizeInput').value = fs }
 function syncNumSize(ns) {
   document.querySelectorAll('.ns-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.ns) === ns))
+}
+function syncNumStrokeColor(hex) {
+  const p = document.getElementById('numStrokeColorPreview')
+  if (p) p.style.background = hex
+}
+function syncNumStrokeUI(isNumber) {
+  document.getElementById('thicknessLabel').textContent = isNumber ? '描邊' : '粗細'
+  document.getElementById('numStrokeColorPreview').style.display = isNumber ? '' : 'none'
+  if (isNumber) {
+    syncThickness(numThickness)
+    syncNumStrokeColor(numStrokeColor)
+  }
 }
 function syncNumCount() {
   const el = document.getElementById('numCountDisplay')
@@ -948,20 +966,42 @@ document.getElementById('fillBorderColorPreview').addEventListener('click', func
   openColorPanel(this, applyFillBorderColor, () => fillBorderColor)
 })
 
+// Number stroke colour
+document.getElementById('numStrokeColorPreview').addEventListener('click', function() {
+  openColorPanel(this, hex => {
+    numStrokeColor = hex
+    syncNumStrokeColor(hex)
+    if (selectedId) { updateSelectedAnnot({ numStrokeColor: hex }); renderAnnotations() }
+    hideColorPanel()   // 選色後自動關閉
+  }, () => numStrokeColor)
+})
+
 // Thickness — manual input
 document.getElementById('strokeWidthInput').addEventListener('input', e => {
-  const v = Math.max(1, Math.min(999, parseInt(e.target.value) || 2))
-  thickness = v
-  if (selectedId) updateSelectedAnnot({ thickness })
+  const v = Math.max(0, Math.min(999, parseInt(e.target.value) || 0))
+  if (tool === 'number') {
+    numThickness = v
+    if (selectedId) updateSelectedAnnot({ thickness: v })
+  } else {
+    thickness = v
+    if (selectedId) updateSelectedAnnot({ thickness })
+  }
 })
 
 // Thickness — quick preset
 document.getElementById('strokeWidthPreset').addEventListener('change', e => {
-  if (!e.target.value) return
-  thickness = parseInt(e.target.value)
-  syncThickness(thickness)
+  if (e.target.value === '') return
+  const v = parseInt(e.target.value)
+  if (tool === 'number') {
+    numThickness = v
+    syncThickness(v)
+    if (selectedId) updateSelectedAnnot({ thickness: v })
+  } else {
+    thickness = v
+    syncThickness(thickness)
+    if (selectedId) updateSelectedAnnot({ thickness })
+  }
   e.target.value = ''
-  if (selectedId) updateSelectedAnnot({ thickness })
 })
 
 // Corner radius (rect / fillrect)
@@ -1823,9 +1863,10 @@ function drawNumber(ctx, a) {
     ctx.font         = `${Math.round(fs)}px -apple-system, 'Noto Sans TC', sans-serif`
     ctx.textAlign    = 'center'
     ctx.textBaseline = 'middle'
+    const strokeCol = a.numStrokeColor ?? getTextColor(a.color)
     // 描邊先畫（外框壓在填色下面的外側）
     if (sw > 0) {
-      ctx.strokeStyle = getTextColor(a.color)
+      ctx.strokeStyle = strokeCol
       ctx.lineWidth   = sw * 2   // strokeText 向外向內各半，×2 讓可見外框等於 sw
       ctx.lineJoin    = 'round'
       ctx.strokeText(glyph, cx, cy)
@@ -1837,11 +1878,12 @@ function drawNumber(ctx, a) {
     // dot 樣式（預設或超出 Unicode 範圍 fallback）
     const r  = (a.size ?? 48) * viewScale
     const sw = (a.thickness ?? 0) * viewScale
+    const strokeCol = a.numStrokeColor ?? getTextColor(a.color)
     if (a.shadow) setShadow(ctx)
     ctx.fillStyle = a.color
     ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill()
     if (sw > 0) {
-      ctx.strokeStyle = getTextColor(a.color)
+      ctx.strokeStyle = strokeCol
       ctx.lineWidth   = sw
       ctx.stroke()
     }
@@ -2315,7 +2357,7 @@ annotCanvas.addEventListener('mousedown', e => {
       numCount = 1
     }
     pushHistory()
-    annotations.push({ id:newId(), type:'number', color, thickness, x:pos.x, y:pos.y, value:numCount++, size:numSize, shadow:numShadow, numberStyle })
+    annotations.push({ id:newId(), type:'number', color, thickness:numThickness, x:pos.x, y:pos.y, value:numCount++, size:numSize, shadow:numShadow, numberStyle, numStrokeColor })
     syncNumCount()
     renderAnnotations()
     return
