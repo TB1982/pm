@@ -3176,9 +3176,6 @@ annotCanvas.addEventListener('mousedown', e => {
     const ann = { id: newId(), type: 'symbol', x: pos.x, y: pos.y, char: symbolChar, color, size: symbolSize, shadow: false }
     pushHistory()
     annotations.push(ann)
-    setTool('select')
-    selectedId = ann.id
-    showOptionsForAnnot(ann)
     renderAnnotations()
     return
   }
