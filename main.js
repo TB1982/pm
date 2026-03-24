@@ -603,7 +603,21 @@ ipcMain.handle('ocr-check-tessdata', () => {
 ipcMain.handle('ocr-recognize', (event, { dataURL }) => {
   return new Promise((resolve) => {
     const { utilityProcess } = require('electron')
-    const child = utilityProcess.fork(path.join(__dirname, 'src/ocr-worker.js'))
+    let child
+    try {
+      child = utilityProcess.fork(path.join(__dirname, 'src/ocr-worker.js'))
+    } catch (err) {
+      resolve({ success: false, error: 'OCR 工作程序無法啟動：' + err.message })
+      return
+    }
+
+    let settled = false
+    const done = (result) => {
+      if (settled) return
+      settled = true
+      try { child.kill() } catch {}
+      resolve(result)
+    }
 
     child.on('message', msg => {
       if (msg.type === 'progress') {
@@ -613,9 +627,13 @@ ipcMain.handle('ocr-recognize', (event, { dataURL }) => {
           }
         } catch {}
       } else if (msg.type === 'result') {
-        child.kill()
-        resolve({ success: msg.success, text: msg.text, error: msg.error })
+        done({ success: msg.success, text: msg.text, error: msg.error })
       }
+    })
+
+    // 若子程序意外退出（例如模組找不到、記憶體不足），立即回報失敗
+    child.on('exit', (code) => {
+      done({ success: false, error: `OCR 工作程序意外結束（exit code ${code}）。請確認已執行 npm install。` })
     })
 
     child.postMessage({ dataURL, cachePath: ocrCachePath })

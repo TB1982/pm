@@ -1785,7 +1785,22 @@ function getHandles(a) {
     return [{ id: 'se', x: a.x + r, y: a.y + r, cursor: 'nwse-resize' }]
   }
   if (a.type === 'polyline') {
-    return a.points.map((p, i) => ({ id: `v${i}`, x: p.x, y: p.y, cursor: 'crosshair' }))
+    const b = bounds(a)
+    const { x, y, w, h } = b
+    const mx = x + w / 2, my = y + h / 2
+    return [
+      // 整體縮放手把（外框 8 點，圓形，與矩形框行為一致）
+      { id: 'bb_nw', x,      y,      cursor: 'nwse-resize' },
+      { id: 'bb_n',  x: mx,  y,      cursor: 'ns-resize'   },
+      { id: 'bb_ne', x: x+w, y,      cursor: 'nesw-resize' },
+      { id: 'bb_e',  x: x+w, y: my,  cursor: 'ew-resize'   },
+      { id: 'bb_se', x: x+w, y: y+h, cursor: 'nwse-resize' },
+      { id: 'bb_s',  x: mx,  y: y+h, cursor: 'ns-resize'   },
+      { id: 'bb_sw', x,      y: y+h, cursor: 'nesw-resize' },
+      { id: 'bb_w',  x,      y: my,  cursor: 'ew-resize'   },
+      // 頂點手把（菱形，個別移動）
+      ...a.points.map((p, i) => ({ id: `v${i}`, x: p.x, y: p.y, cursor: 'crosshair' })),
+    ]
   }
   return []
 }
@@ -1817,11 +1832,32 @@ function startResize(hId, a) {
       case 'w':  info.fixX = x+w; info.fixY = y;   info.fixH = h; break
     }
   }
-  // polyline: id 格式為 'vN'，記錄頂點 index + 記錄拖曳起始位置（Shift 吸附用）
+  // polyline：外框縮放手把（bb_*）或頂點移動手把（v*）
   if (a.type === 'polyline') {
-    info.ptIdx = parseInt(hId.slice(1))
-    info.origX = a.points[info.ptIdx].x
-    info.origY = a.points[info.ptIdx].y
+    if (hId.startsWith('bb_')) {
+      // 整體縮放：記錄原始所有頂點與外框，供 applyResize 等比例縮放
+      const b = bounds(a)
+      const { x, y, w, h } = b
+      info.isBBoxResize  = true
+      info.origPoints    = a.points.map(p => ({ ...p }))
+      info.origBounds    = { ...b }
+      const sub = hId.slice(3)  // 'nw' / 'n' / ...
+      switch (sub) {
+        case 'nw': info.fixX = x+w; info.fixY = y+h; break
+        case 'ne': info.fixX = x;   info.fixY = y+h; break
+        case 'se': info.fixX = x;   info.fixY = y;   break
+        case 'sw': info.fixX = x+w; info.fixY = y;   break
+        case 'n':  info.fixX = x;   info.fixY = y+h; info.fixW = w; break
+        case 's':  info.fixX = x;   info.fixY = y;   info.fixW = w; break
+        case 'e':  info.fixX = x;   info.fixY = y;   info.fixH = h; break
+        case 'w':  info.fixX = x+w; info.fixY = y;   info.fixH = h; break
+      }
+    } else {
+      // 頂點移動：id 格式 'vN'，記錄頂點 index + 拖曳起始位置（Shift 吸附用）
+      info.ptIdx = parseInt(hId.slice(1))
+      info.origX = a.points[info.ptIdx].x
+      info.origY = a.points[info.ptIdx].y
+    }
   }
   resizeHandle = info
   isResizing   = true
@@ -1890,8 +1926,33 @@ function applyResize(a, pos) {
     const d = Math.max(Math.abs(pos.x - h.cx), Math.abs(pos.y - h.cy))
     a.size = Math.max(d, 6)
   }
-  if (a.type === 'polyline' && typeof h.ptIdx === 'number') {
-    a.points[h.ptIdx] = { x: pos.x, y: pos.y }
+  if (a.type === 'polyline') {
+    if (h.isBBoxResize) {
+      // 整體縮放：計算新外框後等比例縮放所有頂點
+      const ob = h.origBounds
+      let x1, y1, x2, y2
+      const sub = h.id.slice(3)
+      switch (sub) {
+        case 'nw': x1=pos.x;   y1=pos.y;   x2=h.fixX;        y2=h.fixY;        break
+        case 'ne': x1=h.fixX;  y1=pos.y;   x2=pos.x;         y2=h.fixY;        break
+        case 'se': x1=h.fixX;  y1=h.fixY;  x2=pos.x;         y2=pos.y;         break
+        case 'sw': x1=pos.x;   y1=h.fixY;  x2=h.fixX;        y2=pos.y;         break
+        case 'n':  x1=h.fixX;  y1=pos.y;   x2=h.fixX+h.fixW; y2=h.fixY;        break
+        case 's':  x1=h.fixX;  y1=h.fixY;  x2=h.fixX+h.fixW; y2=pos.y;         break
+        case 'e':  x1=h.fixX;  y1=h.fixY;  x2=pos.x;         y2=h.fixY+h.fixH; break
+        case 'w':  x1=pos.x;   y1=h.fixY;  x2=h.fixX;        y2=h.fixY+h.fixH; break
+      }
+      const newX = Math.min(x1, x2), newY = Math.min(y1, y2)
+      const newW = Math.max(Math.abs(x2 - x1), 1)
+      const newH = Math.max(Math.abs(y2 - y1), 1)
+      a.points = h.origPoints.map(p => ({
+        x: ob.w > 1 ? newX + (p.x - ob.x) / ob.w * newW : p.x + (newX - ob.x),
+        y: ob.h > 1 ? newY + (p.y - ob.y) / ob.h * newH : p.y + (newY - ob.y),
+      }))
+    } else if (typeof h.ptIdx === 'number') {
+      // 頂點移動
+      a.points[h.ptIdx] = { x: pos.x, y: pos.y }
+    }
   }
 }
 
