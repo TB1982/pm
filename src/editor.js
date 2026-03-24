@@ -2956,6 +2956,10 @@ ipcRenderer.on('ocr-progress', (_, { status, progress }) => {
 // OCR panel button handlers
 document.getElementById('ocrPanelClose').addEventListener('click', () => {
   document.getElementById('ocrPanel').classList.add('hidden')
+  // 關閉時清除 OCR 選取框，取消按鈕也隨之消失
+  ocrRect = null
+  isOcrSelecting = false
+  renderAnnotations()
 })
 
 document.getElementById('btnOcrCopy').addEventListener('click', () => {

@@ -105,6 +105,10 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.closePath()
 }
 
+// 確保游標顯示為十字（macOS 透明視窗有時 CSS cursor 會被系統覆蓋）
+document.body.style.cursor = 'crosshair'
+canvas.style.cursor = 'crosshair'
+
 // ─── Mouse events ─────────────────────────────────────────────────────────────
 
 canvas.addEventListener('mousedown', (e) => {
