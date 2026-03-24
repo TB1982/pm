@@ -75,6 +75,7 @@ let cornerRadius = 0      // 0–100%，套用於 rect / fillrect 的圓角半�
 let fontSize  = 48
 let numCount  = 1
 let numSize   = 48    // radius, image pixels
+let numberStyle = 'dot'  // dot | circle | circle-fill | roman | cjk-paren | cjk-circle
 
 // Fill ellipse shadow state
 let fillellipseShadow = false
@@ -256,7 +257,7 @@ function showOptionsForTool(t) {
     syncTextBgOpacity(textBgOpacity); syncTextBgPreview()
     syncFontFamily(fontFamily)
   }
-  if (t === 'number') { document.getElementById('grpNumber').classList.remove('hidden'); document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(numShadow) }
+  if (t === 'number') { document.getElementById('grpNumber').classList.remove('hidden'); document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(numShadow); syncNumStyle(numberStyle) }
   if (t === 'rect' || t === 'ellipse')         { document.getElementById('grpRectShape').classList.remove('hidden'); syncRectShape(t) }
   if (t === 'fillrect' || t === 'fillellipse') { document.getElementById('grpFillShape').classList.remove('hidden'); syncFillShape(t) }
   if (t === 'rect')         { document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(rectShadow) }
@@ -313,8 +314,9 @@ function showOptionsForAnnot(a) {
     document.getElementById('grpFont').classList.remove('hidden')
   }
   if (t === 'number') {
-    numSize   = a.size ?? 48; syncNumSize(numSize)
-    numShadow = a.shadow ?? false; syncShadowCheck(numShadow)
+    numSize     = a.size ?? 48;            syncNumSize(numSize)
+    numShadow   = a.shadow ?? false;       syncShadowCheck(numShadow)
+    numberStyle = a.numberStyle ?? 'dot';  syncNumStyle(numberStyle)
     document.getElementById('numValueEdit').classList.remove('hidden')
     document.getElementById('numValueInput').value = a.value
     document.getElementById('grpShadow').classList.remove('hidden')
@@ -356,6 +358,9 @@ function syncCaps(sc, ec) {
 function syncFontSize(fs) { document.getElementById('fontSizeInput').value = fs }
 function syncNumSize(ns) {
   document.querySelectorAll('.ns-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.ns) === ns))
+}
+function syncNumStyle(s) {
+  document.querySelectorAll('.ns-style-btn').forEach(b => b.classList.toggle('active', b.dataset.nstyle === s))
 }
 // ── Fill colour helpers ────────────────────────────────────────────────────────
 function fillPreviewBg(hex) {
@@ -1142,6 +1147,15 @@ document.getElementById('shadowCheck').addEventListener('change', e => {
   })
 })
 
+// Number style
+document.querySelectorAll('.ns-style-btn').forEach(btn =>
+  btn.addEventListener('click', () => {
+    numberStyle = btn.dataset.nstyle
+    syncNumStyle(numberStyle)
+    if (selectedId) { updateSelectedAnnot({ numberStyle }); renderAnnotations() }
+  })
+)
+
 // Number size
 document.querySelectorAll('.ns-btn').forEach(btn =>
   btn.addEventListener('click', () => {
@@ -1756,19 +1770,60 @@ function _commitPolyline() {
   renderAnnotations()
 }
 
+// 將數值轉換為對應風格的 Unicode 字元；超出範圍回傳 null（fallback 至 dot）
+function getNumberGlyph(value, style) {
+  const v = value
+  if (style === 'circle') {
+    if (v >= 1  && v <= 20) return String.fromCodePoint(0x2460 + v - 1)
+    if (v >= 21 && v <= 35) return String.fromCodePoint(0x3251 + v - 21)
+    if (v >= 36 && v <= 50) return String.fromCodePoint(0x32B1 + v - 36)
+    return null
+  }
+  if (style === 'circle-fill') {
+    const g = ['➊','➋','➌','➍','➎','➏','➐','➑','➒','➓']
+    return v >= 1 && v <= 10 ? g[v - 1] : null
+  }
+  if (style === 'roman') {
+    const r = ['','Ⅰ','Ⅱ','Ⅲ','Ⅳ','Ⅴ','Ⅵ','Ⅶ','Ⅷ','Ⅸ','Ⅹ','Ⅺ','Ⅻ']
+    return r[v] ?? null
+  }
+  if (style === 'cjk-paren') {
+    return v >= 1 && v <= 10 ? String.fromCodePoint(0x3220 + v - 1) : null
+  }
+  if (style === 'cjk-circle') {
+    return v >= 1 && v <= 10 ? String.fromCodePoint(0x3280 + v - 1) : null
+  }
+  return null  // dot or unknown
+}
+
 function drawNumber(ctx, a) {
-  const r  = (a.size ?? 14) * viewScale
   const cx = c(a.x), cy = c(a.y)
-  if (a.shadow) setShadow(ctx)
-  ctx.fillStyle = a.color
-  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill()
-  // Clear shadow before inner text so it doesn't cast its own shadow
-  ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0
-  ctx.fillStyle    = getTextColor(a.color)
-  ctx.font         = `bold ${Math.round(r * 0.9)}px -apple-system`
-  ctx.textAlign    = 'center'
-  ctx.textBaseline = 'middle'
-  ctx.fillText(String(a.value), cx, cy)
+  const style = a.numberStyle ?? 'dot'
+  const glyph = getNumberGlyph(a.value, style)
+
+  if (glyph) {
+    // Unicode glyph 直接渲染 — Zero Overhead
+    const fs = (a.size ?? 48) * 2 * viewScale
+    if (a.shadow) setShadow(ctx)
+    ctx.fillStyle    = a.color
+    ctx.font         = `${Math.round(fs)}px -apple-system, 'Noto Sans TC', sans-serif`
+    ctx.textAlign    = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(glyph, cx, cy)
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0
+  } else {
+    // dot 樣式（預設或超出 Unicode 範圍 fallback）
+    const r = (a.size ?? 48) * viewScale
+    if (a.shadow) setShadow(ctx)
+    ctx.fillStyle = a.color
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill()
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0
+    ctx.fillStyle    = getTextColor(a.color)
+    ctx.font         = `bold ${Math.round(r * 0.9)}px -apple-system`
+    ctx.textAlign    = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(String(a.value), cx, cy)
+  }
 }
 
 // ─── Resize handles ───────────────────────────────────────────────────────────
@@ -2226,7 +2281,7 @@ annotCanvas.addEventListener('mousedown', e => {
 
   if (tool === 'number') {
     pushHistory()
-    annotations.push({ id:newId(), type:'number', color, thickness, x:pos.x, y:pos.y, value:numCount++, size:numSize, shadow: numShadow })
+    annotations.push({ id:newId(), type:'number', color, thickness, x:pos.x, y:pos.y, value:numCount++, size:numSize, shadow:numShadow, numberStyle })
     renderAnnotations()
     return
   }
