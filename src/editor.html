@@ -179,11 +179,21 @@
 
     <div class="opt-group" id="grpThickness">
       <span class="opt-label">粗細</span>
-      <div class="sz-group">
-        <button class="sz-btn active" data-sz="2">細</button>
-        <button class="sz-btn"        data-sz="4">中</button>
-        <button class="sz-btn"        data-sz="7">粗</button>
-      </div>
+      <input type="number" id="strokeWidthInput" value="2" min="1" max="999">
+      <select id="strokeWidthPreset" class="fs-preset" title="快速選擇粗細">
+        <option value="">—</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+        <option value="10">10</option>
+      </select>
+      <span class="opt-label">px</span>
     </div>
 
     <div class="opt-group hidden" id="grpLineStyle">
@@ -251,10 +261,17 @@
       <div class="opt-sep"></div>
       <span class="opt-label">描邊</span>
       <div class="color-preview fill-preview" id="textStrokeColorPreview" title="點擊選色"></div>
-      <button class="tsw-btn active" data-tsw="0">無</button>
-      <button class="tsw-btn"        data-tsw="1">細</button>
-      <button class="tsw-btn"        data-tsw="2">中</button>
-      <button class="tsw-btn"        data-tsw="3">粗</button>
+      <button class="sz-btn tsw-none-btn active" id="btnTextStrokeNone" title="無描邊">無</button>
+      <input type="number" id="textStrokeWidthInput" value="1" min="1" max="99" title="描邊粗細">
+      <select id="textStrokeWidthPreset" class="fs-preset" title="快速選擇描邊粗細">
+        <option value="">—</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+      </select>
+      <span class="opt-label">px</span>
       <div class="opt-sep"></div>
       <span class="opt-label">背景</span>
       <div class="color-preview fill-preview" id="textBgColorPreview" title="點擊選色"></div>
@@ -315,28 +332,39 @@
   <!-- Body -->
   <div class="editor-body">
 
-    <!-- Left toolbar -->
+    <!-- Left toolbar (雙排) -->
     <div class="editor-toolbar">
-      <button class="tool-btn"        data-tool="select" title="選取 (V)">↖</button>
+      <!-- 選取群 -->
+      <button class="tool-btn"        data-tool="select"      title="選取 (V)">↖</button>
+      <button class="tool-btn"        disabled                 title="框型選取（即將推出）">⬚</button>
+      <!-- 繪圖群 -->
       <div class="tool-sep"></div>
-      <button class="tool-btn active" data-tool="rect"     title="矩形框 (R)">□</button>
-      <button class="tool-btn"        data-tool="fillrect" title="色塊 (B)">■</button>
-      <button class="tool-btn"        data-tool="line"   title="線條 (L)">╱</button>
-      <button class="tool-btn"        data-tool="text"   title="文字 (T)">T</button>
-      <button class="tool-btn"        data-tool="number"   title="編號 (N)">①</button>
-      <button class="tool-btn"        data-tool="ocr"      title="OCR 文字辨識 (G)">文</button>
-      <button class="tool-btn" id="btnOverlayImg" title="疊入圖片 (O)">⧉</button>
+      <button class="tool-btn"        disabled                 title="筆形（即將推出）">✏</button>
+      <button class="tool-btn"        data-tool="line"         title="線條 (L)">╱</button>
+      <button class="tool-btn active" data-tool="rect"         title="矩形框 (R)">□</button>
+      <button class="tool-btn"        data-tool="fillrect"     title="色塊 (B)">■</button>
+      <button class="tool-btn"        data-tool="text"         title="文字 (T)">T</button>
+      <button class="tool-btn"        disabled                 title="去背（Pro 版功能）">⬜</button>
+      <button class="tool-btn"        data-tool="number"       title="編號 (N)">①</button>
+      <button class="tool-btn"        disabled                 title="符號（即將推出）">☺</button>
+      <button class="tool-btn"        data-tool="ocr"          title="OCR 文字辨識 (G)">文</button>
+      <button class="tool-btn"        disabled                 title="馬賽克（即將推出）">▦</button>
+      <!-- 縮放群 -->
       <div class="tool-sep"></div>
-      <button class="tool-btn"        data-tool="zoom-in"  title="放大 (⌘=)">⊕</button>
-      <button class="tool-btn"        data-tool="zoom-out" title="縮小 (⌘-)">⊖</button>
-      <button class="tool-btn" id="btnFitZoom"              title="適合視窗 (⌘0)">⊟</button>
+      <button class="tool-btn"        data-tool="zoom-in"      title="放大 (⌘=)">⊕</button>
+      <button class="tool-btn"        data-tool="zoom-out"     title="縮小 (⌘-)">⊖</button>
+      <button class="tool-btn" id="btnFitZoom"                 title="適合視窗 (⌘0)">⊟</button>
+      <div class="tool-spacer"></div>
+      <!-- 畫布群 -->
       <div class="tool-sep"></div>
-      <button class="tool-btn" data-tool="crop"   title="裁切 (C)">✂</button>
-      <button class="tool-btn" id="btnResize"     title="調整大小 (S)">⇔</button>
-      <button class="tool-btn" id="btnExtend"     title="延伸畫布 (E)">⊞</button>
+      <button class="tool-btn" data-tool="crop"                title="裁切 (C)">✂</button>
+      <button class="tool-btn" id="btnResize"                  title="調整大小 (S)">⇔</button>
+      <button class="tool-btn" id="btnExtend"                  title="延伸畫布 (E)">⊞</button>
+      <button class="tool-btn" id="btnOverlayImg"              title="疊入圖片 (O)">⧉</button>
+      <!-- 操作群 -->
       <div class="tool-sep"></div>
-      <button class="tool-btn" id="btnUndo" title="撤銷 (⌘Z)">↩</button>
-      <button class="tool-btn" id="btnRedo" title="重做 (⌘⇧Z)">↪</button>
+      <button class="tool-btn" id="btnUndo"                    title="撤銷 (⌘Z)">↩</button>
+      <button class="tool-btn" id="btnRedo"                    title="重做 (⌘⇧Z)">↪</button>
     </div>
 
     <!-- Canvas area -->

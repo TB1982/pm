@@ -297,7 +297,10 @@ function showOptionsForAnnot(a) {
   if (t === 'text') {
     fontSize        = a.fontSize;                     syncFontSize(fontSize)
     textStrokeColor = a.textStrokeColor ?? '#000000'; syncTextStrokeColor(textStrokeColor)
-    textStrokeWidth = a.textStrokeWidth ?? 0;         syncTextStrokeWidth(textStrokeWidth)
+    // 向下相容：舊版 1/2/3 enum → 新版 px（3→6→10）
+    const _tsw = a.textStrokeWidth ?? 0
+    textStrokeWidth = _tsw <= 3 ? [0, 3, 6, 10][_tsw] : _tsw
+    syncTextStrokeWidth(textStrokeWidth)
     textBgColor     = a.textBgColor   ?? '#000000'
     textBgOpacity   = a.textBgOpacity ?? 0;  syncTextBgOpacity(textBgOpacity); syncTextBgPreview()
     textShadow      = a.shadow ?? false;              syncTextShadowCheck(textShadow)
@@ -339,7 +342,7 @@ function applyColor(hex) {
   pushRecentColor(hex)
 }
 function syncThickness(t) {
-  document.querySelectorAll('.sz-btn[data-sz]').forEach(b => b.classList.toggle('active', parseInt(b.dataset.sz) === t))
+  document.getElementById('strokeWidthInput').value = t
 }
 function syncCornerRadius(v) { document.getElementById('cornerRadiusInput').value = v }
 function syncLineOrtho(v) { document.getElementById('btnLineOrtho')?.classList.toggle('active', v) }
@@ -408,9 +411,11 @@ function syncTextStrokeColor(hex) {
   if (p) p.style.background = hex
 }
 function syncTextStrokeWidth(w) {
-  document.querySelectorAll('.tsw-btn').forEach(b =>
-    b.classList.toggle('active', parseInt(b.dataset.tsw) === w)
-  )
+  const isNone = (w === 0)
+  document.getElementById('btnTextStrokeNone').classList.toggle('active', isNone)
+  document.getElementById('textStrokeWidthInput').disabled = isNone
+  document.getElementById('textStrokeWidthPreset').disabled = isNone
+  if (!isNone) document.getElementById('textStrokeWidthInput').value = w
 }
 function syncTextBgColor(hex) {
   const p = document.getElementById('textBgColorPreview')
@@ -931,14 +936,21 @@ document.getElementById('fillBorderColorPreview').addEventListener('click', func
   openColorPanel(this, applyFillBorderColor, () => fillBorderColor)
 })
 
-// Thickness
-document.querySelectorAll('.sz-btn[data-sz]').forEach(btn =>
-  btn.addEventListener('click', () => {
-    thickness = parseInt(btn.dataset.sz)
-    syncThickness(thickness)
-    if (selectedId) updateSelectedAnnot({ thickness })
-  })
-)
+// Thickness — manual input
+document.getElementById('strokeWidthInput').addEventListener('input', e => {
+  const v = Math.max(1, Math.min(999, parseInt(e.target.value) || 2))
+  thickness = v
+  if (selectedId) updateSelectedAnnot({ thickness })
+})
+
+// Thickness — quick preset
+document.getElementById('strokeWidthPreset').addEventListener('change', e => {
+  if (!e.target.value) return
+  thickness = parseInt(e.target.value)
+  syncThickness(thickness)
+  e.target.value = ''
+  if (selectedId) updateSelectedAnnot({ thickness })
+})
 
 // Corner radius (rect / fillrect)
 document.getElementById('cornerRadiusInput').addEventListener('input', e => {
@@ -1011,15 +1023,32 @@ document.getElementById('fontSizePreset').addEventListener('change', e => {
   }
 })
 
-// Text stroke width buttons
-document.querySelectorAll('.tsw-btn').forEach(btn =>
-  btn.addEventListener('click', () => {
-    textStrokeWidth = parseInt(btn.dataset.tsw)
-    syncTextStrokeWidth(textStrokeWidth)
-    if (selectedId) updateSelectedAnnot({ textStrokeWidth })
-    if (textActive) renderAnnotations()
-  })
-)
+// Text stroke — "無" toggle
+document.getElementById('btnTextStrokeNone').addEventListener('click', () => {
+  textStrokeWidth = 0
+  syncTextStrokeWidth(0)
+  if (selectedId) updateSelectedAnnot({ textStrokeWidth })
+  if (textActive) renderAnnotations()
+})
+
+// Text stroke — manual input
+document.getElementById('textStrokeWidthInput').addEventListener('input', e => {
+  const v = Math.max(1, Math.min(99, parseInt(e.target.value) || 1))
+  textStrokeWidth = v
+  syncTextStrokeWidth(v)
+  if (selectedId) updateSelectedAnnot({ textStrokeWidth })
+  if (textActive) renderAnnotations()
+})
+
+// Text stroke — quick preset
+document.getElementById('textStrokeWidthPreset').addEventListener('change', e => {
+  if (!e.target.value) return
+  textStrokeWidth = parseInt(e.target.value)
+  syncTextStrokeWidth(textStrokeWidth)
+  e.target.value = ''
+  if (selectedId) updateSelectedAnnot({ textStrokeWidth })
+  if (textActive) renderAnnotations()
+})
 
 // Text stroke colour preview
 document.getElementById('textStrokeColorPreview').addEventListener('click', function() {
@@ -1629,13 +1658,12 @@ function drawText(ctx, a, { previewOnly = false } = {}) {
 
   // Stroke (outline) — no shadow on stroke layer
   // strokeText draws centred on the text path: half inside (covered by fill), half outside.
-  // Multiply by 2 so the *visible* outside width equals the design values 3/6/10 px.
+  // Multiply by 2 so the visible outside width equals the requested px value.
   const strokeW = a.textStrokeWidth ?? 0
-  const strokePxMap = [0, 6, 12, 20]   // lineWidth → visible outside: 0/3/6/10 px
   if (strokeW > 0) {
     ctx.save()
     ctx.strokeStyle = a.textStrokeColor ?? '#000000'
-    ctx.lineWidth   = strokePxMap[strokeW] * viewScale
+    ctx.lineWidth   = strokeW * 2 * viewScale
     ctx.lineJoin    = 'round'
     lines.forEach((line, i) => ctx.strokeText(line, ax, c(a.y) + i * fs * 1.25))
     ctx.restore()

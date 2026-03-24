@@ -233,6 +233,22 @@ body {
   flex-shrink: 0;
 }
 
+/* Stroke width input */
+#strokeWidthInput,
+#textStrokeWidthInput {
+  width: 52px;
+  background: #2e2e2e;
+  border: 1px solid #404040;
+  border-radius: 5px;
+  color: #e0e0e0;
+  font-size: 12px;
+  padding: 3px 6px;
+  text-align: center;
+  outline: none;
+}
+#strokeWidthInput:focus,
+#textStrokeWidthInput:focus { border-color: #4a9eff; }
+
 /* Font size input */
 #fontSizeInput {
   width: 62px;
@@ -277,15 +293,16 @@ body {
 
 .editor-toolbar {
   -webkit-app-region: no-drag;
-  width: 52px;
+  width: 88px;
   background: #202020;
   border-right: 1px solid #2e2e2e;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 8px 0;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  padding: 8px 4px;
   gap: 2px;
   flex-shrink: 0;
+  overflow-y: auto;
 }
 
 .tool-btn {
@@ -306,12 +323,22 @@ body {
 
 .tool-btn:hover  { background: #2a2a2a; color: #ccc; }
 .tool-btn.active { background: #1a3060; color: #4a9eff; }
+.tool-btn:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+.tool-btn:disabled:hover { background: transparent; color: #777; }
 
 .tool-sep {
-  width: 26px;
+  width: 80px;
   height: 1px;
   background: #2e2e2e;
   margin: 4px 0;
+}
+
+.tool-spacer {
+  width: 36px;
+  height: 36px;
 }
 
 /* ─── Canvas area ────────────────────────────────────────────────────────── */
