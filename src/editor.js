@@ -2317,41 +2317,6 @@ function drawPen(ctx, a) {
   ctx.lineCap  = capToLineCap(a.startCap ?? 'round', a.endCap ?? 'round')
   ctx.lineJoin = 'round'
 
-  // Build smooth bezier path, trimming endpoints for arrow caps
-  function buildPath() {
-    ctx.beginPath()
-
-    // Start: move start inward for arrow cap
-    let sp = pts[0]
-    if (a.startCap === 'arrow' && pts.length >= 2) {
-      const dx = pts[1].x - pts[0].x, dy = pts[1].y - pts[0].y
-      const dist = Math.hypot(dx, dy)
-      if (dist > 0) {
-        const t = Math.min(insetImgPx / dist, 0.9)
-        sp = { x: pts[0].x + dx * t, y: pts[0].y + dy * t }
-      }
-    }
-    ctx.moveTo(c(sp.x), c(sp.y))
-
-    for (let i = 1; i < pts.length - 1; i++) {
-      const mx = (pts[i].x + pts[i + 1].x) / 2
-      const my = (pts[i].y + pts[i + 1].y) / 2
-      ctx.quadraticCurveTo(c(pts[i].x), c(pts[i].y), c(mx), c(my))
-    }
-
-    // End: trim last segment for arrow cap
-    const last = pts[pts.length - 1]
-    if (a.endCap === 'arrow' && pts.length >= 2) {
-      const prev = pts[pts.length - 2]
-      const dx = last.x - prev.x, dy = last.y - prev.y
-      const dist = Math.hypot(dx, dy)
-      const t = dist > insetImgPx ? 1 - insetImgPx / dist : 0.1
-      ctx.lineTo(c(prev.x + dx * t), c(prev.y + dy * t))
-    } else {
-      ctx.lineTo(c(last.x), c(last.y))
-    }
-  }
-
   // Find a point at least `threshold` image-px from tip for a stable direction
   function stableFrom(tipIdx, step) {
     const threshold = Math.max(a.thickness * 2 + 4, insetImgPx * 1.2)
@@ -2365,6 +2330,38 @@ function drawPen(ctx, a) {
 
   const p0    = pts[0],              pFrom0 = stableFrom(0, 1)
   const pN    = pts[pts.length - 1], pFromN = stableFrom(pts.length - 1, -1)
+
+  // Compute arrow base: insetImgPx image-px behind tip along the SAME stable direction
+  // as the drawCap call uses. Both stroke-end and arrow-base share this exact point.
+  function arrowBase(tip, from) {
+    const dx = tip.x - from.x, dy = tip.y - from.y
+    const dist = Math.hypot(dx, dy)
+    if (dist < 0.001) return tip
+    return { x: tip.x - (dx / dist) * insetImgPx, y: tip.y - (dy / dist) * insetImgPx }
+  }
+
+  // Build smooth bezier path, terminating exactly at the arrow base
+  function buildPath() {
+    ctx.beginPath()
+
+    // Start: stroke begins at arrow base so gap = zero
+    const startPt = a.startCap === 'arrow' ? arrowBase(p0, pFrom0) : pts[0]
+    ctx.moveTo(c(startPt.x), c(startPt.y))
+
+    for (let i = 1; i < pts.length - 1; i++) {
+      const mx = (pts[i].x + pts[i + 1].x) / 2
+      const my = (pts[i].y + pts[i + 1].y) / 2
+      ctx.quadraticCurveTo(c(pts[i].x), c(pts[i].y), c(mx), c(my))
+    }
+
+    // End: stroke terminates exactly at arrow base
+    if (a.endCap === 'arrow') {
+      const base = arrowBase(pN, pFromN)
+      ctx.lineTo(c(base.x), c(base.y))
+    } else {
+      ctx.lineTo(c(pts[pts.length - 1].x), c(pts[pts.length - 1].y))
+    }
+  }
 
   // Border stroke body
   if (hasBorder) {
