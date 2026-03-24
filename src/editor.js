@@ -2915,7 +2915,9 @@ function startOcrRecognition() {
   // Show panel with progress bar
   const panel = document.getElementById('ocrPanel')
   panel.classList.remove('hidden')
-  document.getElementById('ocrProgressWrap').classList.remove('hidden')
+  const progressWrap = document.getElementById('ocrProgressWrap')
+  progressWrap.classList.remove('hidden')
+  progressWrap.style.display = ''
   document.getElementById('ocrProgressInner').style.width = '0%'
   document.getElementById('ocrProgressLabel').textContent = '辨識中...'
   document.getElementById('ocrResultText').value = ''
@@ -2931,9 +2933,10 @@ function startOcrRecognition() {
   offCtx.drawImage(baseCanvas, c(r.x), c(r.y), c(r.w), c(r.h), 0, 0, off.width, off.height)
   const dataURL = off.toDataURL('image/png')
 
-  // OCR runs in utilityProcess via main (worker_threads supported there)
   ipcRenderer.invoke('ocr-recognize', { dataURL }).then(result => {
-    document.getElementById('ocrProgressWrap').classList.add('hidden')
+    const wrap = document.getElementById('ocrProgressWrap')
+    wrap.classList.add('hidden')
+    wrap.style.display = 'none'
     if (result.success) {
       document.getElementById('ocrResultText').value = result.text
       document.getElementById('btnOcrCopy').disabled      = false
