@@ -4374,169 +4374,89 @@ function _tplDrawImgRounded(ctx, img, x, y, w, h, radius, shadowColor, shadowBlu
   ctx.restore()
 }
 
+// Shared layout helper — all 6 gradient templates use uniform padding
+function _tplGradLayout(w, h) {
+  const pad = Math.round(Math.min(w, h) * 0.09)
+  return { newW: w + pad * 2, newH: h + pad * 2, imgX: pad, imgY: pad }
+}
+
+// Shared drawImg helper — rounded corners + soft drop shadow
+function _tplGradDrawImg(ctx, img, x, y, w, h) {
+  _tplDrawImgRounded(ctx, img, x, y, w, h, 0.025, 'rgba(0,0,0,0.30)', 0.04, 0.015)
+}
+
 const TEMPLATES = [
-  // ── 拍立得 ──────────────────────────────────────────────────
+  // ── Apple 紅 ──────────────────────────────────────────────────
   {
-    id: 'polaroid',
-    layout(w, h) {
-      const s = Math.min(w, h)
-      const pad = Math.round(s * 0.055)
-      const bot = Math.round(s * 0.19)
-      return { newW: w + pad * 2, newH: h + pad + bot, imgX: pad, imgY: pad }
-    },
-    drawBg(ctx, W, H) {
-      ctx.fillStyle = '#f8f8f6'
-      ctx.fillRect(0, 0, W, H)
-    },
-    drawImg(ctx, img, x, y, w, h) {
-      // subtle inset shadow on the photo area
-      ctx.save()
-      ctx.shadowColor = 'rgba(0,0,0,0.18)'
-      ctx.shadowBlur = 8
-      ctx.shadowOffsetY = 2
-      ctx.fillStyle = 'rgba(0,0,0,0.001)'
-      ctx.fillRect(x, y, w, h)
-      ctx.restore()
-      ctx.drawImage(img, x, y, w, h)
-    },
-  },
-  // ── 底片 ─────────────────────────────────────────────────────
-  {
-    id: 'film',
-    layout(w, h) {
-      const s = Math.min(w, h)
-      const padX = Math.round(s * 0.065)
-      const padY = Math.round(s * 0.05)
-      return { newW: w + padX * 2, newH: h + padY * 2, imgX: padX, imgY: padY, padX, padY }
-    },
-    drawBg(ctx, W, H, layout) {
-      ctx.fillStyle = '#111108'
-      ctx.fillRect(0, 0, W, H)
-      const { padX } = layout
-      const hW = Math.max(4, Math.round(padX * 0.42))
-      const hH = Math.max(7, Math.round(hW * 1.7))
-      const hR = Math.round(hW * 0.3)
-      const marginX = Math.round(padX * 0.22)
-      const spacing = hH * 2.3
-      const numH = Math.max(3, Math.floor(H / spacing))
-      const startY = (H - (numH - 1) * spacing) / 2
-      ctx.fillStyle = '#000000'
-      for (let i = 0; i < numH; i++) {
-        const cy = startY + i * spacing
-        _tplRoundRectPath(ctx, marginX, cy - hH / 2, hW, hH, hR)
-        ctx.fill()
-        _tplRoundRectPath(ctx, W - marginX - hW, cy - hH / 2, hW, hH, hR)
-        ctx.fill()
-      }
-    },
-    drawImg(ctx, img, x, y, w, h) {
-      ctx.drawImage(img, x, y, w, h)
-    },
-  },
-  // ── Apple 暖漸層 ──────────────────────────────────────────────
-  {
-    id: 'apple-warm',
-    layout(w, h) {
-      const pad = Math.round(Math.min(w, h) * 0.09)
-      return { newW: w + pad * 2, newH: h + pad * 2, imgX: pad, imgY: pad }
-    },
+    id: 'apple-red',
+    layout: _tplGradLayout,
     drawBg(ctx, W, H) {
       const g = ctx.createLinearGradient(0, 0, W, H)
-      g.addColorStop(0,    '#ff9a9e')
-      g.addColorStop(0.45, '#fad0c4')
-      g.addColorStop(1,    '#ffecd2')
+      g.addColorStop(0,   '#ff512f')
+      g.addColorStop(1,   '#dd2476')
       ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
     },
-    drawImg(ctx, img, x, y, w, h) {
-      _tplDrawImgRounded(ctx, img, x, y, w, h, 0.025, 'rgba(0,0,0,0.28)', 0.04, 0.015)
-    },
+    drawImg: _tplGradDrawImg,
   },
-  // ── Apple 冷漸層 ──────────────────────────────────────────────
+  // ── Apple 橙 ──────────────────────────────────────────────────
   {
-    id: 'apple-cool',
-    layout(w, h) {
-      const pad = Math.round(Math.min(w, h) * 0.09)
-      return { newW: w + pad * 2, newH: h + pad * 2, imgX: pad, imgY: pad }
-    },
+    id: 'apple-orange',
+    layout: _tplGradLayout,
     drawBg(ctx, W, H) {
       const g = ctx.createLinearGradient(0, 0, W, H)
-      g.addColorStop(0,    '#0f0c29')
-      g.addColorStop(0.5,  '#302b63')
-      g.addColorStop(1,    '#24243e')
+      g.addColorStop(0,   '#f7971e')
+      g.addColorStop(1,   '#ffd200')
       ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
     },
-    drawImg(ctx, img, x, y, w, h) {
-      _tplDrawImgRounded(ctx, img, x, y, w, h, 0.025, 'rgba(0,0,0,0.5)', 0.05, 0.02)
-    },
+    drawImg: _tplGradDrawImg,
   },
-  // ── Mac 視窗 ──────────────────────────────────────────────────
+  // ── Apple 黃 ──────────────────────────────────────────────────
   {
-    id: 'mac-window',
-    layout(w, h) {
-      const s = Math.min(w, h)
-      const titleH = Math.max(28, Math.round(s * 0.048))
-      return { newW: w, newH: h + titleH, imgX: 0, imgY: titleH, titleH }
+    id: 'apple-yellow',
+    layout: _tplGradLayout,
+    drawBg(ctx, W, H) {
+      const g = ctx.createLinearGradient(0, 0, W, H)
+      g.addColorStop(0,   '#ffe259')
+      g.addColorStop(1,   '#ffa751')
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
     },
-    drawBg(ctx, W, H, layout) {
-      const { titleH, imgY: imgY_, newW: W_, newH: H_ } = layout
-      const r = Math.min(12, Math.round(titleH * 0.4))
-      // Window chrome background
-      _tplRoundRectPath(ctx, 0, 0, W, H, r)
-      ctx.fillStyle = '#e8e8e8'; ctx.fill()
-      // Title bar gradient
-      const tbg = ctx.createLinearGradient(0, 0, 0, titleH)
-      tbg.addColorStop(0, '#f0f0f0'); tbg.addColorStop(1, '#d8d8d8')
-      ctx.fillStyle = tbg; ctx.fillRect(0, 0, W, titleH)
-      // Separator
-      ctx.fillStyle = '#c0c0c0'; ctx.fillRect(0, titleH - 1, W, 1)
-      // Traffic lights
-      const dotY = titleH / 2
-      const dotR = Math.max(5, titleH * 0.20)
-      const dotGap = dotR * 2.5
-      const startX = titleH * 0.65
-      ;[['#ff5f57'], ['#febc2e'], ['#28c840']].forEach(([c], i) => {
-        ctx.beginPath()
-        ctx.arc(startX + i * dotGap, dotY, dotR, 0, Math.PI * 2)
-        ctx.fillStyle = c; ctx.fill()
-      })
-    },
-    drawImg(ctx, img, x, y, w, h) {
-      ctx.drawImage(img, x, y, w, h)
-    },
+    drawImg: _tplGradDrawImg,
   },
-  // ── 行動裝置 ──────────────────────────────────────────────────
+  // ── Apple 綠 ──────────────────────────────────────────────────
   {
-    id: 'mobile',
-    layout(w, h) {
-      const s = Math.min(w, h)
-      const fw = Math.round(s * 0.07)
-      const topH = Math.round(s * 0.10)
-      const botH = Math.round(s * 0.08)
-      const cr = Math.round(s * 0.07)
-      return { newW: w + fw * 2, newH: h + topH + botH, imgX: fw, imgY: topH, fw, topH, botH, cr }
+    id: 'apple-green',
+    layout: _tplGradLayout,
+    drawBg(ctx, W, H) {
+      const g = ctx.createLinearGradient(0, 0, W, H)
+      g.addColorStop(0,   '#43e97b')
+      g.addColorStop(1,   '#38f9d7')
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
     },
-    drawBg(ctx, W, H, layout) {
-      const { fw, topH, botH, cr } = layout
-      // Phone body
-      _tplRoundRectPath(ctx, 0, 0, W, H, cr)
-      ctx.fillStyle = '#1c1c1e'; ctx.fill()
-      // Screen area
-      ctx.fillStyle = '#000'
-      ctx.fillRect(fw, topH, W - fw * 2, H - topH - botH)
-      // Dynamic island pill
-      const pilW = Math.round(W * 0.22)
-      const pilH = Math.round(topH * 0.35)
-      _tplRoundRectPath(ctx, (W - pilW) / 2, Math.round(topH * 0.28), pilW, pilH, pilH / 2)
-      ctx.fillStyle = '#000'; ctx.fill()
-      // Home indicator bar
-      const barW = Math.round(W * 0.28)
-      const barH = Math.max(3, Math.round(botH * 0.18))
-      _tplRoundRectPath(ctx, (W - barW) / 2, H - Math.round(botH * 0.45), barW, barH, barH / 2)
-      ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.fill()
+    drawImg: _tplGradDrawImg,
+  },
+  // ── Apple 藍（水藍色系）──────────────────────────────────────
+  {
+    id: 'apple-blue',
+    layout: _tplGradLayout,
+    drawBg(ctx, W, H) {
+      const g = ctx.createLinearGradient(0, 0, W, H)
+      g.addColorStop(0,   '#4facfe')
+      g.addColorStop(1,   '#00f2fe')
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
     },
-    drawImg(ctx, img, x, y, w, h) {
-      ctx.drawImage(img, x, y, w, h)
+    drawImg: _tplGradDrawImg,
+  },
+  // ── Apple 紫 ──────────────────────────────────────────────────
+  {
+    id: 'apple-purple',
+    layout: _tplGradLayout,
+    drawBg(ctx, W, H) {
+      const g = ctx.createLinearGradient(0, 0, W, H)
+      g.addColorStop(0,   '#c471f5')
+      g.addColorStop(1,   '#fa71cd')
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
     },
+    drawImg: _tplGradDrawImg,
   },
 ]
 

@@ -169,60 +169,24 @@
   position: relative;
   flex-shrink: 0;
 }
-/* 拍立得 */
-.tpl-preview-polaroid { background: #f8f8f8; border: 1px solid #ddd; }
-.tpl-preview-polaroid::after {
+/* 共用 Apple 漸層縮圖樣式 */
+[class^="tpl-preview-apple-"]::after {
   content: ''; position: absolute;
-  inset: 5px 5px 16px; background: #c8d4e8; border-radius: 1px;
+  inset: 8px; background: rgba(255,255,255,0.25); border-radius: 3px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.22);
 }
-/* 底片 */
-.tpl-preview-film { background: #111108; }
-.tpl-preview-film::before {
-  content: ''; position: absolute;
-  inset: 0; left: 0; width: 9px;
-  background: repeating-linear-gradient(to bottom, #111108 0 5px, #000 5px 9px);
-}
-.tpl-preview-film::after {
-  content: ''; position: absolute;
-  inset: 4px 11px; background: #3a3830;
-}
-/* Apple 暖 */
-.tpl-preview-apple-warm { background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 50%, #ffecd2 100%); }
-.tpl-preview-apple-warm::after {
-  content: ''; position: absolute;
-  inset: 8px; background: #c8d4e8; border-radius: 2px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-}
-/* Apple 冷 */
-.tpl-preview-apple-cool { background: linear-gradient(135deg, #0f0c29 0%, #302b63 55%, #24243e 100%); }
-.tpl-preview-apple-cool::after {
-  content: ''; position: absolute;
-  inset: 8px; background: #c8d4e8; border-radius: 2px;
-  box-shadow: 0 3px 12px rgba(0,0,0,0.55);
-}
-/* Mac 視窗 */
-.tpl-preview-mac-window { background: #e0e0e0; border-radius: 4px; }
-.tpl-preview-mac-window::before {
-  content: ''; position: absolute;
-  top: 0; left: 0; right: 0; height: 13px;
-  background: linear-gradient(to bottom, #e8e8e8, #d8d8d8);
-  border-radius: 4px 4px 0 0;
-}
-.tpl-preview-mac-window::after {
-  content: ''; position: absolute;
-  inset: 15px 4px 4px; background: #c8d4e8;
-}
-.tpl-preview-mac-window .tpl-dots {
-  position: absolute; top: 3px; left: 6px;
-  display: flex; gap: 3px; z-index: 1;
-}
-.tpl-preview-mac-window .tpl-dot { width: 5px; height: 5px; border-radius: 50%; }
-/* 行動裝置 */
-.tpl-preview-mobile { background: #1c1c1e; border-radius: 8px; }
-.tpl-preview-mobile::after {
-  content: ''; position: absolute;
-  inset: 9px 8px 7px; background: #c8d4e8; border-radius: 1px;
-}
+/* Apple 紅 */
+.tpl-preview-apple-red    { background: linear-gradient(135deg, #ff512f, #dd2476); }
+/* Apple 橙 */
+.tpl-preview-apple-orange { background: linear-gradient(135deg, #f7971e, #ffd200); }
+/* Apple 黃 */
+.tpl-preview-apple-yellow { background: linear-gradient(135deg, #ffe259, #ffa751); }
+/* Apple 綠 */
+.tpl-preview-apple-green  { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+/* Apple 藍（水藍色系）*/
+.tpl-preview-apple-blue   { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+/* Apple 紫 */
+.tpl-preview-apple-purple { background: linear-gradient(135deg, #c471f5, #fa71cd); }
 .tpl-label {
   font-size: 11px;
   color: #9098b8;
@@ -936,35 +900,29 @@
 <div id="templatePanel" class="template-panel hidden" role="dialog" aria-label="套版選擇">
   <div class="tpl-heading">一鍵套版</div>
   <div class="tpl-grid">
-    <button class="tpl-card" data-tpl="polaroid">
-      <div class="tpl-preview tpl-preview-polaroid"></div>
-      <span class="tpl-label">拍立得</span>
+    <button class="tpl-card" data-tpl="apple-red">
+      <div class="tpl-preview tpl-preview-apple-red"></div>
+      <span class="tpl-label">Apple 紅</span>
     </button>
-    <button class="tpl-card" data-tpl="film">
-      <div class="tpl-preview tpl-preview-film"></div>
-      <span class="tpl-label">底片</span>
+    <button class="tpl-card" data-tpl="apple-orange">
+      <div class="tpl-preview tpl-preview-apple-orange"></div>
+      <span class="tpl-label">Apple 橙</span>
     </button>
-    <button class="tpl-card" data-tpl="apple-warm">
-      <div class="tpl-preview tpl-preview-apple-warm"></div>
-      <span class="tpl-label">Apple 暖</span>
+    <button class="tpl-card" data-tpl="apple-yellow">
+      <div class="tpl-preview tpl-preview-apple-yellow"></div>
+      <span class="tpl-label">Apple 黃</span>
     </button>
-    <button class="tpl-card" data-tpl="apple-cool">
-      <div class="tpl-preview tpl-preview-apple-cool"></div>
-      <span class="tpl-label">Apple 冷</span>
+    <button class="tpl-card" data-tpl="apple-green">
+      <div class="tpl-preview tpl-preview-apple-green"></div>
+      <span class="tpl-label">Apple 綠</span>
     </button>
-    <button class="tpl-card" data-tpl="mac-window">
-      <div class="tpl-preview tpl-preview-mac-window">
-        <div class="tpl-dots">
-          <div class="tpl-dot" style="background:#ff5f57"></div>
-          <div class="tpl-dot" style="background:#febc2e"></div>
-          <div class="tpl-dot" style="background:#28c840"></div>
-        </div>
-      </div>
-      <span class="tpl-label">Mac 視窗</span>
+    <button class="tpl-card" data-tpl="apple-blue">
+      <div class="tpl-preview tpl-preview-apple-blue"></div>
+      <span class="tpl-label">Apple 藍</span>
     </button>
-    <button class="tpl-card" data-tpl="mobile">
-      <div class="tpl-preview tpl-preview-mobile"></div>
-      <span class="tpl-label">行動裝置</span>
+    <button class="tpl-card" data-tpl="apple-purple">
+      <div class="tpl-preview tpl-preview-apple-purple"></div>
+      <span class="tpl-label">Apple 紫</span>
     </button>
   </div>
 </div>

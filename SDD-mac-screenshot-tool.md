@@ -1,8 +1,35 @@
 # SDD：Mac 截圖與圖片編輯工具
-**版本：** 3.23
+**版本：** 3.24
 **日期：** 2026-03-24
 **狀態：** 待審閱
 **變更紀錄：**
+
+### v3.24 — 一鍵套版重設計：全改 Apple 漸層六色
+
+#### 變更內容
+- 移除原有 6 款套版（拍立得、底片、Apple 暖、Apple 冷、Mac 視窗、行動裝置）
+- 改為 Apple 風格明亮漸層六色：
+
+  | ID | 名稱 | 漸層起點 | 漸層終點 |
+  |----|------|----------|----------|
+  | `apple-red`    | Apple 紅 | `#ff512f` | `#dd2476` |
+  | `apple-orange` | Apple 橙 | `#f7971e` | `#ffd200` |
+  | `apple-yellow` | Apple 黃 | `#ffe259` | `#ffa751` |
+  | `apple-green`  | Apple 綠 | `#43e97b` | `#38f9d7` |
+  | `apple-blue`   | Apple 藍（水藍色系） | `#4facfe` | `#00f2fe` |
+  | `apple-purple` | Apple 紫 | `#c471f5` | `#fa71cd` |
+
+- 所有套版採用統一 layout（`_tplGradLayout`：短邊 9% 留白）與 drawImg（`_tplGradDrawImg`：圓角 + 投影）
+- 新增共用 `_tplGradLayout` / `_tplGradDrawImg` 函式
+
+#### TDD v3.24
+- [ ] 面板顯示 6 張卡片，背景顏色依序為紅橙黃綠藍紫漸層
+- [ ] Apple 藍套版：背景為天藍 → 水藍漸層（非深藍紫）
+- [ ] 所有套版圖片具圓角與陰影效果
+- [ ] 各套版套用後圖片尺寸正確（加上 9% 四邊留白）
+- [ ] Undo 可還原套版
+
+---
 
 ### v3.23 — 一鍵套版 Snapshot 修正（防止層疊套用）
 
