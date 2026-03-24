@@ -1,8 +1,45 @@
 # SDD：Mac 截圖與圖片編輯工具
-**版本：** 3.18
+**版本：** 3.19
 **日期：** 2026-03-24
 **狀態：** 待審閱
 **變更紀錄：**
+
+### v3.19 — 無縫匯入匯出（MVP：Drag & Drop + 複製 + Drag Out）
+
+#### 匯入：Drag & Drop
+- **任意位置放開**：在 editor 視窗任何位置拖曳圖片檔（PNG/JPG/WebP/GIF）放開即可匯入
+- **視覺回饋**：拖曳進入時出現紫色虛線框 + 半透明背景覆蓋層，離開或放開後消失
+- **行為**：匯入後取代現有底圖，清空所有 annotation，重置 undo history
+- **技術**：純 renderer 實作（FileReader API），無需 IPC；`dragenter` / `dragleave` depth 計數防止子元素觸發閃爍
+
+#### 匯出：複製到剪貼簿
+- **按鈕**：底部列「複製」按鈕；快捷鍵 `⌘⇧C`
+- **行為**：`burnIn('png')` → `nativeImage.createFromDataURL` → `clipboard.writeImage`
+- 所有 annotation 燒入，原始解析度輸出
+
+#### 匯出：拖曳匯出（Drag Out）
+- **按鈕**：底部列「⬆ 拖曳匯出」handle（cursor: grab）
+- **行為**：`mousedown` → `ipcRenderer.send('start-drag-export', { dataURL })` → main.js 寫暫存 PNG → `event.sender.startDrag({ file, icon })`
+- 成品可直接拖到 Line / Slack / Finder / 桌面等任何接受圖片的目標
+
+#### 尚未實作（v1.x 規劃）
+- Dock 圖示接受拖曳（需 macOS Info.plist `CFBundleDocumentTypes` + `NSServices`）
+- Share Sheet 匯入 / AirDrop 匯出（需打包為正式 `.app` + bundle ID）
+- 批次 WebP 匯出（Pro 版功能）
+
+#### TDD v3.19
+- [ ] 拖曳 PNG 進視窗：出現紫色 drop overlay，放開後圖片載入至編輯器
+- [ ] 拖曳 JPG / WebP / GIF：同上，均可載入
+- [ ] 拖曳非圖片檔案（.pdf / .txt）：不載入，顯示 toast 錯誤提示
+- [ ] 拖曳圖片進入視窗再拖出（不放開）：overlay 消失，不影響現有圖片
+- [ ] 已有 annotation 時匯入新圖片：annotation 清除，底圖更新
+- [ ] 「複製」按鈕：點擊後 toast 顯示「圖片已複製到剪貼簿」
+- [ ] ⌘⇧C：同上效果
+- [ ] 複製後貼到 Keynote / Figma：圖片含所有 annotation 正確顯示
+- [ ] 「拖曳匯出」handle：mousedown 後拖曳至 Finder 桌面，出現 PNG 檔案
+- [ ] 「拖曳匯出」handle：拖至 Slack 聊天室，直接傳送圖片
+
+---
 
 ### v3.18 — 新工具：馬賽克/模糊 + 符號印章
 

@@ -4340,6 +4340,90 @@ function burnIn(format) {
   return off.toDataURL(mime, 0.92)
 }
 
+// ─── Copy final image to clipboard ───────────────────────────────────────────
+
+function copyFinalImage() {
+  if (!imgElement) { showToast('尚未載入圖片', true); return }
+  const dataURL = burnIn('png')
+  const { clipboard, nativeImage } = require('electron')
+  clipboard.writeImage(nativeImage.createFromDataURL(dataURL))
+  showToast('圖片已複製到剪貼簿')
+}
+
+document.getElementById('btnCopyImage').addEventListener('click', copyFinalImage)
+
+// ─── Drag OUT export ──────────────────────────────────────────────────────────
+
+document.getElementById('btnDragExport').addEventListener('mousedown', () => {
+  if (!imgElement) { showToast('尚未載入圖片', true); return }
+  const dataURL = burnIn('png')
+  ipcRenderer.send('start-drag-export', { dataURL })
+})
+
+// ─── Drag & Drop import ───────────────────────────────────────────────────────
+
+const _dropOverlay = document.getElementById('dropOverlay')
+let   _dropDepth   = 0  // track nested dragenter/dragleave
+
+function _loadFileIntoEditor(file) {
+  if (!file || !file.type.startsWith('image/')) {
+    showToast('請拖曳圖片檔案（PNG / JPG / WebP / GIF）', true)
+    return
+  }
+  const reader = new FileReader()
+  reader.onload = ev => {
+    const newImg = new Image()
+    newImg.onload = () => {
+      imgElement  = newImg
+      imgWidth    = newImg.naturalWidth
+      imgHeight   = newImg.naturalHeight
+      annotations = []
+      history     = [[]]; historyIdx = 0
+      selectedId  = null; userZoomed = false
+      document.getElementById('imgInfo').textContent = `${imgWidth} × ${imgHeight} px`
+      fitCanvas()
+      drawBase()
+      renderAnnotations()
+      showToast(`已匯入：${file.name}`)
+    }
+    newImg.src = ev.target.result
+  }
+  reader.readAsDataURL(file)
+}
+
+document.addEventListener('dragenter', e => {
+  const hasFile = e.dataTransfer?.types?.includes('Files')
+  if (!hasFile) return
+  _dropDepth++
+  if (_dropDepth === 1) _dropOverlay.classList.add('active')
+})
+
+document.addEventListener('dragleave', () => {
+  _dropDepth = Math.max(0, _dropDepth - 1)
+  if (_dropDepth === 0) _dropOverlay.classList.remove('active')
+})
+
+document.addEventListener('dragover', e => {
+  if (e.dataTransfer?.types?.includes('Files')) e.preventDefault()
+})
+
+document.addEventListener('drop', e => {
+  _dropDepth = 0
+  _dropOverlay.classList.remove('active')
+  e.preventDefault()
+  const file = e.dataTransfer?.files?.[0]
+  if (file) _loadFileIntoEditor(file)
+})
+
+// ─── Keyboard shortcut: ⌘⇧C copies final image ──────────────────────────────
+
+// (Handled in the existing keydown listener — injected here so it stays near the impl)
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === 'c' || e.key === 'C')) {
+    e.preventDefault(); copyFinalImage()
+  }
+}, true)  // capture phase so it fires before other listeners
+
 // ─── Toast ────────────────────────────────────────────────────────────────────
 
 function showToast(msg, isError = false) {

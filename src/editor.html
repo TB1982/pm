@@ -5,6 +5,56 @@
   <title>圖片編輯器</title>
   <link rel="stylesheet" href="editor.css">
 <style>
+/* ─── Drag & Drop Import Overlay ───────────────────────── */
+.drop-overlay {
+  position: fixed; inset: 0;
+  background: rgba(99,102,241,0.12);
+  border: 3px dashed #a78bfa;
+  border-radius: 12px;
+  z-index: 2500;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.drop-overlay.active { opacity: 1; }
+.drop-overlay-label {
+  color: #a78bfa;
+  font-size: 18px;
+  font-weight: 700;
+  background: rgba(18,18,30,0.88);
+  padding: 12px 28px;
+  border-radius: 8px;
+  letter-spacing: 0.02em;
+}
+
+/* ─── Export / Copy buttons ─────────────────────────────── */
+.drag-export-btn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 12px;
+  font-size: 12px; font-weight: 500;
+  background: #1e2030;
+  border: 1px solid #3a3a5c;
+  border-radius: 6px;
+  color: #a0a8c0;
+  cursor: grab;
+  user-select: none;
+  transition: background 0.1s, border-color 0.1s;
+}
+.drag-export-btn:hover  { background: #2a2a48; border-color: #6b6baa; color: #d0d8f0; }
+.drag-export-btn:active { cursor: grabbing; }
+.copy-btn {
+  padding: 5px 12px;
+  font-size: 12px; font-weight: 500;
+  background: #1e2030;
+  border: 1px solid #3a3a5c;
+  border-radius: 6px;
+  color: #a0a8c0;
+  cursor: pointer;
+  transition: background 0.1s, border-color 0.1s;
+}
+.copy-btn:hover { background: #2a2a48; border-color: #6b6baa; color: #d0d8f0; }
+
 /* ─── Mosaic Options ────────────────────────────────────── */
 .mosaic-mode-group { display: flex; gap: 3px; }
 .mosaic-int-group  { display: flex; gap: 3px; }
@@ -576,7 +626,9 @@
   <div class="editor-bottombar">
     <span class="zoom-label" id="zoomLabel">100%</span>
     <div class="flex-spacer"></div>
-    <button class="save-btn" id="btnSave">完成並儲存</button>
+    <button class="copy-btn"        id="btnCopyImage"  title="複製最終圖片到剪貼簿 (⌘⇧C)">複製</button>
+    <div   class="drag-export-btn" id="btnDragExport"  title="拖曳到 Line / Slack / Finder 等">⬆ 拖曳匯出</div>
+    <button class="save-btn"        id="btnSave">完成並儲存</button>
   </div>
 
 </div>
@@ -770,6 +822,11 @@
     <button class="sym-tab"        data-cat="misc"  >其他</button>
   </div>
   <div class="sym-grid" id="symGrid"></div>
+</div>
+
+<!-- Drag & Drop import overlay -->
+<div id="dropOverlay" class="drop-overlay" aria-hidden="true">
+  <span class="drop-overlay-label">放開以匯入圖片</span>
 </div>
 
 <!-- Right-click context menu: layer ordering -->
