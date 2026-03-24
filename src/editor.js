@@ -4399,13 +4399,17 @@ function _tplGradLayout(w, h) {
   return { newW, newH, imgX: Math.round((newW - w) / 2), imgY: Math.round((newH - h) / 2) }
 }
 
-// Shared drawImg — rounded corners + shadow using _tplRadius / _tplShadow
+// Shared drawImg — rounded corners + white border using _tplRadius / _tplShadow
 function _tplGradDrawImg(ctx, img, x, y, w, h) {
-  const r     = _tplRadius * 0.005                           // 0–5% of min(w,h)
-  const blur  = _tplShadow * 0.013                           // 0–13% — wider range
-  const offY  = _tplShadow * 0.006                           // 0–6%
-  const alpha = (_tplShadow * 0.06).toFixed(2)               // 0–0.60 opacity
-  _tplDrawImgRounded(ctx, img, x, y, w, h, r, `rgba(0,0,0,${alpha})`, blur, offY)
+  const r = _tplRadius * 0.005                               // 0–5% of min(w,h)
+  if (_tplShadow > 0) {
+    const bw  = Math.round(Math.min(w, h) * _tplShadow * 0.003)  // 0–3% border width
+    const rPx = Math.round(Math.min(w, h) * r)
+    _tplRoundRectPath(ctx, x - bw, y - bw, w + bw * 2, h + bw * 2, rPx + bw)
+    ctx.fillStyle = 'rgba(255,255,255,0.92)'
+    ctx.fill()
+  }
+  _tplDrawImgRounded(ctx, img, x, y, w, h, r, 'rgba(0,0,0,0)', 0, 0)
 }
 
 // Mesh gradient: place multiple soft radial colour blobs over a base fill
