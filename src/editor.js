@@ -426,6 +426,10 @@ function syncSymbolUI() {
   document.getElementById('symbolPreviewSwatch').textContent = symbolChar
   const inp = document.getElementById('symbolSizeInput')
   if (inp) inp.value = symbolSize
+  // 更新群組按鈕 active 狀態
+  document.querySelectorAll('#grpSymbol [data-sym-group]').forEach(b =>
+    b.classList.toggle('active', b.dataset.symGroup === activeSymGroup)
+  )
 }
 
 function syncBoxSelUI() {
@@ -1639,8 +1643,6 @@ function setTool(t) {
     let match = b.dataset.tool === t
       || (t === 'ellipse'     && b.dataset.tool === 'rect')
       || (t === 'fillellipse' && b.dataset.tool === 'fillrect')
-    // sym-group 按鈕：只亮起目前的群組按鈕
-    if (b.dataset.symGroup) match = (t === 'symbol' && b.dataset.symGroup === activeSymGroup)
     b.classList.toggle('active', match)
   })
 
@@ -3880,7 +3882,7 @@ document.addEventListener('keydown', e => {
     case 'x': case 'X': setTool('mosaic'); break
     case 'u': case 'U': {
       setTool('symbol')
-      const _gb = document.querySelector(`.tool-btn[data-sym-group="${activeSymGroup}"]`)
+      const _gb = document.querySelector(`#grpSymbol [data-sym-group="${activeSymGroup}"]`)
       if (_gb) openSymbolGroup(activeSymGroup, _gb)
       break
     }
@@ -4287,8 +4289,8 @@ function openSymbolGroup(group, triggerBtn) {
   symCurrentCat = Object.keys(SYMBOL_SETS[group])[0]
   buildSymGrid(group, symCurrentCat)
   panel.classList.remove('hidden')
-  // Sync active group button highlight
-  document.querySelectorAll('.tool-btn[data-sym-group]').forEach(b =>
+  // 更新子屬性列群組按鈕 active 狀態
+  document.querySelectorAll('#grpSymbol [data-sym-group]').forEach(b =>
     b.classList.toggle('active', b.dataset.symGroup === group)
   )
 }
@@ -4302,18 +4304,17 @@ document.getElementById('symbolPreviewSwatch').addEventListener('click', e => {
   e.stopPropagation()
   const panel = document.getElementById('symbolPickerPanel')
   if (panel.classList.contains('hidden')) {
-    const gb = document.querySelector(`.tool-btn[data-sym-group="${activeSymGroup}"]`)
+    const gb = document.querySelector(`#grpSymbol [data-sym-group="${activeSymGroup}"]`)
     if (gb) openSymbolGroup(activeSymGroup, gb)
   } else {
     hideSymbolPanel()
   }
 })
 
-// Sym-group toolbar buttons — activate tool + open group panel
-document.querySelectorAll('.tool-btn[data-sym-group]').forEach(btn => {
+// Sym-group buttons in options bar — open corresponding panel
+document.querySelectorAll('#grpSymbol [data-sym-group]').forEach(btn => {
   btn.addEventListener('click', () => {
-    const group = btn.dataset.symGroup
-    openSymbolGroup(group, btn)
+    openSymbolGroup(btn.dataset.symGroup, btn)
   })
 })
 
@@ -4331,7 +4332,7 @@ document.addEventListener('mousedown', e => {
   const panel = document.getElementById('symbolPickerPanel')
   if (!panel.classList.contains('hidden') &&
       !panel.contains(e.target) &&
-      !e.target.closest('[data-sym-group]') &&
+      !e.target.closest('#grpSymbol') &&
       e.target.id !== 'symbolPreviewSwatch') {
     hideSymbolPanel()
   }

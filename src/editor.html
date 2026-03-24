@@ -556,8 +556,12 @@
 
     <!-- 符號印章工具 -->
     <div class="opt-group hidden" id="grpSymbol">
-      <span class="opt-label">符號</span>
-      <div class="symbol-preview-swatch" id="symbolPreviewSwatch" title="點擊選擇符號">★</div>
+      <button class="style-btn" data-sym-group="shape"  title="形狀">★</button>
+      <button class="style-btn" data-sym-group="letter" title="字母">Ａ</button>
+      <button class="style-btn" data-sym-group="arrow"  title="箭頭">→</button>
+      <button class="style-btn" data-sym-group="misc"   title="其他">©</button>
+      <div class="opt-sep"></div>
+      <div class="symbol-preview-swatch" id="symbolPreviewSwatch" title="點擊重開面板">★</div>
       <div class="opt-sep"></div>
       <span class="opt-label">大小</span>
       <input type="number" class="num-input" id="symbolSizeInput"
@@ -584,10 +588,7 @@
       <button class="tool-btn"        data-tool="text"         title="文字 (T)">T</button>
       <button class="tool-btn"        disabled                 title="去背（Pro 版功能）">⬜</button>
       <button class="tool-btn"        data-tool="number"       title="編號 (N)">①</button>
-      <button class="tool-btn" data-tool="symbol" data-sym-group="shape"  title="形狀符號 (U)">★</button>
-      <button class="tool-btn" data-tool="symbol" data-sym-group="letter" title="字母字型">Ａ</button>
-      <button class="tool-btn" data-tool="symbol" data-sym-group="arrow"  title="箭頭符號">→</button>
-      <button class="tool-btn" data-tool="symbol" data-sym-group="misc"   title="其他符號">©</button>
+      <button class="tool-btn"        data-tool="symbol"       title="符號印章 (U)">☺</button>
       <button class="tool-btn"        data-tool="ocr"          title="OCR 文字辨識 (G)">文</button>
       <button class="tool-btn"        data-tool="mosaic"       title="馬賽克/模糊 (X)">▦</button>
       <!-- 縮放群 -->
