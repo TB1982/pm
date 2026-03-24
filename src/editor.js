@@ -2095,6 +2095,7 @@ function drawLine(ctx, a) {
   ctx.lineCap = capToLineCap(a.startCap, a.endCap)
   // Border stroke (drawn behind main line)
   if (a.lineBorderColor && a.lineBorderColor !== 'transparent') {
+    const borderSz = ((a.borderThickness ?? a.thickness + 4) * 4 + 8) * viewScale
     ctx.save()
     ctx.strokeStyle = a.lineBorderColor
     ctx.lineWidth   = (a.borderThickness ?? a.thickness + 4) * viewScale
@@ -2103,6 +2104,9 @@ function drawLine(ctx, a) {
     ctx.setLineDash([])
     ctx.restore()
     ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0  // shadow already applied above
+    // Border caps (drawn behind main caps)
+    drawCap(ctx, a.startCap, x2, y2, x1, y1, a.lineBorderColor, borderSz)
+    drawCap(ctx, a.endCap,   x1, y1, x2, y2, a.lineBorderColor, borderSz)
   }
   ctx.beginPath()
   ctx.setLineDash(getLineDash(a.lineStyle, sz))
