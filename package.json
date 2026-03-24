@@ -20,6 +20,10 @@
   "build": {
     "appId": "com.tb1982.vas",
     "productName": "Vas",
+    "asarUnpack": [
+      "**/node_modules/sharp/**",
+      "**/node_modules/@img/**"
+    ],
     "mac": {
       "category": "public.app-category.graphics-design",
       "icon": "build/icon.icns",
