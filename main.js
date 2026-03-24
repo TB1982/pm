@@ -484,6 +484,8 @@ ipcMain.handle('open-overlay', async () => {
     win.setAlwaysOnTop(true, 'screen-saver')
     win.setVisibleOnAllWorkspaces(true)
     win.loadFile('src/overlay.html')
+    // 載入後 focus，讓 macOS 立即套用 CSS cursor: crosshair
+    win.webContents.once('did-finish-load', () => win.focus())
     return win
   })
 })
