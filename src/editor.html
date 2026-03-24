@@ -410,7 +410,7 @@
     </div>
 
     <div class="opt-group" id="grpColor">
-      <span class="opt-label">顏色</span>
+      <span class="opt-label" data-i18n="opt_color">顏色</span>
       <!-- Click to open floating colour-picker panel -->
       <div class="color-preview" id="colorPreview" title="點擊選色"></div>
     </div>
@@ -419,8 +419,8 @@
     <div class="opt-group hidden" id="grpFillColor">
 
       <!-- Mode toggle: 實色 / 漸層 -->
-      <button class="style-btn" id="btnFillSolid">實色</button>
-      <button class="style-btn"        id="btnFillGradient">漸層</button>
+      <button class="style-btn" id="btnFillSolid" data-i18n="opt_solid">實色</button>
+      <button class="style-btn"        id="btnFillGradient" data-i18n="opt_gradient">漸層</button>
       <div class="opt-sep"></div>
 
       <!-- Solid fill controls -->
@@ -443,16 +443,16 @@
       </div>
 
       <div class="opt-sep"></div>
-      <span class="opt-label">透明度</span>
+      <span class="opt-label" data-i18n="opt_opacity">透明度</span>
       <input type="number" id="fillOpacityInput" value="100" min="0" max="100" style="width:44px">
       <span class="opt-label">%</span>
       <div class="opt-sep"></div>
-      <span class="opt-label">邊框</span>
+      <span class="opt-label" data-i18n="opt_border">邊框</span>
       <div class="color-preview fill-preview" id="fillBorderColorPreview" title="點擊選色"></div>
     </div>
 
     <div class="opt-group hidden" id="grpNumber">
-      <span class="opt-label">風格</span>
+      <span class="opt-label" data-i18n="opt_style">風格</span>
       <div class="sz-group" id="numStyleGroup">
         <button class="ns-style-btn active" data-nstyle="dot"         title="實心圓點（無限）">⬤</button>
         <button class="ns-style-btn"        data-nstyle="circle"      title="空心圓圈 ①②③（上限 50）">①</button>
@@ -463,25 +463,25 @@
       </div>
       <span id="numStyleLimit" class="opt-label num-style-limit">上限：∞</span>
       <div class="opt-sep"></div>
-      <span class="opt-label">大小</span>
+      <span class="opt-label" data-i18n="opt_size">大小</span>
       <div class="sz-group">
-        <button class="ns-btn"        data-ns="36">小</button>
-        <button class="ns-btn active" data-ns="48">標準</button>
-        <button class="ns-btn"        data-ns="56">大</button>
+        <button class="ns-btn"        data-ns="36" data-i18n="opt_small">小</button>
+        <button class="ns-btn active" data-ns="48" data-i18n="opt_medium">標準</button>
+        <button class="ns-btn"        data-ns="56" data-i18n="opt_large">大</button>
       </div>
       <div class="opt-sep"></div>
-      <span class="opt-label">下一個</span>
+      <span class="opt-label" data-i18n="opt_next">下一個</span>
       <span id="numCountDisplay" class="num-count-display">1</span>
-      <button class="reset-btn" id="btnNumReset">重置</button>
+      <button class="reset-btn" id="btnNumReset" data-i18n="opt_reset">重置</button>
       <div id="numValueEdit" class="num-value-edit hidden">
         <div class="opt-sep"></div>
-        <span class="opt-label">數值</span>
+        <span class="opt-label" data-i18n="opt_value">數值</span>
         <input type="number" id="numValueInput" min="0" max="9999" value="1">
       </div>
     </div>
 
     <div class="opt-group" id="grpThickness">
-      <span class="opt-label" id="thicknessLabel">粗細</span>
+      <span class="opt-label" id="thicknessLabel" data-i18n="opt_thickness">粗細</span>
       <input type="number" id="strokeWidthInput" value="2" min="0" max="999">
       <select id="strokeWidthPreset" class="fs-preset" title="快速選擇粗細">
         <option value="">—</option>
@@ -503,7 +503,7 @@
 
     <!-- 虛實線（共用：pen / line / polyline / rect / ellipse / fillrect / fillellipse） -->
     <div class="opt-group hidden" id="grpDashStyle">
-      <span class="opt-label">線條</span>
+      <span class="opt-label" data-i18n="opt_line_style">線條</span>
       <select id="dashStyleSelect" class="line-style-select">
         <option value="solid">────  實線</option>
         <option value="dash">╌╌╌╌  短虛線</option>
@@ -515,13 +515,13 @@
     </div>
 
     <div class="opt-group hidden" id="grpRadius">
-      <span class="opt-label">圓角</span>
+      <span class="opt-label" data-i18n="opt_radius">圓角</span>
       <input type="number" id="cornerRadiusInput" value="0" min="0" max="100" style="width:44px">
       <span class="opt-label">%</span>
     </div>
 
     <div class="opt-group hidden" id="grpCaps">
-      <span class="opt-label">起點</span>
+      <span class="opt-label" data-i18n="opt_start">起點</span>
       <select id="startCapSelect" class="cap-select" title="起點樣式">
         <option value="none">―</option>
         <option value="round">◯</option>
@@ -529,7 +529,7 @@
         <option value="square">⏹</option>
         <option value="arrow">◀</option>
       </select>
-      <span class="opt-label" style="margin-left:6px">終點</span>
+      <span class="opt-label" style="margin-left:6px" data-i18n="opt_end">終點</span>
       <select id="endCapSelect" class="cap-select" title="終點樣式">
         <option value="none">―</option>
         <option value="round">◯</option>
@@ -541,14 +541,14 @@
 
     <!-- 不透明度（共用：pen / line / polyline / rect / ellipse） -->
     <div class="opt-group hidden" id="grpStrokeOpacity">
-      <span class="opt-label">不透明</span>
+      <span class="opt-label" data-i18n="opt_stroke_opacity">不透明</span>
       <input type="number" id="strokeOpacityInput" value="100" min="0" max="100" style="width:44px">
       <span class="opt-label">%</span>
     </div>
 
     <!-- 線條/折線專屬：外框色 + 粗細 + 虛實線 + 直角 -->
     <div class="opt-group hidden" id="grpLineStyle">
-      <span class="opt-label">外框</span>
+      <span class="opt-label" data-i18n="opt_outline">外框</span>
       <div class="color-preview fill-preview" id="lineBorderColorPreview" title="點擊選色（透明=無外框）"></div>
       <input type="number" id="lineBorderThicknessInput" value="6" min="1" max="40" style="width:44px" title="外框粗細 px">
       <select id="lineBorderDashSelect" class="line-style-select">
@@ -560,12 +560,12 @@
         <option value="dash-dot-dot">─··─··  長點點</option>
       </select>
       <div class="opt-sep"></div>
-      <button class="style-btn" id="btnLineOrtho" title="正交折線（水平/垂直吸附）">直角</button>
+      <button class="style-btn" id="btnLineOrtho" title="正交折線（水平/垂直吸附）" data-i18n="opt_orthogonal">直角</button>
     </div>
 
     <!-- 筆型專屬：外框色 + 粗細 + 虛實線 -->
     <div class="opt-group hidden" id="grpPenBorder">
-      <span class="opt-label">外框</span>
+      <span class="opt-label" data-i18n="opt_outline">外框</span>
       <div class="color-preview fill-preview" id="penBorderColorPreview" title="點擊選色（透明=無外框）"></div>
       <input type="number" id="penBorderThicknessInput" value="6" min="1" max="40" style="width:44px" title="外框粗細 px">
       <select id="penBorderDashSelect" class="line-style-select">
@@ -580,7 +580,7 @@
 
     <!-- 框線專屬：外框色 + 粗細 + 虛實線 + X/Y 位移 -->
     <div class="opt-group hidden" id="grpStrokeBorder">
-      <span class="opt-label">外框</span>
+      <span class="opt-label" data-i18n="opt_outline">外框</span>
       <div class="color-preview fill-preview" id="strokeBorderColorPreview" title="點擊選色（透明=無外框）"></div>
       <input type="number" id="strokeBorderThicknessInput" value="2" min="1" max="40" style="width:44px" title="外框粗細 px">
       <select id="strokeBorderDashSelect" class="line-style-select">
@@ -600,9 +600,9 @@
     </div>
 
     <div class="opt-group hidden" id="grpFont">
-      <span class="opt-label">字體</span>
+      <span class="opt-label" data-i18n="opt_font">字體</span>
       <select id="fontFamilySelect" class="ff-select">
-        <option value="system">系統預設</option>
+        <option value="system" data-i18n="opt_font_system">系統預設</option>
         <option value="pingfang">蘋方-繁</option>
         <option value="heiti">黑體-繁</option>
         <option value="songti">宋體-繁</option>
@@ -611,10 +611,10 @@
         <option value="georgia">Georgia</option>
         <option value="verdana">Verdana</option>
         <option value="impact">Impact</option>
-        <option value="mono">等寬 Menlo</option>
+        <option value="mono" data-i18n="opt_font_mono">等寬 Menlo</option>
       </select>
       <div class="opt-sep"></div>
-      <span class="opt-label">大小</span>
+      <span class="opt-label" data-i18n="opt_size">大小</span>
       <input type="number" id="fontSizeInput" value="48" min="8" max="400">
       <select id="fontSizePreset" class="fs-preset" title="快速選擇大小">
         <option value="">—</option>
@@ -636,7 +636,7 @@
       <button class="sz-btn align-btn"        id="btnAlignCenter" title="置中對齊">中</button>
       <button class="sz-btn align-btn"        id="btnAlignRight"  title="靠右對齊">右</button>
       <div class="opt-sep"></div>
-      <span class="opt-label">描邊</span>
+      <span class="opt-label" data-i18n="opt_text_stroke">描邊</span>
       <div class="color-preview fill-preview" id="textStrokeColorPreview" title="點擊選色"></div>
       <input type="number" id="textStrokeWidthInput" value="0" min="0" max="99" title="描邊粗細（0 = 無）">
       <select id="textStrokeWidthPreset" class="fs-preset" title="快速選擇描邊粗細">
@@ -650,20 +650,20 @@
       </select>
       <span class="opt-label">px</span>
       <div class="opt-sep"></div>
-      <span class="opt-label">背景</span>
+      <span class="opt-label" data-i18n="opt_text_bg">背景</span>
       <div class="color-preview fill-preview" id="textBgColorPreview" title="點擊選色"></div>
       <input type="number" id="textBgOpacityInput" value="0" min="0" max="100" style="width:44px">
       <span class="opt-label">%</span>
       <div class="opt-sep"></div>
-      <label class="shadow-lbl"><input type="checkbox" id="textShadowCheck"> 陰影</label>
+      <label class="shadow-lbl"><input type="checkbox" id="textShadowCheck"> <span data-i18n="opt_shadow">陰影</span></label>
     </div>
 
     <div class="opt-group hidden" id="grpShadow">
-      <label class="shadow-lbl"><input type="checkbox" id="shadowCheck"> 陰影</label>
+      <label class="shadow-lbl"><input type="checkbox" id="shadowCheck"> <span data-i18n="opt_shadow">陰影</span></label>
     </div>
 
     <div class="opt-group hidden" id="grpZoom">
-      <span class="opt-label">縮放比例</span>
+      <span class="opt-label" data-i18n="opt_zoom">縮放比例</span>
       <select id="zoomSelect" class="zoom-select">
         <option id="zoomCustom" value="custom" disabled>--</option>
         <option value="0.25">25%</option>
@@ -678,28 +678,28 @@
     </div>
 
     <div class="opt-group hidden" id="grpCrop">
-      <span class="opt-label" id="cropSizeLabel">請拖曳選取範圍</span>
+      <span class="opt-label" id="cropSizeLabel" data-i18n="crop_drag">請拖曳選取範圍</span>
       <div class="opt-sep"></div>
       <button class="btn-primary btn-sm"   id="btnCropConfirm">確認裁切</button>
       <button class="btn-secondary btn-sm" id="btnCropCancel">取消</button>
     </div>
 
     <div class="opt-group hidden" id="grpOcr">
-      <span class="opt-label" id="ocrStatusLabel">請拖曳選取辨識區域</span>
+      <span class="opt-label" id="ocrStatusLabel" data-i18n="ocr_drag">請拖曳選取辨識區域</span>
     </div>
 
     <div class="opt-group hidden" id="grpBoxSelect">
-      <span class="opt-label" id="boxSelSizeLabel">請拖曳選取區域</span>
+      <span class="opt-label" id="boxSelSizeLabel" data-i18n="box_drag">請拖曳選取區域</span>
     </div>
 
     <!-- 馬賽克工具 -->
     <div class="opt-group hidden" id="grpMosaic">
       <div class="mosaic-mode-group">
-        <button class="style-btn active" id="btnMosaicModeMosaic">馬賽克</button>
-        <button class="style-btn"        id="btnMosaicModeBlur" >模糊</button>
+        <button class="style-btn active" id="btnMosaicModeMosaic" data-i18n="mosaic">馬賽克</button>
+        <button class="style-btn"        id="btnMosaicModeBlur"  data-i18n="mosaic_blur">模糊</button>
       </div>
       <div class="opt-sep"></div>
-      <span class="opt-label" id="mosaicIntLabel">區塊：</span>
+      <span class="opt-label" id="mosaicIntLabel" data-i18n="mosaic_block">區塊：</span>
       <div class="opt-group" id="grpMosaicBlock">
         <button class="style-btn"        data-block="4" >4</button>
         <button class="style-btn"        data-block="8" >8</button>
@@ -723,7 +723,7 @@
       <div class="opt-sep"></div>
       <div class="symbol-preview-swatch" id="symbolPreviewSwatch" title="點擊重開面板">★</div>
       <div class="opt-sep"></div>
-      <span class="opt-label">大小</span>
+      <span class="opt-label" data-i18n="opt_size">大小</span>
       <input type="number" class="num-input" id="symbolSizeInput"
              value="64" min="16" max="512" step="8" style="width:52px"
              title="符號大小（圖像像素）">
@@ -737,37 +737,37 @@
     <!-- Left toolbar (雙排) -->
     <div class="editor-toolbar">
       <!-- 選取群 -->
-      <button class="tool-btn"        data-tool="select"      title="選取 (V)">↖</button>
-      <button class="tool-btn"        data-tool="boxselect"    title="框型選取 (M)">⬚</button>
+      <button class="tool-btn"        data-tool="select"      title="選取 (V)" data-i18n-title="tool_select">↖</button>
+      <button class="tool-btn"        data-tool="boxselect"    title="框型選取 (M)" data-i18n-title="tool_boxselect">⬚</button>
       <!-- 繪圖群 -->
       <div class="tool-sep"></div>
-      <button class="tool-btn"        data-tool="pen"          title="筆型 (P)">✏</button>
-      <button class="tool-btn"        data-tool="line"         title="線條 (L)">╱</button>
-      <button class="tool-btn active" data-tool="rect"         title="矩形框 (R)">□</button>
-      <button class="tool-btn"        data-tool="fillrect"     title="色塊 (B)">■</button>
-      <button class="tool-btn"        data-tool="text"         title="文字 (T)">T</button>
-      <button class="tool-btn"        disabled                 title="去背（Pro 版功能）">⬜</button>
-      <button class="tool-btn"        data-tool="number"       title="編號 (N)">①</button>
-      <button class="tool-btn"        data-tool="symbol"       title="符號印章 (U)">☺</button>
-      <button class="tool-btn"        data-tool="ocr"          title="OCR 文字辨識 (G)">文</button>
-      <button class="tool-btn"        data-tool="mosaic"       title="馬賽克/模糊 (X)">▦</button>
+      <button class="tool-btn"        data-tool="pen"          title="筆型 (P)" data-i18n-title="tool_pen">✏</button>
+      <button class="tool-btn"        data-tool="line"         title="線條 (L)" data-i18n-title="tool_line">╱</button>
+      <button class="tool-btn active" data-tool="rect"         title="矩形框 (R)" data-i18n-title="tool_rect">□</button>
+      <button class="tool-btn"        data-tool="fillrect"     title="色塊 (B)" data-i18n-title="tool_fillrect">■</button>
+      <button class="tool-btn"        data-tool="text"         title="文字 (T)" data-i18n-title="tool_text">T</button>
+      <button class="tool-btn"        disabled                 title="去背（Pro 版功能）" data-i18n-title="tool_text_pro">⬜</button>
+      <button class="tool-btn"        data-tool="number"       title="編號 (N)" data-i18n-title="tool_number">①</button>
+      <button class="tool-btn"        data-tool="symbol"       title="符號印章 (U)" data-i18n-title="tool_symbol">☺</button>
+      <button class="tool-btn"        data-tool="ocr"          title="OCR 文字辨識 (G)" data-i18n-title="tool_ocr">文</button>
+      <button class="tool-btn"        data-tool="mosaic"       title="馬賽克/模糊 (X)" data-i18n-title="tool_mosaic">▦</button>
       <!-- 縮放群 -->
       <div class="tool-sep"></div>
-      <button class="tool-btn"        data-tool="zoom-in"      title="放大 (⌘=)">⊕</button>
-      <button class="tool-btn"        data-tool="zoom-out"     title="縮小 (⌘-)">⊖</button>
-      <button class="tool-btn" id="btnFitZoom"                 title="適合視窗 (⌘0)">⊟</button>
+      <button class="tool-btn"        data-tool="zoom-in"      title="放大 (⌘=)" data-i18n-title="tool_zoom_in">⊕</button>
+      <button class="tool-btn"        data-tool="zoom-out"     title="縮小 (⌘-)" data-i18n-title="tool_zoom_out">⊖</button>
+      <button class="tool-btn" id="btnFitZoom"                 title="適合視窗 (⌘0)" data-i18n-title="tool_fit">⊟</button>
       <div class="tool-spacer"></div>
       <!-- 畫布群 -->
       <div class="tool-sep"></div>
-      <button class="tool-btn" data-tool="crop"                title="裁切 (C)">✂</button>
-      <button class="tool-btn" id="btnResize"                  title="調整大小 (S)">⇔</button>
-      <button class="tool-btn" id="btnExtend"                  title="延伸畫布 (E)">⊞</button>
-      <button class="tool-btn" id="btnOverlayImg"              title="疊入圖片 (O)">⧉</button>
-      <button class="tool-btn" id="btnTemplate"               title="一鍵套版">▣</button>
+      <button class="tool-btn" data-tool="crop"                title="裁切 (C)" data-i18n-title="tool_crop">✂</button>
+      <button class="tool-btn" id="btnResize"                  title="調整大小 (S)" data-i18n-title="tool_resize">⇔</button>
+      <button class="tool-btn" id="btnExtend"                  title="延伸畫布 (E)" data-i18n-title="tool_extend">⊞</button>
+      <button class="tool-btn" id="btnOverlayImg"              title="疊入圖片 (O)" data-i18n-title="tool_overlay">⧉</button>
+      <button class="tool-btn" id="btnTemplate"               title="一鍵套版" data-i18n-title="tool_template">▣</button>
       <!-- 操作群 -->
       <div class="tool-sep"></div>
-      <button class="tool-btn" id="btnUndo"                    title="撤銷 (⌘Z)">↩</button>
-      <button class="tool-btn" id="btnRedo"                    title="重做 (⌘⇧Z)">↪</button>
+      <button class="tool-btn" id="btnUndo"                    title="撤銷 (⌘Z)" data-i18n-title="tool_undo">↩</button>
+      <button class="tool-btn" id="btnRedo"                    title="重做 (⌘⇧Z)" data-i18n-title="tool_redo">↪</button>
     </div>
 
     <!-- Canvas area -->
@@ -791,8 +791,8 @@
   <div class="editor-bottombar">
     <span class="zoom-label" id="zoomLabel">100%</span>
     <div class="flex-spacer"></div>
-    <button class="copy-btn"        id="btnCopyImage"  title="複製最終圖片到剪貼簿 (⌘⇧C)">複製</button>
-    <button class="save-btn"        id="btnSave">完成並儲存</button>
+    <button class="copy-btn"        id="btnCopyImage"  title="複製最終圖片到剪貼簿 (⌘⇧C)" data-i18n="btn_copy" data-i18n-title="btn_copy_title">複製</button>
+    <button class="save-btn"        id="btnSave" data-i18n="btn_save">完成並儲存</button>
   </div>
 
 </div>
@@ -801,25 +801,25 @@
 <div class="modal-overlay hidden" id="resizeModal">
   <div class="modal">
     <div class="modal-header">
-      <h2>調整尺寸</h2>
+      <h2 data-i18n="resize_title">調整尺寸</h2>
       <button class="modal-close" id="resizeModalClose">✕</button>
     </div>
     <div class="modal-body">
       <div class="resize-fields">
         <div class="resize-row">
-          <span class="opt-label resize-lbl">寬度</span>
+          <span class="opt-label resize-lbl" data-i18n="resize_width">寬度</span>
           <input type="number" id="resizeW" min="1" max="99999" class="resize-input">
           <span class="opt-label">px</span>
         </div>
         <div class="resize-row">
-          <span class="opt-label resize-lbl">高度</span>
+          <span class="opt-label resize-lbl" data-i18n="resize_height">高度</span>
           <input type="number" id="resizeH" readonly class="resize-input resize-input-ro">
-          <span class="opt-label">px（等比例自動計算）</span>
+          <span class="opt-label" data-i18n="resize_height_hint">px（等比例自動計算）</span>
         </div>
       </div>
       <div class="modal-actions">
-        <button class="btn-secondary" id="btnResizeCancel">取消</button>
-        <button class="btn-primary"   id="btnResizeConfirm">套用</button>
+        <button class="btn-secondary" id="btnResizeCancel" data-i18n="resize_cancel">取消</button>
+        <button class="btn-primary"   id="btnResizeConfirm" data-i18n="resize_apply">套用</button>
       </div>
     </div>
   </div>
@@ -829,12 +829,12 @@
 <div class="modal-overlay hidden" id="extendModal">
   <div class="modal modal-extend">
     <div class="modal-header">
-      <h2>延伸畫布</h2>
+      <h2 data-i18n="extend_title">延伸畫布</h2>
       <button class="modal-close" id="extendModalClose">✕</button>
     </div>
     <div class="modal-body">
 
-      <div class="extend-section-label">延伸方向</div>
+      <div class="extend-section-label" data-i18n="extend_direction">延伸方向</div>
       <div class="dir-pad">
         <button class="dir-btn" data-dir="tl">↖</button>
         <button class="dir-btn" data-dir="t" >↑</button>
@@ -849,17 +849,17 @@
 
       <div class="extend-inputs">
         <div class="extend-row hidden" id="extRowW">
-          <label class="extend-lbl" id="extLblW">寬度延伸</label>
+          <label class="extend-lbl" id="extLblW" data-i18n="extend_left">寬度延伸</label>
           <input type="number" class="extend-num" id="extendW" min="1" max="99999" value="100">
           <span class="extend-unit">px</span>
         </div>
         <div class="extend-row hidden" id="extRowH">
-          <label class="extend-lbl" id="extLblH">高度延伸</label>
+          <label class="extend-lbl" id="extLblH" data-i18n="extend_up">高度延伸</label>
           <input type="number" class="extend-num" id="extendH" min="1" max="99999" value="100">
           <span class="extend-unit">px</span>
         </div>
         <div class="extend-row hidden" id="extRowS">
-          <label class="extend-lbl">四邊延伸</label>
+          <label class="extend-lbl" data-i18n="extend_all">四邊延伸</label>
           <input type="number" class="extend-num" id="extendS" min="1" max="99999" value="100">
           <span class="extend-unit">px</span>
         </div>
@@ -873,8 +873,8 @@
       </div>
 
       <div class="modal-actions">
-        <button class="btn-secondary" id="btnExtendCancel">取消</button>
-        <button class="btn-primary"   id="btnExtendConfirm">確認延伸</button>
+        <button class="btn-secondary" id="btnExtendCancel" data-i18n="extend_cancel">取消</button>
+        <button class="btn-primary"   id="btnExtendConfirm" data-i18n="extend_confirm">確認延伸</button>
       </div>
 
     </div>
@@ -885,18 +885,18 @@
 <div class="modal-overlay hidden" id="saveModal">
   <div class="modal">
     <div class="modal-header">
-      <h2>儲存格式</h2>
+      <h2 data-i18n="save_title">儲存格式</h2>
       <button class="modal-close" id="saveModalClose">✕</button>
     </div>
     <div class="modal-body">
       <div class="format-options">
-        <label class="format-opt"><input type="radio" name="fmt" value="png" checked> PNG <span class="fmt-desc">無損，支援透明背景</span></label>
-        <label class="format-opt"><input type="radio" name="fmt" value="jpg"> JPG <span class="fmt-desc">有損壓縮，檔案較小</span></label>
-        <label class="format-opt"><input type="radio" name="fmt" value="webp"> WebP <span class="fmt-desc">現代格式，支援透明</span></label>
+        <label class="format-opt"><input type="radio" name="fmt" value="png" checked> PNG <span class="fmt-desc" data-i18n="save_png_desc">無損，支援透明背景</span></label>
+        <label class="format-opt"><input type="radio" name="fmt" value="jpg"> JPG <span class="fmt-desc" data-i18n="save_jpg_desc">有損壓縮，檔案較小</span></label>
+        <label class="format-opt"><input type="radio" name="fmt" value="webp"> WebP <span class="fmt-desc" data-i18n="save_webp_desc">現代格式，支援透明</span></label>
       </div>
       <div class="modal-actions">
-        <button class="btn-secondary" id="btnSaveCancel">取消</button>
-        <button class="btn-primary"   id="btnSaveConfirm">儲存</button>
+        <button class="btn-secondary" id="btnSaveCancel" data-i18n="save_cancel">取消</button>
+        <button class="btn-primary"   id="btnSaveConfirm" data-i18n="save_confirm">儲存</button>
       </div>
     </div>
   </div>
@@ -909,17 +909,17 @@
 <div class="modal-overlay hidden" id="ocrDownloadModal">
   <div class="modal">
     <div class="modal-header">
-      <h2>OCR 語言包</h2>
+      <h2 data-i18n="ocr_dl_title">OCR 語言包</h2>
     </div>
     <div class="modal-body">
-      <p style="margin-bottom:16px;font-size:13px;color:#888;line-height:1.6">
+      <p style="margin-bottom:16px;font-size:13px;color:#888;line-height:1.6" data-i18n="ocr_dl_body">
         首次使用 OCR 需下載語言資料：<br>
         繁體中文 (~18 MB) + 英文 (~4 MB)<br>
         下載後離線即可使用，無需重複下載。
       </p>
       <div class="modal-actions">
-        <button class="btn-secondary" id="btnOcrDownloadCancel">取消</button>
-        <button class="btn-primary"   id="btnOcrDownloadConfirm">確認下載並辨識</button>
+        <button class="btn-secondary" id="btnOcrDownloadCancel" data-i18n="ocr_dl_cancel">取消</button>
+        <button class="btn-primary"   id="btnOcrDownloadConfirm" data-i18n="ocr_dl_confirm">確認下載並辨識</button>
       </div>
     </div>
   </div>
@@ -928,19 +928,19 @@
 <!-- OCR result panel (floating) -->
 <div id="ocrPanel" class="ocr-panel hidden">
   <div class="ocr-panel-header">
-    <span>OCR 辨識結果</span>
+    <span data-i18n="ocr_result_title">OCR 辨識結果</span>
     <button id="ocrPanelClose" title="關閉">✕</button>
   </div>
   <div id="ocrProgressWrap" class="ocr-progress-wrap hidden">
     <div class="ocr-progress-bar">
       <div class="ocr-progress-inner" id="ocrProgressInner"></div>
     </div>
-    <span class="ocr-progress-label" id="ocrProgressLabel">準備中...</span>
+    <span class="ocr-progress-label" id="ocrProgressLabel" data-i18n="ocr_preparing">準備中...</span>
   </div>
-  <textarea id="ocrResultText" placeholder="辨識結果將顯示在此..." spellcheck="false"></textarea>
+  <textarea id="ocrResultText" placeholder="辨識結果將顯示在此..." spellcheck="false" data-i18n-placeholder="ocr_placeholder"></textarea>
   <div class="ocr-panel-actions">
-    <button id="btnOcrCopy"      class="btn-primary"   disabled>複製</button>
-    <button id="btnOcrCopyClose" class="btn-secondary" disabled>複製並關閉</button>
+    <button id="btnOcrCopy"      class="btn-primary"   disabled data-i18n="ocr_copy">複製</button>
+    <button id="btnOcrCopyClose" class="btn-secondary" disabled data-i18n="ocr_copy_close">複製並關閉</button>
   </div>
 </div>
 
@@ -950,18 +950,18 @@
   <div id="cppTheme"></div>
   <!-- Standard colours -->
   <div class="cpp-divider"></div>
-  <span class="cpp-section-label">標準色彩</span>
+  <span class="cpp-section-label" data-i18n="cpp_standard">標準色彩</span>
   <div id="cppStandard"></div>
   <!-- Layer: Recent colours (hidden until first colour applied) -->
   <div id="cppRecentSection" style="display:none">
     <div class="cpp-divider"></div>
-    <span class="cpp-section-label">最近使用</span>
+    <span class="cpp-section-label" data-i18n="cpp_recent">最近使用</span>
     <div id="cppRecent"></div>
   </div>
   <!-- Layer 2 + 3: Eyedropper + Hex input -->
   <div class="cpp-divider"></div>
   <div id="cppTools">
-    <button class="eyedropper-btn" id="cppEyedropper" title="滴管選色（從螢幕取色）">
+    <button class="eyedropper-btn" id="cppEyedropper" title="滴管選色（從螢幕取色）" data-i18n-title="cpp_eyedropper">
       <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
         <path d="M9.5 1.5 L11.5 3.5 L5 10 L2.5 10.5 L3 8 Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" fill="none"/>
         <path d="M8 3 L10 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
@@ -971,7 +971,7 @@
     <div class="hex-input-wrap" style="flex:1">
       <span class="hex-prefix">#</span>
       <input type="text" class="hex-input" id="cppHexInput" maxlength="6" placeholder="FF3B30"
-             spellcheck="false" autocomplete="off" aria-label="色碼（16 進位）">
+             spellcheck="false" autocomplete="off" aria-label="色碼（16 進位）" data-i18n-aria="cpp_hex">
     </div>
     <input type="color" id="cppNativePicker" class="native-color-picker" tabindex="-1" aria-hidden="true">
   </div>
@@ -987,54 +987,54 @@
 <div id="templatePanel" class="template-panel hidden" role="dialog" aria-label="套版選擇">
   <div class="tpl-drag-handle" id="tplDragHandle">一鍵套版<button class="tpl-close-btn" id="tplCloseBtn" aria-label="關閉">✕</button></div>
 
-  <div class="tpl-heading">背景</div>
+  <div class="tpl-heading" data-i18n="tpl_background">背景</div>
   <div class="tpl-grid">
     <button class="tpl-card" data-tpl="apple-red">
       <div class="tpl-preview tpl-preview-apple-red"></div>
-      <span class="tpl-label">Apple 紅</span>
+      <span class="tpl-label" data-i18n="tpl_apple_red">Apple 紅</span>
     </button>
     <button class="tpl-card" data-tpl="apple-orange">
       <div class="tpl-preview tpl-preview-apple-orange"></div>
-      <span class="tpl-label">Apple 橙</span>
+      <span class="tpl-label" data-i18n="tpl_apple_orange">Apple 橙</span>
     </button>
     <button class="tpl-card" data-tpl="apple-yellow">
       <div class="tpl-preview tpl-preview-apple-yellow"></div>
-      <span class="tpl-label">Apple 黃</span>
+      <span class="tpl-label" data-i18n="tpl_apple_yellow">Apple 黃</span>
     </button>
     <button class="tpl-card" data-tpl="apple-green">
       <div class="tpl-preview tpl-preview-apple-green"></div>
-      <span class="tpl-label">Apple 綠</span>
+      <span class="tpl-label" data-i18n="tpl_apple_green">Apple 綠</span>
     </button>
     <button class="tpl-card" data-tpl="apple-blue">
       <div class="tpl-preview tpl-preview-apple-blue"></div>
-      <span class="tpl-label">Apple 藍</span>
+      <span class="tpl-label" data-i18n="tpl_apple_blue">Apple 藍</span>
     </button>
     <button class="tpl-card" data-tpl="apple-purple">
       <div class="tpl-preview tpl-preview-apple-purple"></div>
-      <span class="tpl-label">Apple 紫</span>
+      <span class="tpl-label" data-i18n="tpl_apple_purple">Apple 紫</span>
     </button>
   </div>
 
-  <div class="tpl-heading">調整</div>
+  <div class="tpl-heading" data-i18n="tpl_adjust">調整</div>
   <div class="tpl-sliders">
     <div class="tpl-slider-row">
-      <span class="tpl-slider-label">留白</span>
+      <span class="tpl-slider-label" data-i18n="tpl_padding">留白</span>
       <input type="range" class="tpl-range" id="tplPadding" min="2" max="30" step="1" value="9">
       <span class="tpl-slider-val" id="tplPaddingVal">9%</span>
     </div>
     <div class="tpl-slider-row">
-      <span class="tpl-slider-label">圓角</span>
+      <span class="tpl-slider-label" data-i18n="tpl_radius">圓角</span>
       <input type="range" class="tpl-range" id="tplRadius"  min="0" max="10" step="1" value="5">
       <span class="tpl-slider-val" id="tplRadiusVal">5</span>
     </div>
     <div class="tpl-slider-row">
-      <span class="tpl-slider-label">外框</span>
+      <span class="tpl-slider-label" data-i18n="tpl_shadow">外框</span>
       <input type="range" class="tpl-range" id="tplShadow"  min="0" max="10" step="1" value="5">
       <span class="tpl-slider-val" id="tplShadowVal">5</span>
     </div>
   </div>
 
-  <div class="tpl-heading">社群尺寸（選用）</div>
+  <div class="tpl-heading" data-i18n="tpl_social">社群尺寸（選用）</div>
   <div class="tpl-sizes">
     <button class="tpl-size-btn" data-ratio="0"     title="等比留白，不限制比例">Auto</button>
     <button class="tpl-size-btn" data-ratio="1.914" title="LinkedIn 1200×627">LinkedIn</button>
@@ -1045,21 +1045,21 @@
 
 <!-- Drag & Drop import overlay -->
 <div id="dropOverlay" class="drop-overlay" aria-hidden="true">
-  <span class="drop-overlay-label">放開以匯入圖片</span>
+  <span class="drop-overlay-label" data-i18n="drop_overlay_label">放開以匯入圖片</span>
 </div>
 
 <!-- Right-click context menu: layer ordering -->
 <div id="ctxMenu" class="ctx-menu hidden" role="menu">
-  <button id="ctxToTop"    data-dir="top">移到最上層</button>
-  <button id="ctxMoveUp"   data-dir="up">上移一層</button>
-  <button id="ctxMoveDown" data-dir="down">下移一層</button>
-  <button id="ctxToBottom" data-dir="bottom">移到最下層</button>
+  <button id="ctxToTop"    data-dir="top" data-i18n="ctx_to_top">移到最上層</button>
+  <button id="ctxMoveUp"   data-dir="up" data-i18n="ctx_move_up">上移一層</button>
+  <button id="ctxMoveDown" data-dir="down" data-i18n="ctx_move_down">下移一層</button>
+  <button id="ctxToBottom" data-dir="bottom" data-i18n="ctx_to_bottom">移到最下層</button>
 </div>
 
 <!-- Floating drag-export button -->
-<div id="floatDragExport" class="float-drag-export" title="拖曳匯出到 Line / Slack / Finder 等">
-  <span class="float-drag-move" id="floatDragMove" title="拖曳移動按鈕位置">⠿</span>
-  <span class="float-drag-label">⬆ 拖曳匯出</span>
+<div id="floatDragExport" class="float-drag-export" title="拖曳匯出到 Line / Slack / Finder 等" data-i18n-title="float_drag_export_title">
+  <span class="float-drag-move" id="floatDragMove" title="拖曳移動按鈕位置" data-i18n-title="float_drag_move_title">⠿</span>
+  <span class="float-drag-label" data-i18n="float_drag_label">⬆ 拖曳匯出</span>
 </div>
 
 <script src="editor.js"></script>

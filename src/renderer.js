@@ -1,4 +1,7 @@
 const { ipcRenderer } = require('electron')
+const { t, applyI18n } = require('./i18n')
+
+applyI18n()
 
 // ─── Modal resize helpers ──────────────────────────────────────────────────────
 
@@ -59,10 +62,10 @@ function showPermissionToast() {
   toast.innerHTML = ''
 
   const msg = document.createElement('span')
-  msg.textContent = '需要「螢幕錄製」權限  '
+  msg.textContent = t('toast_permission')
 
   const btn = document.createElement('button')
-  btn.textContent = '開啟系統設定'
+  btn.textContent = t('toast_open_settings')
   btn.className = 'toast-btn'
   btn.addEventListener('click', () => {
     ipcRenderer.invoke('open-permission-settings')
@@ -78,11 +81,11 @@ function showPermissionToast() {
 
 function handleCaptureResult(result) {
   if (result.success) {
-    showToast(`已複製到剪貼簿  ${result.width} × ${result.height} px`)
+    showToast(t('toast_copied', result.width, result.height))
   } else if (result.needsPermission) {
     showPermissionToast()
   } else {
-    showToast(result.error ?? '截圖失敗', true)
+    showToast(result.error ?? t('toast_capture_fail'), true)
   }
 }
 
@@ -112,7 +115,7 @@ function hideWindowPicker() {
 async function doWindow() {
   const sources = await ipcRenderer.invoke('get-window-sources')
   if (!sources || sources.length === 0) {
-    showToast('未找到可截圖的視窗', true)
+    showToast(t('toast_no_windows'), true)
     return
   }
 
@@ -301,7 +304,7 @@ function renderFileList() {
     scroll.appendChild(item)
   })
 
-  countEl.textContent = `共 ${batchFiles.length} 個檔案`
+  countEl.textContent = t('batch_n_files', batchFiles.length)
 }
 
 // ✕ 事件委派（一次性綁在容器上，re-render 後仍有效）
@@ -366,9 +369,9 @@ function showWarning(sameFiles, preemptive = false) {
     sameFiles.map(p => p.split('/').pop()).join('、')
   // 按鈕文字依場景切換
   document.getElementById('warnSkipBtn').textContent =
-    preemptive ? '從清單移除' : '略過這些，繼續轉換'
+    preemptive ? t('batch_remove') : t('batch_skip')
   document.getElementById('warnCancelBtn').textContent =
-    preemptive ? '忽略提示' : '取消全部'
+    preemptive ? t('batch_dismiss') : t('batch_cancel_all')
   document.getElementById('batchWarning').classList.remove('hidden')
 }
 
@@ -423,7 +426,7 @@ document.getElementById('batchStartBtn').addEventListener('click', () => {
   if (batchRunning) return
 
   if (batchFiles.length === 0) {
-    showToast('請先選取要轉換的檔案', true)
+    showToast(t('toast_select_files'), true)
     return
   }
 
@@ -431,7 +434,7 @@ document.getElementById('batchStartBtn').addEventListener('click', () => {
   const outputMode = document.querySelector('input[name="outputMode"]:checked').value
 
   if (outputMode === 'custom' && !selectedOutputDir) {
-    showToast('請先選擇輸出目錄', true)
+    showToast(t('toast_select_dir'), true)
     return
   }
 
@@ -452,7 +455,7 @@ document.getElementById('batchStartBtn').addEventListener('click', () => {
 
 async function runConversion(files) {
   if (files.length === 0) {
-    showToast('沒有可轉換的檔案', true)
+    showToast(t('toast_no_files'), true)
     return
   }
 
@@ -520,12 +523,12 @@ async function runConversion(files) {
     batchFiles = batchFiles.filter(p => failedPaths.includes(p))
     renderFileList()
     updateConditionalRows()
-    showToast(`完成：${ok} 個成功，${err} 個失敗`, true)
+    showToast(t('toast_done', ok, err), true)
   } else {
     // 全部成功 → 清空佇列
     batchFiles = []
     renderFileList()
     updateConditionalRows()
-    showToast(`已轉換 ${ok} 個檔案`)
+    showToast(t('toast_converted', ok))
   }
 }
