@@ -4385,75 +4385,96 @@ function _tplGradDrawImg(ctx, img, x, y, w, h) {
   _tplDrawImgRounded(ctx, img, x, y, w, h, 0.025, 'rgba(0,0,0,0.30)', 0.04, 0.015)
 }
 
+// Shared: draw radial bloom highlight overlay
+function _tplBloom(ctx, W, H, cx, cy, r, rgba) {
+  const rg = ctx.createRadialGradient(W * cx, H * cy, 0, W * cx, H * cy, W * r)
+  rg.addColorStop(0, rgba)
+  rg.addColorStop(1, rgba.replace(/[\d.]+\)$/, '0)'))
+  ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H)
+}
+
 const TEMPLATES = [
-  // ── Apple 紅 ──────────────────────────────────────────────────
+  // ── Apple 紅 — 珊瑚玫瑰 ──────────────────────────────────────
   {
     id: 'apple-red',
     layout: _tplGradLayout,
     drawBg(ctx, W, H) {
-      const g = ctx.createLinearGradient(0, 0, W, H)
-      g.addColorStop(0,   '#ff512f')
-      g.addColorStop(1,   '#dd2476')
+      const g = ctx.createLinearGradient(0, H, W, 0)   // BL → TR
+      g.addColorStop(0,    '#f77062')   // 暖珊瑚
+      g.addColorStop(0.52, '#ee5a71')   // 玫瑰中調
+      g.addColorStop(1,    '#d6336c')   // 深莓紅
       ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
+      _tplBloom(ctx, W, H, 0.80, 0.12, 0.72, 'rgba(255,190,150,0.42)')
     },
     drawImg: _tplGradDrawImg,
   },
-  // ── Apple 橙 ──────────────────────────────────────────────────
+  // ── Apple 橙 — 琥珀暖陽 ──────────────────────────────────────
   {
     id: 'apple-orange',
     layout: _tplGradLayout,
     drawBg(ctx, W, H) {
-      const g = ctx.createLinearGradient(0, 0, W, H)
-      g.addColorStop(0,   '#f7971e')
-      g.addColorStop(1,   '#ffd200')
+      const g = ctx.createLinearGradient(0, H, W, 0)
+      g.addColorStop(0,    '#c95b18')   // 深陶土橙
+      g.addColorStop(0.5,  '#f07821')   // 暖橙中調
+      g.addColorStop(1,    '#fbb034')   // 琥珀金
       ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
+      _tplBloom(ctx, W, H, 0.22, 0.18, 0.65, 'rgba(255,232,110,0.48)')
     },
     drawImg: _tplGradDrawImg,
   },
-  // ── Apple 黃 ──────────────────────────────────────────────────
+  // ── Apple 黃 — 晨光黃金 ──────────────────────────────────────
   {
     id: 'apple-yellow',
     layout: _tplGradLayout,
     drawBg(ctx, W, H) {
-      const g = ctx.createLinearGradient(0, 0, W, H)
-      g.addColorStop(0,   '#ffe259')
-      g.addColorStop(1,   '#ffa751')
+      const g = ctx.createLinearGradient(0, H, W, 0)
+      g.addColorStop(0,    '#f5a623')   // 暖琥珀
+      g.addColorStop(0.5,  '#f9cf37')   // 陽光黃
+      g.addColorStop(1,    '#fef28a')   // 淡檸檬
       ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
+      _tplBloom(ctx, W, H, 0.50, 0.08, 0.60, 'rgba(255,255,210,0.52)')
     },
     drawImg: _tplGradDrawImg,
   },
-  // ── Apple 綠 ──────────────────────────────────────────────────
+  // ── Apple 綠 — 翠玉薄荷 ──────────────────────────────────────
   {
     id: 'apple-green',
     layout: _tplGradLayout,
     drawBg(ctx, W, H) {
-      const g = ctx.createLinearGradient(0, 0, W, H)
-      g.addColorStop(0,   '#43e97b')
-      g.addColorStop(1,   '#38f9d7')
+      const g = ctx.createLinearGradient(0, H, W, 0)
+      g.addColorStop(0,    '#0d9f72')   // 深翠綠
+      g.addColorStop(0.5,  '#2dcea0')   // 薄荷中調
+      g.addColorStop(1,    '#6ee7b7')   // 淺青
       ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
+      _tplBloom(ctx, W, H, 0.78, 0.15, 0.60, 'rgba(180,255,230,0.40)')
     },
     drawImg: _tplGradDrawImg,
   },
-  // ── Apple 藍（水藍色系）──────────────────────────────────────
+  // ── Apple 藍（水藍色系）— 晴空碧海 ──────────────────────────
   {
     id: 'apple-blue',
     layout: _tplGradLayout,
     drawBg(ctx, W, H) {
-      const g = ctx.createLinearGradient(0, 0, W, H)
-      g.addColorStop(0,   '#4facfe')
-      g.addColorStop(1,   '#00f2fe')
+      const g = ctx.createLinearGradient(0, H, W, 0)
+      g.addColorStop(0,    '#1a7ac2')   // 深空藍
+      g.addColorStop(0.5,  '#3db8dc')   // 天藍中調
+      g.addColorStop(1,    '#82d8f0')   // 水藍淡色
       ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
+      _tplBloom(ctx, W, H, 0.80, 0.10, 0.65, 'rgba(200,242,255,0.52)')
     },
     drawImg: _tplGradDrawImg,
   },
-  // ── Apple 紫 ──────────────────────────────────────────────────
+  // ── Apple 紫 — 薰衣草夢境 ──────────────────────────────────
   {
     id: 'apple-purple',
     layout: _tplGradLayout,
     drawBg(ctx, W, H) {
-      const g = ctx.createLinearGradient(0, 0, W, H)
-      g.addColorStop(0,   '#c471f5')
-      g.addColorStop(1,   '#fa71cd')
+      const g = ctx.createLinearGradient(0, H, W, 0)
+      g.addColorStop(0,    '#7c3aed')   // 濃郁紫羅蘭
+      g.addColorStop(0.5,  '#9d5cf6')   // 中紫
+      g.addColorStop(1,    '#c4a9ff')   // 薰衣草淡紫
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
+      _tplBloom(ctx, W, H, 0.75, 0.12, 0.68, 'rgba(220,200,255,0.45)')
       ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
     },
     drawImg: _tplGradDrawImg,
