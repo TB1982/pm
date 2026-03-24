@@ -4464,23 +4464,25 @@ const TEMPLATES = [
     id: 'apple-green',
     layout: _tplGradLayout,
     drawBg(ctx, W, H) {
-      _tplMesh(ctx, W, H, '#f0fff8', [
-        [0.06, 0.90, 0.88, [8,  138, 102], 0.75],  // 深翠 左下
-        [0.90, 0.10, 0.84, [75, 238, 188], 0.65],  // 水藍綠 右上
-        [0.50, 0.50, 0.64, [45, 200, 162], 0.38],  // 薄荷 中
+      _tplMesh(ctx, W, H, '#edfff6', [
+        [0.05, 0.92, 0.92, [4,  112, 80],  0.82],  // 深翠綠 左下
+        [0.90, 0.06, 0.88, [50, 228, 170], 0.72],  // 薄荷青 右上
+        [0.85, 0.82, 0.68, [18, 172, 122], 0.42],  // 中翠 右下
+        [0.14, 0.14, 0.64, [90, 230,  95], 0.32],  // 草黃綠 左上（跨色）
       ])
     },
     drawImg: _tplGradDrawImg,
   },
-  // ── Apple 藍 — 晴空碧海（Sky / Aqua / Periwinkle）────────────
+  // ── Apple 藍 — 晴空碧海（Sky / Aqua / Violet hint）───────────
   {
     id: 'apple-blue',
     layout: _tplGradLayout,
     drawBg(ctx, W, H) {
-      _tplMesh(ctx, W, H, '#f0f8ff', [
-        [0.05, 0.90, 0.90, [32, 122, 205], 0.75],  // 深天藍 左下
-        [0.90, 0.08, 0.88, [95, 215, 255], 0.65],  // 天水藍 右上
-        [0.50, 0.48, 0.65, [128, 162, 235], 0.35], // 薰藍 中
+      _tplMesh(ctx, W, H, '#eef7ff', [
+        [0.05, 0.92, 0.92, [18, 98, 198],  0.82],  // 深靛藍 左下
+        [0.90, 0.05, 0.88, [95, 220, 255], 0.72],  // 天水藍 右上
+        [0.88, 0.86, 0.70, [55, 138, 232], 0.45],  // 中藍 右下
+        [0.13, 0.12, 0.66, [115, 85, 255], 0.32],  // 紫藍 左上（跨色）
       ])
     },
     drawImg: _tplGradDrawImg,
@@ -4502,6 +4504,7 @@ const TEMPLATES = [
 ]
 
 let _tplBaseSnapshot = null
+let _snapImgLoaded   = null   // cached decoded snapshot — avoids repeated async Image load
 
 function applyTemplate(tplId) {
   if (!imgElement) return
@@ -4510,69 +4513,73 @@ function applyTemplate(tplId) {
   if (!_tplBaseSnapshot) return
 
   _lastAppliedTplId = tplId
-  // Always apply from snapshot so templates don't stack
   const snap = _tplBaseSnapshot
-  const snapImg = new Image()
-  snapImg.onload = () => {
+
+  const doApply = (snapImg) => {
     const layout = tpl.layout(snap.width, snap.height)
     const { newW, newH, imgX, imgY } = layout
-
     const off = document.createElement('canvas')
     off.width = newW; off.height = newH
     const ctx = off.getContext('2d')
-
     tpl.drawBg(ctx, newW, newH, layout)
     tpl.drawImg(ctx, snapImg, imgX, imgY, snap.width, snap.height, layout)
-
     pushHistory()
-
     const newImg = new Image()
     newImg.onload = () => {
-      imgElement = newImg
-      imgWidth   = newW
-      imgHeight  = newH
+      imgElement = newImg; imgWidth = newW; imgHeight = newH
       document.getElementById('imgInfo').textContent = `${newW} × ${newH} px`
-      // Restore snapshot annotations then translate by (imgX, imgY)
       annotations = JSON.parse(JSON.stringify(snap.annotations))
       annotations.forEach(a => moveAnnot(a, imgX, imgY))
       userZoomed = false
-      fitCanvas()
-      drawBase()
-      renderAnnotations()
+      fitCanvas(); drawBase(); renderAnnotations()
       showToast('套版已套用')
     }
     newImg.src = off.toDataURL()
   }
-  snapImg.src = snap.dataURL
+
+  if (_snapImgLoaded) {
+    doApply(_snapImgLoaded)
+  } else {
+    const img = new Image()
+    img.onload = () => { _snapImgLoaded = img; doApply(img) }
+    img.src = snap.dataURL
+  }
 }
 
 function openTemplatePanel() {
   if (!imgElement) { showToast('請先載入圖片'); return }
   const panel = document.getElementById('templatePanel')
-  const btn   = document.getElementById('btnTemplate')
-  const ar    = btn.getBoundingClientRect()
+  if (!panel.classList.contains('hidden')) { hideTemplatePanel(); return }
+
+  // Take snapshot of current image
+  const sc = document.createElement('canvas')
+  sc.width = imgWidth; sc.height = imgHeight
+  sc.getContext('2d').drawImage(imgElement, 0, 0)
+  _tplBaseSnapshot = { dataURL: sc.toDataURL(), width: imgWidth, height: imgHeight,
+                       annotations: JSON.parse(JSON.stringify(annotations)) }
+  _snapImgLoaded = null
+
+  // Initial position near button
+  const btn = document.getElementById('btnTemplate')
+  const ar  = btn.getBoundingClientRect()
   panel.style.left = Math.min(ar.left - 8, window.innerWidth - 300) + 'px'
   panel.style.top  = (ar.bottom + 6) + 'px'
+  panel.classList.remove('hidden')
 
-  // Capture snapshot when opening (not closing)
-  if (panel.classList.contains('hidden')) {
-    const snapCanvas = document.createElement('canvas')
-    snapCanvas.width = imgWidth; snapCanvas.height = imgHeight
-    snapCanvas.getContext('2d').drawImage(imgElement, 0, 0)
-    _tplBaseSnapshot = {
-      dataURL: snapCanvas.toDataURL(),
-      width: imgWidth,
-      height: imgHeight,
-      annotations: JSON.parse(JSON.stringify(annotations)),
-    }
-  }
-
-  panel.classList.toggle('hidden')
+  // Clamp to viewport after layout paint
+  requestAnimationFrame(() => {
+    const pr = panel.getBoundingClientRect()
+    if (pr.bottom > window.innerHeight - 10)
+      panel.style.top  = Math.max(10, ar.top - pr.height - 6) + 'px'
+    if (pr.right  > window.innerWidth  - 10)
+      panel.style.left = Math.max(10, window.innerWidth - pr.width - 10) + 'px'
+  })
 }
 
 function hideTemplatePanel() {
   document.getElementById('templatePanel').classList.add('hidden')
   _tplBaseSnapshot  = null
+  _snapImgLoaded    = null
   _tplTargetRatio   = null
   _lastAppliedTplId = null
   document.querySelectorAll('.tpl-size-btn').forEach(b => b.classList.remove('active'))
@@ -4597,33 +4604,53 @@ document.querySelectorAll('.tpl-size-btn').forEach(btn => {
   })
 })
 
-// Sliders — live re-apply with debounce
-let _sliderTimer = null
-function _onTplSlider() {
+// Sliders — labels update on drag (input), apply only on release (change)
+function _syncSliderLabels() {
   const pEl = document.getElementById('tplPadding')
   const rEl = document.getElementById('tplRadius')
   const sEl = document.getElementById('tplShadow')
-  if (pEl) {
-    _tplPadding = parseInt(pEl.value, 10)
-    document.getElementById('tplPaddingVal').textContent = _tplPadding + '%'
-  }
-  if (rEl) {
-    _tplRadius = parseInt(rEl.value, 10)
-    document.getElementById('tplRadiusVal').textContent = _tplRadius
-  }
-  if (sEl) {
-    _tplShadow = parseInt(sEl.value, 10)
-    document.getElementById('tplShadowVal').textContent = _tplShadow
-  }
-  if (!_lastAppliedTplId || !_tplBaseSnapshot) return
-  clearTimeout(_sliderTimer)
-  _sliderTimer = setTimeout(() => applyTemplate(_lastAppliedTplId), 120)
+  if (pEl) document.getElementById('tplPaddingVal').textContent = pEl.value + '%'
+  if (rEl) document.getElementById('tplRadiusVal').textContent  = rEl.value
+  if (sEl) document.getElementById('tplShadowVal').textContent  = sEl.value
+}
+
+function _applySliderChange() {
+  const pEl = document.getElementById('tplPadding')
+  const rEl = document.getElementById('tplRadius')
+  const sEl = document.getElementById('tplShadow')
+  if (pEl) _tplPadding = parseInt(pEl.value, 10)
+  if (rEl) _tplRadius  = parseInt(rEl.value, 10)
+  if (sEl) _tplShadow  = parseInt(sEl.value, 10)
+  if (_lastAppliedTplId && _tplBaseSnapshot) applyTemplate(_lastAppliedTplId)
 }
 
 ;['tplPadding', 'tplRadius', 'tplShadow'].forEach(id => {
   const el = document.getElementById(id)
-  if (el) el.addEventListener('input', _onTplSlider)
+  if (!el) return
+  el.addEventListener('input',  _syncSliderLabels)
+  el.addEventListener('change', _applySliderChange)
 })
+
+// Draggable template panel
+;(function () {
+  const panel  = document.getElementById('templatePanel')
+  const handle = document.getElementById('tplDragHandle')
+  let drag = null
+
+  handle.addEventListener('mousedown', e => {
+    const r = panel.getBoundingClientRect()
+    drag = { ox: e.clientX - r.left, oy: e.clientY - r.top }
+    e.preventDefault()
+  })
+  document.addEventListener('mousemove', e => {
+    if (!drag) return
+    const x = Math.max(0, Math.min(window.innerWidth  - panel.offsetWidth,  e.clientX - drag.ox))
+    const y = Math.max(0, Math.min(window.innerHeight - panel.offsetHeight, e.clientY - drag.oy))
+    panel.style.left = x + 'px'
+    panel.style.top  = y + 'px'
+  })
+  document.addEventListener('mouseup', () => { drag = null })
+})()
 
 document.addEventListener('mousedown', e => {
   const panel = document.getElementById('templatePanel')

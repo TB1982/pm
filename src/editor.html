@@ -129,16 +129,26 @@
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.5);
   z-index: 1400;
-  padding: 12px;
+  padding: 0 12px 12px;
   width: 282px;
 }
 .template-panel.hidden { display: none; }
+/* 拖拉把手標題列 */
+.tpl-drag-handle {
+  cursor: grab; user-select: none;
+  font-size: 11px; color: #888;
+  padding: 10px 0 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #2a2a42;
+  letter-spacing: .05em;
+  display: flex; align-items: center; gap: 6px;
+}
+.tpl-drag-handle::before { content: '⠿'; color: #555; font-size: 13px; }
+.tpl-drag-handle:active  { cursor: grabbing; }
 .tpl-heading {
   font-size: 11px;
-  color: #666;
-  margin-bottom: 10px;
-  padding-bottom: 7px;
-  border-bottom: 1px solid #2a2a42;
+  color: #555;
+  margin: 8px 0 8px;
   letter-spacing: .05em;
 }
 .tpl-grid {
@@ -190,15 +200,17 @@
   background: radial-gradient(ellipse at 8% 90%,  rgba(230,148,28,0.88) 0%, transparent 62%),
               radial-gradient(ellipse at 88% 10%,  rgba(255,242,95,0.85) 0%, transparent 62%), #fffde8;
 }
-/* Apple 綠 — 翠綠 + 薄荷 + 水色（mesh） */
+/* Apple 綠 — 深翠 + 薄荷青 + 草黃（跨色） */
 .tpl-preview-apple-green {
-  background: radial-gradient(ellipse at 6% 90%,  rgba(8,138,102,0.90)  0%, transparent 65%),
-              radial-gradient(ellipse at 90% 10%,  rgba(75,238,188,0.82) 0%, transparent 62%), #f0fff8;
+  background: radial-gradient(ellipse at 5% 92%,  rgba(4,112,80,0.92)    0%, transparent 65%),
+              radial-gradient(ellipse at 90%  6%,  rgba(50,228,170,0.80)  0%, transparent 62%),
+              radial-gradient(ellipse at 14% 14%,  rgba(90,230,95,0.45)   0%, transparent 50%), #edfff6;
 }
-/* Apple 藍 — 天藍 + 水藍 + 薰藍（mesh） */
+/* Apple 藍 — 靛藍 + 水藍 + 紫藍（跨色） */
 .tpl-preview-apple-blue {
-  background: radial-gradient(ellipse at 5% 90%,  rgba(32,122,205,0.90)  0%, transparent 65%),
-              radial-gradient(ellipse at 90%  8%,  rgba(95,215,255,0.82)  0%, transparent 62%), #f0f8ff;
+  background: radial-gradient(ellipse at 5% 92%,  rgba(18,98,198,0.92)   0%, transparent 65%),
+              radial-gradient(ellipse at 90%  5%,  rgba(95,220,255,0.80)  0%, transparent 62%),
+              radial-gradient(ellipse at 13% 12%,  rgba(115,85,255,0.42)  0%, transparent 50%), #eef7ff;
 }
 /* Apple 紫 — 極光（紫 + 品紅 + 薰衣草，mesh） */
 .tpl-preview-apple-purple {
@@ -947,30 +959,8 @@
 
 <!-- ─── Template Panel ──────────────────────────────────── -->
 <div id="templatePanel" class="template-panel hidden" role="dialog" aria-label="套版選擇">
-  <div class="tpl-heading">社群尺寸（選用）</div>
-  <div class="tpl-sizes">
-    <button class="tpl-size-btn" data-ratio="0"     title="等比留白，不限制比例">Auto</button>
-    <button class="tpl-size-btn" data-ratio="1.914" title="LinkedIn 1200×627">LinkedIn</button>
-    <button class="tpl-size-btn" data-ratio="1"     title="Instagram 1080×1080">Instagram</button>
-    <button class="tpl-size-btn" data-ratio="1.778" title="X / Twitter 1200×675">𝕏 Twitter</button>
-  </div>
-  <div class="tpl-sliders">
-    <div class="tpl-slider-row">
-      <span class="tpl-slider-label">留白</span>
-      <input type="range" class="tpl-range" id="tplPadding" min="2" max="30" step="1" value="9">
-      <span class="tpl-slider-val" id="tplPaddingVal">9%</span>
-    </div>
-    <div class="tpl-slider-row">
-      <span class="tpl-slider-label">圓角</span>
-      <input type="range" class="tpl-range" id="tplRadius"  min="0" max="10" step="1" value="5">
-      <span class="tpl-slider-val" id="tplRadiusVal">5</span>
-    </div>
-    <div class="tpl-slider-row">
-      <span class="tpl-slider-label">陰影</span>
-      <input type="range" class="tpl-range" id="tplShadow"  min="0" max="10" step="1" value="5">
-      <span class="tpl-slider-val" id="tplShadowVal">5</span>
-    </div>
-  </div>
+  <div class="tpl-drag-handle" id="tplDragHandle">一鍵套版</div>
+
   <div class="tpl-heading">背景</div>
   <div class="tpl-grid">
     <button class="tpl-card" data-tpl="apple-red">
@@ -997,6 +987,33 @@
       <div class="tpl-preview tpl-preview-apple-purple"></div>
       <span class="tpl-label">Apple 紫</span>
     </button>
+  </div>
+
+  <div class="tpl-heading">調整</div>
+  <div class="tpl-sliders">
+    <div class="tpl-slider-row">
+      <span class="tpl-slider-label">留白</span>
+      <input type="range" class="tpl-range" id="tplPadding" min="2" max="30" step="1" value="9">
+      <span class="tpl-slider-val" id="tplPaddingVal">9%</span>
+    </div>
+    <div class="tpl-slider-row">
+      <span class="tpl-slider-label">圓角</span>
+      <input type="range" class="tpl-range" id="tplRadius"  min="0" max="10" step="1" value="5">
+      <span class="tpl-slider-val" id="tplRadiusVal">5</span>
+    </div>
+    <div class="tpl-slider-row">
+      <span class="tpl-slider-label">陰影</span>
+      <input type="range" class="tpl-range" id="tplShadow"  min="0" max="10" step="1" value="5">
+      <span class="tpl-slider-val" id="tplShadowVal">5</span>
+    </div>
+  </div>
+
+  <div class="tpl-heading">社群尺寸（選用）</div>
+  <div class="tpl-sizes">
+    <button class="tpl-size-btn" data-ratio="0"     title="等比留白，不限制比例">Auto</button>
+    <button class="tpl-size-btn" data-ratio="1.914" title="LinkedIn 1200×627">LinkedIn</button>
+    <button class="tpl-size-btn" data-ratio="1"     title="Instagram 1080×1080">Instagram</button>
+    <button class="tpl-size-btn" data-ratio="1.778" title="X / Twitter 1200×675">𝕏 Twitter</button>
   </div>
 </div>
 
