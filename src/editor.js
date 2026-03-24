@@ -76,6 +76,9 @@ let fontSize  = 48
 let numCount  = 1
 let numSize   = 48    // radius, image pixels
 let numberStyle = 'dot'  // dot | circle | circle-fill | roman | cjk-paren | cjk-circle
+const STYLE_LIMITS = { dot: Infinity, circle: 50, 'circle-fill': 10, roman: 12, 'cjk-paren': 10, 'cjk-circle': 10 }
+const STYLE_LABELS = { dot: '實心圓點', circle: '空心圓圈①', 'circle-fill': '實心圓圈➊', roman: '羅馬數字Ⅰ', 'cjk-paren': '中文括號㈠', 'cjk-circle': '中文圓圈㊀' }
+function getStyleLimit(style) { return STYLE_LIMITS[style] ?? Infinity }
 
 // Fill ellipse shadow state
 let fillellipseShadow = false
@@ -361,6 +364,9 @@ function syncNumSize(ns) {
 }
 function syncNumStyle(s) {
   document.querySelectorAll('.ns-style-btn').forEach(b => b.classList.toggle('active', b.dataset.nstyle === s))
+  const limit = getStyleLimit(s)
+  const el = document.getElementById('numStyleLimit')
+  if (el) el.textContent = `上限：${limit === Infinity ? '∞' : limit}`
 }
 // ── Fill colour helpers ────────────────────────────────────────────────────────
 function fillPreviewBg(hex) {
@@ -1151,6 +1157,7 @@ document.getElementById('shadowCheck').addEventListener('change', e => {
 document.querySelectorAll('.ns-style-btn').forEach(btn =>
   btn.addEventListener('click', () => {
     numberStyle = btn.dataset.nstyle
+    numCount = 1   // 切換風格一律從 1 開始
     syncNumStyle(numberStyle)
     if (selectedId) { updateSelectedAnnot({ numberStyle }); renderAnnotations() }
   })
@@ -1770,7 +1777,7 @@ function _commitPolyline() {
   renderAnnotations()
 }
 
-// 將數值轉換為對應風格的 Unicode 字元；超出範圍回傳 null（fallback 至 dot）
+// 將數值轉換為對應風格的 Unicode 字元；超出範圍回傳 null（dot fallback）
 function getNumberGlyph(value, style) {
   const v = value
   if (style === 'circle') {
@@ -2280,6 +2287,11 @@ annotCanvas.addEventListener('mousedown', e => {
   }
 
   if (tool === 'number') {
+    const _limit = getStyleLimit(numberStyle)
+    if (numCount > _limit) {
+      showToast(`已達「${STYLE_LABELS[numberStyle]}」上限（${_limit}），編號重置為 1`)
+      numCount = 1
+    }
     pushHistory()
     annotations.push({ id:newId(), type:'number', color, thickness, x:pos.x, y:pos.y, value:numCount++, size:numSize, shadow:numShadow, numberStyle })
     renderAnnotations()

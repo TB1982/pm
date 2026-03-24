@@ -262,6 +262,13 @@ body {
   outline: none;
 }
 
+/* Number style limit display */
+.num-style-limit {
+  color: #5a9eff;
+  font-size: 11px;
+  min-width: 52px;
+}
+
 /* Number value edit */
 .num-value-edit {
   display: flex;
