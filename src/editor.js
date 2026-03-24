@@ -205,6 +205,18 @@ let boxSelRect      = null   // { x, y, w, h } in image coordinates (normalised 
 let boxSelStart     = null   // drag start pos
 let pixelClipboard  = null   // { dataURL, w, h } — last copied region
 
+// Mosaic tool
+let mosaicMode      = 'mosaic'  // 'mosaic' | 'blur'
+let mosaicBlockSize = 16
+let mosaicBlurRadius = 8
+let isMosaicDrawing = false
+let mosaicDrawStart = null
+let mosaicPreviewRect = null
+
+// Symbol tool
+let symbolChar = '★'
+let symbolSize = 64  // image pixels (font-size equivalent)
+
 // Pen tool
 let isPenDrawing   = false
 let penPoints      = []       // {x,y}[] collected during current stroke
@@ -283,7 +295,8 @@ function hideAllOptions() {
   ['grpRectShape','grpFillShape','grpColor','grpFillColor','grpThickness',
    'grpLineStyle','grpPenBorder','grpStrokeBorder','grpDashStyle',
    'grpCaps','grpRadius','grpFont','grpNumber','grpStrokeOpacity',
-   'grpShadow','grpZoom','grpCrop','grpOcr','grpBoxSelect'].forEach(id => {
+   'grpShadow','grpZoom','grpCrop','grpOcr','grpBoxSelect',
+   'grpMosaic','grpSymbol'].forEach(id => {
     const el = document.getElementById(id)
     if (el) el.classList.add('hidden')
   })
@@ -309,6 +322,19 @@ function showOptionsForTool(t) {
   if (t === 'boxselect') {
     document.getElementById('grpBoxSelect').classList.remove('hidden')
     syncBoxSelUI()
+    return
+  }
+  if (t === 'mosaic') {
+    document.getElementById('grpMosaic').classList.remove('hidden')
+    syncMosaicUI()
+    return
+  }
+  if (t === 'symbol') {
+    document.getElementById('grpColor').classList.remove('hidden')
+    document.getElementById('grpSymbol').classList.remove('hidden')
+    document.getElementById('grpShadow').classList.remove('hidden')
+    syncSymbolUI()
+    syncShadowCheck(false)
     return
   }
   const sh  = id => document.getElementById(id).classList.remove('hidden')
@@ -379,6 +405,26 @@ function showOptionsForTool(t) {
     syncFontFamily(fontFamily)
   }
   if (t === 'number') { sh('grpNumber'); sh('grpShadow'); syncShadowCheck(numShadow); syncNumStyle(numberStyle) }
+}
+
+function syncMosaicUI() {
+  document.getElementById('btnMosaicModeMosaic').classList.toggle('active', mosaicMode === 'mosaic')
+  document.getElementById('btnMosaicModeBlur').classList.toggle('active', mosaicMode === 'blur')
+  document.getElementById('grpMosaicBlock').classList.toggle('hidden', mosaicMode === 'blur')
+  document.getElementById('grpMosaicBlur').classList.toggle('hidden', mosaicMode === 'mosaic')
+  document.getElementById('mosaicIntLabel').textContent = mosaicMode === 'mosaic' ? '區塊：' : '強度：'
+  document.querySelectorAll('#grpMosaicBlock [data-block]').forEach(btn => {
+    btn.classList.toggle('active', parseInt(btn.dataset.block) === mosaicBlockSize)
+  })
+  document.querySelectorAll('#grpMosaicBlur [data-blur]').forEach(btn => {
+    btn.classList.toggle('active', parseInt(btn.dataset.blur) === mosaicBlurRadius)
+  })
+}
+
+function syncSymbolUI() {
+  document.getElementById('symbolPreviewSwatch').textContent = symbolChar
+  const inp = document.getElementById('symbolSizeInput')
+  if (inp) inp.value = symbolSize
 }
 
 function syncBoxSelUI() {
@@ -501,6 +547,23 @@ function showOptionsForAnnot(a) {
     document.getElementById('numValueEdit').classList.remove('hidden')
     document.getElementById('numValueInput').value = a.value
     sh('grpNumber'); sh('grpShadow')
+  }
+  if (t === 'mosaic') {
+    mosaicMode      = a.mode      ?? 'mosaic'
+    mosaicBlockSize = a.blockSize ?? 16
+    mosaicBlurRadius= a.blurRadius ?? 8
+    sh('grpMosaic')
+    syncMosaicUI()
+    return
+  }
+  if (t === 'symbol') {
+    symbolChar = a.char  ?? '★'
+    symbolSize = a.size  ?? 64
+    color      = a.color ?? '#ff3b30'; syncColor(color)
+    sh('grpColor'); sh('grpSymbol'); sh('grpShadow')
+    syncSymbolUI()
+    syncShadowCheck(a.shadow ?? false)
+    return
   }
 }
 
@@ -1562,6 +1625,7 @@ function setTool(t) {
   if (t !== 'crop')      { cropRect = null; isCropping = false; cropMoving = false; cropResizeH = null; cropMoveStart = null }
   if (t !== 'ocr')       { ocrRect = null; isOcrSelecting = false; ocrStart = null }
   if (t !== 'boxselect') { boxSelRect = null; isBoxSelecting = false; boxSelStart = null }
+  if (t !== 'mosaic')   { isMosaicDrawing = false; mosaicDrawStart = null; mosaicPreviewRect = null }
   if (t !== 'pen')       { isPenDrawing = false; penPoints = [] }
   _cancelPolyline()   // 切換工具時取消任何進行中的折線
   tool       = t
@@ -1842,6 +1906,23 @@ function renderAnnotations() {
     annotCtx.restore()
   }
 
+  // Mosaic tool live preview
+  if (tool === 'mosaic' && mosaicPreviewRect && mosaicPreviewRect.w > 2 && mosaicPreviewRect.h > 2) {
+    drawMosaic(annotCtx, {
+      x: mosaicPreviewRect.x, y: mosaicPreviewRect.y,
+      w: mosaicPreviewRect.w, h: mosaicPreviewRect.h,
+      mode: mosaicMode, blockSize: mosaicBlockSize, blurRadius: mosaicBlurRadius,
+    })
+    annotCtx.save()
+    annotCtx.strokeStyle = '#a78bfa'
+    annotCtx.lineWidth   = 1.5
+    annotCtx.setLineDash([5, 3])
+    annotCtx.strokeRect(c(mosaicPreviewRect.x), c(mosaicPreviewRect.y),
+                        c(mosaicPreviewRect.w), c(mosaicPreviewRect.h))
+    annotCtx.setLineDash([])
+    annotCtx.restore()
+  }
+
   // Pen tool live preview
   if (isPenDrawing && penPoints.length >= 2) {
     annotCtx.save()
@@ -1878,6 +1959,82 @@ function _getOffCanvas(w, h) {
   if (!_offCanvas) _offCanvas = document.createElement('canvas')
   if (_offCanvas.width !== w || _offCanvas.height !== h) { _offCanvas.width = w; _offCanvas.height = h }
   return _offCanvas
+}
+
+// ─── Mosaic / Blur ────────────────────────────────────────────────────────────
+
+function drawMosaic(ctx, a) {
+  const vx = Math.round(a.x * viewScale)
+  const vy = Math.round(a.y * viewScale)
+  const vw = Math.max(1, Math.round(a.w * viewScale))
+  const vh = Math.max(1, Math.round(a.h * viewScale))
+
+  const off  = document.createElement('canvas')
+  off.width  = vw
+  off.height = vh
+  const octx = off.getContext('2d')
+
+  if (a.mode === 'blur') {
+    const r   = Math.max(1, (a.blurRadius ?? 8) * viewScale)
+    const pad = Math.ceil(r * 2.5)
+    // Draw a padded region so blur doesn't darken edges
+    octx.filter = `blur(${r}px)`
+    octx.drawImage(baseCanvas,
+      vx - pad, vy - pad, vw + pad * 2, vh + pad * 2,
+      -pad, -pad, vw + pad * 2, vh + pad * 2)
+  } else {
+    octx.drawImage(baseCanvas, vx, vy, vw, vh, 0, 0, vw, vh)
+    const bs       = Math.max(2, Math.round((a.blockSize ?? 16) * viewScale))
+    const imgData  = octx.getImageData(0, 0, vw, vh)
+    const data     = imgData.data
+    for (let py = 0; py < vh; py += bs) {
+      const pyEnd = Math.min(py + bs, vh)
+      for (let px = 0; px < vw; px += bs) {
+        const pxEnd = Math.min(px + bs, vw)
+        let r = 0, g = 0, b = 0, al = 0, n = 0
+        for (let qy = py; qy < pyEnd; qy++) {
+          for (let qx = px; qx < pxEnd; qx++) {
+            const i = (qy * vw + qx) * 4
+            r += data[i]; g += data[i+1]; b += data[i+2]; al += data[i+3]; n++
+          }
+        }
+        r = Math.round(r/n); g = Math.round(g/n); b = Math.round(b/n); al = Math.round(al/n)
+        for (let qy = py; qy < pyEnd; qy++) {
+          for (let qx = px; qx < pxEnd; qx++) {
+            const i = (qy * vw + qx) * 4
+            data[i] = r; data[i+1] = g; data[i+2] = b; data[i+3] = al
+          }
+        }
+      }
+    }
+    octx.putImageData(imgData, 0, 0)
+  }
+
+  ctx.save()
+  ctx.beginPath()
+  ctx.rect(vx, vy, vw, vh)
+  ctx.clip()
+  ctx.drawImage(off, vx, vy)
+  ctx.restore()
+}
+
+// ─── Symbol Stamp ──────────────────────────────────────────────────────────────
+
+function drawSymbol(ctx, a) {
+  const sz = Math.max(8, (a.size ?? 64) * viewScale)
+  ctx.save()
+  ctx.font          = `${sz}px 'Apple Color Emoji', 'Noto Sans Symbols 2', 'Segoe UI Symbol', sans-serif`
+  ctx.fillStyle     = a.color ?? '#ff3b30'
+  ctx.textAlign     = 'center'
+  ctx.textBaseline  = 'middle'
+  if (a.shadow) {
+    ctx.shadowColor   = 'rgba(0,0,0,0.4)'
+    ctx.shadowBlur    = 4 * viewScale
+    ctx.shadowOffsetX = 2 * viewScale
+    ctx.shadowOffsetY = 2 * viewScale
+  }
+  ctx.fillText(a.char ?? '★', a.x * viewScale, a.y * viewScale)
+  ctx.restore()
 }
 
 function drawOne(ctx, a) {
@@ -1928,6 +2085,8 @@ function drawOne(ctx, a) {
     case 'number':   drawNumber(ctx, a);   break
     case 'polyline': drawPolyline(ctx, a); break
     case 'pen':      drawPen(ctx, a);      break
+    case 'mosaic':   drawMosaic(ctx, a);   break
+    case 'symbol':   drawSymbol(ctx, a);   break
   }
   ctx.restore()
 }
@@ -2500,7 +2659,7 @@ function drawNumber(ctx, a) {
 // ─── Resize handles ───────────────────────────────────────────────────────────
 
 function getHandles(a) {
-  if (a.type === 'rect' || a.type === 'ellipse' || a.type === 'fillrect' || a.type === 'fillellipse' || a.type === 'img') {
+  if (a.type === 'rect' || a.type === 'ellipse' || a.type === 'fillrect' || a.type === 'fillellipse' || a.type === 'img' || a.type === 'mosaic') {
     const { x, y, w, h } = a
     const mx = x + w / 2, my = y + h / 2
     return [
@@ -2522,6 +2681,10 @@ function getHandles(a) {
   }
   if (a.type === 'number') {
     const r = a.size ?? 14
+    return [{ id: 'se', x: a.x + r, y: a.y + r, cursor: 'nwse-resize' }]
+  }
+  if (a.type === 'symbol') {
+    const r = (a.size ?? 64) / 2
     return [{ id: 'se', x: a.x + r, y: a.y + r, cursor: 'nwse-resize' }]
   }
   if (a.type === 'pen') {
@@ -2575,7 +2738,10 @@ function startResize(hId, a) {
   if (a.type === 'number') {
     info.cx = a.x; info.cy = a.y
   }
-  if (a.type === 'rect' || a.type === 'ellipse' || a.type === 'fillrect' || a.type === 'fillellipse' || a.type === 'img') {
+  if (a.type === 'symbol') {
+    info.cx = a.x; info.cy = a.y
+  }
+  if (a.type === 'rect' || a.type === 'ellipse' || a.type === 'fillrect' || a.type === 'fillellipse' || a.type === 'img' || a.type === 'mosaic') {
     const { x, y, w, h } = a
     switch (hId) {
       case 'nw': info.fixX = x+w; info.fixY = y+h; break
@@ -2658,7 +2824,7 @@ function applyResize(a, pos) {
     return
   }
 
-  if (['rect','ellipse','fillrect','fillellipse'].includes(a.type)) {
+  if (['rect','ellipse','fillrect','fillellipse','mosaic'].includes(a.type)) {
     let x1, y1, x2, y2
     switch (h.id) {
       case 'nw': x1=pos.x;    y1=pos.y;    x2=h.fixX;        y2=h.fixY;        break
@@ -2681,6 +2847,10 @@ function applyResize(a, pos) {
   if (a.type === 'number') {
     const d = Math.max(Math.abs(pos.x - h.cx), Math.abs(pos.y - h.cy))
     a.size = Math.max(d, 6)
+  }
+  if (a.type === 'symbol') {
+    const d = Math.max(Math.abs(pos.x - h.cx), Math.abs(pos.y - h.cy))
+    a.size = Math.max(d * 2, 16)
   }
   if (a.type === 'pen' || a.type === 'polyline') {
     if (h.isBBoxResize) {
@@ -2876,7 +3046,9 @@ function bounds(a) {
     case 'ellipse':
     case 'fillrect':
     case 'fillellipse':
+    case 'mosaic':
     case 'img':    return { x: a.x, y: a.y, w: a.w, h: a.h }
+    case 'symbol': { const r = (a.size ?? 64) / 2; return { x: a.x - r, y: a.y - r, w: a.size ?? 64, h: a.size ?? 64 } }
     case 'line': {
       const minX = Math.min(a.x1,a.x2), maxX = Math.max(a.x1,a.x2)
       const minY = Math.min(a.y1,a.y2), maxY = Math.max(a.y1,a.y2)
@@ -2960,6 +3132,24 @@ annotCanvas.addEventListener('mousedown', e => {
     boxSelStart    = pos
     boxSelRect     = { x: pos.x, y: pos.y, w: 0, h: 0 }
     syncBoxSelUI()
+    return
+  }
+
+  if (tool === 'mosaic') {
+    isMosaicDrawing = true
+    mosaicDrawStart = pos
+    mosaicPreviewRect = { x: pos.x, y: pos.y, w: 0, h: 0 }
+    return
+  }
+
+  if (tool === 'symbol') {
+    const ann = { id: newId(), type: 'symbol', x: pos.x, y: pos.y, char: symbolChar, color, size: symbolSize, shadow: false }
+    pushHistory()
+    annotations.push(ann)
+    setTool('select')
+    selectedId = ann.id
+    showOptionsForAnnot(ann)
+    renderAnnotations()
     return
   }
 
@@ -3125,6 +3315,17 @@ annotCanvas.addEventListener('mousemove', e => {
     return
   }
 
+  if (isMosaicDrawing && mosaicDrawStart) {
+    mosaicPreviewRect = {
+      x: Math.min(mosaicDrawStart.x, pos.x),
+      y: Math.min(mosaicDrawStart.y, pos.y),
+      w: Math.abs(pos.x - mosaicDrawStart.x),
+      h: Math.abs(pos.y - mosaicDrawStart.y),
+    }
+    renderAnnotations()
+    return
+  }
+
   if (isResizing && selectedId) {
     const a = annotations.find(x => x.id === selectedId)
     if (a) {
@@ -3274,6 +3475,28 @@ document.addEventListener('mouseup', e => {
     return
   }
 
+  if (isMosaicDrawing) {
+    isMosaicDrawing = false
+    const r = mosaicPreviewRect
+    if (r && r.w >= 4 && r.h >= 4) {
+      const ann = {
+        id: newId(), type: 'mosaic',
+        x: r.x, y: r.y, w: r.w, h: r.h,
+        mode: mosaicMode, blockSize: mosaicBlockSize, blurRadius: mosaicBlurRadius,
+      }
+      pushHistory()
+      annotations.push(ann)
+      mosaicPreviewRect = null
+      setTool('select')
+      selectedId = ann.id
+      showOptionsForAnnot(ann)
+    } else {
+      mosaicPreviewRect = null
+    }
+    renderAnnotations()
+    return
+  }
+
   if (isPenDrawing) {
     isPenDrawing = false
     if (penPoints.length >= 2) {
@@ -3325,9 +3548,11 @@ function moveAnnot(a, dx, dy) {
     case 'ellipse':
     case 'fillrect':
     case 'fillellipse':
+    case 'mosaic':
     case 'img':
     case 'text':
-    case 'number': a.x += dx; a.y += dy; break
+    case 'number':
+    case 'symbol': a.x += dx; a.y += dy; break
     case 'line':     a.x1 += dx; a.y1 += dy; a.x2 += dx; a.y2 += dy; break
     case 'polyline':
     case 'pen':      a.points.forEach(p => { p.x += dx; p.y += dy }); break
@@ -3617,6 +3842,8 @@ document.addEventListener('keydown', e => {
     case 'e': case 'E': document.getElementById('btnExtend').click();     break
     case 'c': case 'C': setTool('crop');   break
     case 'g': case 'G': setTool('ocr');    break
+    case 'x': case 'X': setTool('mosaic'); break
+    case 'u': case 'U': setTool('symbol'); break
     case 's': case 'S': openResizeModal(); break
     case 'Escape':
       hideCtxMenu()
@@ -3624,6 +3851,7 @@ document.addEventListener('keydown', e => {
       if (tool === 'crop') { cancelCrop(); break }
       if (tool === 'ocr')  { ocrRect = null; isOcrSelecting = false; document.getElementById('ocrStatusLabel').textContent = '請拖曳選取辨識區域'; renderAnnotations(); break }
       if (tool === 'boxselect') { boxSelRect = null; isBoxSelecting = false; syncBoxSelUI(); renderAnnotations(); break }
+      if (tool === 'mosaic')    { mosaicPreviewRect = null; isMosaicDrawing = false; renderAnnotations(); break }
       selectedId = null
       isDrawing  = false
       if (tool === 'select') hideAllOptions()
@@ -3749,7 +3977,7 @@ function confirmCrop() {
     annotations = annotations.map(a => {
       a = JSON.parse(JSON.stringify(a))
       switch (a.type) {
-        case 'rect': case 'fillrect': case 'text': case 'number': a.x -= cx; a.y -= cy; break
+        case 'rect': case 'fillrect': case 'mosaic': case 'text': case 'number': case 'symbol': a.x -= cx; a.y -= cy; break
         case 'line': a.x1 -= cx; a.y1 -= cy; a.x2 -= cx; a.y2 -= cy; break
       }
       return a
@@ -3910,6 +4138,111 @@ document.getElementById('btnOcrDownloadCancel').addEventListener('click', () => 
 })
 
 
+// ─── Mosaic tool controls ─────────────────────────────────────────────────────
+
+document.getElementById('btnMosaicModeMosaic').addEventListener('click', () => {
+  mosaicMode = 'mosaic'; syncMosaicUI()
+  if (selectedId) { const a = annotations.find(x => x.id === selectedId); if (a && a.type === 'mosaic') { updateSelectedAnnot({ mode: 'mosaic' }) } }
+})
+document.getElementById('btnMosaicModeBlur').addEventListener('click', () => {
+  mosaicMode = 'blur'; syncMosaicUI()
+  if (selectedId) { const a = annotations.find(x => x.id === selectedId); if (a && a.type === 'mosaic') { updateSelectedAnnot({ mode: 'blur' }) } }
+})
+document.querySelectorAll('#grpMosaicBlock [data-block]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    mosaicBlockSize = parseInt(btn.dataset.block); syncMosaicUI()
+    if (selectedId) { const a = annotations.find(x => x.id === selectedId); if (a && a.type === 'mosaic') { updateSelectedAnnot({ blockSize: mosaicBlockSize }) } }
+  })
+})
+document.querySelectorAll('#grpMosaicBlur [data-blur]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    mosaicBlurRadius = parseInt(btn.dataset.blur); syncMosaicUI()
+    if (selectedId) { const a = annotations.find(x => x.id === selectedId); if (a && a.type === 'mosaic') { updateSelectedAnnot({ blurRadius: mosaicBlurRadius }) } }
+  })
+})
+
+// ─── Symbol tool controls ─────────────────────────────────────────────────────
+
+const SYMBOL_SETS = {
+  shapes: ['★','☆','●','○','■','□','▲','△','▼','▽','◆','◇','♥','♡','♦','♠','♣','♤','❤','❥','✦','✧','✩','✪'],
+  marks:  ['✓','✔','✗','✘','✕','✖','⚠','⚑','ℹ','！','？','＊','⊕','⊗','⊙','⊘','☑','☐','⓪','①','②','③'],
+  arrows: ['←','→','↑','↓','↔','↕','↗','↘','↙','↖','⇐','⇒','⇑','⇓','⇔','⇕','↩','↪','↺','↻','▶','◀','▲','▼'],
+  misc:   ['☎','✉','✂','✏','✒','♻','☁','☀','☂','☃','⚡','🔥','💡','⭐','🏆','🔑','🔒','🔓','📌','📎','🔗','💬','🎯','🎨'],
+}
+
+let symCurrentCat = 'shapes'
+
+function buildSymGrid(cat) {
+  const grid = document.getElementById('symGrid')
+  grid.innerHTML = ''
+  ;(SYMBOL_SETS[cat] ?? []).forEach(ch => {
+    const btn = document.createElement('button')
+    btn.className   = 'sym-btn' + (ch === symbolChar ? ' active' : '')
+    btn.textContent = ch
+    btn.title       = ch
+    btn.addEventListener('click', () => {
+      symbolChar = ch
+      document.getElementById('symbolPreviewSwatch').textContent = ch
+      document.querySelectorAll('.sym-btn').forEach(b => b.classList.remove('active'))
+      btn.classList.add('active')
+      if (selectedId) {
+        const a = annotations.find(x => x.id === selectedId)
+        if (a && a.type === 'symbol') { updateSelectedAnnot({ char: ch }) }
+      }
+      hideSymbolPanel()
+    })
+    grid.appendChild(btn)
+  })
+}
+
+function showSymbolPanel() {
+  const panel = document.getElementById('symbolPickerPanel')
+  const swatch = document.getElementById('symbolPreviewSwatch')
+  const ar = swatch.getBoundingClientRect()
+  panel.style.left = Math.min(ar.left, window.innerWidth - 272) + 'px'
+  panel.style.top  = (ar.bottom + 4) + 'px'
+  panel.classList.remove('hidden')
+  buildSymGrid(symCurrentCat)
+}
+
+function hideSymbolPanel() {
+  document.getElementById('symbolPickerPanel').classList.add('hidden')
+}
+
+document.getElementById('symbolPreviewSwatch').addEventListener('click', e => {
+  e.stopPropagation()
+  const panel = document.getElementById('symbolPickerPanel')
+  panel.classList.contains('hidden') ? showSymbolPanel() : hideSymbolPanel()
+})
+
+document.querySelectorAll('.sym-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    symCurrentCat = tab.dataset.cat
+    document.querySelectorAll('.sym-tab').forEach(t => t.classList.remove('active'))
+    tab.classList.add('active')
+    buildSymGrid(symCurrentCat)
+  })
+})
+
+document.getElementById('symbolSizeInput').addEventListener('change', e => {
+  symbolSize = Math.max(16, Math.min(512, parseInt(e.target.value) || 64))
+  e.target.value = symbolSize
+  if (selectedId) {
+    const a = annotations.find(x => x.id === selectedId)
+    if (a && a.type === 'symbol') { updateSelectedAnnot({ size: symbolSize }); pushHistory() }
+  }
+})
+
+// Close symbol panel on outside click
+document.addEventListener('mousedown', e => {
+  const panel = document.getElementById('symbolPickerPanel')
+  if (!panel.classList.contains('hidden') &&
+      !panel.contains(e.target) &&
+      e.target.id !== 'symbolPreviewSwatch') {
+    hideSymbolPanel()
+  }
+})
+
 // ─── Resize ───────────────────────────────────────────────────────────────────
 
 const resizeModal = document.getElementById('resizeModal')
@@ -3951,10 +4284,17 @@ document.getElementById('btnResizeConfirm').addEventListener('click', () => {
     annotations = annotations.map(a => {
       a = JSON.parse(JSON.stringify(a))
       switch (a.type) {
+        case 'mosaic':
+          a.x *= sx; a.y *= sy; a.w *= sx; a.h *= sy
+          break
         case 'rect':
         case 'fillrect':
           a.x *= sx; a.y *= sy; a.w *= sx; a.h *= sy
           a.thickness = Math.max(1, Math.round(a.thickness * sx))
+          break
+        case 'symbol':
+          a.x *= sx; a.y *= sy
+          a.size = Math.max(8, Math.round(a.size * Math.min(sx, sy)))
           break
         case 'line':
           a.x1 *= sx; a.y1 *= sy; a.x2 *= sx; a.y2 *= sy

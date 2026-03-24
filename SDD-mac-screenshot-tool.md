@@ -1,8 +1,61 @@
 # SDD：Mac 截圖與圖片編輯工具
-**版本：** 3.17
+**版本：** 3.18
 **日期：** 2026-03-24
 **狀態：** 待審閱
 **變更紀錄：**
+
+### v3.18 — 新工具：馬賽克/模糊 + 符號印章
+
+#### 馬賽克/模糊工具（annotation-based）
+- **工具列按鈕**：`▦`，快捷鍵 `X`，啟用 `data-tool="mosaic"`
+- **操作流程**：拖曳繪製矩形區域 → 即時預覽效果（紫色虛線框）→ 放開滑鼠後自動 commit 為 `mosaic` annotation
+- **馬賽克模式**：`getImageData / putImageData` 像素取樣平均化，區塊大小 4 / 8 / 16 / 32 px（圖像像素）
+- **模糊模式**：`ctx.filter = 'blur(Npx)'` offscreen compositing，強度 4 / 8 / 16 / 24 px
+- **讀取來源**：`baseCanvas`（不含其他 annotation），馬賽克只遮蔽底圖像素
+- **可移動 / 縮放**：支援 8 個方向 resize handle（與 rect 相同）；支援 Cmd+C/V 複製貼上
+- **Undo 支援**：annotation-based，完整納入 pushHistory / undo 機制
+- **Options Bar 選項**
+  - 模式切換：馬賽克 / 模糊（`btnMosaicModeMosaic` / `btnMosaicModeBlur`）
+  - 馬賽克區塊大小：4 / 8 / 16 / 32 按鈕（`grpMosaicBlock`）
+  - 模糊強度：4px / 8px / 16px / 24px 按鈕（`grpMosaicBlur`）
+- **Annotation 資料結構**：`{ type: 'mosaic', x, y, w, h, mode, blockSize, blurRadius }`
+
+#### 符號印章工具（Symbol Stamp）
+- **工具列按鈕**：`☺`，快捷鍵 `U`，啟用 `data-tool="symbol"`
+- **操作流程**：選取工具 → 點擊畫面 → 符號即時置放在點擊位置
+- **渲染**：`fillText()` + `font-size = size * viewScale`，顏色由 grpColor 控制，支援陰影
+- **字型 fallback**：`'Apple Color Emoji', 'Noto Sans Symbols 2', 'Segoe UI Symbol', sans-serif`
+- **符號選取面板**（浮動 panel，點擊 `symbolPreviewSwatch` 開啟）
+  - 4 個分類 Tab：幾何 / 標記 / 箭頭 / 其他
+  - 每類 24 個常用 Unicode 符號，8 列格狀排列
+- **Bounds 計算**：以 x,y 為中心，size 為直徑（方形包圍盒）
+- **Resize**：單一 SE 角 handle，拖曳調整 size 值
+- **Options Bar**：grpColor（顏色）+ grpSymbol（符號選取 + 大小輸入）+ grpShadow（陰影）
+- **Annotation 資料結構**：`{ type: 'symbol', x, y, char, color, size, shadow }`
+
+#### 其他異動
+- `bounds()`、`moveAnnot()`、`getHandles()`、`startResize()`、`applyResize()`：新增 `mosaic` / `symbol` 支援
+- crop 座標平移、resize 等比縮放：新增 `mosaic` / `symbol` 支援
+- `grpMosaic`、`grpSymbol` 加入 `hideAllOptions` 清單
+
+#### TDD v3.18
+- [ ] 馬賽克工具：拖曳繪製，即時預覽（紫色虛線框＋馬賽克效果），放開後 commit 為 annotation
+- [ ] 馬賽克工具：拖曳距離 < 4px，不產生 annotation
+- [ ] 馬賽克模式：選取 annotation 後切換區塊大小（4/8/16/32），效果即時更新
+- [ ] 模糊模式：切換至模糊，選取強度（4/8/16/24px），效果即時更新
+- [ ] 馬賽克 annotation：支援移動、8 方向縮放，效果隨位置/大小更新
+- [ ] 馬賽克 annotation：Cmd+Z 撤銷，Cmd+Y 重做
+- [ ] 馬賽克 annotation：Cmd+C 複製，Cmd+V 貼上，位置偏移 8px
+- [ ] 符號印章工具：點擊畫面，在點擊位置置放目前符號
+- [ ] 符號印章面板：點擊 swatch 開啟浮動 panel，四個分類 Tab 可切換
+- [ ] 符號印章面板：點擊符號，swatch 更新，panel 關閉
+- [ ] 符號大小輸入框：輸入 64，annotation 的 size 更新，顯示大小改變
+- [ ] 符號顏色：透過 grpColor 改色，annotation 即時更新
+- [ ] 符號 annotation：支援移動（SE handle 縮放）、Cmd+Z 撤銷
+- [ ] 快捷鍵：X 啟動馬賽克工具；U 啟動符號印章工具
+- [ ] Escape：馬賽克工具拖曳中按 Esc，取消預覽框，回到空白狀態
+
+---
 
 ### v3.17 — Bug 修正：鉛筆工具粗線箭頭方向跑掉
 
