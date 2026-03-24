@@ -177,6 +177,35 @@
       <div class="color-preview fill-preview" id="fillBorderColorPreview" title="點擊選色"></div>
     </div>
 
+    <div class="opt-group hidden" id="grpNumber">
+      <span class="opt-label">風格</span>
+      <div class="sz-group" id="numStyleGroup">
+        <button class="ns-style-btn active" data-nstyle="dot"         title="實心圓點（無限）">⬤</button>
+        <button class="ns-style-btn"        data-nstyle="circle"      title="空心圓圈 ①②③（上限 50）">①</button>
+        <button class="ns-style-btn"        data-nstyle="circle-fill" title="實心圓圈 ➊➋➌（上限 10）">➊</button>
+        <button class="ns-style-btn"        data-nstyle="roman"       title="羅馬數字 Ⅰ Ⅱ Ⅲ（上限 12）">Ⅰ</button>
+        <button class="ns-style-btn"        data-nstyle="cjk-paren"   title="中文括號 ㈠㈡㈢（上限 10）">㈠</button>
+        <button class="ns-style-btn"        data-nstyle="cjk-circle"  title="中文圓圈 ㊀㊁㊂（上限 10）">㊀</button>
+      </div>
+      <span id="numStyleLimit" class="opt-label num-style-limit">上限：∞</span>
+      <div class="opt-sep"></div>
+      <span class="opt-label">大小</span>
+      <div class="sz-group">
+        <button class="ns-btn"        data-ns="36">小</button>
+        <button class="ns-btn active" data-ns="48">標準</button>
+        <button class="ns-btn"        data-ns="56">大</button>
+      </div>
+      <div class="opt-sep"></div>
+      <span class="opt-label">下一個</span>
+      <span id="numCountDisplay" class="num-count-display">1</span>
+      <button class="reset-btn" id="btnNumReset">重置</button>
+      <div id="numValueEdit" class="num-value-edit hidden">
+        <div class="opt-sep"></div>
+        <span class="opt-label">數值</span>
+        <input type="number" id="numValueInput" min="0" max="9999" value="1">
+      </div>
+    </div>
+
     <div class="opt-group" id="grpThickness">
       <span class="opt-label" id="thicknessLabel">粗細</span>
       <input type="number" id="strokeWidthInput" value="2" min="0" max="999">
@@ -285,36 +314,6 @@
 
     <div class="opt-group hidden" id="grpShadow">
       <label class="shadow-lbl"><input type="checkbox" id="shadowCheck"> 陰影</label>
-    </div>
-
-    <div class="opt-group hidden" id="grpNumber">
-      <span class="opt-label">風格</span>
-      <div class="sz-group" id="numStyleGroup">
-        <button class="ns-style-btn active" data-nstyle="dot"         title="實心圓點（無限）">⬤</button>
-        <button class="ns-style-btn"        data-nstyle="circle"      title="空心圓圈 ①②③（上限 50）">①</button>
-        <button class="ns-style-btn"        data-nstyle="circle-fill" title="實心圓圈 ➊➋➌（上限 10）">➊</button>
-        <button class="ns-style-btn"        data-nstyle="roman"       title="羅馬數字 Ⅰ Ⅱ Ⅲ（上限 12）">Ⅰ</button>
-        <button class="ns-style-btn"        data-nstyle="cjk-paren"   title="中文括號 ㈠㈡㈢（上限 10）">㈠</button>
-        <button class="ns-style-btn"        data-nstyle="cjk-circle"  title="中文圓圈 ㊀㊁㊂（上限 10）">㊀</button>
-      </div>
-      <span id="numStyleLimit" class="opt-label num-style-limit">上限：∞</span>
-      <div class="opt-sep"></div>
-      <span class="opt-label">下一個</span>
-      <span id="numCountDisplay" class="num-count-display">1</span>
-      <div class="opt-sep"></div>
-      <span class="opt-label">大小</span>
-      <div class="sz-group">
-        <button class="ns-btn"        data-ns="36">小</button>
-        <button class="ns-btn active" data-ns="48">標準</button>
-        <button class="ns-btn"        data-ns="56">大</button>
-      </div>
-      <div class="opt-sep"></div>
-      <button class="reset-btn" id="btnNumReset">重置編號</button>
-      <div id="numValueEdit" class="num-value-edit hidden">
-        <div class="opt-sep"></div>
-        <span class="opt-label">數值</span>
-        <input type="number" id="numValueInput" min="0" max="9999" value="1">
-      </div>
     </div>
 
     <div class="opt-group hidden" id="grpZoom">
