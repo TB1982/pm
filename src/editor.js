@@ -1,4 +1,5 @@
 const { ipcRenderer } = require('electron')
+const { t, applyI18n } = require('./i18n')
 
 // ─── Colour palette ──────────────────────────────────────────────────────────
 
@@ -79,7 +80,14 @@ let numberStyle   = 'dot'   // dot | circle | circle-fill | roman | cjk-paren | 
 let numThickness  = 0       // 描邊粗細，獨立於全域 thickness
 let numStrokeColor = '#ffffff'  // 描邊顏色
 const STYLE_LIMITS = { dot: Infinity, circle: 50, 'circle-fill': 10, roman: 12, 'cjk-paren': 10, 'cjk-circle': 10 }
-const STYLE_LABELS = { dot: '實心圓點', circle: '空心圓圈①', 'circle-fill': '實心圓圈➊', roman: '羅馬數字Ⅰ', 'cjk-paren': '中文括號㈠', 'cjk-circle': '中文圓圈㊀' }
+const STYLE_LABELS = {
+  dot: () => t('style_dot'),
+  circle: () => t('style_circle'),
+  'circle-fill': () => t('style_circle_fill'),
+  roman: () => t('style_roman'),
+  'cjk-paren': () => t('style_cjk_paren'),
+  'cjk-circle': () => t('style_cjk_circle'),
+}
 function getStyleLimit(style) { return STYLE_LIMITS[style] ?? Infinity }
 
 // Fill ellipse shadow state
@@ -233,6 +241,15 @@ let polylineLastMs = 0       // 上次 mousedown 時間戳，用於雙擊判斷
 
 // ─── DOM ─────────────────────────────────────────────────────────────────────
 
+applyI18n()
+
+// Translate line-style select options (appear in multiple selects)
+document.querySelectorAll('.line-style-select option').forEach(opt => {
+  const key = 'dash_' + opt.value
+  const str = t(key)
+  if (str !== key) opt.textContent = str
+})
+
 const baseCanvas    = document.getElementById('baseCanvas')
 const annotCanvas   = document.getElementById('annotCanvas')
 const baseCtx       = baseCanvas.getContext('2d')
@@ -317,7 +334,7 @@ function showOptionsForTool(t) {
   }
   if (t === 'ocr') {
     document.getElementById('grpOcr').classList.remove('hidden')
-    document.getElementById('ocrStatusLabel').textContent = '請拖曳選取辨識區域'
+    document.getElementById('ocrStatusLabel').textContent = t('ocr_drag')
     return
   }
   if (t === 'boxselect') {
@@ -413,7 +430,7 @@ function syncMosaicUI() {
   document.getElementById('btnMosaicModeBlur').classList.toggle('active', mosaicMode === 'blur')
   document.getElementById('grpMosaicBlock').classList.toggle('hidden', mosaicMode === 'blur')
   document.getElementById('grpMosaicBlur').classList.toggle('hidden', mosaicMode === 'mosaic')
-  document.getElementById('mosaicIntLabel').textContent = mosaicMode === 'mosaic' ? '區塊：' : '強度：'
+  document.getElementById('mosaicIntLabel').textContent = mosaicMode === 'mosaic' ? t('mosaic_block') : t('mosaic_intensity')
   document.querySelectorAll('#grpMosaicBlock [data-block]').forEach(btn => {
     btn.classList.toggle('active', parseInt(btn.dataset.block) === mosaicBlockSize)
   })
@@ -437,9 +454,9 @@ function syncBoxSelUI() {
   if (hasRect) {
     const w = Math.round(Math.abs(boxSelRect.w))
     const h = Math.round(Math.abs(boxSelRect.h))
-    document.getElementById('boxSelSizeLabel').textContent = `${w} × ${h} px　Cmd+C 複製`
+    document.getElementById('boxSelSizeLabel').textContent = t('box_copy', w, h)
   } else {
-    document.getElementById('boxSelSizeLabel').textContent = '請拖曳選取區域'
+    document.getElementById('boxSelSizeLabel').textContent = t('box_drag')
   }
 }
 
@@ -643,7 +660,7 @@ function syncNumStrokeColor(hex) {
   if (p) p.style.background = hex
 }
 function syncNumStrokeUI(isNumber) {
-  document.getElementById('thicknessLabel').textContent = isNumber ? '描邊' : '粗細'
+  document.getElementById('thicknessLabel').textContent = isNumber ? t('thickness_stroke') : t('thickness_line')
   document.getElementById('numStrokeColorPreview').style.display = isNumber ? '' : 'none'
   if (isNumber) {
     syncThickness(numThickness)
@@ -658,7 +675,7 @@ function syncNumStyle(s) {
   document.querySelectorAll('.ns-style-btn').forEach(b => b.classList.toggle('active', b.dataset.nstyle === s))
   const limit = getStyleLimit(s)
   const el = document.getElementById('numStyleLimit')
-  if (el) el.textContent = `上限：${limit === Infinity ? '∞' : limit}`
+  if (el) el.textContent = t('opt_limit', limit === Infinity ? '∞' : limit)
 }
 // ── Fill colour helpers ────────────────────────────────────────────────────────
 function fillPreviewBg(hex) {
@@ -865,15 +882,15 @@ syncFillBorderColor(fillBorderColor)
   //   oxLeft                 — true if extension is to the LEFT (original shifts right by addW)
   //   oyTop                  — true if extension is to the TOP  (original shifts down  by addH)
   const DIRS = {
-    tl: { showW: true,  showH: true,  showS: false, lblW: '向左延伸', lblH: '向上延伸', oxLeft: true,  oyTop: true  },
-    t:  { showW: false, showH: true,  showS: false,                    lblH: '向上延伸', oxLeft: false, oyTop: true  },
-    tr: { showW: true,  showH: true,  showS: false, lblW: '向右延伸', lblH: '向上延伸', oxLeft: false, oyTop: true  },
-    l:  { showW: true,  showH: false, showS: false, lblW: '向左延伸',                   oxLeft: true,  oyTop: false },
+    tl: { showW: true,  showH: true,  showS: false, get lblW() { return t('extend_left') }, get lblH() { return t('extend_up') }, oxLeft: true,  oyTop: true  },
+    t:  { showW: false, showH: true,  showS: false,                                          get lblH() { return t('extend_up') }, oxLeft: false, oyTop: true  },
+    tr: { showW: true,  showH: true,  showS: false, get lblW() { return t('extend_right') }, get lblH() { return t('extend_up') }, oxLeft: false, oyTop: true  },
+    l:  { showW: true,  showH: false, showS: false, get lblW() { return t('extend_left') },                                        oxLeft: true,  oyTop: false },
     c:  { showW: false, showH: false, showS: true                                                                    },
-    r:  { showW: true,  showH: false, showS: false, lblW: '向右延伸',                   oxLeft: false, oyTop: false },
-    bl: { showW: true,  showH: true,  showS: false, lblW: '向左延伸', lblH: '向下延伸', oxLeft: true,  oyTop: false },
-    b:  { showW: false, showH: true,  showS: false,                    lblH: '向下延伸', oxLeft: false, oyTop: false },
-    br: { showW: true,  showH: true,  showS: false, lblW: '向右延伸', lblH: '向下延伸', oxLeft: false, oyTop: false },
+    r:  { showW: true,  showH: false, showS: false, get lblW() { return t('extend_right') },                                          oxLeft: false, oyTop: false },
+    bl: { showW: true,  showH: true,  showS: false, get lblW() { return t('extend_left') },  get lblH() { return t('extend_down') }, oxLeft: true,  oyTop: false },
+    b:  { showW: false, showH: true,  showS: false,                                           get lblH() { return t('extend_down') }, oxLeft: false, oyTop: false },
+    br: { showW: true,  showH: true,  showS: false, get lblW() { return t('extend_right') }, get lblH() { return t('extend_down') }, oxLeft: false, oyTop: false },
   }
 
   let selectedDir = 'r'
@@ -973,7 +990,7 @@ syncFillBorderColor(fillBorderColor)
       fitCanvas()
       drawBase()
       renderAnnotations()
-      showToast(`已延伸：${newW} × ${newH} px`)
+      showToast(t('toast_extended', newW, newH))
     }
     newImg.src = off.toDataURL()
     closeExtendModal()
@@ -1000,7 +1017,7 @@ syncFillBorderColor(fillBorderColor)
 
   document.getElementById('btnOverlayImg').addEventListener('click', () => {
     if (annotations.some(a => a.type === 'img')) {
-      showToast('請先刪除現有疊入圖（Delete 鍵），再插入新圖', true)
+      showToast(t('toast_overlay_exists'), true)
       return
     }
     fileInput.click()
@@ -1033,7 +1050,7 @@ syncFillBorderColor(fillBorderColor)
         setTool('select')
         selectedId = id              // set AFTER setTool (setTool clears selectedId)
         renderAnnotations()
-        showToast('疊入圖片已插入，拖動可移動，拖角落可等比縮放')
+        showToast(t('toast_overlay_inserted'))
       }
       tempImg.src = src
     }
@@ -1116,7 +1133,7 @@ function hideColorPanel() {
     btn.dataset.hex = hex
     if (hex === 'transparent') {
       btn.classList.add('cpp-swatch-transparent')
-      btn.title = '透明'
+      btn.title = t('opt_transparent')
     } else {
       btn.style.background = hex
       const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16)
@@ -1606,7 +1623,7 @@ document.getElementById('numValueInput').addEventListener('input', e => {
 document.getElementById('btnNumReset').addEventListener('click', () => {
   numCount = 1
   syncNumCount()
-  showToast('編號已重置，下一個從 1 開始')
+  showToast(t('toast_num_reset'))
 })
 
 // Tool buttons — zoom-in/out also fire an immediate zoom step
@@ -3145,7 +3162,7 @@ annotCanvas.addEventListener('mousedown', e => {
     isCropping = true
     cropRect   = { x: pos.x, y: pos.y, w: 0, h: 0 }
     drawStart  = pos
-    document.getElementById('cropSizeLabel').textContent = '請拖曳選取範圍'
+    document.getElementById('cropSizeLabel').textContent = t('crop_drag')
     return
   }
 
@@ -3153,7 +3170,7 @@ annotCanvas.addEventListener('mousedown', e => {
     isOcrSelecting = true
     ocrStart = pos
     ocrRect  = { x: pos.x, y: pos.y, w: 0, h: 0 }
-    document.getElementById('ocrStatusLabel').textContent = '請拖曳選取辨識區域'
+    document.getElementById('ocrStatusLabel').textContent = t('ocr_drag')
     return
   }
 
@@ -3221,7 +3238,7 @@ annotCanvas.addEventListener('mousedown', e => {
   if (tool === 'number') {
     const _limit = getStyleLimit(numberStyle)
     if (numCount > _limit) {
-      showToast(`已達「${STYLE_LABELS[numberStyle]}」上限（${_limit}），編號重置為 1`)
+      showToast(t('toast_num_limit', STYLE_LABELS[numberStyle](), _limit))
       numCount = 1
     }
     pushHistory()
@@ -3484,7 +3501,7 @@ document.addEventListener('mouseup', e => {
     isOcrSelecting = false
     if (!ocrRect || ocrRect.w < 4 || ocrRect.h < 4) {
       ocrRect = null
-      document.getElementById('ocrStatusLabel').textContent = '請拖曳選取辨識區域'
+      document.getElementById('ocrStatusLabel').textContent = t('ocr_drag')
       renderAnnotations()
       return
     }
@@ -3889,7 +3906,7 @@ document.addEventListener('keydown', e => {
       hideCtxMenu()
       if (polylineActive) { _cancelPolyline(); renderAnnotations(); break }
       if (tool === 'crop') { cancelCrop(); break }
-      if (tool === 'ocr')  { ocrRect = null; isOcrSelecting = false; document.getElementById('ocrStatusLabel').textContent = '請拖曳選取辨識區域'; renderAnnotations(); break }
+      if (tool === 'ocr')  { ocrRect = null; isOcrSelecting = false; document.getElementById('ocrStatusLabel').textContent = t('ocr_drag'); renderAnnotations(); break }
       if (tool === 'boxselect') { boxSelRect = null; isBoxSelecting = false; syncBoxSelUI(); renderAnnotations(); break }
       if (tool === 'mosaic')    { mosaicPreviewRect = null; isMosaicDrawing = false; renderAnnotations(); break }
       selectedId = null
@@ -3929,7 +3946,7 @@ document.getElementById('btnSaveConfirm').addEventListener('click', async () => 
   const dataURL = burnIn(format)
   const result  = await ipcRenderer.invoke('save-image-as', { dataURL, format })
   if (result?.success) {
-    showToast(`已儲存：${result.path.split('/').pop()}`)
+    showToast(t('toast_saved', result.path.split('/').pop()))
     setTimeout(() => window.close(), 800)
   }
 })
@@ -3989,20 +4006,20 @@ function applyCropResize(pos) {
 function updateCropSizeLabel() {
   const pw = Math.round(cropRect?.w ?? 0), ph = Math.round(cropRect?.h ?? 0)
   document.getElementById('cropSizeLabel').textContent =
-    pw > 0 && ph > 0 ? `${pw} × ${ph} px` : '請拖曳選取範圍'
+    pw > 0 && ph > 0 ? `${pw} × ${ph} px` : t('crop_drag')
 }
 
 // ─── Crop ─────────────────────────────────────────────────────────────────────
 
 function confirmCrop() {
   if (!cropRect || cropRect.w < 1 || cropRect.h < 1) {
-    showToast('請先拖曳選取裁切範圍', true); return
+    showToast(t('toast_crop_first'), true); return
   }
   const cx = Math.max(0, Math.round(cropRect.x))
   const cy = Math.max(0, Math.round(cropRect.y))
   const cw = Math.min(Math.round(cropRect.w), imgWidth  - cx)
   const ch = Math.min(Math.round(cropRect.h), imgHeight - cy)
-  if (cw < 1 || ch < 1) { showToast('裁切範圍超出圖片邊界', true); return }
+  if (cw < 1 || ch < 1) { showToast(t('toast_crop_oob'), true); return }
 
   const off = document.createElement('canvas')
   off.width = cw; off.height = ch
@@ -4030,7 +4047,7 @@ function confirmCrop() {
     fitCanvas()
     drawBase()
     setTool('rect')
-    showToast(`已裁切：${cw} × ${ch} px`)
+    showToast(t('toast_cropped', cw, ch))
   }
   newImg.src = off.toDataURL()
 }
@@ -4073,7 +4090,7 @@ function copyBoxSelection() {
   const { nativeImage, clipboard } = require('electron')
   clipboard.writeImage(nativeImage.createFromDataURL(dataURL))
 
-  showToast(`已複製 ${sw} × ${sh} px，Cmd+V 貼上為浮動圖層`)
+  showToast(t('toast_box_copied', sw, sh))
 }
 
 // ─── OCR ─────────────────────────────────────────────────────────────────────
@@ -4087,9 +4104,9 @@ function _updateOcrProgress({ status, progress }) {
   const label = document.getElementById('ocrProgressLabel')
   const pct   = Math.round((progress || 0) * 100)
   bar.style.width = `${pct}%`
-  if      (status.includes('loading language')) label.textContent = `下載語言包 ${pct}%`
-  else if (status.includes('recognizing'))      label.textContent = `辨識中... ${pct}%`
-  else if (status.includes('initialized'))      label.textContent = `初始化完成`
+  if      (status.includes('loading language')) label.textContent = t('ocr_downloading', pct)
+  else if (status.includes('recognizing'))      label.textContent = t('ocr_recognizing', pct)
+  else if (status.includes('initialized'))      label.textContent = t('ocr_initialized')
   else                                          label.textContent = status
 }
 
@@ -4103,7 +4120,7 @@ function startOcrRecognition() {
   progressWrap.classList.remove('hidden')
   progressWrap.style.display = ''
   document.getElementById('ocrProgressInner').style.width = '0%'
-  document.getElementById('ocrProgressLabel').textContent = '辨識中...'
+  document.getElementById('ocrProgressLabel').textContent = t('ocr_recognizing_label')
   document.getElementById('ocrResultText').value = ''
   document.getElementById('btnOcrCopy').disabled = true
   document.getElementById('btnOcrCopyClose').disabled = true
@@ -4125,10 +4142,10 @@ function startOcrRecognition() {
       document.getElementById('ocrResultText').value = result.text
       document.getElementById('btnOcrCopy').disabled      = false
       document.getElementById('btnOcrCopyClose').disabled = false
-      if (!result.text) showToast('OCR 未辨識到文字，請嘗試更清晰的區域')
+      if (!result.text) showToast(t('toast_ocr_no_text'))
     } else {
       document.getElementById('ocrResultText').value = `辨識失敗：${result.error}`
-      showToast('OCR 辨識失敗')
+      showToast(t('toast_ocr_fail'))
     }
   })
 }
@@ -4150,14 +4167,14 @@ document.getElementById('btnOcrCopy').addEventListener('click', () => {
   const text = document.getElementById('ocrResultText').value
   const { clipboard } = require('electron')
   clipboard.writeText(text)
-  showToast('文字已複製到剪貼簿')
+  showToast(t('toast_text_copied'))
 })
 
 document.getElementById('btnOcrCopyClose').addEventListener('click', () => {
   const text = document.getElementById('ocrResultText').value
   const { clipboard } = require('electron')
   clipboard.writeText(text)
-  showToast('文字已複製到剪貼簿')
+  showToast(t('toast_text_copied'))
   document.getElementById('ocrPanel').classList.add('hidden')
   ocrRect = null
   isOcrSelecting = false
@@ -4173,7 +4190,7 @@ document.getElementById('btnOcrDownloadConfirm').addEventListener('click', () =>
 document.getElementById('btnOcrDownloadCancel').addEventListener('click', () => {
   document.getElementById('ocrDownloadModal').classList.add('hidden')
   ocrRect = null
-  document.getElementById('ocrStatusLabel').textContent = '請拖曳選取辨識區域'
+  document.getElementById('ocrStatusLabel').textContent = t('ocr_drag')
   renderAnnotations()
 })
 
@@ -4538,7 +4555,7 @@ function applyTemplate(tplId) {
       annotations.forEach(a => moveAnnot(a, imgX, imgY))
       userZoomed = false
       fitCanvas(); drawBase(); renderAnnotations()
-      showToast('套版已套用')
+      showToast(t('toast_template_applied'))
     }
     newImg.src = off.toDataURL()
   }
@@ -4553,7 +4570,7 @@ function applyTemplate(tplId) {
 }
 
 function openTemplatePanel() {
-  if (!imgElement) { showToast('請先載入圖片'); return }
+  if (!imgElement) { showToast(t('toast_load_image_first')); return }
   const panel = document.getElementById('templatePanel')
   if (!panel.classList.contains('hidden')) { hideTemplatePanel(); return }
 
@@ -4752,7 +4769,7 @@ document.getElementById('btnResizeConfirm').addEventListener('click', () => {
     drawBase()
     renderAnnotations()
     resizeModal.classList.add('hidden')
-    showToast(`已調整尺寸：${targetW} × ${targetH} px`)
+    showToast(t('toast_resized', targetW, targetH))
   }
   newImg.src = off.toDataURL()
 })
@@ -4776,11 +4793,11 @@ function burnIn(format) {
 // ─── Copy final image to clipboard ───────────────────────────────────────────
 
 function copyFinalImage() {
-  if (!imgElement) { showToast('尚未載入圖片', true); return }
+  if (!imgElement) { showToast(t('toast_no_image'), true); return }
   const dataURL = burnIn('png')
   const { clipboard, nativeImage } = require('electron')
   clipboard.writeImage(nativeImage.createFromDataURL(dataURL))
-  showToast('圖片已複製到剪貼簿')
+  showToast(t('toast_img_copied'))
 }
 
 document.getElementById('btnCopyImage').addEventListener('click', copyFinalImage)
@@ -4813,7 +4830,7 @@ document.getElementById('btnCopyImage').addEventListener('click', copyFinalImage
   // Main area — start OS-level drag export
   btn.addEventListener('mousedown', e => {
     if (e.target === handle || handle.contains(e.target)) return
-    if (!imgElement) { showToast('尚未載入圖片', true); return }
+    if (!imgElement) { showToast(t('toast_no_image'), true); return }
     const dataURL = burnIn('png')
     ipcRenderer.send('start-drag-export', { dataURL })
   })
@@ -4826,7 +4843,7 @@ let   _dropDepth   = 0  // track nested dragenter/dragleave
 
 function _loadFileIntoEditor(file) {
   if (!file || !file.type.startsWith('image/')) {
-    showToast('請拖曳圖片檔案（PNG / JPG / WebP / GIF）', true)
+    showToast(t('toast_drop_images'), true)
     return
   }
   const reader = new FileReader()
@@ -4843,7 +4860,7 @@ function _loadFileIntoEditor(file) {
       fitCanvas()
       drawBase()
       renderAnnotations()
-      showToast(`已匯入：${file.name}`)
+      showToast(t('toast_imported', file.name))
     }
     newImg.src = ev.target.result
   }
