@@ -2317,9 +2317,11 @@ function drawPen(ctx, a) {
   ctx.lineCap  = capToLineCap(a.startCap ?? 'round', a.endCap ?? 'round')
   ctx.lineJoin = 'round'
 
-  // Find a point at least `threshold` image-px from tip for a stable direction
+  // Find a point at least `threshold` image-px from tip for a stable direction.
+  // Threshold is capped at ~2× thickness so we read the LOCAL direction near the
+  // tip rather than looking so far back that a curved stroke gives a wrong angle.
   function stableFrom(tipIdx, step) {
-    const threshold = Math.max(a.thickness * 2 + 4, insetImgPx * 1.2)
+    const threshold = Math.max(a.thickness * 2 + 4, Math.min(insetImgPx, a.thickness * 2.5 + 10))
     const tip = pts[tipIdx]
     for (let i = tipIdx + step; i >= 0 && i < pts.length; i += step) {
       if (Math.hypot(pts[i].x - tip.x, pts[i].y - tip.y) >= threshold) return pts[i]
