@@ -229,8 +229,14 @@
 
     <div class="opt-group hidden" id="grpLineStyle">
       <span class="opt-label">線條</span>
-      <button class="style-btn active" data-ls="solid">實線</button>
-      <button class="style-btn"        data-ls="dashed">虛線</button>
+      <select id="lineStyleSelect" class="line-style-select">
+        <option value="solid">────  實線</option>
+        <option value="dash">╌╌╌╌  短虛線</option>
+        <option value="dash-lg">─ ─ ─  長虛線</option>
+        <option value="dot">······  點線</option>
+        <option value="dot-dash">·─·─  點虛線</option>
+        <option value="dash-dot-dot">─··─··  長點點</option>
+      </select>
       <div class="opt-sep"></div>
       <button class="style-btn" id="btnLineOrtho" title="正交折線（水平/垂直吸附）">直角</button>
     </div>
@@ -243,13 +249,17 @@
 
     <div class="opt-group hidden" id="grpCaps">
       <span class="opt-label">起點</span>
-      <button class="cap-btn active" data-end="start" data-cap="none">─</button>
-      <button class="cap-btn"        data-end="start" data-cap="dot">●</button>
-      <button class="cap-btn"        data-end="start" data-cap="arrow">◀</button>
+      <button class="cap-btn active" data-end="start" data-cap="none"   title="平頭">─</button>
+      <button class="cap-btn"        data-end="start" data-cap="round"  title="圓頭">╭</button>
+      <button class="cap-btn"        data-end="start" data-cap="square" title="方頭">┐</button>
+      <button class="cap-btn"        data-end="start" data-cap="dot"    title="圓點">●</button>
+      <button class="cap-btn"        data-end="start" data-cap="arrow"  title="箭頭">◀</button>
       <span class="opt-label" style="margin-left:6px">終點</span>
-      <button class="cap-btn"        data-end="end" data-cap="none">─</button>
-      <button class="cap-btn"        data-end="end" data-cap="dot">●</button>
-      <button class="cap-btn active" data-end="end" data-cap="arrow">▶</button>
+      <button class="cap-btn"        data-end="end" data-cap="none"   title="平頭">─</button>
+      <button class="cap-btn"        data-end="end" data-cap="round"  title="圓頭">╮</button>
+      <button class="cap-btn"        data-end="end" data-cap="square" title="方頭">┘</button>
+      <button class="cap-btn"        data-end="end" data-cap="dot"    title="圓點">●</button>
+      <button class="cap-btn active" data-end="end" data-cap="arrow"  title="箭頭">▶</button>
     </div>
 
 
@@ -316,6 +326,15 @@
       <label class="shadow-lbl"><input type="checkbox" id="shadowCheck"> 陰影</label>
     </div>
 
+    <div class="opt-group hidden" id="grpPen">
+      <span class="opt-label">不透明</span>
+      <input type="number" id="penOpacityInput" value="100" min="0" max="100" style="width:44px">
+      <span class="opt-label">%</span>
+      <div class="opt-sep"></div>
+      <span class="opt-label">外框</span>
+      <div class="color-preview fill-preview" id="penBorderColorPreview" title="點擊選色（透明=無外框）"></div>
+    </div>
+
     <div class="opt-group hidden" id="grpZoom">
       <span class="opt-label">縮放比例</span>
       <select id="zoomSelect" class="zoom-select">
@@ -358,7 +377,7 @@
       <button class="tool-btn"        data-tool="boxselect"    title="框型選取 (M)">⬚</button>
       <!-- 繪圖群 -->
       <div class="tool-sep"></div>
-      <button class="tool-btn"        disabled                 title="筆形（即將推出）">✏</button>
+      <button class="tool-btn"        data-tool="pen"          title="筆型 (P)">✏</button>
       <button class="tool-btn"        data-tool="line"         title="線條 (L)">╱</button>
       <button class="tool-btn active" data-tool="rect"         title="矩形框 (R)">□</button>
       <button class="tool-btn"        data-tool="fillrect"     title="色塊 (B)">■</button>

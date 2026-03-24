@@ -1,8 +1,31 @@
 # SDD：Mac 截圖與圖片編輯工具
-**版本：** 3.6
+**版本：** 3.7
 **日期：** 2026-03-24
 **狀態：** 待審閱
 **變更紀錄：**
+
+### v3.7 — 筆型工具；虛線種類升級；端點樣式升級
+
+#### 虛線種類升級（線條 / 折線 / 筆型共用）
+- `grpLineStyle` 從 2 個按鈕改為 `<select>` 下拉，支援 6 種：
+  - `solid` 實線、`dash` 短虛線、`dash-lg` 長虛線、`dot` 點線、`dot-dash` 點虛線、`dash-dot-dot` 長點點
+- 新增 `getLineDash(style, sz)` helper 統一換算 `setLineDash` 陣列
+
+#### 端點樣式升級（線條 / 折線 / 筆型共用）
+- `grpCaps` 起點與終點各新增「圓頭 (round)」與「方頭 (square)」選項（共 5 種）
+- 新增 `capToLineCap(startCap, endCap)` helper，自動決定 canvas `lineCap`
+- `drawCap` 對 `round`/`square` 直接 return（由 `lineCap` 處理，不需額外繪製）
+
+#### 筆型工具（pen）
+- 工具列「✏」按鈕啟用，快捷鍵 `P`
+- 按住拖曳收集路徑點（每 2px 取樣一次），mouseup 時 commit 為 `pen` annotation
+- `drawPen` 使用 `quadraticCurveTo` 平滑曲線渲染
+- 共用 grpColor（顏色）、grpThickness（線寬）、grpLineStyle（虛線）、grpCaps（起終點端點）、grpShadow（陰影）
+- 新增 `grpPen` panel（筆型專屬）：
+  - 不透明度 0–100%（預設 100）
+  - 外框色 swatch（預設 transparent；挑色後自動啟用外框，選色後關閉面板）
+- `pen` annotation 資料結構：`{ type, points, color, thickness, lineStyle, startCap, endCap, penOpacity, penBorderColor, shadow }`
+- 支援選取、移動、Cmd+C/V 複製貼上；bounds 計算與 moveAnnot 已擴充
 
 ### v3.6 — 框型選取工具（矩形區域複製為浮動圖層）
 
@@ -1324,6 +1347,32 @@ Menu.buildFromTemplate([{
 - [ ] 選取已放置的 glyph 風格編號 → 切換風格 → 畫布即時更新
 - [ ] 舊版存檔（無 `numberStyle` 欄位）開啟後顯示為 `dot` 樣式，不出錯
 - [ ] 點擊「重置編號」後再放置，計數從 1 重新開始，風格保持不變
+
+#### 虛線種類升級（v3.7）
+- [ ] 線條工具 options bar 顯示下拉選單，預設「實線」
+- [ ] 切換為「點線」，繪製線條後呈現點狀虛線
+- [ ] 切換為「長點點」，繪製折線後呈現長點點虛線
+- [ ] 選取已存在線條，切換虛線種類，線條即時更新
+- [ ] 虛線設定在筆型工具中同樣有效
+
+#### 端點樣式升級（v3.7）
+- [ ] 線條工具 grpCaps 起點與終點各顯示 5 個按鈕（平/圓/方/點/箭）
+- [ ] 選擇「圓頭」，線條兩端呈現圓弧端點
+- [ ] 選擇「方頭」，線條兩端延伸至端點外半個線寬
+- [ ] 圓頭 + 箭頭組合：箭頭端畫箭頭，另一端圓頭正確顯示
+- [ ] 筆型工具可設定起點 / 終點端點樣式（含箭頭）
+
+#### 筆型工具（v3.7）
+- [ ] 工具列「✏」按鈕可點選，按 `P` 快捷鍵切換
+- [ ] 按住滑鼠拖曳，畫出平滑曲線（quadratic bezier 插值）
+- [ ] 放開滑鼠後曲線成為可選取的 pen annotation
+- [ ] pen annotation 可被拖曳移動、Cmd+C 複製、Cmd+V 貼上（offset 8px）
+- [ ] options bar 顯示：顏色、粗細、虛線、起終點端點、不透明度、外框、陰影
+- [ ] 不透明度設為 50%，筆跡半透明
+- [ ] 外框色選黑色，筆跡出現黑色外框描邊
+- [ ] 外框色為透明（預設），不顯示外框
+- [ ] 陰影勾選，筆跡出現右下陰影
+- [ ] 選取後修改任何屬性（顏色、粗細、透明度），筆跡即時更新
 
 #### 框型選取工具（v3.6）
 - [ ] 工具列「⬚」按鈕可點選，點擊後切換到 boxselect 工具（options bar 顯示 grpBoxSelect）
