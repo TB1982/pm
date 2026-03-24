@@ -2975,6 +2975,9 @@ document.getElementById('btnOcrCopyClose').addEventListener('click', () => {
   clipboard.writeText(text)
   showToast('文字已複製到剪貼簿')
   document.getElementById('ocrPanel').classList.add('hidden')
+  ocrRect = null
+  isOcrSelecting = false
+  renderAnnotations()
 })
 
 // OCR download confirmation
@@ -2990,11 +2993,6 @@ document.getElementById('btnOcrDownloadCancel').addEventListener('click', () => 
   renderAnnotations()
 })
 
-document.getElementById('btnOcrCancel').addEventListener('click', () => {
-  ocrRect = null
-  isOcrSelecting = false
-  setTool('rect')
-})
 
 // ─── Resize ───────────────────────────────────────────────────────────────────
 
