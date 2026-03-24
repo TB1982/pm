@@ -1791,8 +1791,12 @@ function getHandles(a) {
 }
 
 function findHandle(pos, a) {
-  const hitR = (HANDLE_R + 4) / viewScale
-  return getHandles(a).find(h => Math.hypot(h.x - pos.x, h.y - pos.y) <= hitR) ?? null
+  const baseHitR = (HANDLE_R + 4) / viewScale
+  return getHandles(a).find(h => {
+    // 折線頂點手把（菱形）：使用較大點擊範圍
+    const hitR = (h.id && h.id[0] === 'v') ? (HANDLE_R + 7) / viewScale : baseHitR
+    return Math.hypot(h.x - pos.x, h.y - pos.y) <= hitR
+  }) ?? null
 }
 
 function startResize(hId, a) {
@@ -1813,9 +1817,11 @@ function startResize(hId, a) {
       case 'w':  info.fixX = x+w; info.fixY = y;   info.fixH = h; break
     }
   }
-  // polyline: id 格式為 'vN'，記錄頂點 index
+  // polyline: id 格式為 'vN'，記錄頂點 index + 記錄拖曳起始位置（Shift 吸附用）
   if (a.type === 'polyline') {
     info.ptIdx = parseInt(hId.slice(1))
+    info.origX = a.points[info.ptIdx].x
+    info.origY = a.points[info.ptIdx].y
   }
   resizeHandle = info
   isResizing   = true
@@ -1908,7 +1914,18 @@ function drawSelection(ctx, a) {
     ctx.lineWidth   = 1.5
     ctx.setLineDash([])
     ctx.beginPath()
-    ctx.arc(c(h.x), c(h.y), HANDLE_R, 0, Math.PI * 2)
+    if (h.id && h.id[0] === 'v') {
+      // 折線頂點：菱形手把，尺寸較大，更易點擊
+      const r = HANDLE_R + 3
+      const cx = c(h.x), cy = c(h.y)
+      ctx.moveTo(cx,   cy-r)
+      ctx.lineTo(cx+r, cy)
+      ctx.lineTo(cx,   cy+r)
+      ctx.lineTo(cx-r, cy)
+      ctx.closePath()
+    } else {
+      ctx.arc(c(h.x), c(h.y), HANDLE_R, 0, Math.PI * 2)
+    }
     ctx.fill(); ctx.stroke()
     ctx.restore()
   })
@@ -2251,14 +2268,10 @@ annotCanvas.addEventListener('mousemove', e => {
           const adx = Math.abs(pos.x - fixed.x), ady = Math.abs(pos.y - fixed.y)
           snapPos = adx >= ady ? { x: pos.x, y: fixed.y } : { x: fixed.x, y: pos.y }
         }
-        // 折線頂點：Shift = 鎖水平/垂直（相對相鄰頂點）
+        // 折線頂點：Shift = 鎖水平/垂直（相對拖曳起始位置，避免受相鄰頂點距離影響）
         if (a.type === 'polyline' && typeof h.ptIdx === 'number') {
-          const pi = h.ptIdx
-          const nb = pi > 0 ? a.points[pi - 1] : a.points[pi + 1]
-          if (nb) {
-            const adx = Math.abs(pos.x - nb.x), ady = Math.abs(pos.y - nb.y)
-            snapPos = adx >= ady ? { x: pos.x, y: nb.y } : { x: nb.x, y: pos.y }
-          }
+          const adx = Math.abs(pos.x - h.origX), ady = Math.abs(pos.y - h.origY)
+          snapPos = adx >= ady ? { x: pos.x, y: h.origY } : { x: h.origX, y: pos.y }
         }
       }
       applyResize(a, snapPos)
