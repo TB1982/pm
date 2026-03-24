@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAS — Visual Annotation Studio</title>
+    <meta name="description" content="VAS 是一款專為 Mac 設計的截圖與圖像敘述工具。一站式匯聚標注、套版、OCR、批次轉檔，為跨領域溝通而生。">
+    <link rel="canonical" href="https://tb1982.github.io/pm/vas.html">
+    <meta property="og:title" content="VAS — Visual Annotation Studio">
+    <meta property="og:description" content="為跨領域溝通而生的截圖與圖像敘述工具，專為 Mac 設計。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://tb1982.github.io/pm/vas.html">
+    <meta property="og:locale" content="zh_TW">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', 'Noto Sans TC', sans-serif; }
+
+        .hero-bg {
+            background: linear-gradient(145deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #c471f5 0%, #fa71cd 50%, #4facfe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .download-btn {
+            background: linear-gradient(135deg, #c471f5 0%, #fa71cd 100%);
+            transition: transform 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
+        }
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 16px 40px rgba(196, 113, 245, 0.45);
+            opacity: 0.92;
+        }
+        .feature-card {
+            background: rgba(255,255,255,0.06);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.12);
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-6px);
+            background: rgba(255,255,255,0.10);
+        }
+        .glass-section {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.10);
+            backdrop-filter: blur(8px);
+        }
+        .lang-switcher button {
+            background: transparent;
+            border: none;
+            color: rgba(255,255,255,0.5);
+            padding: 6px 14px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            border-radius: 14px;
+            transition: color 0.2s, background 0.2s;
+        }
+        .lang-switcher button.active {
+            background: rgba(255,255,255,0.15);
+            color: #ffffff;
+            font-weight: 700;
+        }
+        .divider {
+            width: 48px;
+            height: 3px;
+            background: linear-gradient(90deg, #c471f5, #fa71cd);
+            border-radius: 2px;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body class="hero-bg text-white min-h-screen">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 border-b border-white/10" style="background: rgba(15,12,41,0.85); backdrop-filter: blur(16px);">
+        <div class="container mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="index.html" class="text-white/60 hover:text-white transition-colors text-sm flex items-center gap-2" aria-label="返回深握計畫首頁">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                </svg>
+                <span data-lang-key="backLabel">深握計畫</span>
+            </a>
+            <div class="text-lg font-bold tracking-widest gradient-text">VAS</div>
+            <div class="lang-switcher flex items-center rounded-full p-1" style="background: rgba(255,255,255,0.08);" role="group" aria-label="語言切換">
+                <button id="lang-zh" class="active" aria-pressed="true">中</button>
+                <button id="lang-en" aria-pressed="false">EN</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+
+        <!-- Hero -->
+        <section class="container mx-auto px-6 pt-16 pb-20 text-center" aria-labelledby="hero-heading">
+            <div class="inline-block mb-6 px-4 py-1.5 rounded-full text-xs font-semibold tracking-widest" style="background: rgba(196,113,245,0.18); color: #e2aaff; border: 1px solid rgba(196,113,245,0.3);">
+                <span data-lang-key="badge">Mac 專屬 · v0.1.0 正式發布</span>
+            </div>
+
+            <div class="flex justify-center mb-6">
+                <img src="img/vas.png" alt="VAS app icon" width="120" height="120" class="drop-shadow-2xl" style="filter: drop-shadow(0 0 32px rgba(196,113,245,0.5));">
+            </div>
+
+            <h1 id="hero-heading" class="text-5xl md:text-7xl font-extrabold tracking-tight mb-4">
+                <span class="gradient-text">VAS</span>
+            </h1>
+            <p class="text-lg md:text-2xl font-light text-white/70 mb-3 tracking-wide" data-lang-key="heroSubtitle">
+                Visual Annotation Studio
+            </p>
+            <p class="text-base md:text-lg text-white/50 mb-12 max-w-xl mx-auto" data-lang-key="heroTagline">
+                為跨領域溝通而生的截圖與圖像敘述工具
+            </p>
+
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <a href="https://github.com/TB1982/pm/releases/download/v0.1.0/Vas-0.1.0-arm64.dmg"
+                   class="download-btn inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-semibold text-white text-lg min-h-[52px]"
+                   aria-label="下載 VAS v0.1.0 for Mac (Apple Silicon, DMG 格式)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                        <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                        <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                    </svg>
+                    <span data-lang-key="downloadBtn">下載 for Mac</span>
+                </a>
+                <a href="https://github.com/TB1982/pm/releases/tag/v0.1.0"
+                   target="_blank" rel="noopener noreferrer"
+                   class="inline-flex items-center gap-2 px-6 py-4 rounded-2xl font-medium text-white/70 hover:text-white transition-colors min-h-[52px]"
+                   style="border: 1px solid rgba(255,255,255,0.15);">
+                    <span data-lang-key="releaseNotesBtn">Release Notes</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/>
+                        <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"/>
+                    </svg>
+                </a>
+            </div>
+
+            <p class="mt-5 text-xs text-white/30" data-lang-key="sysReq">
+                需要 macOS · Apple Silicon (arm64) · 113 MB
+            </p>
+        </section>
+
+        <!-- About -->
+        <section class="container mx-auto px-6 py-16 max-w-3xl" aria-labelledby="about-heading">
+            <div class="divider mx-auto mb-8"></div>
+            <h2 id="about-heading" class="text-2xl md:text-3xl font-bold text-center mb-10 text-white/90" data-lang-key="aboutTitle">關於 VAS</h2>
+
+            <div class="glass-section rounded-3xl p-8 md:p-12 space-y-5 text-white/75 leading-relaxed text-base md:text-lg">
+                <p data-lang-key="about1">
+                    它最特別的地方不在對標哪個產品，而在於它試圖成為<strong class="text-white/95">傳遞資訊的煉金容器</strong>。
+                </p>
+                <p data-lang-key="about2">
+                    資訊用順勢的方式滑入 VAS，再由各式工具乘載思緒，無痛傳遞到任何你想讓它去的地方。一站式匯聚所有你想像得到的常用工具，讓每個人都能在這個容器裡找到屬於自己的溝通方式。
+                </p>
+            </div>
+        </section>
+
+        <!-- App Preview -->
+        <section class="container mx-auto px-4 md:px-6 py-8 max-w-5xl" aria-labelledby="preview-heading">
+            <h2 id="preview-heading" class="sr-only">VAS 編輯器介面預覽</h2>
+            <div class="rounded-2xl overflow-hidden shadow-2xl" style="border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 32px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06);">
+                <img src="img/vasframe.jpg" alt="VAS 編輯器介面：深色工作區，左側工具列，頂部選項列，中央為圖片標注畫布" class="w-full block" loading="lazy">
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section class="container mx-auto px-6 py-16 max-w-4xl" aria-labelledby="features-heading">
+            <h2 id="features-heading" class="text-2xl md:text-3xl font-bold text-center mb-3 text-white/90" data-lang-key="featuresTitle">核心功能</h2>
+            <p class="text-center text-white/40 text-sm mb-12" data-lang-key="featuresSub">第一性原理，從底層打造</p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+
+                <div class="feature-card rounded-2xl p-6">
+                    <div class="text-3xl mb-4" aria-hidden="true">✏️</div>
+                    <h3 class="font-semibold text-white mb-2" data-lang-key="f1Title">點・線・面・文字</h3>
+                    <p class="text-white/50 text-sm" data-lang-key="f1Desc">專注第一性原理打造的標注工具組，矩形、直線、箭頭、自由文字，精準乘載你的每一個想法。</p>
+                </div>
+
+                <div class="feature-card rounded-2xl p-6">
+                    <div class="text-3xl mb-4" aria-hidden="true">🔢</div>
+                    <h3 class="font-semibold text-white mb-2" data-lang-key="f2Title">圖像式語言</h3>
+                    <p class="text-white/50 text-sm" data-lang-key="f2Desc">加疊編號步驟、符號標記與 emoji，讓跨語言、跨背景的閱讀者都能一眼讀懂你的意圖。</p>
+                </div>
+
+                <div class="feature-card rounded-2xl p-6">
+                    <div class="text-3xl mb-4" aria-hidden="true">🎨</div>
+                    <h3 class="font-semibold text-white mb-2" data-lang-key="f3Title">一鍵套版</h3>
+                    <p class="text-white/50 text-sm" data-lang-key="f3Desc">六款 Apple 漸層 mesh 背景，秒轉社群媒體規格（LinkedIn / Instagram / X），輸出即展示級。</p>
+                </div>
+
+                <div class="feature-card rounded-2xl p-6">
+                    <div class="text-3xl mb-4" aria-hidden="true">🔍</div>
+                    <h3 class="font-semibold text-white mb-2" data-lang-key="f4Title">OCR 文字辨識</h3>
+                    <p class="text-white/50 text-sm" data-lang-key="f4Desc">中英文圖片取字，截圖裡的文字不再只是圖片，直接複製、貼上、轉發。</p>
+                </div>
+
+                <div class="feature-card rounded-2xl p-6">
+                    <div class="text-3xl mb-4" aria-hidden="true">📦</div>
+                    <h3 class="font-semibold text-white mb-2" data-lang-key="f5Title">圖片批次轉檔</h3>
+                    <p class="text-white/50 text-sm" data-lang-key="f5Desc">一次選取多張，PNG / JPG / GIF 三格互轉，省去繁瑣的逐張操作。</p>
+                </div>
+
+                <div class="feature-card rounded-2xl p-6">
+                    <div class="text-3xl mb-4" aria-hidden="true">📐</div>
+                    <h3 class="font-semibold text-white mb-2" data-lang-key="f6Title">示意圖繪製</h3>
+                    <p class="text-white/50 text-sm" data-lang-key="f6Desc">不需要 Figma、不需要 Keynote，在截圖上直接完成流程說明與架構示意。</p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Toolbar Preview -->
+        <section class="container mx-auto px-6 pb-4 max-w-3xl text-center" aria-labelledby="toolbar-heading">
+            <h2 id="toolbar-heading" class="text-sm font-semibold tracking-widest text-white/30 uppercase mb-6" data-lang-key="toolbarLabel">Capture Toolbar</h2>
+            <img src="img/vastoolbar.png" alt="VAS 截圖工具列：全螢幕、視窗、矩形、延遲、開啟、批次轉等功能按鈕" class="mx-auto max-w-full rounded-2xl shadow-xl" loading="lazy" style="box-shadow: 0 8px 40px rgba(0,0,0,0.4);">
+        </section>
+
+        <!-- Origin Story -->
+        <section class="container mx-auto px-6 py-16 max-w-2xl text-center" aria-labelledby="story-heading">
+            <div class="divider mx-auto mb-8"></div>
+            <h2 id="story-heading" class="text-xl font-bold mb-8 text-white/60 tracking-widest uppercase text-sm" data-lang-key="storyTitle">Origin</h2>
+            <blockquote class="glass-section rounded-3xl p-8 md:p-10">
+                <p class="text-white/80 text-base md:text-lg leading-loose mb-6" data-lang-key="storyBody">
+                    來自一位<strong class="text-white">一行程式碼都不會寫的 PM</strong>，以及 Claude Code 的 Claude，<br>
+                    人機協作 <strong class="gradient-text text-2xl font-bold">36 小時</strong>內迭代至 v3.26 而誕生的作品。
+                </p>
+                <footer class="text-white/35 text-sm" data-lang-key="storyByline">— Nova &amp; Claude，2026</footer>
+            </blockquote>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-white/10 mt-16 py-10 text-center text-white/25 text-xs space-y-2">
+        <p>Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by Nova (babelon1882@gmail.com)</p>
+        <p>由 GitHub 部署　｜　Claude Code 傾力打造　｜　Nova（babelon1882@gmail.com）最後更新於 2026</p>
+    </footer>
+
+    <script>
+        const translations = {
+            zh: {
+                backLabel: '深握計畫',
+                badge: 'Mac 專屬 · v0.1.0 正式發布',
+                heroSubtitle: 'Visual Annotation Studio',
+                heroTagline: '為跨領域溝通而生的截圖與圖像敘述工具',
+                downloadBtn: '下載 for Mac',
+                releaseNotesBtn: 'Release Notes',
+                sysReq: '需要 macOS · Apple Silicon (arm64) · 113 MB',
+                aboutTitle: '關於 VAS',
+                about1: '它最特別的地方不在對標哪個產品，而在於它試圖成為<strong class="text-white/95">傳遞資訊的煉金容器</strong>。',
+                about2: '資訊用順勢的方式滑入 VAS，再由各式工具乘載思緒，無痛傳遞到任何你想讓它去的地方。一站式匯聚所有你想像得到的常用工具，讓每個人都能在這個容器裡找到屬於自己的溝通方式。',
+                featuresTitle: '核心功能',
+                featuresSub: '第一性原理，從底層打造',
+                f1Title: '點・線・面・文字',
+                f1Desc: '專注第一性原理打造的標注工具組，矩形、直線、箭頭、自由文字，精準乘載你的每一個想法。',
+                f2Title: '圖像式語言',
+                f2Desc: '加疊編號步驟、符號標記與 emoji，讓跨語言、跨背景的閱讀者都能一眼讀懂你的意圖。',
+                f3Title: '一鍵套版',
+                f3Desc: '六款 Apple 漸層 mesh 背景，秒轉社群媒體規格（LinkedIn / Instagram / X），輸出即展示級。',
+                f4Title: 'OCR 文字辨識',
+                f4Desc: '中英文圖片取字，截圖裡的文字不再只是圖片，直接複製、貼上、轉發。',
+                f5Title: '圖片批次轉檔',
+                f5Desc: '一次選取多張，PNG / JPG / GIF 三格互轉，省去繁瑣的逐張操作。',
+                f6Title: '示意圖繪製',
+                f6Desc: '不需要 Figma、不需要 Keynote，在截圖上直接完成流程說明與架構示意。',
+                toolbarLabel: '截圖工具列',
+                storyTitle: 'Origin',
+                storyBody: '來自一位<strong class="text-white">一行程式碼都不會寫的 PM</strong>，以及 Claude Code 的 Claude，<br>人機協作 <strong class="gradient-text text-2xl font-bold">36 小時</strong>內迭代至 v3.26 而誕生的作品。',
+                storyByline: '— Nova & Claude，2026'
+            },
+            en: {
+                backLabel: 'Deep Holding Project',
+                badge: 'Mac Only · v0.1.0 Now Available',
+                heroSubtitle: 'Visual Annotation Studio',
+                heroTagline: 'A screenshot and visual communication tool, built for Mac.',
+                downloadBtn: 'Download for Mac',
+                releaseNotesBtn: 'Release Notes',
+                sysReq: 'Requires macOS · Apple Silicon (arm64) · 113 MB',
+                aboutTitle: 'About VAS',
+                about1: 'What makes it special isn\'t what it competes with — it\'s that VAS aspires to be an <strong class="text-white/95">alchemical vessel for information</strong>.',
+                about2: 'Ideas flow naturally in, get shaped by its tools, and move — without friction — to wherever you need them to go. Every essential communication tool, gathered in one place, so that anyone can find their own way to be understood.',
+                featuresTitle: 'Features',
+                featuresSub: 'Built on first principles, from the ground up',
+                f1Title: 'Points · Lines · Shapes · Text',
+                f1Desc: 'A complete annotation toolkit built on first principles — rectangles, lines, arrows, free text. Precise, expressive, yours.',
+                f2Title: 'Visual Language',
+                f2Desc: 'Layer in step numbers, symbols, and emoji. Cross-language, cross-background — readers get it at a glance.',
+                f3Title: 'One-Click Templates',
+                f3Desc: 'Six Apple mesh gradient backgrounds. Instant social media sizing (LinkedIn / Instagram / X). Presentation-quality output.',
+                f4Title: 'OCR Text Recognition',
+                f4Desc: 'Extract text from screenshots in Chinese and English. Copy, paste, share — no more retyping.',
+                f5Title: 'Batch Image Conversion',
+                f5Desc: 'Select multiple files, convert between PNG / JPG / GIF in one go.',
+                f6Title: 'Diagram Sketching',
+                f6Desc: 'No Figma. No Keynote. Draw flowcharts and architecture diagrams directly on your screenshots.',
+                toolbarLabel: 'Capture Toolbar',
+                storyTitle: 'Origin',
+                storyBody: 'Born from a collaboration between <strong class="text-white">a PM who can\'t write a single line of code</strong> and Claude from Claude Code —<br>iterated together to v3.26 in <strong class="gradient-text text-2xl font-bold">36 hours</strong>.',
+                storyByline: '— Nova & Claude, 2026'
+            }
+        };
+
+        const langZhBtn = document.getElementById('lang-zh');
+        const langEnBtn = document.getElementById('lang-en');
+
+        function switchLanguage(lang) {
+            document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+            const trans = translations[lang];
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.dataset.langKey;
+                if (trans[key] !== undefined) el.innerHTML = trans[key];
+            });
+            langZhBtn.classList.toggle('active', lang === 'zh');
+            langEnBtn.classList.toggle('active', lang === 'en');
+            langZhBtn.setAttribute('aria-pressed', lang === 'zh');
+            langEnBtn.setAttribute('aria-pressed', lang === 'en');
+        }
+
+        langZhBtn.addEventListener('click', () => switchLanguage('zh'));
+        langEnBtn.addEventListener('click', () => switchLanguage('en'));
+    </script>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "VAS — Visual Annotation Studio",
+        "description": "專為 Mac 設計的截圖與圖像敘述工具，一站式匯聚標注、套版、OCR、批次轉檔，為跨領域溝通而生。",
+        "url": "https://tb1982.github.io/pm/vas.html",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "macOS",
+        "inLanguage": "zh-Hant",
+        "author": {
+            "@type": "Person",
+            "name": "Nova",
+            "email": "babelon1882@gmail.com",
+            "sameAs": [
+                "https://github.com/tb1982",
+                "https://www.linkedin.com/in/yingtzuliu",
+                "https://www.instagram.com/liuyingtzu"
+            ]
+        }
+    }
+    </script>
+
+</body>
+</html>
