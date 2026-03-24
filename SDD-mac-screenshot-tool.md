@@ -1,8 +1,205 @@
 # SDD：Mac 截圖與圖片編輯工具
-**版本：** 3.5
+**版本：** 3.17
 **日期：** 2026-03-24
 **狀態：** 待審閱
 **變更紀錄：**
+
+### v3.17 — Bug 修正：鉛筆工具粗線箭頭方向跑掉
+
+#### Bug 修正
+- **粗線箭頭方向錯誤**：`stableFrom` 的查找距離上限從 `insetImgPx × 1.2`（隨線寬等比放大）改為 `min(insetImgPx, thickness × 2.5 + 10)`，避免在粗線情境下回看距離過大繞過曲線彎道、讀到錯誤方向
+
+#### TDD v3.17
+- [ ] 鉛筆工具，thickness ≥ 20，終點有彎曲：箭頭方向應反映線段實際末端方向，不跑到彎道另一側
+- [ ] 鉛筆工具，thickness = 5（細線）：箭頭方向不退化，行為與修改前一致
+
+---
+
+### v3.16 — Bug 修正：箭頭露餡 + 缺口 + 調色盤自動收起
+
+#### Bug 修正
+- **鉛筆工具箭頭露餡與缺口**：`buildPath` 在每個箭頭端點加入 0.5 image-px 的小步伐，使 bezier 路徑以箭頭軸向切入箭頭基底，butt cap 垂直於箭頭軸心，完全藏在三角形填色下方
+- **調色盤自動收起**：選色後不再停留在畫面上；`applyColor`、`applyFillColor`、`applyFillColorA`、`applyFillColorB`、`applyFillBorderColor`、`applyTextStrokeColor`、`applyTextBgColor` 統一在執行後呼叫 `hideColorPanel()`
+
+#### TDD v3.16 測試項目
+- [ ] 鉛筆 arrow 箭頭：箭頭基底與線段主體無缺口，無露餡（有無外框皆測）
+- [ ] 鉛筆 arrow 起點與終點：同上
+- [ ] 主色（筆形、線段、外框、色塊、文字）：選色後調色盤自動收起
+- [ ] 漸層色 A/B、填色外框色、文字底色：同上
+- [ ] 外框色（已有自動收起）：行為不受影響
+
+---
+
+### v3.15 — Bug 修正：鉛筆箭頭與線段斷開
+
+#### Bug 修正
+- **鉛筆箭頭線段斷開**：`buildPath()` 的截止點改用 `arrowBase(pN, pFromN)`（與 `drawCap` 完全相同的 stable-direction 向量計算），與箭頭基底的座標完全吻合；消除因修剪方向（原用 `pts[n-2]→pts[n-1]`）與箭頭方向（`pFromN→pN`）不同所造成的缺口
+
+---
+
+### v3.14 — Bug 修正：箭頭方形頂點 + 外框位移
+
+#### Bug 修正
+- **箭頭方形頂點消除**：直線與鉛筆工具，線段主體在箭頭端點改為「截止於箭頭基底」（arrInset = sz × 0.8），不再延伸到尖端；消除線段矩形端口在箭頭尖端的方形露出
+- **外框不再位移**：棄用「大三角疊小三角」方案；改由修改 `drawCap()` 支援 `borderCol/borderW` 參數，以「先 stroke 後 fill 同一路徑」實作外框；外框邊線緊貼箭頭三角形邊緣，無前後位移感
+- **drawCap 重構**：新增 `borderCol`、`borderW` 選用參數；`arrow`/`dot` 皆支援；向下相容（舊呼叫無需傳入參數）
+
+---
+
+### v3.13 — Bug 修正：箭頭外框金字塔 + 鉛筆箭頭角度偏移
+
+#### Bug 修正
+- **外框箭頭「金字塔」消除**：直線與鉛筆工具的外框端點大小，由 `(borderThickness × 4 + 8) × viewScale`（與主線完全不成比例）改為 `sz + (borderThickness − thickness) × viewScale`，外框三角形現在只比主三角形微幅外擴，視覺上呈正常描邊效果
+- **鉛筆箭頭角度穩定**：手繪點密集時 pts[1] / pts[n-2] 方向不穩定；新增 `stableFrom()` 函數，向後搜尋第一個距端點至少 `thickness × 2 + 4` 圖素遠的取向點，箭頭角度現在能正確貼合筆跡走向
+
+---
+
+### v3.12 — Bug 修正：直線端點外框 + 空心圓端點符號
+
+#### Bug 修正
+- **直線端點不套外框**：`drawLine` 在繪製外框路徑後，補上以外框色 + 較大 `borderSz` 繪製的 border cap，再疊上主色 cap，arrow / dot 端點正確出現外框輪廓
+- **空心圓符號優化**：端點選單的 `round` 選項從 `○`（U+25CB）改為 `◯`（U+25EF 大空心圓），視覺上更清晰易辨
+
+---
+
+### v3.11 — Bug 修正：鉛筆端點外框 + 虛實線失效 + 外框群組移至最後
+
+#### Bug 修正
+- **鉛筆端點不套外框**：`drawPen` 在繪製外框路徑後，現同步繪製外框色端點（border cap），再疊上主色端點，使 arrow / dot 端點正確呈現外框效果
+- **鉛筆虛實線失效**：外框段落呼叫 `ctx.setLineDash([])` 重設後，主筆跡繪製前未重新套用 `lineStyle`，導致主線永遠為實線；現於主筆跡 `buildPath()` 前補上 `ctx.setLineDash(getLineDash(a.lineStyle, sz))`
+- **外框群組排序**：`grpLineStyle`（線條外框）、`grpPenBorder`（鉛筆外框）、`grpStrokeBorder`（框線外框）三個群組移至 options bar 最後，使主線設定（線條 → 端點 → 不透明）連貫，外框作為獨立附加群組置於末端
+
+---
+
+### v3.10 — Bug 修正 + 端點 UI 精簡 + 外框粗細/虛實線分組
+
+#### Bug 修正
+- **X 光曝光修正**：line / polyline / pen 在不透明 < 100% 時，使用 offscreen canvas 合成整段線後再以單一 globalAlpha 繪至主畫布，徹底消除 cap 與主線重疊處的雙重曝光效果
+- **鉛筆端點透明修正**：arrow / dot cap 繪製移入同一 save/restore 區塊，正確繼承 globalAlpha
+- **鉛筆縮放 handle**：pen annotation 選取後顯示 8 個外框縮放手把（與 polyline 相同邏輯），支援等比例縮放
+
+#### UI 精簡：grpCaps → 下拉選單
+- 起點 / 終點各改為 `<select class="cap-select">（寬 52px）`，取代原本 5+5 = 10 顆按鈕
+- 選項符號：`―`(none) `○`(round) `●`(dot) `⏹`(square) `◀/▶`(arrow)
+
+#### 外框細節升級（三處）
+- **grpLineStyle**：新增 `lineBorderThicknessInput`（px）+ `lineBorderDashSelect`（虛實線）
+- **grpPenBorder**：新增 `penBorderThicknessInput` + `penBorderDashSelect`
+- **grpStrokeBorder**（rect/ellipse）：新增 `strokeBorderThicknessInput` + `strokeBorderDashSelect`
+- 外框粗細以絕對 px 儲存於 `borderThickness`；外框虛實線儲存於 `borderDashStyle`（與主線 `lineStyle` 獨立）
+
+#### 狀態變數新增
+- `lineBorderThickness`, `lineBorderDashStyle`
+- `penBorderThickness`, `penBorderDashStyle`
+- `rectBorderThickness`, `rectBorderDashStyle`
+- `ellipseBorderThickness`, `ellipseBorderDashStyle`
+
+#### 技術實作細節
+- `drawOne`：新增 offscreen 路徑（`_offCanvas` 共用畫布避免 GC 壓力）
+- `drawLine/drawPen`：讀取 `a.borderThickness` / `a.borderDashStyle`
+- `drawRect/drawEllipse`：讀取 `a.borderThickness` / `a.borderDashStyle`
+- `getHandles`：pen 加入 bb_* 8 個手把
+- `startResize` / `applyResize`：pen 與 polyline 共用 isBBoxResize 邏輯
+
+### v3.9 — Options Bar 全面對齊；框線外框位移；虛實線全工具覆蓋
+
+#### Options Bar 重構
+- 新增 `grpDashStyle`（虛實線 select）：共用於 pen / line / polyline / rect / ellipse / fillrect / fillellipse
+- 新增 `grpPenBorder`：筆型工具外框色 swatch（從 grpPen 拆出，DOM 位置移至粗細後）
+- 新增 `grpStrokeBorder`：框線工具（rect / ellipse）外框色 + X/Y 位移輸入
+- 新增 `grpStrokeOpacity`：共用不透明度 input（pen / line / polyline / rect / ellipse）
+- `grpLineStyle` 精簡為：外框色 swatch + 直角按鈕（線條/折線專屬）
+- `grpPen` 移除（功能分拆至 grpPenBorder + grpStrokeOpacity）
+- 直角（`btnLineOrtho`）：顯示於 line 工具；折線 annotation 選取時自動隱藏
+
+#### 各工具最終 Options Bar 順序
+- **筆形**：顏色－粗細－外框－虛實線－起點－終點－不透明－陰影
+- **線條**：顏色－粗細－外框＋直角－虛實線－起點－終點－不透明－陰影
+- **框線**：方/圓－顏色－粗細－外框（色+XY）－虛實線－圓角－不透明－陰影
+- **色塊**：方/圓－實色/漸層－粗細－邊框色－虛實線－圓角－透明度（grpFillColor 內）－陰影
+
+#### 框線工具新功能
+- **外框色**：rect/ellipse 新增第二層描框，`borderColor`（預設 transparent）
+- **外框位移**：`borderOffsetX` / `borderOffsetY`（px，-50 至 +50），形成位移外框設計效果
+- 外框繪製在主框之前，不帶陰影；主框繪製在後，套用陰影（若啟用）
+- **透明度**：rect/ellipse 新增 `opacity` 欄位（0–100，預設 100）
+- **虛實線**：rect/ellipse 邊框現在支援全部 6 種虛實線樣式
+
+#### 線條／折線新功能
+- **透明度**：line/polyline 新增 `opacity` 欄位（0–100，預設 100）
+
+#### 色塊工具新功能
+- **虛實線**：fillrect/fillellipse 邊框現在支援全部 6 種虛實線樣式，存於 `lineStyle` 欄位
+
+#### 狀態變數新增
+- `rectOpacity`, `ellipseOpacity`, `lineOpacity`
+- `rectBorderColor`, `rectBorderOffsetX`, `rectBorderOffsetY`
+- `ellipseBorderColor`, `ellipseBorderOffsetX`, `ellipseBorderOffsetY`
+- `rectLineStyle`, `ellipseLineStyle`, `fillrectLineStyle`, `fillellipseLineStyle`
+- `syncDashStyle()` 取代 `syncLineStyle()`（保留 alias 向下相容）
+- `syncStrokeOpacity()`, `syncStrokeBorderColor()`, `syncStrokeBorderOffset()`
+
+### v3.8 — 工具一致性升級（邊框／陰影統一）
+
+#### 色塊工具邊框簡化
+- 移除 `grpFillColor` 中的「有」「無」邊框按鈕（`btnFillBorderOn` / `btnFillBorderOff`）
+- 邊框顯示邏輯改為：`thickness > 0` 且 `fillBorder !== false` 才繪製（向下相容舊資料）
+- 新建 fillrect / fillellipse 時不再寫入 `fillBorder` 欄位（預設有邊框 = 粗細 > 0 即顯示）
+- 移除 `fillBorderEnabled` 狀態變數、`syncFillBorder()`、`applyFillBorder()` 函式及對應事件綁定
+
+#### 線條／折線新增外框色
+- `grpLineStyle` 新增「外框」色彩 swatch（`lineBorderColorPreview`）
+- 預設 `transparent`（無外框）；使用者點選後啟用外框，顏色選完後自動關閉選色面板
+- `lineBorderColor` 狀態變數（預設 `'transparent'`）；`syncLineBorderColor()` 同步 UI
+- `drawLine` / `drawPolyline` 繪製時：先以 `(thickness + 4) × viewScale` 線寬描邊外框色，再疊上主色
+- `line` / `polyline` annotation 新增 `lineBorderColor` 欄位
+
+#### 線條／折線新增陰影
+- `grpShadow` 現在在工具切換為 `line` 時也會顯示
+- `lineShadow` 狀態變數（預設 `false`）；`shadowCheck` handler 統一分派
+- `line` / `polyline` annotation 新增 `shadow` 欄位
+- `showOptionsForAnnot` 讀取已存 annotation 的 `shadow` 與 `lineBorderColor` 並同步 UI
+
+### v3.7 — 筆型工具；虛線種類升級；端點樣式升級
+
+#### 虛線種類升級（線條 / 折線 / 筆型共用）
+- `grpLineStyle` 從 2 個按鈕改為 `<select>` 下拉，支援 6 種：
+  - `solid` 實線、`dash` 短虛線、`dash-lg` 長虛線、`dot` 點線、`dot-dash` 點虛線、`dash-dot-dot` 長點點
+- 新增 `getLineDash(style, sz)` helper 統一換算 `setLineDash` 陣列
+
+#### 端點樣式升級（線條 / 折線 / 筆型共用）
+- `grpCaps` 起點與終點各新增「圓頭 (round)」與「方頭 (square)」選項（共 5 種）
+- 新增 `capToLineCap(startCap, endCap)` helper，自動決定 canvas `lineCap`
+- `drawCap` 對 `round`/`square` 直接 return（由 `lineCap` 處理，不需額外繪製）
+
+#### 筆型工具（pen）
+- 工具列「✏」按鈕啟用，快捷鍵 `P`
+- 按住拖曳收集路徑點（每 2px 取樣一次），mouseup 時 commit 為 `pen` annotation
+- `drawPen` 使用 `quadraticCurveTo` 平滑曲線渲染
+- 共用 grpColor（顏色）、grpThickness（線寬）、grpLineStyle（虛線）、grpCaps（起終點端點）、grpShadow（陰影）
+- 新增 `grpPen` panel（筆型專屬）：
+  - 不透明度 0–100%（預設 100）
+  - 外框色 swatch（預設 transparent；挑色後自動啟用外框，選色後關閉面板）
+- `pen` annotation 資料結構：`{ type, points, color, thickness, lineStyle, startCap, endCap, penOpacity, penBorderColor, shadow }`
+- 支援選取、移動、Cmd+C/V 複製貼上；bounds 計算與 moveAnnot 已擴充
+
+### v3.6 — 框型選取工具（矩形區域複製為浮動圖層）
+
+#### 框型選取工具（boxselect）
+- 工具列「⬚」按鈕從 `disabled` 改為可點選，綁定工具 `boxselect`，快捷鍵 `M`
+- 拖曳繪製選取框，canvas 以綠色虛線（`#22c55e`）＋10% 填充標示選取區域
+- Options bar 顯示即時尺寸（`W × H px`）
+- 「複製為圖層」按鈕：
+  - 將選取區域的像素（base image + 所有已燒入標註）繪製至 offscreen canvas
+  - 裁切後轉為 `image/png` dataURL
+  - 透過 `nativeImage` + Electron `clipboard.writeImage` 同時寫入系統剪貼簿
+  - `pixelClipboard` 變數存留，供後續 `Cmd+V` 使用
+- `Cmd+V`：優先貼上 `pixelClipboard`（若有）為 `img` 型 annotation，置中於畫布，進入選取模式可移動/縮放
+- 「取消選取」按鈕清除選取框
+- 切換至其他工具自動清除選取框狀態
+
+#### 修正
+- `btn-primary:disabled` / `btn-secondary:disabled` 補充 CSS 樣式（`opacity: 0.35, cursor: not-allowed`）
 
 ### v3.5 — 工具列雙排佈局；Smart Semantic Numbering；粗細 px 輸入
 
@@ -1306,6 +1503,192 @@ Menu.buildFromTemplate([{
 - [ ] 選取已放置的 glyph 風格編號 → 切換風格 → 畫布即時更新
 - [ ] 舊版存檔（無 `numberStyle` 欄位）開啟後顯示為 `dot` 樣式，不出錯
 - [ ] 點擊「重置編號」後再放置，計數從 1 重新開始，風格保持不變
+
+#### 虛線種類升級（v3.7）
+- [ ] 線條工具 options bar 顯示下拉選單，預設「實線」
+- [ ] 切換為「點線」，繪製線條後呈現點狀虛線
+- [ ] 切換為「長點點」，繪製折線後呈現長點點虛線
+- [ ] 選取已存在線條，切換虛線種類，線條即時更新
+- [ ] 虛線設定在筆型工具中同樣有效
+
+#### 端點樣式升級（v3.7）
+- [ ] 線條工具 grpCaps 起點與終點各顯示 5 個按鈕（平/圓/方/點/箭）
+- [ ] 選擇「圓頭」，線條兩端呈現圓弧端點
+- [ ] 選擇「方頭」，線條兩端延伸至端點外半個線寬
+- [ ] 圓頭 + 箭頭組合：箭頭端畫箭頭，另一端圓頭正確顯示
+- [ ] 筆型工具可設定起點 / 終點端點樣式（含箭頭）
+
+#### 筆型工具（v3.7）
+- [ ] 工具列「✏」按鈕可點選，按 `P` 快捷鍵切換
+- [ ] 按住滑鼠拖曳，畫出平滑曲線（quadratic bezier 插值）
+- [ ] 放開滑鼠後曲線成為可選取的 pen annotation
+- [ ] pen annotation 可被拖曳移動、Cmd+C 複製、Cmd+V 貼上（offset 8px）
+- [ ] options bar 顯示：顏色、粗細、虛線、起終點端點、不透明度、外框、陰影
+- [ ] 不透明度設為 50%，筆跡半透明
+- [ ] 外框色選黑色，筆跡出現黑色外框描邊
+- [ ] 外框色為透明（預設），不顯示外框
+- [ ] 陰影勾選，筆跡出現右下陰影
+- [ ] 選取後修改任何屬性（顏色、粗細、透明度），筆跡即時更新
+
+#### Bug 修正（v3.15）
+
+**鉛筆箭頭線段銜接**
+- [ ] 鉛筆工具，arrow 終點：箭頭三角形與線段主體無缺口，邊框無斷裂
+- [ ] 鉛筆工具，arrow 起點：同上，起點銜接正常
+- [ ] 有外框色時：外框線段與外框箭頭同樣無缺口
+- [ ] 無外框時：行為與前版相同，不退化
+
+#### Bug 修正（v3.14）
+
+**箭頭方形頂點**
+- [ ] 直線工具，設定 arrow 端點，繪製線條：箭頭尖端應為純三角，無線段方形矩形端口露出
+- [ ] 鉛筆工具，同上，箭頭尖端乾淨
+- [ ] 短線段（兩端皆為 arrow）：線段體仍可見，不被過度截短
+- [ ] 無外框時（純箭頭）：外觀與前版相同，無退化
+
+**外框箭頭不位移**
+- [ ] 直線設定外框色，arrow 端點：外框描邊緊貼箭頭三角形邊緣，無往後偏移
+- [ ] 鉛筆同上
+- [ ] dot 端點：外框圓環緊貼圓點邊緣
+- [ ] 外框色為透明時，箭頭只顯示主色，無額外描邊
+
+#### Bug 修正（v3.13）
+
+**外框箭頭金字塔**
+- [ ] 直線工具：設定外框色、端點為 arrow，外框三角形應比主三角形微幅外擴（非暴增），不形成「金字塔」堆疊感
+- [ ] 鉛筆工具：同上，外框 arrow 端點呈正常描邊，主色 arrow 清晰疊在外框之上
+- [ ] dot 端點：外框圓點比主色圓點微幅大，形成圓形描邊
+
+**鉛筆箭頭角度**
+- [ ] 手繪長弧線，終點 arrow 方向與筆跡末段走向一致
+- [ ] 繪製繞圈筆跡，起點 / 終點 arrow 方向貼合線段實際切線方向
+- [ ] 筆觸只有 2 點時，方向退回鄰接點，不崩潰
+
+#### Bug 修正（v3.12）
+
+**直線端點外框**
+- [ ] 線條工具：設外框色（黑色）、終點為 arrow，繪製線條，箭頭端點周圍出現黑色外框輪廓
+- [ ] 起點為 dot：圓點周圍出現外框色描邊
+- [ ] 起點 / 終點為 none / round / square：不受影響（lineCap 已處理）
+- [ ] 外框色透明時，不繪製任何邊框端點
+
+**空心圓符號**
+- [ ] 端點起點 / 終點下拉選單，`round` 選項顯示 `◯`（大空心圓），視覺上明顯為空心
+- [ ] 選取已有 round cap 的線條，select 正確顯示 `◯`
+
+#### Bug 修正（v3.11）
+
+**鉛筆端點外框**
+- [ ] 鉛筆工具：設定外框色（黑色）、端點為 arrow，繪製筆跡後，箭頭端點周圍出現黑色外框輪廓
+- [ ] 端點為 dot：圓點周圍出現外框色描邊
+- [ ] 端點為 none / round / square：無外框端點（lineCap 已處理），行為不變
+- [ ] 外框色為透明時，不繪製任何邊框端點
+
+**鉛筆虛實線**
+- [ ] 鉛筆工具：切換線條為「短虛線（dash）」，繪製筆跡，筆觸呈虛線
+- [ ] 切換為「點線（dot）」，筆觸呈點線
+- [ ] 外框虛實線獨立：外框為實線、主線為虛線，兩者互不影響
+- [ ] 選取已有 lineStyle 的鉛筆 annotation，修改虛實線，即時更新
+
+**外框群組排序**
+- [ ] 線條工具：options bar 由左至右順序為「粗細 → 線條（虛實）→ 起點 → 終點 → 不透明 → 外框」
+- [ ] 鉛筆工具：順序為「粗細 → 線條（虛實）→ 起點 → 終點 → 不透明 → 外框」
+- [ ] 矩形框工具：「粗細 → 線條 → 圓角 → 不透明 → 外框（含 X/Y 位移）」
+
+#### Bug 修正 + UI 精簡（v3.10）
+
+**X 光曝光**
+- [ ] 線條不透明設為 60%，起點設箭頭，終點設箭頭：箭頭與線身不應出現「X 光透視」效果
+- [ ] 鉛筆不透明設為 50%，起點 dot：整段筆觸含端點均呈均勻半透明
+
+**鉛筆縮放 handle**
+- [ ] 選取鉛筆筆觸，出現 8 個藍色縮放手把（藍色虛線框四角+四邊）
+- [ ] 拖動角落手把，筆觸整體等比例縮放
+- [ ] 拖動邊中手把，筆觸在該軸方向縮放
+
+**grpCaps 下拉**
+- [ ] 線條工具 options bar 起點 / 終點各顯示一個下拉選單（寬約 52px）
+- [ ] 選單選項符號正確：`―`  `○`  `●`  `⏹`  `◀/▶`
+- [ ] 切換起點為 `●`，線段起點出現圓點標記
+- [ ] 選取已有 arrow 終點的線條，select 顯示 `▶`
+
+**外框粗細 / 外框虛實線**
+- [ ] 線條工具 grpLineStyle 外框色票右方出現 px 數字 input（預設 6）+ 虛實線 select
+- [ ] 外框粗細改為 10，繪製有外框色的線條，外框明顯變粗
+- [ ] 外框虛實線改為「點線」，外框呈點線，主線仍為實線
+- [ ] rect 工具 grpStrokeBorder 同樣出現 px input + 虛實線 select
+- [ ] 選取已有 borderThickness 的 rect annotation，UI 正確顯示
+
+#### Options Bar 全面對齊（v3.9）
+
+**框線工具外框 + 位移**
+- [ ] 切換至矩形框（rect）工具，options bar 顯示「外框」色票，預設棋盤格（透明）
+- [ ] 點擊外框色票，選色後 swatch 更新為選取色，X/Y 輸入框預設為 0
+- [ ] X = 0, Y = 0 時，外框與主框重疊（等同純描框加粗效果）
+- [ ] 設 X = 8，繪製矩形框，可見外框向右偏移 8px
+- [ ] 設 Y = -8，繪製矩形框，可見外框向上偏移 8px
+- [ ] 選取已有外框的 rect annotation，UI 正確顯示外框色與 X/Y 數值
+- [ ] 橢圓框（ellipse）同樣支援外框色 + X/Y 位移
+
+**框線工具透明度**
+- [ ] rect/ellipse 工具 options bar 顯示「不透明」數字輸入（0–100）
+- [ ] 設不透明 = 50，繪製矩形框，框線呈半透明
+- [ ] 選取已有 opacity 的 rect annotation，UI 正確顯示數值
+
+**線條/折線透明度**
+- [ ] line 工具 options bar 顯示「不透明」輸入
+- [ ] 設不透明 = 30，繪製線條，線條明顯半透明
+- [ ] polyline annotation 選取後同樣顯示不透明輸入，數值正確
+
+**虛實線全工具覆蓋**
+- [ ] rect 工具 options bar 顯示「線條」虛實線 select
+- [ ] 選擇「點線」後繪製矩形框，邊框呈點線樣式
+- [ ] fillrect 工具顯示虛實線 select；色塊邊框可呈虛線
+- [ ] pen / line 的虛實線 select 移至 grpDashStyle，功能不變
+
+**直角按鈕顯示邏輯**
+- [ ] line 工具時，直角按鈕顯示
+- [ ] 選取 polyline annotation 時，直角按鈕隱藏
+
+**筆型外框位置**
+- [ ] pen 工具時，外框色 swatch 出現在「粗細」後、「虛實線」前
+- [ ] 設外框色後繪製筆觸，可見外框描邊
+
+#### 工具一致性升級（v3.8）
+
+**色塊工具邊框簡化**
+- [ ] 矩形色塊（fillrect）選項列中，不再出現「有」「無」邊框按鈕
+- [ ] 粗細 = 0 時，fillrect / fillellipse 不繪製邊框；粗細 ≥ 1 時顯示邊框
+- [ ] 舊版含 `fillBorder: false` 的 annotation 仍不顯示邊框（向下相容）
+- [ ] 切換到 fillrect / fillellipse 工具，UI 無 「有」「無」按鈕出現
+
+**線條 / 折線外框色**
+- [ ] 線條（line）選項列中，`grpLineStyle` 出現「外框」色塊 swatch
+- [ ] 折線（polyline）選取後，選項列也顯示「外框」色塊
+- [ ] 預設外框色 swatch 顯示棋盤格（透明）
+- [ ] 點擊外框色 swatch 開啟選色面板；選色後關閉面板、swatch 更新為選取色
+- [ ] 選取外框色後，線條繪製出現明顯外框（比主線寬 4px）
+- [ ] 若外框色為透明，渲染結果與 v3.7 相同（無外框）
+- [ ] 選取已有外框色的 line annotation，UI 正確顯示該外框色
+
+**線條 / 折線陰影**
+- [ ] 切換至線條（line）工具，`grpShadow`（陰影選項）出現於選項列
+- [ ] 勾選陰影後拖曳繪製線條，線條具有陰影效果
+- [ ] 選取已有陰影的 line annotation，陰影 checkbox 呈現勾選狀態
+- [ ] 折線（polyline）同樣支援陰影（commit 後重新選取可見陰影 checkbox 正確）
+
+#### 框型選取工具（v3.6）
+- [ ] 工具列「⬚」按鈕可點選，點擊後切換到 boxselect 工具（options bar 顯示尺寸標籤）
+- [ ] 按 `M` 快捷鍵切換到 boxselect 工具
+- [ ] 拖曳選取區域，canvas 出現綠色虛線框＋淡綠色填充，options bar 即時顯示 `W × H px　Cmd+C 複製`
+- [ ] 拖曳完成後按 `Cmd+C`，toast 顯示「已複製 W × H px，Cmd+V 貼上為浮動圖層」
+- [ ] 複製後按 `Cmd+V`，選取區域像素以 `img` annotation 形式出現於畫布中心，自動進入選取模式
+- [ ] 貼上的浮動圖層可被拖曳移動
+- [ ] 貼上的浮動圖層可被角落 handle 縮放（維持長寬比）
+- [ ] 複製動作同時寫入系統剪貼簿（可在 macOS 預覽、Notes 等 App 中直接貼上）
+- [ ] 按 `Esc` 清除綠色虛線框，取消選取
+- [ ] 切換至其他工具（如矩形框、文字），綠色選取框自動消失
+- [ ] 拖曳範圍小於 4px 視為無效選取，不顯示選取框
 
 #### 最近使用色（v2.3 階段 A）
 - [ ] 初始開啟面板時，「最近使用」區塊不顯示（`#cppRecentSection` 隱藏）

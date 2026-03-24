@@ -172,8 +172,6 @@
       <span class="opt-label">%</span>
       <div class="opt-sep"></div>
       <span class="opt-label">邊框</span>
-      <button class="style-btn" id="btnFillBorderOn">有</button>
-      <button class="style-btn"        id="btnFillBorderOff">無</button>
       <div class="color-preview fill-preview" id="fillBorderColorPreview" title="點擊選色"></div>
     </div>
 
@@ -227,12 +225,17 @@
       <div class="color-preview" id="numStrokeColorPreview" title="描邊顏色" style="display:none"></div>
     </div>
 
-    <div class="opt-group hidden" id="grpLineStyle">
+    <!-- 虛實線（共用：pen / line / polyline / rect / ellipse / fillrect / fillellipse） -->
+    <div class="opt-group hidden" id="grpDashStyle">
       <span class="opt-label">線條</span>
-      <button class="style-btn active" data-ls="solid">實線</button>
-      <button class="style-btn"        data-ls="dashed">虛線</button>
-      <div class="opt-sep"></div>
-      <button class="style-btn" id="btnLineOrtho" title="正交折線（水平/垂直吸附）">直角</button>
+      <select id="dashStyleSelect" class="line-style-select">
+        <option value="solid">────  實線</option>
+        <option value="dash">╌╌╌╌  短虛線</option>
+        <option value="dash-lg">─ ─ ─  長虛線</option>
+        <option value="dot">······  點線</option>
+        <option value="dot-dash">·─·─  點虛線</option>
+        <option value="dash-dot-dot">─··─··  長點點</option>
+      </select>
     </div>
 
     <div class="opt-group hidden" id="grpRadius">
@@ -243,15 +246,82 @@
 
     <div class="opt-group hidden" id="grpCaps">
       <span class="opt-label">起點</span>
-      <button class="cap-btn active" data-end="start" data-cap="none">─</button>
-      <button class="cap-btn"        data-end="start" data-cap="dot">●</button>
-      <button class="cap-btn"        data-end="start" data-cap="arrow">◀</button>
+      <select id="startCapSelect" class="cap-select" title="起點樣式">
+        <option value="none">―</option>
+        <option value="round">◯</option>
+        <option value="dot">●</option>
+        <option value="square">⏹</option>
+        <option value="arrow">◀</option>
+      </select>
       <span class="opt-label" style="margin-left:6px">終點</span>
-      <button class="cap-btn"        data-end="end" data-cap="none">─</button>
-      <button class="cap-btn"        data-end="end" data-cap="dot">●</button>
-      <button class="cap-btn active" data-end="end" data-cap="arrow">▶</button>
+      <select id="endCapSelect" class="cap-select" title="終點樣式">
+        <option value="none">―</option>
+        <option value="round">◯</option>
+        <option value="dot">●</option>
+        <option value="square">⏹</option>
+        <option value="arrow" selected>▶</option>
+      </select>
     </div>
 
+    <!-- 不透明度（共用：pen / line / polyline / rect / ellipse） -->
+    <div class="opt-group hidden" id="grpStrokeOpacity">
+      <span class="opt-label">不透明</span>
+      <input type="number" id="strokeOpacityInput" value="100" min="0" max="100" style="width:44px">
+      <span class="opt-label">%</span>
+    </div>
+
+    <!-- 線條/折線專屬：外框色 + 粗細 + 虛實線 + 直角 -->
+    <div class="opt-group hidden" id="grpLineStyle">
+      <span class="opt-label">外框</span>
+      <div class="color-preview fill-preview" id="lineBorderColorPreview" title="點擊選色（透明=無外框）"></div>
+      <input type="number" id="lineBorderThicknessInput" value="6" min="1" max="40" style="width:44px" title="外框粗細 px">
+      <select id="lineBorderDashSelect" class="line-style-select">
+        <option value="solid">────  實線</option>
+        <option value="dash">╌╌╌╌  短虛線</option>
+        <option value="dash-lg">─ ─ ─  長虛線</option>
+        <option value="dot">······  點線</option>
+        <option value="dot-dash">·─·─  點虛線</option>
+        <option value="dash-dot-dot">─··─··  長點點</option>
+      </select>
+      <div class="opt-sep"></div>
+      <button class="style-btn" id="btnLineOrtho" title="正交折線（水平/垂直吸附）">直角</button>
+    </div>
+
+    <!-- 筆型專屬：外框色 + 粗細 + 虛實線 -->
+    <div class="opt-group hidden" id="grpPenBorder">
+      <span class="opt-label">外框</span>
+      <div class="color-preview fill-preview" id="penBorderColorPreview" title="點擊選色（透明=無外框）"></div>
+      <input type="number" id="penBorderThicknessInput" value="6" min="1" max="40" style="width:44px" title="外框粗細 px">
+      <select id="penBorderDashSelect" class="line-style-select">
+        <option value="solid">────  實線</option>
+        <option value="dash">╌╌╌╌  短虛線</option>
+        <option value="dash-lg">─ ─ ─  長虛線</option>
+        <option value="dot">······  點線</option>
+        <option value="dot-dash">·─·─  點虛線</option>
+        <option value="dash-dot-dot">─··─··  長點點</option>
+      </select>
+    </div>
+
+    <!-- 框線專屬：外框色 + 粗細 + 虛實線 + X/Y 位移 -->
+    <div class="opt-group hidden" id="grpStrokeBorder">
+      <span class="opt-label">外框</span>
+      <div class="color-preview fill-preview" id="strokeBorderColorPreview" title="點擊選色（透明=無外框）"></div>
+      <input type="number" id="strokeBorderThicknessInput" value="2" min="1" max="40" style="width:44px" title="外框粗細 px">
+      <select id="strokeBorderDashSelect" class="line-style-select">
+        <option value="solid">────  實線</option>
+        <option value="dash">╌╌╌╌  短虛線</option>
+        <option value="dash-lg">─ ─ ─  長虛線</option>
+        <option value="dot">······  點線</option>
+        <option value="dot-dash">·─·─  點虛線</option>
+        <option value="dash-dot-dot">─··─··  長點點</option>
+      </select>
+      <div class="opt-sep"></div>
+      <span class="opt-label">X</span>
+      <input type="number" id="strokeBorderOffsetX" value="0" min="-50" max="50" style="width:44px">
+      <span class="opt-label">Y</span>
+      <input type="number" id="strokeBorderOffsetY" value="0" min="-50" max="50" style="width:44px">
+      <span class="opt-label">px</span>
+    </div>
 
     <div class="opt-group hidden" id="grpFont">
       <span class="opt-label">字體</span>
@@ -342,6 +412,10 @@
       <span class="opt-label" id="ocrStatusLabel">請拖曳選取辨識區域</span>
     </div>
 
+    <div class="opt-group hidden" id="grpBoxSelect">
+      <span class="opt-label" id="boxSelSizeLabel">請拖曳選取區域</span>
+    </div>
+
   </div>
 
   <!-- Body -->
@@ -351,10 +425,10 @@
     <div class="editor-toolbar">
       <!-- 選取群 -->
       <button class="tool-btn"        data-tool="select"      title="選取 (V)">↖</button>
-      <button class="tool-btn"        disabled                 title="框型選取（即將推出）">⬚</button>
+      <button class="tool-btn"        data-tool="boxselect"    title="框型選取 (M)">⬚</button>
       <!-- 繪圖群 -->
       <div class="tool-sep"></div>
-      <button class="tool-btn"        disabled                 title="筆形（即將推出）">✏</button>
+      <button class="tool-btn"        data-tool="pen"          title="筆型 (P)">✏</button>
       <button class="tool-btn"        data-tool="line"         title="線條 (L)">╱</button>
       <button class="tool-btn active" data-tool="rect"         title="矩形框 (R)">□</button>
       <button class="tool-btn"        data-tool="fillrect"     title="色塊 (B)">■</button>

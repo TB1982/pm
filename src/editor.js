@@ -92,7 +92,6 @@ let fillColorA       = '#ffcc00'     // gradient start colour
 let fillColorB       = 'transparent' // gradient end colour ('transparent' or hex)
 let fillGradientDir  = 'h'           // 'h' | 'v' | 'dr' | 'ur'
 let fillOpacity      = 100
-let fillBorderEnabled = true
 let fillBorderColor   = '#ffffff'    // border stroke colour
 let fillPrevColorA    = '#ffcc00'    // last non-transparent colorA (for 透 toggle)
 let fillPrevColorB    = '#333333'    // last non-transparent colorB (for 透 toggle)
@@ -116,8 +115,42 @@ let fontFamily        = 'system'   // FONT_FAMILIES id
 let rectShadow      = false
 let ellipseShadow   = false
 let fillrectShadow  = false
+let lineShadow      = false
 let textShadow      = false
+
+// Line/polyline border
+let lineBorderColor = 'transparent'
 let numShadow       = false
+
+// Per-tool opacity
+let rectOpacity     = 100
+let ellipseOpacity  = 100
+let lineOpacity     = 100   // shared for line + polyline
+
+// Rect outer border (框線工具外框 + 位移)
+let rectBorderColor    = 'transparent'
+let rectBorderOffsetX  = 0
+let rectBorderOffsetY  = 0
+// Ellipse outer border
+let ellipseBorderColor    = 'transparent'
+let ellipseBorderOffsetX  = 0
+let ellipseBorderOffsetY  = 0
+
+// Per-shape dash style
+let rectLineStyle        = 'solid'
+let ellipseLineStyle     = 'solid'
+let fillrectLineStyle    = 'solid'
+let fillellipseLineStyle = 'solid'
+
+// Border thickness + dash (per tool)
+let lineBorderThickness    = 6
+let lineBorderDashStyle    = 'solid'
+let penBorderThickness     = 6
+let penBorderDashStyle     = 'solid'
+let rectBorderThickness    = 2
+let rectBorderDashStyle    = 'solid'
+let ellipseBorderThickness = 2
+let ellipseBorderDashStyle = 'solid'
 
 // Recent colours (shared across all colour pickers, max 10, session-only)
 let recentColors     = []
@@ -166,6 +199,19 @@ let isOcrSelecting = false  // currently drawing OCR selection rect
 let ocrRect        = null   // { x, y, w, h } in image coordinates
 let ocrStart       = null   // drag start pos
 
+// Box select
+let isBoxSelecting  = false  // currently drawing selection rect
+let boxSelRect      = null   // { x, y, w, h } in image coordinates (normalised after mouseup)
+let boxSelStart     = null   // drag start pos
+let pixelClipboard  = null   // { dataURL, w, h } — last copied region
+
+// Pen tool
+let isPenDrawing   = false
+let penPoints      = []       // {x,y}[] collected during current stroke
+let penOpacity     = 100      // 0–100，100=fully opaque
+let penBorderColor = 'transparent'
+let penShadow      = false
+
 // Polyline drawing (line tool + lineOrtho = true)
 // 互動：點擊加點 → 雙擊完成；各段自動折直角（H→V 或 V→H）
 let polylineActive = false
@@ -196,6 +242,25 @@ function hexToRgba(hex, alpha) {
   return `rgba(${r},${g},${b},${alpha})`
 }
 
+// Resolve dash pattern from lineStyle string + base size
+function getLineDash(style, sz) {
+  switch (style) {
+    case 'dash':         return [sz * 1.2,  sz * 0.7]
+    case 'dash-lg':      return [sz * 2.5,  sz * 0.8]
+    case 'dot':          return [sz * 0.15, sz * 0.9]
+    case 'dot-dash':     return [sz * 0.15, sz * 0.7, sz * 1.5,  sz * 0.7]
+    case 'dash-dot-dot': return [sz * 1.8,  sz * 0.5, sz * 0.15, sz * 0.5, sz * 0.15, sz * 0.5]
+    default:             return []  // solid
+  }
+}
+
+// Pick canvas lineCap based on start+end cap values
+function capToLineCap(sc, ec) {
+  if (sc === 'round' || ec === 'round') return 'round'
+  if (sc === 'square' || ec === 'square') return 'square'
+  return 'butt'
+}
+
 // Apply drop-shadow to canvas context (cleared by ctx.restore())
 function setShadow(ctx) {
   ctx.shadowColor   = 'rgba(0,0,0,0.45)'
@@ -215,10 +280,15 @@ function getTextColor(hex) {
 // ─── Options bar helpers ──────────────────────────────────────────────────────
 
 function hideAllOptions() {
-  ['grpRectShape','grpFillShape','grpColor','grpFillColor','grpThickness','grpLineStyle','grpCaps','grpRadius','grpFont','grpNumber','grpShadow','grpZoom','grpCrop','grpOcr'].forEach(id =>
-    document.getElementById(id).classList.add('hidden')
-  )
+  ['grpRectShape','grpFillShape','grpColor','grpFillColor','grpThickness',
+   'grpLineStyle','grpPenBorder','grpStrokeBorder','grpDashStyle',
+   'grpCaps','grpRadius','grpFont','grpNumber','grpStrokeOpacity',
+   'grpShadow','grpZoom','grpCrop','grpOcr','grpBoxSelect'].forEach(id => {
+    const el = document.getElementById(id)
+    if (el) el.classList.add('hidden')
+  })
   document.getElementById('numValueEdit').classList.add('hidden')
+  document.getElementById('btnLineOrtho')?.classList.remove('hidden')  // reset to visible by default
 }
 
 function showOptionsForTool(t) {
@@ -236,26 +306,71 @@ function showOptionsForTool(t) {
     document.getElementById('ocrStatusLabel').textContent = '請拖曳選取辨識區域'
     return
   }
-  if (!['rect','ellipse','fillrect','fillellipse','line','text','number'].includes(t)) return
-  // (polyline 由 line tool + lineOrtho 切換控制，此處不需獨立 tool id)
-  const isFill = t === 'fillrect' || t === 'fillellipse'
-  if (!isFill) document.getElementById('grpColor').classList.remove('hidden')
-  if (isFill) {
-    document.getElementById('grpFillColor').classList.remove('hidden')
-    syncFillMode(fillMode)
-    syncFillColorA(fillColorA)
-    syncFillColorB(fillColorB)
-    syncFillGradientDir(fillGradientDir)
-    syncFillOpacity(fillOpacity)
-    syncFillBorder(fillBorderEnabled)
-    syncFillBorderColor(fillBorderColor)
+  if (t === 'boxselect') {
+    document.getElementById('grpBoxSelect').classList.remove('hidden')
+    syncBoxSelUI()
+    return
   }
-  if (['rect','ellipse','fillrect','fillellipse','line','number'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
+  const sh  = id => document.getElementById(id).classList.remove('hidden')
+  if (t === 'pen') {
+    sh('grpColor'); sh('grpThickness'); sh('grpPenBorder'); sh('grpDashStyle')
+    sh('grpCaps'); sh('grpStrokeOpacity'); sh('grpShadow')
+    syncNumStrokeUI(false)
+    syncDashStyle(lineStyle)
+    syncCaps(startCap, endCap)
+    syncPenBorderColor(penBorderColor)
+    syncPenBorderThickness(penBorderThickness)
+    syncPenBorderDash(penBorderDashStyle)
+    syncStrokeOpacity(penOpacity)
+    syncShadowCheck(penShadow)
+    return
+  }
+  if (!['rect','ellipse','fillrect','fillellipse','line','text','number'].includes(t)) return
+  // (polyline 由 line tool 雙擊切換，此處不需獨立 tool id)
+  const isFill = t === 'fillrect' || t === 'fillellipse'
+  if (!isFill) sh('grpColor')
+  if (isFill) {
+    sh('grpFillColor')
+    syncFillMode(fillMode); syncFillColorA(fillColorA); syncFillColorB(fillColorB)
+    syncFillGradientDir(fillGradientDir); syncFillOpacity(fillOpacity); syncFillBorderColor(fillBorderColor)
+  }
+  if (['rect','ellipse','fillrect','fillellipse','line','number'].includes(t)) sh('grpThickness')
   syncNumStrokeUI(t === 'number')
-  if (t === 'line')   { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden'); syncLineOrtho(lineOrtho) }
-  if (['rect','fillrect'].includes(t)) { document.getElementById('grpRadius').classList.remove('hidden'); syncCornerRadius(cornerRadius) }
+  if (t === 'line') {
+    sh('grpLineStyle'); sh('grpDashStyle'); sh('grpCaps'); sh('grpStrokeOpacity'); sh('grpShadow')
+    syncLineOrtho(lineOrtho); syncLineBorderColor(lineBorderColor)
+    syncLineBorderThickness(lineBorderThickness); syncLineBorderDash(lineBorderDashStyle)
+    syncDashStyle(lineStyle); syncCaps(startCap, endCap)
+    syncStrokeOpacity(lineOpacity); syncShadowCheck(lineShadow)
+  }
+  if (t === 'rect') {
+    sh('grpRectShape'); sh('grpStrokeBorder'); sh('grpDashStyle')
+    sh('grpRadius'); sh('grpStrokeOpacity'); sh('grpShadow')
+    syncRectShape(t)
+    syncStrokeBorderColor(rectBorderColor); syncStrokeBorderThickness(rectBorderThickness); syncStrokeBorderDash(rectBorderDashStyle)
+    syncStrokeBorderOffset(rectBorderOffsetX, rectBorderOffsetY)
+    syncDashStyle(rectLineStyle); syncCornerRadius(cornerRadius)
+    syncStrokeOpacity(rectOpacity); syncShadowCheck(rectShadow)
+  }
+  if (t === 'ellipse') {
+    sh('grpRectShape'); sh('grpStrokeBorder'); sh('grpDashStyle')
+    sh('grpStrokeOpacity'); sh('grpShadow')
+    syncRectShape(t)
+    syncStrokeBorderColor(ellipseBorderColor); syncStrokeBorderThickness(ellipseBorderThickness); syncStrokeBorderDash(ellipseBorderDashStyle)
+    syncStrokeBorderOffset(ellipseBorderOffsetX, ellipseBorderOffsetY)
+    syncDashStyle(ellipseLineStyle)
+    syncStrokeOpacity(ellipseOpacity); syncShadowCheck(ellipseShadow)
+  }
+  if (t === 'fillrect') {
+    sh('grpFillShape'); sh('grpDashStyle'); sh('grpRadius'); sh('grpShadow')
+    syncFillShape(t); syncDashStyle(fillrectLineStyle); syncCornerRadius(cornerRadius); syncShadowCheck(fillrectShadow)
+  }
+  if (t === 'fillellipse') {
+    sh('grpFillShape'); sh('grpDashStyle'); sh('grpShadow')
+    syncFillShape(t); syncDashStyle(fillellipseLineStyle); syncShadowCheck(fillellipseShadow)
+  }
   if (t === 'text') {
-    document.getElementById('grpFont').classList.remove('hidden')
+    sh('grpFont')
     syncTextShadowCheck(textShadow)
     syncTextBold(textBold); syncTextItalic(textItalic); syncTextUnderline(textUnderline); syncTextStrikethrough(textStrikethrough)
     syncTextAlign(textAlign)
@@ -263,27 +378,80 @@ function showOptionsForTool(t) {
     syncTextBgOpacity(textBgOpacity); syncTextBgPreview()
     syncFontFamily(fontFamily)
   }
-  if (t === 'number') { document.getElementById('grpNumber').classList.remove('hidden'); document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(numShadow); syncNumStyle(numberStyle) }
-  if (t === 'rect' || t === 'ellipse')         { document.getElementById('grpRectShape').classList.remove('hidden'); syncRectShape(t) }
-  if (t === 'fillrect' || t === 'fillellipse') { document.getElementById('grpFillShape').classList.remove('hidden'); syncFillShape(t) }
-  if (t === 'rect')         { document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(rectShadow) }
-  if (t === 'ellipse')      { document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(ellipseShadow) }
-  if (t === 'fillrect')     { document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(fillrectShadow) }
-  if (t === 'fillellipse')  { document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(fillellipseShadow) }
+  if (t === 'number') { sh('grpNumber'); sh('grpShadow'); syncShadowCheck(numShadow); syncNumStyle(numberStyle) }
+}
+
+function syncBoxSelUI() {
+  const hasRect = boxSelRect && boxSelRect.w > 1 && boxSelRect.h > 1
+  if (hasRect) {
+    const w = Math.round(Math.abs(boxSelRect.w))
+    const h = Math.round(Math.abs(boxSelRect.h))
+    document.getElementById('boxSelSizeLabel').textContent = `${w} × ${h} px　Cmd+C 複製`
+  } else {
+    document.getElementById('boxSelSizeLabel').textContent = '請拖曳選取區域'
+  }
 }
 
 function showOptionsForAnnot(a) {
   hideAllOptions()
   if (a.type === 'img') return   // overlay image has no editable colour/thickness options
   const t = a.type
+  const sh = id => { const el = document.getElementById(id); if (el) el.classList.remove('hidden') }
   const isFill = t === 'fillrect' || t === 'fillellipse'
-  if (!isFill) document.getElementById('grpColor').classList.remove('hidden')
-  if (isFill)  document.getElementById('grpFillColor').classList.remove('hidden')
-  if (['rect','ellipse','fillrect','fillellipse','line','polyline','number'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
+  if (!isFill) sh('grpColor')
+  if (isFill)  sh('grpFillColor')
+  if (['rect','ellipse','fillrect','fillellipse','line','polyline','number','pen'].includes(t)) sh('grpThickness')
   syncNumStrokeUI(t === 'number')
-  if (['line','polyline'].includes(t)) { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden') }
-  if (['rect','fillrect'].includes(t)) document.getElementById('grpRadius').classList.remove('hidden')
-  if (t === 'number') document.getElementById('grpNumber').classList.remove('hidden')
+
+  if (['line','polyline'].includes(t)) {
+    sh('grpLineStyle'); sh('grpDashStyle'); sh('grpCaps'); sh('grpStrokeOpacity'); sh('grpShadow')
+    lineBorderColor = a.lineBorderColor ?? 'transparent'; syncLineBorderColor(lineBorderColor)
+    lineBorderThickness = a.borderThickness ?? lineBorderThickness; syncLineBorderThickness(lineBorderThickness)
+    lineBorderDashStyle = a.borderDashStyle ?? 'solid'; syncLineBorderDash(lineBorderDashStyle)
+    lineStyle = a.lineStyle ?? 'solid'; syncDashStyle(lineStyle)
+    startCap = a.startCap; endCap = a.endCap; syncCaps(startCap, endCap)
+    lineOpacity = a.opacity ?? 100; syncStrokeOpacity(lineOpacity)
+    syncShadowCheck(a.shadow ?? false)
+    if (t === 'line') { lineOrtho = a.lineOrtho ?? false; syncLineOrtho(lineOrtho) }
+    if (t === 'polyline') document.getElementById('btnLineOrtho')?.classList.add('hidden')
+  }
+  if (t === 'pen') {
+    sh('grpPenBorder'); sh('grpDashStyle'); sh('grpCaps'); sh('grpStrokeOpacity'); sh('grpShadow')
+    penBorderColor = a.penBorderColor ?? 'transparent'; syncPenBorderColor(penBorderColor)
+    penBorderThickness = a.borderThickness ?? penBorderThickness; syncPenBorderThickness(penBorderThickness)
+    penBorderDashStyle = a.borderDashStyle ?? 'solid'; syncPenBorderDash(penBorderDashStyle)
+    lineStyle = a.lineStyle ?? 'solid'; syncDashStyle(lineStyle)
+    startCap = a.startCap ?? 'round'; endCap = a.endCap ?? 'round'; syncCaps(startCap, endCap)
+    penOpacity = a.penOpacity ?? 100; syncStrokeOpacity(penOpacity)
+    syncShadowCheck(a.shadow ?? false)
+  }
+  if (t === 'rect') {
+    sh('grpRectShape'); sh('grpStrokeBorder'); sh('grpDashStyle'); sh('grpRadius'); sh('grpStrokeOpacity'); sh('grpShadow')
+    syncRectShape(t)
+    rectBorderColor = a.borderColor ?? 'transparent'; syncStrokeBorderColor(rectBorderColor)
+    rectBorderThickness = a.borderThickness ?? a.thickness ?? 2; syncStrokeBorderThickness(rectBorderThickness)
+    rectBorderDashStyle = a.borderDashStyle ?? 'solid'; syncStrokeBorderDash(rectBorderDashStyle)
+    rectBorderOffsetX = a.borderOffsetX ?? 0; rectBorderOffsetY = a.borderOffsetY ?? 0
+    syncStrokeBorderOffset(rectBorderOffsetX, rectBorderOffsetY)
+    rectLineStyle = a.lineStyle ?? 'solid'; syncDashStyle(rectLineStyle)
+    cornerRadius = a.cornerRadius ?? 0; syncCornerRadius(cornerRadius)
+    rectOpacity = a.opacity ?? 100; syncStrokeOpacity(rectOpacity)
+    rectShadow = a.shadow ?? false; syncShadowCheck(rectShadow)
+  }
+  if (t === 'ellipse') {
+    sh('grpRectShape'); sh('grpStrokeBorder'); sh('grpDashStyle'); sh('grpStrokeOpacity'); sh('grpShadow')
+    syncRectShape(t)
+    ellipseBorderColor = a.borderColor ?? 'transparent'; syncStrokeBorderColor(ellipseBorderColor)
+    ellipseBorderThickness = a.borderThickness ?? a.thickness ?? 2; syncStrokeBorderThickness(ellipseBorderThickness)
+    ellipseBorderDashStyle = a.borderDashStyle ?? 'solid'; syncStrokeBorderDash(ellipseBorderDashStyle)
+    ellipseBorderOffsetX = a.borderOffsetX ?? 0; ellipseBorderOffsetY = a.borderOffsetY ?? 0
+    syncStrokeBorderOffset(ellipseBorderOffsetX, ellipseBorderOffsetY)
+    ellipseLineStyle = a.lineStyle ?? 'solid'; syncDashStyle(ellipseLineStyle)
+    ellipseOpacity = a.opacity ?? 100; syncStrokeOpacity(ellipseOpacity)
+    ellipseShadow = a.shadow ?? false; syncShadowCheck(ellipseShadow)
+  }
+  if (['rect','fillrect'].includes(t)) { cornerRadius = a.cornerRadius ?? 0; syncCornerRadius(cornerRadius) }
+
   // Sync UI state to annotation values
   color = a.color; syncColor(color)
   if ('thickness' in a) { thickness = a.thickness; syncThickness(thickness) }
@@ -296,16 +464,20 @@ function showOptionsForAnnot(a) {
     if (fillColorB !== 'transparent') fillPrevColorB = fillColorB
     fillGradientDir = a.fillGradientDir ?? 'h'; syncFillGradientDir(fillGradientDir)
     fillOpacity = a.fillOpacity ?? 100; syncFillOpacity(fillOpacity)
-    fillBorderEnabled = a.fillBorder !== false; syncFillBorder(fillBorderEnabled)
     fillBorderColor = a.fillBorderColor ?? '#ffffff'; syncFillBorderColor(fillBorderColor)
+    const fls = a.lineStyle ?? 'solid'
+    if (t === 'fillrect') fillrectLineStyle = fls
+    else fillellipseLineStyle = fls
+    syncDashStyle(fls)
+    sh('grpDashStyle'); sh('grpShadow')
+    if (t === 'fillrect')    { fillrectShadow    = a.shadow ?? false; syncShadowCheck(fillrectShadow) }
+    if (t === 'fillellipse') { fillellipseShadow = a.shadow ?? false; syncShadowCheck(fillellipseShadow) }
+    if (['fillrect'].includes(t)) sh('grpRadius')
+    if (t === 'fillrect' || t === 'fillellipse') { const fsh = document.getElementById('grpFillShape'); if (fsh) fsh.classList.remove('hidden'); syncFillShape(t) }
   }
-  if (t === 'line')     { lineStyle = a.lineStyle; startCap = a.startCap; endCap = a.endCap; lineOrtho = a.lineOrtho ?? false; syncLineStyle(lineStyle); syncCaps(startCap, endCap); syncLineOrtho(lineOrtho) }
-  if (t === 'polyline') { lineStyle = a.lineStyle; startCap = a.startCap; endCap = a.endCap; syncLineStyle(lineStyle); syncCaps(startCap, endCap) }
-  if (['rect','fillrect'].includes(t)) { cornerRadius = a.cornerRadius ?? 0; syncCornerRadius(cornerRadius) }
   if (t === 'text') {
     fontSize        = a.fontSize;                     syncFontSize(fontSize)
     textStrokeColor = a.textStrokeColor ?? '#000000'; syncTextStrokeColor(textStrokeColor)
-    // 向下相容：舊版 1/2/3 enum → 新版 px（3→6→10）
     const _tsw = a.textStrokeWidth ?? 0
     textStrokeWidth = _tsw <= 3 ? [0, 3, 6, 10][_tsw] : _tsw
     syncTextStrokeWidth(textStrokeWidth)
@@ -318,7 +490,7 @@ function showOptionsForAnnot(a) {
     textStrikethrough = a.strikethrough ?? false; syncTextStrikethrough(textStrikethrough)
     textAlign         = a.textAlign     ?? 'left';    syncTextAlign(textAlign)
     fontFamily        = a.fontFamily    ?? 'system';  syncFontFamily(fontFamily)
-    document.getElementById('grpFont').classList.remove('hidden')
+    sh('grpFont')
   }
   if (t === 'number') {
     numSize        = a.size ?? 48;             syncNumSize(numSize)
@@ -328,14 +500,8 @@ function showOptionsForAnnot(a) {
     numStrokeColor = a.numStrokeColor ?? '#ffffff'; syncNumStrokeColor(numStrokeColor)
     document.getElementById('numValueEdit').classList.remove('hidden')
     document.getElementById('numValueInput').value = a.value
-    document.getElementById('grpShadow').classList.remove('hidden')
+    sh('grpNumber'); sh('grpShadow')
   }
-  if (t === 'rect' || t === 'ellipse')         { document.getElementById('grpRectShape').classList.remove('hidden'); syncRectShape(t) }
-  if (t === 'fillrect' || t === 'fillellipse') { document.getElementById('grpFillShape').classList.remove('hidden'); syncFillShape(t) }
-  if (t === 'rect')        { rectShadow        = a.shadow ?? false; syncShadowCheck(rectShadow);        document.getElementById('grpShadow').classList.remove('hidden') }
-  if (t === 'ellipse')     { ellipseShadow     = a.shadow ?? false; syncShadowCheck(ellipseShadow);     document.getElementById('grpShadow').classList.remove('hidden') }
-  if (t === 'fillrect')    { fillrectShadow    = a.shadow ?? false; syncShadowCheck(fillrectShadow);    document.getElementById('grpShadow').classList.remove('hidden') }
-  if (t === 'fillellipse') { fillellipseShadow = a.shadow ?? false; syncShadowCheck(fillellipseShadow); document.getElementById('grpShadow').classList.remove('hidden') }
 }
 
 // Sync UI controls
@@ -351,20 +517,55 @@ function applyColor(hex) {
   if (selectedId) updateSelectedAnnot({ color: hex })
   if (textActive) { textInputEl.style.color = hex; renderAnnotations() }
   pushRecentColor(hex)
-  if (tool === 'number') hideColorPanel()
+  hideColorPanel()
 }
 function syncThickness(t) {
   document.getElementById('strokeWidthInput').value = t
 }
 function syncCornerRadius(v) { document.getElementById('cornerRadiusInput').value = v }
 function syncLineOrtho(v) { document.getElementById('btnLineOrtho')?.classList.toggle('active', v) }
-function syncLineStyle(ls) {
-  document.querySelectorAll('.style-btn[data-ls]').forEach(b => b.classList.toggle('active', b.dataset.ls === ls))
+function syncDashStyle(ls) {
+  const sel = document.getElementById('dashStyleSelect')
+  if (sel) sel.value = ls
+}
+const syncLineStyle = syncDashStyle  // backward-compat alias
+function syncLineBorderColor(hex) {
+  const p = document.getElementById('lineBorderColorPreview')
+  if (p) p.style.background = (hex === 'transparent' || !hex) ? 'repeating-linear-gradient(45deg,#888 0,#888 3px,#fff 3px,#fff 6px)' : hex
+}
+function syncPenBorderColor(hex) {
+  const p = document.getElementById('penBorderColorPreview')
+  if (p) p.style.background = (hex === 'transparent' || !hex) ? 'repeating-linear-gradient(45deg,#888 0,#888 3px,#fff 3px,#fff 6px)' : hex
+}
+function syncStrokeOpacity(v) {
+  const inp = document.getElementById('strokeOpacityInput')
+  if (inp) inp.value = v
+}
+function syncStrokeBorderColor(hex) {
+  const p = document.getElementById('strokeBorderColorPreview')
+  if (!p) return
+  p.style.background = (hex === 'transparent' || !hex)
+    ? 'repeating-linear-gradient(45deg,#888 0,#888 3px,#fff 3px,#fff 6px)'
+    : hex
+}
+function syncStrokeBorderOffset(x, y) {
+  const xi = document.getElementById('strokeBorderOffsetX')
+  const yi = document.getElementById('strokeBorderOffsetY')
+  if (xi) xi.value = x ?? 0
+  if (yi) yi.value = y ?? 0
 }
 function syncCaps(sc, ec) {
-  document.querySelectorAll('.cap-btn[data-end="start"]').forEach(b => b.classList.toggle('active', b.dataset.cap === sc))
-  document.querySelectorAll('.cap-btn[data-end="end"]').forEach(b => b.classList.toggle('active', b.dataset.cap === ec))
+  const ss = document.getElementById('startCapSelect')
+  const es = document.getElementById('endCapSelect')
+  if (ss) ss.value = sc ?? 'none'
+  if (es) es.value = ec ?? 'arrow'
 }
+function syncLineBorderThickness(v) { const el = document.getElementById('lineBorderThicknessInput'); if (el) el.value = v }
+function syncLineBorderDash(v)      { const el = document.getElementById('lineBorderDashSelect');    if (el) el.value = v }
+function syncPenBorderThickness(v)  { const el = document.getElementById('penBorderThicknessInput'); if (el) el.value = v }
+function syncPenBorderDash(v)       { const el = document.getElementById('penBorderDashSelect');     if (el) el.value = v }
+function syncStrokeBorderThickness(v) { const el = document.getElementById('strokeBorderThicknessInput'); if (el) el.value = v }
+function syncStrokeBorderDash(v)      { const el = document.getElementById('strokeBorderDashSelect');     if (el) el.value = v }
 function syncFontSize(fs) { document.getElementById('fontSizeInput').value = fs }
 function syncNumSize(ns) {
   document.querySelectorAll('.ns-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.ns) === ns))
@@ -426,13 +627,6 @@ function syncFillGradientDir(dir) {
 function syncFillOpacity(val) {
   const inp = document.getElementById('fillOpacityInput')
   if (inp) inp.value = val
-}
-function syncFillBorder(enabled) {
-  const on  = document.getElementById('btnFillBorderOn')
-  const off = document.getElementById('btnFillBorderOff')
-  if (enabled) { on.classList.add('active');  off.classList.remove('active') }
-  else         { off.classList.add('active'); on.classList.remove('active') }
-  document.getElementById('fillBorderColorPreview').classList.toggle('hidden', !enabled)
 }
 function syncFillBorderColor(hex) {
   const p = document.getElementById('fillBorderColorPreview')
@@ -505,19 +699,19 @@ function applyFillMode(mode) {
 function applyFillColor(hex) {
   fillColor = hex; syncFillColor(hex)
   if (selectedId) updateSelectedAnnot({ fillColor: hex })
-  pushRecentColor(hex)
+  pushRecentColor(hex); hideColorPanel()
 }
 function applyFillColorA(hex) {
   if (hex !== 'transparent') fillPrevColorA = hex
   fillColorA = hex; syncFillColorA(hex)
   if (selectedId) updateSelectedAnnot({ fillColorA: hex })
-  pushRecentColor(hex)
+  pushRecentColor(hex); hideColorPanel()
 }
 function applyFillColorB(hex) {
   if (hex !== 'transparent') fillPrevColorB = hex
   fillColorB = hex; syncFillColorB(hex)
   if (selectedId) updateSelectedAnnot({ fillColorB: hex })
-  pushRecentColor(hex)
+  pushRecentColor(hex); hideColorPanel()
 }
 function applyFillGradientDir(dir) {
   fillGradientDir = dir; syncFillGradientDir(dir)
@@ -527,20 +721,16 @@ function applyFillOpacity(val) {
   fillOpacity = val; syncFillOpacity(val)
   if (selectedId) updateSelectedAnnot({ fillOpacity: val })
 }
-function applyFillBorder(enabled) {
-  fillBorderEnabled = enabled; syncFillBorder(enabled)
-  if (selectedId) updateSelectedAnnot({ fillBorder: enabled })
-}
 function applyFillBorderColor(hex) {
   fillBorderColor = hex; syncFillBorderColor(hex)
   if (selectedId) updateSelectedAnnot({ fillBorderColor: hex })
-  pushRecentColor(hex)
+  pushRecentColor(hex); hideColorPanel()
 }
 function applyTextStrokeColor(hex) {
   textStrokeColor = hex; syncTextStrokeColor(hex)
   if (selectedId) updateSelectedAnnot({ textStrokeColor: hex })
   if (textActive) renderAnnotations()
-  pushRecentColor(hex)
+  pushRecentColor(hex); hideColorPanel()
 }
 function applyTextBgColor(hex) {
   if (hex === 'transparent') {
@@ -556,7 +746,7 @@ function applyTextBgColor(hex) {
   syncTextBgPreview()   // opacity 已確定後再更新色塊
   if (selectedId) updateSelectedAnnot({ textBgColor: hex, textBgOpacity: textBgOpacity })
   if (textActive) renderAnnotations()
-  pushRecentColor(hex)
+  pushRecentColor(hex); hideColorPanel()
 }
 
 // Update selected annotation's properties + push history
@@ -588,9 +778,6 @@ document.getElementById('fillOpacityInput').addEventListener('change', e =>
 )
 document.getElementById('fillOpacityInput').addEventListener('keydown', e => e.stopPropagation())
 
-// Border toggle
-document.getElementById('btnFillBorderOn').addEventListener('click',  () => applyFillBorder(true))
-document.getElementById('btnFillBorderOff').addEventListener('click', () => applyFillBorder(false))
 
 // Sync initial state
 syncFillMode(fillMode)
@@ -599,7 +786,6 @@ syncFillColorA(fillColorA)
 syncFillColorB(fillColorB)
 syncFillGradientDir(fillGradientDir)
 syncFillOpacity(fillOpacity)
-syncFillBorder(fillBorderEnabled)
 syncFillBorderColor(fillBorderColor)
 
 // ─── Extend canvas ────────────────────────────────────────────────────────────
@@ -976,6 +1162,26 @@ document.getElementById('numStrokeColorPreview').addEventListener('click', funct
   }, () => numStrokeColor)
 })
 
+// Line border colour
+document.getElementById('lineBorderColorPreview').addEventListener('click', function() {
+  openColorPanel(this, hex => {
+    lineBorderColor = hex
+    syncLineBorderColor(hex)
+    if (selectedId) updateSelectedAnnot({ lineBorderColor: hex })
+    hideColorPanel()
+  }, () => lineBorderColor)
+})
+
+// Pen border colour
+document.getElementById('penBorderColorPreview').addEventListener('click', function() {
+  openColorPanel(this, hex => {
+    penBorderColor = hex
+    syncPenBorderColor(hex)
+    if (selectedId) updateSelectedAnnot({ penBorderColor: hex })
+    hideColorPanel()
+  }, () => penBorderColor)
+})
+
 // Thickness — manual input
 document.getElementById('strokeWidthInput').addEventListener('input', e => {
   const v = Math.max(0, Math.min(999, parseInt(e.target.value) || 0))
@@ -1032,25 +1238,125 @@ document.getElementById('btnLineOrtho').addEventListener('click', () => {
   }
 })
 
-// Line style
-document.querySelectorAll('.style-btn[data-ls]').forEach(btn =>
-  btn.addEventListener('click', () => {
-    lineStyle = btn.dataset.ls
-    syncLineStyle(lineStyle)
-    if (selectedId) updateSelectedAnnot({ lineStyle })
-  })
-)
+// Dash style (shared: pen / line / polyline / rect / ellipse / fillrect / fillellipse)
+document.getElementById('dashStyleSelect').addEventListener('change', e => {
+  const val = e.target.value
+  const t = selectedId ? (annotations.find(a => a.id === selectedId)?.type ?? tool) : tool
+  if (['pen','line','polyline'].includes(t)) {
+    lineStyle = val
+  } else if (t === 'rect') {
+    rectLineStyle = val
+  } else if (t === 'ellipse') {
+    ellipseLineStyle = val
+  } else if (t === 'fillrect') {
+    fillrectLineStyle = val
+  } else if (t === 'fillellipse') {
+    fillellipseLineStyle = val
+  }
+  if (selectedId) updateSelectedAnnot({ lineStyle: val })
+  else renderAnnotations()
+})
 
-// Caps
-document.querySelectorAll('.cap-btn').forEach(btn =>
-  btn.addEventListener('click', () => {
-    const end = btn.dataset.end, cap = btn.dataset.cap
-    if (end === 'start') startCap = cap
-    else                 endCap   = cap
-    syncCaps(startCap, endCap)
-    if (selectedId) updateSelectedAnnot(end === 'start' ? { startCap: cap } : { endCap: cap })
-  })
-)
+// Stroke opacity (shared: pen / line / polyline / rect / ellipse)
+document.getElementById('strokeOpacityInput').addEventListener('input', e => {
+  const val = Math.min(100, Math.max(0, parseInt(e.target.value) || 0))
+  e.target.value = val
+  const t = selectedId ? (annotations.find(a => a.id === selectedId)?.type ?? tool) : tool
+  if (t === 'pen') {
+    penOpacity = val
+    if (selectedId) updateSelectedAnnot({ penOpacity: val })
+  } else if (t === 'rect') {
+    rectOpacity = val
+    if (selectedId) updateSelectedAnnot({ opacity: val })
+  } else if (t === 'ellipse') {
+    ellipseOpacity = val
+    if (selectedId) updateSelectedAnnot({ opacity: val })
+  } else if (['line','polyline'].includes(t)) {
+    lineOpacity = val
+    if (selectedId) updateSelectedAnnot({ opacity: val })
+  }
+})
+
+// Stroke border colour (rect / ellipse)
+document.getElementById('strokeBorderColorPreview').addEventListener('click', function() {
+  const t = selectedId ? (annotations.find(a => a.id === selectedId)?.type ?? tool) : tool
+  openColorPanel(this, hex => {
+    if (t === 'rect')    { rectBorderColor    = hex; syncStrokeBorderColor(hex) }
+    if (t === 'ellipse') { ellipseBorderColor = hex; syncStrokeBorderColor(hex) }
+    if (selectedId) updateSelectedAnnot({ borderColor: hex })
+    hideColorPanel()
+  }, () => t === 'ellipse' ? ellipseBorderColor : rectBorderColor)
+})
+
+// Stroke border offset X / Y (rect / ellipse)
+document.getElementById('strokeBorderOffsetX').addEventListener('input', e => {
+  const val = parseInt(e.target.value) || 0
+  const t = selectedId ? (annotations.find(a => a.id === selectedId)?.type ?? tool) : tool
+  if (t === 'rect')    rectBorderOffsetX    = val
+  if (t === 'ellipse') ellipseBorderOffsetX = val
+  if (selectedId) updateSelectedAnnot({ borderOffsetX: val })
+  else renderAnnotations()
+})
+document.getElementById('strokeBorderOffsetY').addEventListener('input', e => {
+  const val = parseInt(e.target.value) || 0
+  const t = selectedId ? (annotations.find(a => a.id === selectedId)?.type ?? tool) : tool
+  if (t === 'rect')    rectBorderOffsetY    = val
+  if (t === 'ellipse') ellipseBorderOffsetY = val
+  if (selectedId) updateSelectedAnnot({ borderOffsetY: val })
+  else renderAnnotations()
+})
+
+// Caps (起點 / 終點 下拉)
+document.getElementById('startCapSelect').addEventListener('change', e => {
+  startCap = e.target.value
+  if (selectedId) updateSelectedAnnot({ startCap })
+})
+document.getElementById('endCapSelect').addEventListener('change', e => {
+  endCap = e.target.value
+  if (selectedId) updateSelectedAnnot({ endCap })
+})
+
+// Line border thickness / dash
+document.getElementById('lineBorderThicknessInput').addEventListener('input', e => {
+  lineBorderThickness = Math.max(1, parseInt(e.target.value) || 1)
+  if (selectedId) updateSelectedAnnot({ borderThickness: lineBorderThickness })
+  else renderAnnotations()
+})
+document.getElementById('lineBorderDashSelect').addEventListener('change', e => {
+  lineBorderDashStyle = e.target.value
+  if (selectedId) updateSelectedAnnot({ borderDashStyle: lineBorderDashStyle })
+  else renderAnnotations()
+})
+
+// Pen border thickness / dash
+document.getElementById('penBorderThicknessInput').addEventListener('input', e => {
+  penBorderThickness = Math.max(1, parseInt(e.target.value) || 1)
+  if (selectedId) updateSelectedAnnot({ borderThickness: penBorderThickness })
+  else renderAnnotations()
+})
+document.getElementById('penBorderDashSelect').addEventListener('change', e => {
+  penBorderDashStyle = e.target.value
+  if (selectedId) updateSelectedAnnot({ borderDashStyle: penBorderDashStyle })
+  else renderAnnotations()
+})
+
+// Stroke border thickness / dash (rect / ellipse)
+document.getElementById('strokeBorderThicknessInput').addEventListener('input', e => {
+  const val = Math.max(1, parseInt(e.target.value) || 1)
+  const t = selectedId ? (annotations.find(a => a.id === selectedId)?.type ?? tool) : tool
+  if (t === 'rect')    rectBorderThickness    = val
+  if (t === 'ellipse') ellipseBorderThickness = val
+  if (selectedId) updateSelectedAnnot({ borderThickness: val })
+  else renderAnnotations()
+})
+document.getElementById('strokeBorderDashSelect').addEventListener('change', e => {
+  const val = e.target.value
+  const t = selectedId ? (annotations.find(a => a.id === selectedId)?.type ?? tool) : tool
+  if (t === 'rect')    rectBorderDashStyle    = val
+  if (t === 'ellipse') ellipseBorderDashStyle = val
+  if (selectedId) updateSelectedAnnot({ borderDashStyle: val })
+  else renderAnnotations()
+})
 
 // Font size — manual input
 document.getElementById('fontSizeInput').addEventListener('input', e => {
@@ -1145,7 +1451,7 @@ document.getElementById('fontFamilySelect').addEventListener('change', e => {
     })
 })
 
-// Shared shadow checkbox (rect / ellipse / fillrect / fillellipse / number)
+// Shared shadow checkbox (rect / ellipse / fillrect / fillellipse / number / line / polyline / pen)
 document.getElementById('shadowCheck').addEventListener('change', e => {
   const val = e.target.checked
   if      (tool === 'rect')        rectShadow        = val
@@ -1153,6 +1459,8 @@ document.getElementById('shadowCheck').addEventListener('change', e => {
   else if (tool === 'fillrect')    fillrectShadow    = val
   else if (tool === 'fillellipse') fillellipseShadow = val
   else if (tool === 'number')      numShadow         = val
+  else if (tool === 'line' || tool === 'polyline') lineShadow = val
+  else if (tool === 'pen')         penShadow         = val
   if (selectedId) {
     const a = annotations.find(x => x.id === selectedId)
     if (a) {
@@ -1161,6 +1469,8 @@ document.getElementById('shadowCheck').addEventListener('change', e => {
       if (a.type === 'fillrect')    fillrectShadow    = val
       if (a.type === 'fillellipse') fillellipseShadow = val
       if (a.type === 'number')      numShadow         = val
+      if (a.type === 'line' || a.type === 'polyline') lineShadow = val
+      if (a.type === 'pen')         penShadow         = val
       updateSelectedAnnot({ shadow: val })
     }
   }
@@ -1249,8 +1559,10 @@ document.getElementById('btnRedo').addEventListener('click', redo)
 function setTool(t) {
   commitText(false)
   hideColorPanel()
-  if (t !== 'crop') { cropRect = null; isCropping = false; cropMoving = false; cropResizeH = null; cropMoveStart = null }
-  if (t !== 'ocr')  { ocrRect = null; isOcrSelecting = false; ocrStart = null }
+  if (t !== 'crop')      { cropRect = null; isCropping = false; cropMoving = false; cropResizeH = null; cropMoveStart = null }
+  if (t !== 'ocr')       { ocrRect = null; isOcrSelecting = false; ocrStart = null }
+  if (t !== 'boxselect') { boxSelRect = null; isBoxSelecting = false; boxSelStart = null }
+  if (t !== 'pen')       { isPenDrawing = false; penPoints = [] }
   _cancelPolyline()   // 切換工具時取消任何進行中的折線
   tool       = t
   selectedId = null
@@ -1516,6 +1828,33 @@ function renderAnnotations() {
     annotCtx.restore()
   }
 
+  // Box-select overlay: green dashed rect + semi-transparent fill
+  if (tool === 'boxselect' && boxSelRect && boxSelRect.w > 1 && boxSelRect.h > 1) {
+    const r = boxSelRect
+    annotCtx.save()
+    annotCtx.strokeStyle = '#22c55e'
+    annotCtx.lineWidth   = 1.5
+    annotCtx.setLineDash([5, 3])
+    annotCtx.strokeRect(c(r.x), c(r.y), c(r.w), c(r.h))
+    annotCtx.fillStyle = 'rgba(34,197,94,0.10)'
+    annotCtx.fillRect(c(r.x), c(r.y), c(r.w), c(r.h))
+    annotCtx.setLineDash([])
+    annotCtx.restore()
+  }
+
+  // Pen tool live preview
+  if (isPenDrawing && penPoints.length >= 2) {
+    annotCtx.save()
+    drawPen(annotCtx, {
+      type: 'pen', points: penPoints,
+      color, thickness, lineStyle,
+      startCap, endCap,
+      penOpacity, penBorderColor,
+      shadow: penShadow,
+    })
+    annotCtx.restore()
+  }
+
   // 輸入中的文字即時預覽：在 canvas 畫出背景色塊、描邊、陰影效果，
   // textarea 的文字字元疊在正上方（定位相同），不會跑位
   if (textActive && textPos) {
@@ -1533,6 +1872,14 @@ function renderAnnotations() {
   }
 }
 
+// Shared offscreen canvas for opacity compositing (reused, never GC'd)
+let _offCanvas = null
+function _getOffCanvas(w, h) {
+  if (!_offCanvas) _offCanvas = document.createElement('canvas')
+  if (_offCanvas.width !== w || _offCanvas.height !== h) { _offCanvas.width = w; _offCanvas.height = h }
+  return _offCanvas
+}
+
 function drawOne(ctx, a) {
   if (a.type === 'img') {
     const img = getImg(a)
@@ -1541,6 +1888,32 @@ function drawOne(ctx, a) {
     }
     return
   }
+
+  // For stroke tools with opacity < 100, use offscreen compositing so
+  // caps and border don't X-ray through the main stroke
+  const strokeOpacity = a.type === 'pen' ? (a.penOpacity ?? 100) : (a.opacity ?? 100)
+  if (strokeOpacity < 100 && ['line','polyline','pen'].includes(a.type)) {
+    const off  = _getOffCanvas(ctx.canvas.width, ctx.canvas.height)
+    const octx = off.getContext('2d')
+    octx.clearRect(0, 0, off.width, off.height)
+    octx.strokeStyle = a.color
+    octx.fillStyle   = a.color
+    octx.lineWidth   = a.thickness * viewScale
+    const fullA = a.type === 'pen'
+      ? { ...a, penOpacity: 100 }
+      : { ...a, opacity: 100 }
+    switch (a.type) {
+      case 'line':     drawLine(octx, fullA);     break
+      case 'polyline': drawPolyline(octx, fullA); break
+      case 'pen':      drawPen(octx, fullA);      break
+    }
+    ctx.save()
+    ctx.globalAlpha = strokeOpacity / 100
+    ctx.drawImage(off, 0, 0)
+    ctx.restore()
+    return
+  }
+
   ctx.save()
   ctx.strokeStyle = a.color
   ctx.fillStyle   = a.color
@@ -1554,6 +1927,7 @@ function drawOne(ctx, a) {
     case 'text':     drawText(ctx, a);     break
     case 'number':   drawNumber(ctx, a);   break
     case 'polyline': drawPolyline(ctx, a); break
+    case 'pen':      drawPen(ctx, a);      break
   }
   ctx.restore()
 }
@@ -1564,20 +1938,70 @@ function cornerRadiusPx(a) {
 }
 
 function drawRect(ctx, a) {
+  const r  = cornerRadiusPx(a)
+  const sz = (a.thickness ?? 2) * viewScale
+  const lsd = getLineDash(a.lineStyle ?? 'solid', sz)
+
+  // Outer border (offset frame, no shadow)
+  if (a.borderColor && a.borderColor !== 'transparent') {
+    ctx.save()
+    ctx.strokeStyle = a.borderColor
+    ctx.lineWidth   = (a.borderThickness ?? a.thickness ?? 2) * viewScale
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0
+    ctx.setLineDash(getLineDash(a.borderDashStyle ?? 'solid', ctx.lineWidth))
+    const ox = (a.borderOffsetX ?? 0) * viewScale
+    const oy = (a.borderOffsetY ?? 0) * viewScale
+    if (r > 0) {
+      ctx.beginPath(); ctx.roundRect(c(a.x)+ox, c(a.y)+oy, c(a.w), c(a.h), r); ctx.stroke()
+    } else {
+      ctx.strokeRect(c(a.x)+ox, c(a.y)+oy, c(a.w), c(a.h))
+    }
+    ctx.setLineDash([])
+    ctx.restore()
+  }
+
+  // Main stroke
+  ctx.save()
   if (a.shadow) setShadow(ctx)
-  const r = cornerRadiusPx(a)
+  ctx.globalAlpha = (a.opacity ?? 100) / 100
+  ctx.setLineDash(lsd)
   if (r > 0) {
     ctx.beginPath(); ctx.roundRect(c(a.x), c(a.y), c(a.w), c(a.h), r); ctx.stroke()
   } else {
     ctx.strokeRect(c(a.x), c(a.y), c(a.w), c(a.h))
   }
+  ctx.setLineDash([])
+  ctx.restore()
 }
 
 function drawEllipse(ctx, a) {
+  const cx  = c(a.x + a.w / 2), cy = c(a.y + a.h / 2)
+  const rx  = Math.max(c(a.w / 2), 1), ry = Math.max(c(a.h / 2), 1)
+  const sz  = (a.thickness ?? 2) * viewScale
+  const lsd = getLineDash(a.lineStyle ?? 'solid', sz)
+
+  // Outer border (offset frame, no shadow)
+  if (a.borderColor && a.borderColor !== 'transparent') {
+    ctx.save()
+    ctx.strokeStyle = a.borderColor
+    ctx.lineWidth   = (a.borderThickness ?? a.thickness ?? 2) * viewScale
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0
+    ctx.setLineDash(getLineDash(a.borderDashStyle ?? 'solid', ctx.lineWidth))
+    const ox = (a.borderOffsetX ?? 0) * viewScale
+    const oy = (a.borderOffsetY ?? 0) * viewScale
+    ctx.beginPath(); ctx.ellipse(cx+ox, cy+oy, rx, ry, 0, 0, Math.PI * 2); ctx.stroke()
+    ctx.setLineDash([])
+    ctx.restore()
+  }
+
+  // Main stroke
+  ctx.save()
   if (a.shadow) setShadow(ctx)
-  const cx = c(a.x + a.w / 2), cy = c(a.y + a.h / 2)
-  const rx = c(a.w / 2),       ry = c(a.h / 2)
-  ctx.beginPath(); ctx.ellipse(cx, cy, Math.max(rx, 1), Math.max(ry, 1), 0, 0, Math.PI * 2); ctx.stroke()
+  ctx.globalAlpha = (a.opacity ?? 100) / 100
+  ctx.setLineDash(lsd)
+  ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2); ctx.stroke()
+  ctx.setLineDash([])
+  ctx.restore()
 }
 
 function resolveGradientColor(col) {
@@ -1614,13 +2038,16 @@ function drawFillRect(ctx, a) {
     ctx.fillRect(rx, ry, rw, rh)
   }
   ctx.restore()
-  if (a.fillBorder !== false) {
+  if (a.fillBorder !== false && a.thickness > 0) {
+    const sz = (a.thickness ?? 2) * viewScale
     ctx.strokeStyle = a.fillBorderColor ?? '#ffffff'
+    ctx.setLineDash(getLineDash(a.lineStyle ?? 'solid', sz))
     if (r > 0) {
       ctx.beginPath(); ctx.roundRect(rx, ry, rw, rh, r); ctx.stroke()
     } else {
       ctx.strokeRect(rx, ry, rw, rh)
     }
+    ctx.setLineDash([])
   }
 }
 
@@ -1649,10 +2076,13 @@ function drawFillEllipse(ctx, a) {
   }
   ctx.fill()
   ctx.restore()
-  if (a.fillBorder !== false) {
+  if (a.fillBorder !== false && a.thickness > 0) {
+    const sz = (a.thickness ?? 2) * viewScale
     ctx.save()
     ctx.strokeStyle = a.fillBorderColor ?? '#ffffff'
+    ctx.setLineDash(getLineDash(a.lineStyle ?? 'solid', sz))
     ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2); ctx.stroke()
+    ctx.setLineDash([])
     ctx.restore()
   }
 }
@@ -1660,27 +2090,76 @@ function drawFillEllipse(ctx, a) {
 function drawLine(ctx, a) {
   const x1 = c(a.x1), y1 = c(a.y1), x2 = c(a.x2), y2 = c(a.y2)
   const sz  = (a.thickness * 4 + 8) * viewScale
+  const hasBorder = !!(a.lineBorderColor && a.lineBorderColor !== 'transparent')
+  // capBorderW: full stroke width → outer half acts as the visible border ring
+  const capBorderW = hasBorder ? ((a.borderThickness ?? a.thickness + 4) - a.thickness) * viewScale * 2 : 0
+  const capBorderCol = hasBorder ? a.lineBorderColor : null
+
+  if (a.shadow) setShadow(ctx)
+  ctx.globalAlpha = (a.opacity ?? 100) / 100
+  ctx.lineCap = capToLineCap(a.startCap, a.endCap)
+
+  // Trim stroke at arrow endpoints so the line body stops at the arrow base (not the tip),
+  // eliminating the square butt-cap that would otherwise poke through the triangle tip.
+  const ang      = Math.atan2(y2 - y1, x2 - x1)
+  const arrInset = sz * 0.8   // ≈ sz × |cos(2.5)|  (distance tip→base of arrow)
+  let sx1 = x1, sy1 = y1, sx2 = x2, sy2 = y2
+  if (a.startCap === 'arrow') { sx1 += Math.cos(ang) * arrInset; sy1 += Math.sin(ang) * arrInset }
+  if (a.endCap   === 'arrow') { sx2 -= Math.cos(ang) * arrInset; sy2 -= Math.sin(ang) * arrInset }
+
+  // Border stroke body
+  if (hasBorder) {
+    ctx.save()
+    ctx.strokeStyle = a.lineBorderColor
+    ctx.lineWidth   = (a.borderThickness ?? a.thickness + 4) * viewScale
+    ctx.setLineDash(getLineDash(a.borderDashStyle ?? a.lineStyle, sz))
+    ctx.beginPath(); ctx.moveTo(sx1, sy1); ctx.lineTo(sx2, sy2); ctx.stroke()
+    ctx.setLineDash([])
+    ctx.restore()
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0
+  }
+
+  // Main stroke body
   ctx.beginPath()
-  if (a.lineStyle === 'dashed') ctx.setLineDash([sz * 1.2, sz * 0.7])
-  ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke()
+  ctx.setLineDash(getLineDash(a.lineStyle, sz))
+  ctx.moveTo(sx1, sy1); ctx.lineTo(sx2, sy2); ctx.stroke()
   ctx.setLineDash([])
-  drawCap(ctx, a.startCap, x2, y2, x1, y1, a.color, sz)
-  drawCap(ctx, a.endCap,   x1, y1, x2, y2, a.color, sz)
+
+  // Caps: single call — strokes border outline first, then fills main colour
+  drawCap(ctx, a.startCap, x2, y2, x1, y1, a.color, sz, capBorderCol, capBorderW)
+  drawCap(ctx, a.endCap,   x1, y1, x2, y2, a.color, sz, capBorderCol, capBorderW)
 }
 
-function drawCap(ctx, type, fx, fy, tx, ty, col, sz) {
-  if (type === 'none') return
+// borderCol / borderW: if set, stroke the cap path in border colour BEFORE filling in col.
+// Canvas stroke is centred on the path, so the outer half of the stroke acts as the visible border.
+function drawCap(ctx, type, fx, fy, tx, ty, col, sz, borderCol, borderW) {
+  if (type === 'none' || type === 'round' || type === 'square') return  // handled by lineCap
   const ang = Math.atan2(ty - fy, tx - fx)
-  ctx.fillStyle = col
+  const hasBorder = borderCol && borderCol !== 'transparent' && borderW > 0
+  ctx.save()
   if (type === 'arrow') {
     ctx.beginPath()
     ctx.moveTo(tx, ty)
     ctx.lineTo(tx + Math.cos(ang + 2.5) * sz, ty + Math.sin(ang + 2.5) * sz)
     ctx.lineTo(tx + Math.cos(ang - 2.5) * sz, ty + Math.sin(ang - 2.5) * sz)
-    ctx.closePath(); ctx.fill()
+    ctx.closePath()
+    if (hasBorder) {
+      ctx.lineJoin = 'miter'
+      ctx.strokeStyle = borderCol
+      ctx.lineWidth = borderW
+      ctx.stroke()
+    }
+    ctx.fillStyle = col; ctx.fill()
   } else if (type === 'dot') {
-    ctx.beginPath(); ctx.arc(tx, ty, sz * 0.42, 0, Math.PI * 2); ctx.fill()
+    ctx.beginPath(); ctx.arc(tx, ty, sz * 0.42, 0, Math.PI * 2)
+    if (hasBorder) {
+      ctx.strokeStyle = borderCol
+      ctx.lineWidth = borderW
+      ctx.stroke()
+    }
+    ctx.fillStyle = col; ctx.fill()
   }
+  ctx.restore()
 }
 
 function drawText(ctx, a, { previewOnly = false } = {}) {
@@ -1782,14 +2261,31 @@ function drawPolyline(ctx, a, liveEnd) {
   if (pts.length < 1) return
 
   const sz = (a.thickness * 4 + 8) * viewScale
-  if (a.lineStyle === 'dashed') ctx.setLineDash([sz * 1.2, sz * 0.7])
+  if (a.shadow) setShadow(ctx)
+  ctx.globalAlpha = (a.opacity ?? 100) / 100
+  ctx.lineCap = capToLineCap(a.startCap, a.endCap)
 
-  ctx.beginPath()
-  ctx.moveTo(pts[0].x, pts[0].y)
-  // 儲存的頂點已 snap 至 H/V，每段為純直線
-  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y)
-  // live 段：從最後頂點路由至游標（仍需 H/V elbow）
-  if (liveEnd) _polylineRouteThrough(ctx, pts[pts.length - 1], { x: c(liveEnd.x), y: c(liveEnd.y) })
+  function buildPath() {
+    ctx.beginPath()
+    ctx.moveTo(pts[0].x, pts[0].y)
+    for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y)
+    if (liveEnd) _polylineRouteThrough(ctx, pts[pts.length - 1], { x: c(liveEnd.x), y: c(liveEnd.y) })
+  }
+
+  // Border stroke
+  if (!liveEnd && a.lineBorderColor && a.lineBorderColor !== 'transparent') {
+    ctx.save()
+    ctx.strokeStyle = a.lineBorderColor
+    ctx.lineWidth   = (a.thickness + 4) * viewScale
+    ctx.setLineDash(getLineDash(a.lineStyle, sz))
+    buildPath(); ctx.stroke()
+    ctx.setLineDash([])
+    ctx.restore()
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0
+  }
+
+  ctx.setLineDash(getLineDash(a.lineStyle, sz))
+  buildPath()
   ctx.stroke()
   ctx.setLineDash([])
 
@@ -1803,6 +2299,112 @@ function drawPolyline(ctx, a, liveEnd) {
   drawCap(ctx, a.endCap, pN1.x, pN1.y, pN.x, pN.y, a.color, sz)
 }
 
+function drawPen(ctx, a) {
+  const pts = a.points
+  if (!pts || pts.length < 2) return
+
+  const sz = (a.thickness * 4 + 8) * viewScale
+  const hasBorder  = !!(a.penBorderColor && a.penBorderColor !== 'transparent')
+  const capBorderW = hasBorder ? ((a.borderThickness ?? a.thickness + 4) - a.thickness) * viewScale * 2 : 0
+  const capBorderCol = hasBorder ? a.penBorderColor : null
+
+  // Trim amount in image-pixels so arrow-capped strokes stop at the arrow base
+  const insetImgPx = (a.thickness * 4 + 8) * 0.8
+
+  ctx.save()
+  if (a.shadow) setShadow(ctx)
+  ctx.globalAlpha = (a.penOpacity ?? 100) / 100
+  ctx.lineCap  = capToLineCap(a.startCap ?? 'round', a.endCap ?? 'round')
+  ctx.lineJoin = 'round'
+
+  // Find a point at least `threshold` image-px from tip for a stable direction.
+  // Threshold is capped at ~2× thickness so we read the LOCAL direction near the
+  // tip rather than looking so far back that a curved stroke gives a wrong angle.
+  function stableFrom(tipIdx, step) {
+    const threshold = Math.max(a.thickness * 2 + 4, Math.min(insetImgPx, a.thickness * 2.5 + 10))
+    const tip = pts[tipIdx]
+    for (let i = tipIdx + step; i >= 0 && i < pts.length; i += step) {
+      if (Math.hypot(pts[i].x - tip.x, pts[i].y - tip.y) >= threshold) return pts[i]
+    }
+    const fb = tipIdx + step
+    return pts[Math.max(0, Math.min(pts.length - 1, fb))]
+  }
+
+  const p0    = pts[0],              pFrom0 = stableFrom(0, 1)
+  const pN    = pts[pts.length - 1], pFromN = stableFrom(pts.length - 1, -1)
+
+  // Compute arrow base: insetImgPx image-px behind tip along the SAME stable direction
+  // as the drawCap call uses. Both stroke-end and arrow-base share this exact point.
+  function arrowBase(tip, from) {
+    const dx = tip.x - from.x, dy = tip.y - from.y
+    const dist = Math.hypot(dx, dy)
+    if (dist < 0.001) return tip
+    return { x: tip.x - (dx / dist) * insetImgPx, y: tip.y - (dy / dist) * insetImgPx }
+  }
+
+  // Build smooth bezier path, terminating exactly at the arrow base.
+  // A tiny axial step at each arrow endpoint forces the path tangent to align
+  // with the arrow axis so the butt cap is perpendicular to it — hidden under
+  // the arrow fill and causing no露餡 (stroke-head bleed) or gap.
+  function buildPath() {
+    ctx.beginPath()
+
+    // ── Start ────────────────────────────────────────────────────────────────
+    if (a.startCap === 'arrow') {
+      const base = arrowBase(p0, pFrom0)
+      const dx = p0.x - pFrom0.x, dy = p0.y - pFrom0.y
+      const len = Math.hypot(dx, dy)
+      ctx.moveTo(c(base.x), c(base.y))
+      // Step 0.5 image-px forward along the arrow axis so the butt cap faces the arrow
+      if (len > 0) ctx.lineTo(c(base.x + dx / len * 0.5), c(base.y + dy / len * 0.5))
+    } else {
+      ctx.moveTo(c(pts[0].x), c(pts[0].y))
+    }
+
+    for (let i = 1; i < pts.length - 1; i++) {
+      const mx = (pts[i].x + pts[i + 1].x) / 2
+      const my = (pts[i].y + pts[i + 1].y) / 2
+      ctx.quadraticCurveTo(c(pts[i].x), c(pts[i].y), c(mx), c(my))
+    }
+
+    // ── End ──────────────────────────────────────────────────────────────────
+    if (a.endCap === 'arrow') {
+      const base = arrowBase(pN, pFromN)
+      const dx = pN.x - pFromN.x, dy = pN.y - pFromN.y
+      const len = Math.hypot(dx, dy)
+      // Step 0.5 image-px back from base so last segment arrives along the axis
+      if (len > 0) ctx.lineTo(c(base.x - dx / len * 0.5), c(base.y - dy / len * 0.5))
+      ctx.lineTo(c(base.x), c(base.y))
+    } else {
+      ctx.lineTo(c(pts[pts.length - 1].x), c(pts[pts.length - 1].y))
+    }
+  }
+
+  // Border stroke body
+  if (hasBorder) {
+    buildPath()
+    ctx.strokeStyle = a.penBorderColor
+    ctx.lineWidth   = (a.borderThickness ?? a.thickness + 4) * viewScale
+    ctx.setLineDash(getLineDash(a.borderDashStyle ?? 'solid', sz))
+    ctx.stroke()
+    ctx.setLineDash([])
+  }
+
+  // Main stroke body
+  ctx.setLineDash(getLineDash(a.lineStyle, sz))
+  buildPath()
+  ctx.strokeStyle = a.color
+  ctx.lineWidth   = a.thickness * viewScale
+  ctx.stroke()
+  ctx.setLineDash([])
+
+  // Caps: stroke border outline first, then fill main colour (no separate border-triangle)
+  drawCap(ctx, a.startCap ?? 'round', c(pFrom0.x), c(pFrom0.y), c(p0.x), c(p0.y), a.color, sz, capBorderCol, capBorderW)
+  drawCap(ctx, a.endCap   ?? 'round', c(pFromN.x), c(pFromN.y), c(pN.x), c(pN.y), a.color, sz, capBorderCol, capBorderW)
+
+  ctx.restore()
+}
+
 function _cancelPolyline() {
   polylineActive = false; polylinePoints = []; polylineMouse = null
 }
@@ -1811,9 +2413,8 @@ function _commitPolyline() {
   if (polylinePoints.length < 2) { _cancelPolyline(); renderAnnotations(); return }
   const ann = {
     id: newId(), type: 'polyline',
-    color, thickness, lineStyle, startCap, endCap,
+    color, thickness, lineStyle, startCap, endCap, lineBorderColor, shadow: lineShadow,
     points: [...polylinePoints],
-    shadow: false,
   }
   _cancelPolyline()
   pushHistory()
@@ -1923,6 +2524,22 @@ function getHandles(a) {
     const r = a.size ?? 14
     return [{ id: 'se', x: a.x + r, y: a.y + r, cursor: 'nwse-resize' }]
   }
+  if (a.type === 'pen') {
+    const b = bounds(a)
+    if (!b) return []
+    const { x, y, w, h } = b
+    const mx = x + w / 2, my = y + h / 2
+    return [
+      { id: 'bb_nw', x,      y,      cursor: 'nwse-resize' },
+      { id: 'bb_n',  x: mx,  y,      cursor: 'ns-resize'   },
+      { id: 'bb_ne', x: x+w, y,      cursor: 'nesw-resize' },
+      { id: 'bb_e',  x: x+w, y: my,  cursor: 'ew-resize'   },
+      { id: 'bb_se', x: x+w, y: y+h, cursor: 'nwse-resize' },
+      { id: 'bb_s',  x: mx,  y: y+h, cursor: 'ns-resize'   },
+      { id: 'bb_sw', x,      y: y+h, cursor: 'nesw-resize' },
+      { id: 'bb_w',  x,      y: my,  cursor: 'ew-resize'   },
+    ]
+  }
   if (a.type === 'polyline') {
     const b = bounds(a)
     const { x, y, w, h } = b
@@ -1971,16 +2588,15 @@ function startResize(hId, a) {
       case 'w':  info.fixX = x+w; info.fixY = y;   info.fixH = h; break
     }
   }
-  // polyline：外框縮放手把（bb_*）或頂點移動手把（v*）
-  if (a.type === 'polyline') {
+  // pen / polyline：外框縮放手把（bb_*）
+  if (a.type === 'pen' || a.type === 'polyline') {
     if (hId.startsWith('bb_')) {
-      // 整體縮放：記錄原始所有頂點與外框，供 applyResize 等比例縮放
       const b = bounds(a)
       const { x, y, w, h } = b
       info.isBBoxResize  = true
       info.origPoints    = a.points.map(p => ({ ...p }))
       info.origBounds    = { ...b }
-      const sub = hId.slice(3)  // 'nw' / 'n' / ...
+      const sub = hId.slice(3)
       switch (sub) {
         case 'nw': info.fixX = x+w; info.fixY = y+h; break
         case 'ne': info.fixX = x;   info.fixY = y+h; break
@@ -1991,7 +2607,8 @@ function startResize(hId, a) {
         case 'e':  info.fixX = x;   info.fixY = y;   info.fixH = h; break
         case 'w':  info.fixX = x+w; info.fixY = y;   info.fixH = h; break
       }
-    } else {
+    }
+    if (a.type === 'polyline' && !hId.startsWith('bb_')) {
       // 頂點移動：id 格式 'vN'，記錄頂點 index + 拖曳起始位置（Shift 吸附用）
       info.ptIdx = parseInt(hId.slice(1))
       info.origX = a.points[info.ptIdx].x
@@ -2065,7 +2682,7 @@ function applyResize(a, pos) {
     const d = Math.max(Math.abs(pos.x - h.cx), Math.abs(pos.y - h.cy))
     a.size = Math.max(d, 6)
   }
-  if (a.type === 'polyline') {
+  if (a.type === 'pen' || a.type === 'polyline') {
     if (h.isBBoxResize) {
       // 整體縮放：計算新外框後等比例縮放所有頂點
       const ob = h.origBounds
@@ -2137,22 +2754,34 @@ function buildPreview() {
   const base = { id: '_p', color, thickness }
   const s = drawStart, e = drawCurrent
   if (tool === 'rect')
-    return { ...base, type:'rect', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y), shadow: rectShadow, cornerRadius }
+    return { ...base, type:'rect', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y),
+             lineStyle:rectLineStyle, opacity:rectOpacity,
+             borderColor:rectBorderColor, borderThickness:rectBorderThickness, borderDashStyle:rectBorderDashStyle,
+             borderOffsetX:rectBorderOffsetX, borderOffsetY:rectBorderOffsetY,
+             shadow:rectShadow, cornerRadius }
   if (tool === 'ellipse')
-    return { ...base, type:'ellipse', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y), shadow: ellipseShadow }
+    return { ...base, type:'ellipse', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y),
+             lineStyle:ellipseLineStyle, opacity:ellipseOpacity,
+             borderColor:ellipseBorderColor, borderThickness:ellipseBorderThickness, borderDashStyle:ellipseBorderDashStyle,
+             borderOffsetX:ellipseBorderOffsetX, borderOffsetY:ellipseBorderOffsetY,
+             shadow:ellipseShadow }
   if (tool === 'fillrect')
     return { ...base, type:'fillrect', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y),
-             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled, fillBorderColor, shadow: fillrectShadow, cornerRadius }
+             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorderColor,
+             lineStyle:fillrectLineStyle, shadow:fillrectShadow, cornerRadius }
   if (tool === 'fillellipse')
     return { ...base, type:'fillellipse', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y),
-             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled, fillBorderColor, shadow: fillellipseShadow }
+             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorderColor,
+             lineStyle:fillellipseLineStyle, shadow:fillellipseShadow }
   if (tool === 'line') {
     let x2 = e.x, y2 = e.y
     if (lineOrtho) {
       if (Math.abs(e.x - s.x) >= Math.abs(e.y - s.y)) y2 = s.y
       else x2 = s.x
     }
-    return { ...base, type:'line', x1:s.x, y1:s.y, x2, y2, lineStyle, startCap, endCap, lineOrtho }
+    return { ...base, type:'line', x1:s.x, y1:s.y, x2, y2, lineStyle, startCap, endCap, lineOrtho,
+             lineBorderColor, borderThickness:lineBorderThickness, borderDashStyle:lineBorderDashStyle,
+             opacity:lineOpacity, shadow:lineShadow }
   }
   return null
 }
@@ -2162,24 +2791,34 @@ function commitShape(start, end) {
   if (tool === 'rect') {
     const w = Math.abs(end.x - start.x), h = Math.abs(end.y - start.y)
     if (w < 2 || h < 2) return null
-    return { ...base, type:'rect', x:Math.min(start.x,end.x), y:Math.min(start.y,end.y), w, h, shadow: rectShadow, cornerRadius }
+    return { ...base, type:'rect', x:Math.min(start.x,end.x), y:Math.min(start.y,end.y), w, h,
+             lineStyle:rectLineStyle, opacity:rectOpacity,
+             borderColor:rectBorderColor, borderThickness:rectBorderThickness, borderDashStyle:rectBorderDashStyle,
+             borderOffsetX:rectBorderOffsetX, borderOffsetY:rectBorderOffsetY,
+             shadow:rectShadow, cornerRadius }
   }
   if (tool === 'ellipse') {
     const w = Math.abs(end.x - start.x), h = Math.abs(end.y - start.y)
     if (w < 2 || h < 2) return null
-    return { ...base, type:'ellipse', x:Math.min(start.x,end.x), y:Math.min(start.y,end.y), w, h, shadow: ellipseShadow }
+    return { ...base, type:'ellipse', x:Math.min(start.x,end.x), y:Math.min(start.y,end.y), w, h,
+             lineStyle:ellipseLineStyle, opacity:ellipseOpacity,
+             borderColor:ellipseBorderColor, borderThickness:ellipseBorderThickness, borderDashStyle:ellipseBorderDashStyle,
+             borderOffsetX:ellipseBorderOffsetX, borderOffsetY:ellipseBorderOffsetY,
+             shadow:ellipseShadow }
   }
   if (tool === 'fillrect') {
     const w = Math.abs(end.x - start.x), h = Math.abs(end.y - start.y)
     if (w < 2 || h < 2) return null
     return { ...base, type:'fillrect', x:Math.min(start.x,end.x), y:Math.min(start.y,end.y), w, h,
-             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled, fillBorderColor, shadow: fillrectShadow, cornerRadius }
+             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorderColor,
+             lineStyle:fillrectLineStyle, shadow:fillrectShadow, cornerRadius }
   }
   if (tool === 'fillellipse') {
     const w = Math.abs(end.x - start.x), h = Math.abs(end.y - start.y)
     if (w < 2 || h < 2) return null
     return { ...base, type:'fillellipse', x:Math.min(start.x,end.x), y:Math.min(start.y,end.y), w, h,
-             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled, fillBorderColor, shadow: fillellipseShadow }
+             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorderColor,
+             lineStyle:fillellipseLineStyle, shadow:fillellipseShadow }
   }
   if (tool === 'line') {
     let ex = end.x, ey = end.y
@@ -2188,7 +2827,9 @@ function commitShape(start, end) {
       else ex = start.x
     }
     if (Math.hypot(ex-start.x, ey-start.y) < 2) return null
-    return { ...base, type:'line', x1:start.x, y1:start.y, x2:ex, y2:ey, lineStyle, startCap, endCap, lineOrtho }
+    return { ...base, type:'line', x1:start.x, y1:start.y, x2:ex, y2:ey, lineStyle, startCap, endCap, lineOrtho,
+             lineBorderColor, borderThickness:lineBorderThickness, borderDashStyle:lineBorderDashStyle,
+             opacity:lineOpacity, shadow:lineShadow }
   }
   return null
 }
@@ -2250,7 +2891,8 @@ function bounds(a) {
       return { x:bx, y:a.y, w:maxW, h:lines.length*a.fontSize*1.25 }
     }
     case 'number': { const r = a.size ?? 14; return { x:a.x-r, y:a.y-r, w:r*2, h:r*2 } }
-    case 'polyline': {
+    case 'polyline':
+    case 'pen': {
       const xs = a.points.map(p => p.x), ys = a.points.map(p => p.y)
       const minX = Math.min(...xs), maxX = Math.max(...xs)
       const minY = Math.min(...ys), maxY = Math.max(...ys)
@@ -2310,6 +2952,14 @@ annotCanvas.addEventListener('mousedown', e => {
     ocrStart = pos
     ocrRect  = { x: pos.x, y: pos.y, w: 0, h: 0 }
     document.getElementById('ocrStatusLabel').textContent = '請拖曳選取辨識區域'
+    return
+  }
+
+  if (tool === 'boxselect') {
+    isBoxSelecting = true
+    boxSelStart    = pos
+    boxSelRect     = { x: pos.x, y: pos.y, w: 0, h: 0 }
+    syncBoxSelUI()
     return
   }
 
@@ -2396,6 +3046,12 @@ annotCanvas.addEventListener('mousedown', e => {
     return
   }
 
+  if (tool === 'pen') {
+    isPenDrawing = true
+    penPoints    = [{ x: pos.x, y: pos.y }]
+    return
+  }
+
   isDrawing = true; drawStart = pos; drawCurrent = pos
 })
 
@@ -2457,6 +3113,18 @@ annotCanvas.addEventListener('mousemove', e => {
     return
   }
 
+  if (isBoxSelecting && boxSelStart) {
+    boxSelRect = {
+      x: Math.min(boxSelStart.x, pos.x),
+      y: Math.min(boxSelStart.y, pos.y),
+      w: Math.abs(pos.x - boxSelStart.x),
+      h: Math.abs(pos.y - boxSelStart.y)
+    }
+    syncBoxSelUI()
+    renderAnnotations()
+    return
+  }
+
   if (isResizing && selectedId) {
     const a = annotations.find(x => x.id === selectedId)
     if (a) {
@@ -2498,6 +3166,15 @@ annotCanvas.addEventListener('mousemove', e => {
     return
   }
 
+  if (isPenDrawing) {
+    // Thin out points: only add if moved > 2 image px from last point
+    const last = penPoints[penPoints.length - 1]
+    if (Math.hypot(pos.x - last.x, pos.y - last.y) > 2 / viewScale) {
+      penPoints.push({ x: pos.x, y: pos.y })
+      renderAnnotations()
+    }
+    return
+  }
   if (polylineActive) { polylineMouse = pos; renderAnnotations(); return }
   if (isDrawing) {
     // Shift 鍵：線條鎖定水平／垂直（類 PPT 行為）；矩形鎖正方形
@@ -2587,6 +3264,38 @@ document.addEventListener('mouseup', e => {
     return
   }
 
+  if (isBoxSelecting) {
+    isBoxSelecting = false
+    if (!boxSelRect || boxSelRect.w < 4 || boxSelRect.h < 4) {
+      boxSelRect = null
+    }
+    syncBoxSelUI()
+    renderAnnotations()
+    return
+  }
+
+  if (isPenDrawing) {
+    isPenDrawing = false
+    if (penPoints.length >= 2) {
+      const ann = {
+        id: newId(), type: 'pen',
+        color, thickness, lineStyle,
+        startCap, endCap,
+        penOpacity, penBorderColor,
+        borderThickness: penBorderThickness, borderDashStyle: penBorderDashStyle,
+        shadow: penShadow,
+        points: penPoints.slice(),
+      }
+      pushHistory()
+      annotations.push(ann)
+      setTool('select'); selectedId = ann.id
+      showOptionsForAnnot(ann)
+    }
+    penPoints = []
+    renderAnnotations()
+    return
+  }
+
   if (isResizing) {
     isResizing = false
     pushHistory()
@@ -2620,7 +3329,8 @@ function moveAnnot(a, dx, dy) {
     case 'text':
     case 'number': a.x += dx; a.y += dy; break
     case 'line':     a.x1 += dx; a.y1 += dy; a.x2 += dx; a.y2 += dy; break
-    case 'polyline': a.points.forEach(p => { p.x += dx; p.y += dy }); break
+    case 'polyline':
+    case 'pen':      a.points.forEach(p => { p.x += dx; p.y += dy }); break
   }
 }
 
@@ -2844,16 +3554,41 @@ document.addEventListener('keydown', e => {
 
   // Copy / paste for all annotation types (except overlay images)
   if (meta && (e.key === 'c' || e.key === 'C')) {
+    // Box-select: Cmd+C copies the selected region as pixel clipboard
+    if (tool === 'boxselect' && boxSelRect && boxSelRect.w >= 4 && boxSelRect.h >= 4) {
+      e.preventDefault()
+      copyBoxSelection()
+      return
+    }
     const a = annotations.find(x => x.id === selectedId)
     if (a && a.type !== 'img') { annotClipboard = JSON.parse(JSON.stringify(a)); return }
   }
   if (meta && (e.key === 'v' || e.key === 'V')) {
+    // Paste pixel clipboard as floating img annotation
+    if (pixelClipboard) {
+      e.preventDefault()
+      const { dataURL, w, h } = pixelClipboard
+      // Place at centre of current view
+      const cx = Math.round(imgWidth  / 2 - w / 2)
+      const cy = Math.round(imgHeight / 2 - h / 2)
+      const id = newId()
+      const tempImg = new Image()
+      _imgCache.set(id, tempImg)
+      tempImg.onload = () => renderAnnotations()
+      tempImg.src = dataURL
+      pushHistory()
+      annotations.push({ id, type: 'img', x: cx, y: cy, w, h, src: dataURL, aspectRatio: w / h })
+      setTool('select')
+      selectedId = id
+      renderAnnotations()
+      return
+    }
     if (annotClipboard) {
       e.preventDefault()
       const newA = JSON.parse(JSON.stringify(annotClipboard))
       newA.id = newId()
       if (newA.type === 'line')     { newA.x1 += 8; newA.y1 += 8; newA.x2 += 8; newA.y2 += 8 }
-      else if (newA.type === 'polyline') { newA.points.forEach(p => { p.x += 8; p.y += 8 }) }
+      else if (newA.type === 'polyline' || newA.type === 'pen') { newA.points.forEach(p => { p.x += 8; p.y += 8 }) }
       else                               { newA.x  += 8; newA.y  += 8 }
       pushHistory()
       annotations.push(newA)
@@ -2870,7 +3605,9 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && tool === 'crop') { e.preventDefault(); confirmCrop(); return }
 
   switch (e.key) {
-    case 'v': case 'V': setTool('select'); break
+    case 'v': case 'V': setTool('select');    break
+    case 'm': case 'M': setTool('boxselect'); break
+    case 'p': case 'P': setTool('pen');      break
     case 'r': case 'R': setTool('rect');     break
     case 'b': case 'B': setTool('fillrect'); break
     case 'l': case 'L': setTool('line');     break
@@ -2886,6 +3623,7 @@ document.addEventListener('keydown', e => {
       if (polylineActive) { _cancelPolyline(); renderAnnotations(); break }
       if (tool === 'crop') { cancelCrop(); break }
       if (tool === 'ocr')  { ocrRect = null; isOcrSelecting = false; document.getElementById('ocrStatusLabel').textContent = '請拖曳選取辨識區域'; renderAnnotations(); break }
+      if (tool === 'boxselect') { boxSelRect = null; isBoxSelecting = false; syncBoxSelUI(); renderAnnotations(); break }
       selectedId = null
       isDrawing  = false
       if (tool === 'select') hideAllOptions()
@@ -3037,6 +3775,38 @@ function cancelCrop() {
 
 document.getElementById('btnCropConfirm').addEventListener('click', confirmCrop)
 document.getElementById('btnCropCancel').addEventListener('click', cancelCrop)
+
+// ─── Box select ───────────────────────────────────────────────────────────────
+
+function copyBoxSelection() {
+  if (!boxSelRect || boxSelRect.w < 4 || boxSelRect.h < 4) return
+
+  const r = boxSelRect
+  const sw = Math.round(r.w), sh = Math.round(r.h)
+
+  const off = document.createElement('canvas')
+  off.width  = imgWidth
+  off.height = imgHeight
+  const offCtx = off.getContext('2d')
+  offCtx.drawImage(imgElement, 0, 0, imgWidth, imgHeight)
+  const savedScale = viewScale
+  viewScale = 1
+  annotations.forEach(a => drawOne(offCtx, a))
+  viewScale = savedScale
+
+  const crop = document.createElement('canvas')
+  crop.width  = sw
+  crop.height = sh
+  crop.getContext('2d').drawImage(off, Math.round(r.x), Math.round(r.y), sw, sh, 0, 0, sw, sh)
+  const dataURL = crop.toDataURL('image/png')
+
+  pixelClipboard = { dataURL, w: sw, h: sh }
+
+  const { nativeImage, clipboard } = require('electron')
+  clipboard.writeImage(nativeImage.createFromDataURL(dataURL))
+
+  showToast(`已複製 ${sw} × ${sh} px，Cmd+V 貼上為浮動圖層`)
+}
 
 // ─── OCR ─────────────────────────────────────────────────────────────────────
 
