@@ -5,6 +5,282 @@
   <title>圖片編輯器</title>
   <link rel="stylesheet" href="editor.css">
 <style>
+/* ─── Drag & Drop Import Overlay ───────────────────────── */
+.drop-overlay {
+  position: fixed; inset: 0;
+  background: rgba(99,102,241,0.12);
+  border: 3px dashed #a78bfa;
+  border-radius: 12px;
+  z-index: 2500;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.drop-overlay.active { opacity: 1; }
+.drop-overlay-label {
+  color: #a78bfa;
+  font-size: 18px;
+  font-weight: 700;
+  background: rgba(18,18,30,0.88);
+  padding: 12px 28px;
+  border-radius: 8px;
+  letter-spacing: 0.02em;
+}
+
+/* ─── Export / Copy buttons ─────────────────────────────── */
+.drag-export-btn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 12px;
+  font-size: 12px; font-weight: 500;
+  background: #1e2030;
+  border: 1px solid #3a3a5c;
+  border-radius: 6px;
+  color: #a0a8c0;
+  cursor: grab;
+  user-select: none;
+  transition: background 0.1s, border-color 0.1s;
+}
+.drag-export-btn:hover  { background: #2a2a48; border-color: #6b6baa; color: #d0d8f0; }
+.drag-export-btn:active { cursor: grabbing; }
+/* Floating drag-export button */
+.float-drag-export {
+  position: fixed; right: 20px; bottom: 56px;
+  display: flex; align-items: center; gap: 4px;
+  padding: 6px 12px 6px 2px;
+  background: #1e1e38; border: 1px solid #4a4a7a;
+  border-radius: 20px; color: #a0a8c8;
+  font-size: 12px; font-weight: 500;
+  user-select: none; z-index: 300;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.45);
+  transition: background 0.1s, border-color 0.1s;
+}
+.float-drag-export:hover { background: #2a2a48; border-color: #6b6baa; color: #d0d8f0; }
+.float-drag-move {
+  color: #555; font-size: 15px; line-height: 1;
+  cursor: move; padding: 2px 6px; border-radius: 10px;
+}
+.float-drag-move:hover { color: #888; background: rgba(255,255,255,0.07); }
+.float-drag-label { cursor: grab; }
+.float-drag-label:active { cursor: grabbing; }
+.copy-btn {
+  padding: 5px 12px;
+  font-size: 12px; font-weight: 500;
+  background: #1e2030;
+  border: 1px solid #3a3a5c;
+  border-radius: 6px;
+  color: #a0a8c0;
+  cursor: pointer;
+  transition: background 0.1s, border-color 0.1s;
+}
+.copy-btn:hover { background: #2a2a48; border-color: #6b6baa; color: #d0d8f0; }
+
+/* ─── Mosaic Options ────────────────────────────────────── */
+.mosaic-mode-group { display: flex; gap: 3px; }
+.mosaic-int-group  { display: flex; gap: 3px; }
+
+/* ─── Symbol Picker Panel ───────────────────────────────── */
+.symbol-picker-panel {
+  position: fixed;
+  background: #1e1e2e;
+  border: 1px solid #3a3a5c;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  z-index: 1400;
+  width: 260px;
+  overflow: hidden;
+}
+.symbol-picker-panel.hidden { display: none; }
+.sym-tabs {
+  display: flex;
+  border-bottom: 1px solid #2a2a42;
+}
+.sym-tab {
+  flex: 1;
+  padding: 6px 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b6b8a;
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color .15s, border-color .15s;
+}
+.sym-tab:hover { color: #c0c8e0; }
+.sym-tab.active { color: #a78bfa; border-bottom-color: #a78bfa; }
+.sym-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 2px;
+  padding: 8px;
+}
+.sym-btn {
+  font-size: 18px;
+  background: none;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  padding: 4px 0;
+  color: #d0d8f0;
+  line-height: 1;
+  transition: background .1s;
+  text-align: center;
+}
+.sym-btn:hover  { background: #2a2a4a; }
+.sym-btn.active { background: #3b2f7a; color: #a78bfa; }
+.symbol-preview-swatch {
+  width: 26px; height: 26px;
+  border: 1px solid #3a3a5c;
+  border-radius: 5px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  background: #12121e;
+  user-select: none;
+}
+.symbol-preview-swatch:hover { border-color: #6b6baa; }
+
+/* ─── Template Panel ────────────────────────────────────── */
+.template-panel {
+  position: fixed;
+  background: #1e1e2e;
+  border: 1px solid #3a3a5c;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  z-index: 1400;
+  padding: 0 12px 12px;
+  width: 282px;
+}
+.template-panel.hidden { display: none; }
+/* 拖拉把手標題列 */
+.tpl-drag-handle {
+  cursor: grab; user-select: none;
+  font-size: 11px; color: #888;
+  padding: 10px 0 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #2a2a42;
+  letter-spacing: .05em;
+  display: flex; align-items: center; gap: 6px;
+}
+.tpl-drag-handle::before { content: '⠿'; color: #555; font-size: 13px; }
+.tpl-drag-handle:active  { cursor: grabbing; }
+.tpl-close-btn {
+  margin-left: auto; background: none; border: none;
+  color: #555; font-size: 14px; cursor: pointer;
+  padding: 0 3px; line-height: 1; border-radius: 3px;
+}
+.tpl-close-btn:hover { color: #aaa; background: rgba(255,255,255,0.07); }
+.tpl-heading {
+  font-size: 11px;
+  color: #555;
+  margin: 8px 0 8px;
+  letter-spacing: .05em;
+}
+.tpl-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.tpl-card {
+  background: none;
+  border: 1.5px solid #2a2a42;
+  border-radius: 8px;
+  padding: 7px 4px 5px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  transition: border-color .15s, background .15s;
+  color: inherit;
+  font-family: inherit;
+}
+.tpl-card:hover { border-color: #a78bfa; background: rgba(167,139,250,0.08); }
+.tpl-preview {
+  width: 72px;
+  height: 50px;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+}
+/* 共用 Apple 縮圖白色圖片模擬 */
+[class^="tpl-preview-apple-"]::after {
+  content: ''; position: absolute;
+  inset: 8px; background: rgba(255,255,255,0.28); border-radius: 3px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.22);
+}
+/* Apple 紅 — 珊瑚 + 玫瑰 + 桃（mesh） */
+.tpl-preview-apple-red {
+  background: radial-gradient(ellipse at 10% 90%, rgba(225,55,85,0.90) 0%, transparent 65%),
+              radial-gradient(ellipse at 92% 12%, rgba(255,125,85,0.85) 0%, transparent 62%), #fff0f0;
+}
+/* Apple 橙 — 陶土 + 橙 + 金（mesh） */
+.tpl-preview-apple-orange {
+  background: radial-gradient(ellipse at 5% 92%,  rgba(205,72,22,0.90)  0%, transparent 65%),
+              radial-gradient(ellipse at 90%  8%,  rgba(255,200,50,0.85) 0%, transparent 62%), #fff8f0;
+}
+/* Apple 黃 — 琥珀 + 陽光 + 嫩草綠（跨色） */
+.tpl-preview-apple-yellow {
+  background: radial-gradient(ellipse at 8% 90%,   rgba(230,148,28,0.88) 0%, transparent 62%),
+              radial-gradient(ellipse at 88% 10%,   rgba(255,242,95,0.85) 0%, transparent 62%),
+              radial-gradient(ellipse at 88% 88%,   rgba(120,215,90,0.45) 0%, transparent 52%), #fffde8;
+}
+/* Apple 綠 — 深翠 + 薄荷青 + 檸檬黃（跨色） */
+.tpl-preview-apple-green {
+  background: radial-gradient(ellipse at 5% 92%,   rgba(4,112,80,0.92)   0%, transparent 65%),
+              radial-gradient(ellipse at 90%  6%,   rgba(50,228,170,0.80) 0%, transparent 62%),
+              radial-gradient(ellipse at 12% 12%,   rgba(210,230,40,0.50) 0%, transparent 50%), #edfff6;
+}
+/* Apple 藍 — 靛藍 + 水藍 + 紫藍（跨色） */
+.tpl-preview-apple-blue {
+  background: radial-gradient(ellipse at 5% 92%,  rgba(18,98,198,0.92)   0%, transparent 65%),
+              radial-gradient(ellipse at 90%  5%,  rgba(95,220,255,0.80)  0%, transparent 62%),
+              radial-gradient(ellipse at 13% 12%,  rgba(115,85,255,0.42)  0%, transparent 50%), #eef7ff;
+}
+/* Apple 紫 — 極光（紫 + 品紅 + 薰衣草，mesh） */
+.tpl-preview-apple-purple {
+  background: radial-gradient(ellipse at 5% 90%,  rgba(98,32,218,0.90)   0%, transparent 65%),
+              radial-gradient(ellipse at 92%  8%,  rgba(222,90,205,0.82)  0%, transparent 62%),
+              radial-gradient(ellipse at 10% 10%,  rgba(142,112,245,0.60) 0%, transparent 55%), #f8f0ff;
+}
+/* 社群尺寸按鈕 */
+.tpl-sizes { display: flex; gap: 5px; margin-bottom: 10px; }
+.tpl-size-btn {
+  flex: 1;
+  background: none; border: 1.5px solid #2a2a42; border-radius: 6px;
+  padding: 5px 2px; font-size: 10px; color: #9098b8; cursor: pointer;
+  transition: border-color .15s, background .15s, color .15s;
+  font-family: inherit; text-align: center; white-space: nowrap;
+}
+.tpl-size-btn:hover  { border-color: #a78bfa; color: #d0d8f8; }
+.tpl-size-btn.active { border-color: #a78bfa; background: rgba(167,139,250,0.15); color: #d0d8f8; }
+/* 三個滑桿 */
+.tpl-sliders { margin-bottom: 10px; }
+.tpl-slider-row {
+  display: flex; align-items: center; gap: 7px; margin-bottom: 6px;
+}
+.tpl-slider-label { font-size: 10px; color: #9098b8; width: 28px; flex-shrink: 0; }
+.tpl-range {
+  flex: 1; height: 3px;
+  -webkit-appearance: none; appearance: none;
+  background: #2a2a42; border-radius: 2px; outline: none; cursor: pointer;
+}
+.tpl-range::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 13px; height: 13px;
+  border-radius: 50%; background: #a78bfa; cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.45);
+  transition: background .15s;
+}
+.tpl-range::-webkit-slider-thumb:hover { background: #c4b5fd; }
+.tpl-slider-val { font-size: 10px; color: #d0d8f8; width: 22px; text-align: right; flex-shrink: 0; }
+.tpl-label {
+  font-size: 11px;
+  color: #9098b8;
+  text-align: center;
+}
+
 /* ─── OCR Panel ─────────────────────────────────────────── */
 .ocr-panel {
   position: fixed;
@@ -416,6 +692,43 @@
       <span class="opt-label" id="boxSelSizeLabel">請拖曳選取區域</span>
     </div>
 
+    <!-- 馬賽克工具 -->
+    <div class="opt-group hidden" id="grpMosaic">
+      <div class="mosaic-mode-group">
+        <button class="style-btn active" id="btnMosaicModeMosaic">馬賽克</button>
+        <button class="style-btn"        id="btnMosaicModeBlur" >模糊</button>
+      </div>
+      <div class="opt-sep"></div>
+      <span class="opt-label" id="mosaicIntLabel">區塊：</span>
+      <div class="opt-group" id="grpMosaicBlock">
+        <button class="style-btn"        data-block="4" >4</button>
+        <button class="style-btn"        data-block="8" >8</button>
+        <button class="style-btn active" data-block="16">16</button>
+        <button class="style-btn"        data-block="32">32</button>
+      </div>
+      <div class="opt-group hidden" id="grpMosaicBlur">
+        <button class="style-btn"        data-blur="4" >4px</button>
+        <button class="style-btn active" data-blur="8" >8px</button>
+        <button class="style-btn"        data-blur="16">16px</button>
+        <button class="style-btn"        data-blur="24">24px</button>
+      </div>
+    </div>
+
+    <!-- 符號印章工具 -->
+    <div class="opt-group hidden" id="grpSymbol">
+      <button class="style-btn" data-sym-group="shape"  title="形狀">★</button>
+      <button class="style-btn" data-sym-group="letter" title="字母">Ａ</button>
+      <button class="style-btn" data-sym-group="arrow"  title="箭頭">→</button>
+      <button class="style-btn" data-sym-group="misc"   title="其他">©</button>
+      <div class="opt-sep"></div>
+      <div class="symbol-preview-swatch" id="symbolPreviewSwatch" title="點擊重開面板">★</div>
+      <div class="opt-sep"></div>
+      <span class="opt-label">大小</span>
+      <input type="number" class="num-input" id="symbolSizeInput"
+             value="64" min="16" max="512" step="8" style="width:52px"
+             title="符號大小（圖像像素）">
+    </div>
+
   </div>
 
   <!-- Body -->
@@ -435,9 +748,9 @@
       <button class="tool-btn"        data-tool="text"         title="文字 (T)">T</button>
       <button class="tool-btn"        disabled                 title="去背（Pro 版功能）">⬜</button>
       <button class="tool-btn"        data-tool="number"       title="編號 (N)">①</button>
-      <button class="tool-btn"        disabled                 title="符號（即將推出）">☺</button>
+      <button class="tool-btn"        data-tool="symbol"       title="符號印章 (U)">☺</button>
       <button class="tool-btn"        data-tool="ocr"          title="OCR 文字辨識 (G)">文</button>
-      <button class="tool-btn"        disabled                 title="馬賽克（即將推出）">▦</button>
+      <button class="tool-btn"        data-tool="mosaic"       title="馬賽克/模糊 (X)">▦</button>
       <!-- 縮放群 -->
       <div class="tool-sep"></div>
       <button class="tool-btn"        data-tool="zoom-in"      title="放大 (⌘=)">⊕</button>
@@ -450,6 +763,7 @@
       <button class="tool-btn" id="btnResize"                  title="調整大小 (S)">⇔</button>
       <button class="tool-btn" id="btnExtend"                  title="延伸畫布 (E)">⊞</button>
       <button class="tool-btn" id="btnOverlayImg"              title="疊入圖片 (O)">⧉</button>
+      <button class="tool-btn" id="btnTemplate"               title="一鍵套版">▣</button>
       <!-- 操作群 -->
       <div class="tool-sep"></div>
       <button class="tool-btn" id="btnUndo"                    title="撤銷 (⌘Z)">↩</button>
@@ -477,7 +791,8 @@
   <div class="editor-bottombar">
     <span class="zoom-label" id="zoomLabel">100%</span>
     <div class="flex-spacer"></div>
-    <button class="save-btn" id="btnSave">完成並儲存</button>
+    <button class="copy-btn"        id="btnCopyImage"  title="複製最終圖片到剪貼簿 (⌘⇧C)">複製</button>
+    <button class="save-btn"        id="btnSave">完成並儲存</button>
   </div>
 
 </div>
@@ -662,12 +977,89 @@
   </div>
 </div>
 
+<!-- ─── Floating symbol picker panel ─────────────────────── -->
+<div id="symbolPickerPanel" class="symbol-picker-panel hidden" role="dialog" aria-label="符號選取面板">
+  <div class="sym-tabs" id="symTabsRow"></div>
+  <div class="sym-grid" id="symGrid"></div>
+</div>
+
+<!-- ─── Template Panel ──────────────────────────────────── -->
+<div id="templatePanel" class="template-panel hidden" role="dialog" aria-label="套版選擇">
+  <div class="tpl-drag-handle" id="tplDragHandle">一鍵套版<button class="tpl-close-btn" id="tplCloseBtn" aria-label="關閉">✕</button></div>
+
+  <div class="tpl-heading">背景</div>
+  <div class="tpl-grid">
+    <button class="tpl-card" data-tpl="apple-red">
+      <div class="tpl-preview tpl-preview-apple-red"></div>
+      <span class="tpl-label">Apple 紅</span>
+    </button>
+    <button class="tpl-card" data-tpl="apple-orange">
+      <div class="tpl-preview tpl-preview-apple-orange"></div>
+      <span class="tpl-label">Apple 橙</span>
+    </button>
+    <button class="tpl-card" data-tpl="apple-yellow">
+      <div class="tpl-preview tpl-preview-apple-yellow"></div>
+      <span class="tpl-label">Apple 黃</span>
+    </button>
+    <button class="tpl-card" data-tpl="apple-green">
+      <div class="tpl-preview tpl-preview-apple-green"></div>
+      <span class="tpl-label">Apple 綠</span>
+    </button>
+    <button class="tpl-card" data-tpl="apple-blue">
+      <div class="tpl-preview tpl-preview-apple-blue"></div>
+      <span class="tpl-label">Apple 藍</span>
+    </button>
+    <button class="tpl-card" data-tpl="apple-purple">
+      <div class="tpl-preview tpl-preview-apple-purple"></div>
+      <span class="tpl-label">Apple 紫</span>
+    </button>
+  </div>
+
+  <div class="tpl-heading">調整</div>
+  <div class="tpl-sliders">
+    <div class="tpl-slider-row">
+      <span class="tpl-slider-label">留白</span>
+      <input type="range" class="tpl-range" id="tplPadding" min="2" max="30" step="1" value="9">
+      <span class="tpl-slider-val" id="tplPaddingVal">9%</span>
+    </div>
+    <div class="tpl-slider-row">
+      <span class="tpl-slider-label">圓角</span>
+      <input type="range" class="tpl-range" id="tplRadius"  min="0" max="10" step="1" value="5">
+      <span class="tpl-slider-val" id="tplRadiusVal">5</span>
+    </div>
+    <div class="tpl-slider-row">
+      <span class="tpl-slider-label">外框</span>
+      <input type="range" class="tpl-range" id="tplShadow"  min="0" max="10" step="1" value="5">
+      <span class="tpl-slider-val" id="tplShadowVal">5</span>
+    </div>
+  </div>
+
+  <div class="tpl-heading">社群尺寸（選用）</div>
+  <div class="tpl-sizes">
+    <button class="tpl-size-btn" data-ratio="0"     title="等比留白，不限制比例">Auto</button>
+    <button class="tpl-size-btn" data-ratio="1.914" title="LinkedIn 1200×627">LinkedIn</button>
+    <button class="tpl-size-btn" data-ratio="1"     title="Instagram 1080×1080">Instagram</button>
+    <button class="tpl-size-btn" data-ratio="1.778" title="X / Twitter 1200×675">𝕏 Twitter</button>
+  </div>
+</div>
+
+<!-- Drag & Drop import overlay -->
+<div id="dropOverlay" class="drop-overlay" aria-hidden="true">
+  <span class="drop-overlay-label">放開以匯入圖片</span>
+</div>
+
 <!-- Right-click context menu: layer ordering -->
 <div id="ctxMenu" class="ctx-menu hidden" role="menu">
   <button id="ctxToTop"    data-dir="top">移到最上層</button>
   <button id="ctxMoveUp"   data-dir="up">上移一層</button>
   <button id="ctxMoveDown" data-dir="down">下移一層</button>
   <button id="ctxToBottom" data-dir="bottom">移到最下層</button>
+</div>
+
+<!-- Floating drag-export button -->
+<div id="floatDragExport" class="float-drag-export" title="拖曳匯出到 Line / Slack / Finder 等">
+  <span class="float-drag-move" id="floatDragMove" title="拖曳移動按鈕位置">⠿</span>
+  <span class="float-drag-label">⬆ 拖曳匯出</span>
 </div>
 
 <script src="editor.js"></script>

@@ -1,8 +1,276 @@
 # SDD：Mac 截圖與圖片編輯工具
-**版本：** 3.17
+**版本：** 3.26
 **日期：** 2026-03-24
 **狀態：** 待審閱
 **變更紀錄：**
+
+### v3.26 — 套版三滑桿 + 批次轉換移除 WebP
+
+#### 套版面板新增三個即時滑桿
+- **留白**（Padding）：2–30%，預設 9%
+- **圓角**（Border Radius）：0–10，預設 5（radius factor = value × 0.005）
+- **陰影**（Shadow）：0–10，預設 5（blur factor = value × 0.008）
+- 滑桿調整後 120ms debounce 自動重套版（從快照重算，不疊加）
+- 滑桿數值在面板關閉後保留，下次開啟沿用
+
+#### 批次轉換移除 WebP
+- 批次轉換格式選單僅保留 PNG / JPG / GIF
+- WebP 仍可於圖片編輯器單檔匯出
+
+#### TDD v3.26
+- [ ] 留白滑桿拖動：圖片背景邊框隨即改變寬度
+- [ ] 圓角滑桿拖到 0：圖片角落變為直角
+- [ ] 陰影滑桿拖到 0：無陰影；拖到 10：明顯投影
+- [ ] 關閉面板再重開：滑桿數值與上次一致
+- [ ] 批次轉換格式選單不含 WebP
+- [ ] 單檔匯出仍可選 WebP
+
+---
+
+### v3.25 — mesh gradient + 社群尺寸（見 v3.24 底部說明）
+
+#### 背景改用多點放射疊加（Mesh Gradient）
+- 所有 6 款套版改用 `_tplMesh()` helper（多個 radial blob 疊加）
+- 縮圖 CSS 同步改為多層 radial-gradient
+- 紫色模板增加第 4 個光球，形成極光效果
+
+#### 社群尺寸快選
+- Auto / LinkedIn 1.91:1 / Instagram 1:1 / X 16:9
+- 以 `_tplTargetRatio` 狀態驅動，`_tplGradLayout` 自動計算使圖片置中
+
+---
+
+### v3.24 — 一鍵套版重設計：全改 Apple 漸層六色
+
+#### 變更內容
+- 移除原有 6 款套版（拍立得、底片、Apple 暖、Apple 冷、Mac 視窗、行動裝置）
+- 改為 Apple 風格明亮漸層六色：
+
+  | ID | 名稱 | 漸層起點 | 漸層終點 |
+  |----|------|----------|----------|
+  | `apple-red`    | Apple 紅 | `#ff512f` | `#dd2476` |
+  | `apple-orange` | Apple 橙 | `#f7971e` | `#ffd200` |
+  | `apple-yellow` | Apple 黃 | `#ffe259` | `#ffa751` |
+  | `apple-green`  | Apple 綠 | `#43e97b` | `#38f9d7` |
+  | `apple-blue`   | Apple 藍（水藍色系） | `#4facfe` | `#00f2fe` |
+  | `apple-purple` | Apple 紫 | `#c471f5` | `#fa71cd` |
+
+- 所有套版採用統一 layout（`_tplGradLayout`：短邊 9% 留白）與 drawImg（`_tplGradDrawImg`：圓角 + 投影）
+- 新增共用 `_tplGradLayout` / `_tplGradDrawImg` 函式
+
+#### TDD v3.24
+- [ ] 面板顯示 6 張卡片，背景顏色依序為紅橙黃綠藍紫漸層
+- [ ] Apple 藍套版：背景為天藍 → 水藍漸層（非深藍紫）
+- [ ] 所有套版圖片具圓角與陰影效果
+- [ ] 各套版套用後圖片尺寸正確（加上 9% 四邊留白）
+- [ ] Undo 可還原套版
+
+---
+
+### v3.23 — 一鍵套版 Snapshot 修正（防止層疊套用）
+
+#### 問題描述
+面板開啟後多次點選不同套版，導致每次都在前一次套版的結果上再疊加，而非從原圖重新套版。
+
+#### 修正內容
+- 新增狀態變數 `_tplBaseSnapshot`（dataURL + width + height + annotations 深拷貝）
+- `openTemplatePanel()`：當面板從隱藏變為顯示時，快照當前圖片與標註
+- `applyTemplate()`：改為從快照圖片（而非 `imgElement`）計算 layout 並合成；套用後還原快照的標註再平移；面板保持開啟，供使用者切換不同套版
+- `hideTemplatePanel()`：關閉面板時清除快照（`_tplBaseSnapshot = null`）
+
+#### TDD v3.23
+- [ ] 面板開啟後連續點選不同套版：每次都從原圖套用，不疊加
+- [ ] 面板開啟後套用套版 A，再點套版 B：最終圖片為 B 效果（非 A+B 疊加）
+- [ ] 關閉面板後再次開啟：重新快照當前（已套版）圖片作為新基底
+- [ ] 套版後 annotation 位置仍正確（以快照時的座標為基準再平移）
+- [ ] 每次套版仍支援 Undo（`pushHistory()` 在每次套用前呼叫）
+
+---
+
+### v3.22 — 一鍵套版（MVP：6 款裝飾框架）
+
+#### 功能概述
+- **工具列按鈕**：`▣`，位於「疊入圖片」按鈕下方，點擊開啟套版選擇浮動面板
+- **套版種類（6 款）**：
+  | ID | 名稱 | 效果 |
+  |----|------|------|
+  | `polaroid` | 拍立得 | 純白底，上/左/右等寬留白，下方留白 3.5× 厚 |
+  | `film` | 底片 | 近黑底，左右兩側柯達式片孔（圓角矩形） |
+  | `apple-warm` | Apple 暖 | 橘粉珊瑚漸層底，圖片圓角 + 投影 |
+  | `apple-cool` | Apple 冷 | 深藍紫漸層底，圖片圓角 + 投影 |
+  | `mac-window` | Mac 視窗 | 灰色標題列 + 紅黃綠圓點，圖片置於視窗內 |
+  | `mobile` | 行動裝置 | 深色手機外框，含 Dynamic Island + 底部 Home bar |
+- **套用行為**：
+  - 先 `pushHistory()`（支援 Undo）
+  - 建立 offscreen canvas，畫背景 + 原圖
+  - 更新 `imgElement / imgWidth / imgHeight`
+  - 所有現有 annotation 座標以 `moveAnnot(a, imgX, imgY)` 平移
+  - 呼叫 `fitCanvas() + drawBase() + renderAnnotations()`
+- **留白比例**：以 `Math.min(imgWidth, imgHeight)` 為基準，各 style 8–10%
+
+#### TDD v3.22
+- [ ] 點 `▣` 按鈕：面板出現，顯示 6 個套版縮圖卡片
+- [ ] 無圖片時點按鈕：toast 提示「請先載入圖片」，不開面板
+- [ ] 套用「拍立得」：圖片被白框包圍，下方留白明顯比上方厚
+- [ ] 套用「底片」：黑色背景，左右可見片孔排列
+- [ ] 套用「Apple 暖」：橘粉漸層底，圖片有圓角與陰影
+- [ ] 套用「Apple 冷」：深藍紫漸層底，圖片有圓角與陰影
+- [ ] 套用「Mac 視窗」：頂部灰色標題列，可見紅黃綠三個圓點
+- [ ] 套用「行動裝置」：深色手機外框，上方有膠囊形 Dynamic Island
+- [ ] 套版後現有 annotation 位置正確（不偏移）
+- [ ] 套版後可 Undo 還原（⌘Z 恢復原圖）
+- [ ] 套版後關閉面板，再次開啟並套另一款：以已套版圖片為基底，正確產生新套版
+- [ ] 套版後「完成並儲存」：匯出圖片包含套版效果
+
+---
+
+### v3.21 — 符號工具重構：多群組按鈕 + 馬賽克參數顯示修正
+
+#### 符號工具多群組架構
+- **工具列**：原單一 `☺` 按鈕改為 4 個群組按鈕，各自帶獨立的浮動面板與分頁
+  - `★` → 形狀（幾何 / 裝飾）
+  - `Ａ` → 字母（圓框 / 全形 / 粗體 / 粗斜 / 草書）
+  - `→` → 箭頭（一般 / 雙線 / 三角）
+  - `©` → 其他（標記 / 貨幣 / 數學 / 技術）
+- **字母群組**：僅收錄 Unicode 中 A–Z 26 個字母全部完整的 style；使用 `String.fromCodePoint` 範圍生成，避免缺字問題
+  - 圓框 Ⓐ–Ⓩ ⓐ–ⓩ　全形 Ａ–Ｚ ａ–ｚ　粗體 𝐀–𝐙 𝐚–𝐳　粗斜 𝑨–𝒁 𝒂–𝒛　草書 𝓐–𝓩 𝓪–𝔃
+- **動態 tab**：`buildSymTabs(group)` 動態生成 tab 按鈕；`buildSymGrid(group, cat)` 動態生成符號格
+- **狀態變數**：`activeSymGroup`（目前群組）+ `symCurrentCat`（目前分頁）
+- **鍵盤 U**：開啟 `activeSymGroup` 的面板
+- **Swatch 點擊**：重新開啟目前群組面板（toggle）
+
+#### 馬賽克參數顯示修正
+- **問題**：`grpMosaicBlock` / `grpMosaicBlur` 使用 `mosaic-int-group` class，該 class 未定義 `.hidden` 規則，導致兩組參數同時顯示
+- **修正**：改為 `opt-group` class，直接使用已定義的 `.opt-group.hidden { display: none }` 規則
+
+#### 符號大小欄位同步修正
+- **問題**：拖曳 SE 手把調整符號大小後，options bar 的大小輸入欄未同步
+- **修正**：mouseup 完成 resize 後，若選取的是 symbol annotation，立即更新 `symbolSizeInput.value`
+
+#### TDD v3.21
+- [ ] 工具列出現 4 個符號群組按鈕（★ Ａ → ©），各自可點擊開啟對應面板
+- [ ] 形狀面板：包含「幾何」「裝飾」兩個 tab，各顯示對應符號格
+- [ ] 字母面板：包含「圓框」「全形」「粗體」「粗斜」「草書」5 個 tab，每 tab 顯示 52 個字符
+- [ ] 箭頭面板：包含「一般」「雙線」「三角」3 個 tab
+- [ ] 其他面板：包含「標記」「貨幣」「數學」「技術」4 個 tab
+- [ ] 點同一群組按鈕再次點擊：面板 toggle 關閉
+- [ ] Swatch 點擊：重新開啟目前群組面板
+- [ ] 鍵盤 U：開啟目前 activeSymGroup 的面板
+- [ ] 馬賽克模式下：只顯示區塊大小選項（4/8/16/32），不顯示模糊強度
+- [ ] 模糊模式下：只顯示強度選項（4px/8px/16px/24px），不顯示區塊大小
+- [ ] 符號 SE 手把拖曳後：options bar 大小欄位正確顯示新數值
+
+---
+
+### v3.20 — 符號工具選取框精準化 + 移除重複符號
+
+#### 符號選取框修正
+- **問題**：選取框使用 `size × size` 固定正方形，與實際字符渲染尺寸不符
+- **修正**：新增 `measureSymbol(char, size)` helper，使用 Map 快取，以 `measureText()` 的 `actualBoundingBoxAscent / Descent / width` 計算實際字符邊界
+- **`bounds()` 更新**：symbol 類型改為 `{ x: a.x - hw, y: a.y - ascent, w: hw*2, h: ascent+descent }`
+- **`getHandles()` 更新**：SE 手把位置改為 `(a.x + hw, a.y + descent)`，對齊字符實際右下角
+
+#### 符號集移除重複項
+- **問題**：「標記」分類中含有 `⓪①②③`，與既有「編號」工具（圓形樣式）功能重複
+- **修正**：從 `SYMBOL_SETS.marks` 移除 `⓪①②③`
+
+#### TDD v3.20
+- [ ] 選取符號 `★`（size=64）：選取框緊貼字符邊緣，不超過 10px 誤差
+- [ ] 選取 Emoji 符號（如 🔥）：選取框貼合字符，不使用 64×64 固定框
+- [ ] SE 手把：位置位於字符右下角，可拖曳調整大小
+- [ ] 符號印章「標記」分類：不再出現 ⓪①②③ 符號
+
+---
+
+### v3.19 — 無縫匯入匯出（MVP：Drag & Drop + 複製 + Drag Out）
+
+#### 匯入：Drag & Drop
+- **任意位置放開**：在 editor 視窗任何位置拖曳圖片檔（PNG/JPG/WebP/GIF）放開即可匯入
+- **視覺回饋**：拖曳進入時出現紫色虛線框 + 半透明背景覆蓋層，離開或放開後消失
+- **行為**：匯入後取代現有底圖，清空所有 annotation，重置 undo history
+- **技術**：純 renderer 實作（FileReader API），無需 IPC；`dragenter` / `dragleave` depth 計數防止子元素觸發閃爍
+
+#### 匯出：複製到剪貼簿
+- **按鈕**：底部列「複製」按鈕；快捷鍵 `⌘⇧C`
+- **行為**：`burnIn('png')` → `nativeImage.createFromDataURL` → `clipboard.writeImage`
+- 所有 annotation 燒入，原始解析度輸出
+
+#### 匯出：拖曳匯出（Drag Out）
+- **按鈕**：底部列「⬆ 拖曳匯出」handle（cursor: grab）
+- **行為**：`mousedown` → `ipcRenderer.send('start-drag-export', { dataURL })` → main.js 寫暫存 PNG → `event.sender.startDrag({ file, icon })`
+- 成品可直接拖到 Line / Slack / Finder / 桌面等任何接受圖片的目標
+
+#### 尚未實作（v1.x 規劃）
+- Dock 圖示接受拖曳（需 macOS Info.plist `CFBundleDocumentTypes` + `NSServices`）
+- Share Sheet 匯入 / AirDrop 匯出（需打包為正式 `.app` + bundle ID）
+- 批次 WebP 匯出（Pro 版功能）
+
+#### TDD v3.19
+- [ ] 拖曳 PNG 進視窗：出現紫色 drop overlay，放開後圖片載入至編輯器
+- [ ] 拖曳 JPG / WebP / GIF：同上，均可載入
+- [ ] 拖曳非圖片檔案（.pdf / .txt）：不載入，顯示 toast 錯誤提示
+- [ ] 拖曳圖片進入視窗再拖出（不放開）：overlay 消失，不影響現有圖片
+- [ ] 已有 annotation 時匯入新圖片：annotation 清除，底圖更新
+- [ ] 「複製」按鈕：點擊後 toast 顯示「圖片已複製到剪貼簿」
+- [ ] ⌘⇧C：同上效果
+- [ ] 複製後貼到 Keynote / Figma：圖片含所有 annotation 正確顯示
+- [ ] 「拖曳匯出」handle：mousedown 後拖曳至 Finder 桌面，出現 PNG 檔案
+- [ ] 「拖曳匯出」handle：拖至 Slack 聊天室，直接傳送圖片
+
+---
+
+### v3.18 — 新工具：馬賽克/模糊 + 符號印章
+
+#### 馬賽克/模糊工具（annotation-based）
+- **工具列按鈕**：`▦`，快捷鍵 `X`，啟用 `data-tool="mosaic"`
+- **操作流程**：拖曳繪製矩形區域 → 即時預覽效果（紫色虛線框）→ 放開滑鼠後自動 commit 為 `mosaic` annotation
+- **馬賽克模式**：`getImageData / putImageData` 像素取樣平均化，區塊大小 4 / 8 / 16 / 32 px（圖像像素）
+- **模糊模式**：`ctx.filter = 'blur(Npx)'` offscreen compositing，強度 4 / 8 / 16 / 24 px
+- **讀取來源**：`baseCanvas`（不含其他 annotation），馬賽克只遮蔽底圖像素
+- **可移動 / 縮放**：支援 8 個方向 resize handle（與 rect 相同）；支援 Cmd+C/V 複製貼上
+- **Undo 支援**：annotation-based，完整納入 pushHistory / undo 機制
+- **Options Bar 選項**
+  - 模式切換：馬賽克 / 模糊（`btnMosaicModeMosaic` / `btnMosaicModeBlur`）
+  - 馬賽克區塊大小：4 / 8 / 16 / 32 按鈕（`grpMosaicBlock`）
+  - 模糊強度：4px / 8px / 16px / 24px 按鈕（`grpMosaicBlur`）
+- **Annotation 資料結構**：`{ type: 'mosaic', x, y, w, h, mode, blockSize, blurRadius }`
+
+#### 符號印章工具（Symbol Stamp）
+- **工具列按鈕**：`☺`，快捷鍵 `U`，啟用 `data-tool="symbol"`
+- **操作流程**：選取工具 → 點擊畫面 → 符號即時置放在點擊位置
+- **渲染**：`fillText()` + `font-size = size * viewScale`，顏色由 grpColor 控制，支援陰影
+- **字型 fallback**：`'Apple Color Emoji', 'Noto Sans Symbols 2', 'Segoe UI Symbol', sans-serif`
+- **符號選取面板**（浮動 panel，點擊 `symbolPreviewSwatch` 開啟）
+  - 4 個分類 Tab：幾何 / 標記 / 箭頭 / 其他
+  - 每類 24 個常用 Unicode 符號，8 列格狀排列
+- **Bounds 計算**：以 x,y 為中心，size 為直徑（方形包圍盒）
+- **Resize**：單一 SE 角 handle，拖曳調整 size 值
+- **Options Bar**：grpColor（顏色）+ grpSymbol（符號選取 + 大小輸入）+ grpShadow（陰影）
+- **Annotation 資料結構**：`{ type: 'symbol', x, y, char, color, size, shadow }`
+
+#### 其他異動
+- `bounds()`、`moveAnnot()`、`getHandles()`、`startResize()`、`applyResize()`：新增 `mosaic` / `symbol` 支援
+- crop 座標平移、resize 等比縮放：新增 `mosaic` / `symbol` 支援
+- `grpMosaic`、`grpSymbol` 加入 `hideAllOptions` 清單
+
+#### TDD v3.18
+- [ ] 馬賽克工具：拖曳繪製，即時預覽（紫色虛線框＋馬賽克效果），放開後 commit 為 annotation
+- [ ] 馬賽克工具：拖曳距離 < 4px，不產生 annotation
+- [ ] 馬賽克模式：選取 annotation 後切換區塊大小（4/8/16/32），效果即時更新
+- [ ] 模糊模式：切換至模糊，選取強度（4/8/16/24px），效果即時更新
+- [ ] 馬賽克 annotation：支援移動、8 方向縮放，效果隨位置/大小更新
+- [ ] 馬賽克 annotation：Cmd+Z 撤銷，Cmd+Y 重做
+- [ ] 馬賽克 annotation：Cmd+C 複製，Cmd+V 貼上，位置偏移 8px
+- [ ] 符號印章工具：點擊畫面，在點擊位置置放目前符號
+- [ ] 符號印章面板：點擊 swatch 開啟浮動 panel，四個分類 Tab 可切換
+- [ ] 符號印章面板：點擊符號，swatch 更新，panel 關閉
+- [ ] 符號大小輸入框：輸入 64，annotation 的 size 更新，顯示大小改變
+- [ ] 符號顏色：透過 grpColor 改色，annotation 即時更新
+- [ ] 符號 annotation：支援移動（SE handle 縮放）、Cmd+Z 撤銷
+- [ ] 快捷鍵：X 啟動馬賽克工具；U 啟動符號印章工具
+- [ ] Escape：馬賽克工具拖曳中按 Esc，取消預覽框，回到空白狀態
+
+---
 
 ### v3.17 — Bug 修正：鉛筆工具粗線箭頭方向跑掉
 

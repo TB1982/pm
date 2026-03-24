@@ -643,6 +643,20 @@ ipcMain.handle('ocr-recognize', (event, { dataURL }) => {
   })
 })
 
+// ─── Drag OUT export (renderer → OS drag) ────────────────────────────────────
+
+ipcMain.on('start-drag-export', (event, { dataURL }) => {
+  try {
+    const base64  = dataURL.replace(/^data:image\/\w+;base64,/, '')
+    const tmpPath = path.join(os.tmpdir(), `export-${Date.now()}.png`)
+    fs.writeFileSync(tmpPath, Buffer.from(base64, 'base64'))
+    const icon = nativeImage.createFromPath(tmpPath).resize({ width: 64, height: 64 })
+    event.sender.startDrag({ file: tmpPath, icon })
+  } catch (err) {
+    console.error('start-drag-export failed:', err.message)
+  }
+})
+
 // ─── App lifecycle ────────────────────────────────────────────────────────────
 
 app.whenReady().then(() => {

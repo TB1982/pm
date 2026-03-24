@@ -205,6 +205,18 @@ let boxSelRect      = null   // { x, y, w, h } in image coordinates (normalised 
 let boxSelStart     = null   // drag start pos
 let pixelClipboard  = null   // { dataURL, w, h } — last copied region
 
+// Mosaic tool
+let mosaicMode      = 'mosaic'  // 'mosaic' | 'blur'
+let mosaicBlockSize = 16
+let mosaicBlurRadius = 8
+let isMosaicDrawing = false
+let mosaicDrawStart = null
+let mosaicPreviewRect = null
+
+// Symbol tool
+let symbolChar = '★'
+let symbolSize = 64  // image pixels (font-size equivalent)
+
 // Pen tool
 let isPenDrawing   = false
 let penPoints      = []       // {x,y}[] collected during current stroke
@@ -283,12 +295,14 @@ function hideAllOptions() {
   ['grpRectShape','grpFillShape','grpColor','grpFillColor','grpThickness',
    'grpLineStyle','grpPenBorder','grpStrokeBorder','grpDashStyle',
    'grpCaps','grpRadius','grpFont','grpNumber','grpStrokeOpacity',
-   'grpShadow','grpZoom','grpCrop','grpOcr','grpBoxSelect'].forEach(id => {
+   'grpShadow','grpZoom','grpCrop','grpOcr','grpBoxSelect',
+   'grpMosaic','grpSymbol'].forEach(id => {
     const el = document.getElementById(id)
     if (el) el.classList.add('hidden')
   })
   document.getElementById('numValueEdit').classList.add('hidden')
   document.getElementById('btnLineOrtho')?.classList.remove('hidden')  // reset to visible by default
+  hideSymbolPanel()
 }
 
 function showOptionsForTool(t) {
@@ -309,6 +323,19 @@ function showOptionsForTool(t) {
   if (t === 'boxselect') {
     document.getElementById('grpBoxSelect').classList.remove('hidden')
     syncBoxSelUI()
+    return
+  }
+  if (t === 'mosaic') {
+    document.getElementById('grpMosaic').classList.remove('hidden')
+    syncMosaicUI()
+    return
+  }
+  if (t === 'symbol') {
+    document.getElementById('grpColor').classList.remove('hidden')
+    document.getElementById('grpSymbol').classList.remove('hidden')
+    document.getElementById('grpShadow').classList.remove('hidden')
+    syncSymbolUI()
+    syncShadowCheck(false)
     return
   }
   const sh  = id => document.getElementById(id).classList.remove('hidden')
@@ -381,6 +408,30 @@ function showOptionsForTool(t) {
   if (t === 'number') { sh('grpNumber'); sh('grpShadow'); syncShadowCheck(numShadow); syncNumStyle(numberStyle) }
 }
 
+function syncMosaicUI() {
+  document.getElementById('btnMosaicModeMosaic').classList.toggle('active', mosaicMode === 'mosaic')
+  document.getElementById('btnMosaicModeBlur').classList.toggle('active', mosaicMode === 'blur')
+  document.getElementById('grpMosaicBlock').classList.toggle('hidden', mosaicMode === 'blur')
+  document.getElementById('grpMosaicBlur').classList.toggle('hidden', mosaicMode === 'mosaic')
+  document.getElementById('mosaicIntLabel').textContent = mosaicMode === 'mosaic' ? '區塊：' : '強度：'
+  document.querySelectorAll('#grpMosaicBlock [data-block]').forEach(btn => {
+    btn.classList.toggle('active', parseInt(btn.dataset.block) === mosaicBlockSize)
+  })
+  document.querySelectorAll('#grpMosaicBlur [data-blur]').forEach(btn => {
+    btn.classList.toggle('active', parseInt(btn.dataset.blur) === mosaicBlurRadius)
+  })
+}
+
+function syncSymbolUI() {
+  document.getElementById('symbolPreviewSwatch').textContent = symbolChar
+  const inp = document.getElementById('symbolSizeInput')
+  if (inp) inp.value = symbolSize
+  // 更新群組按鈕 active 狀態
+  document.querySelectorAll('#grpSymbol [data-sym-group]').forEach(b =>
+    b.classList.toggle('active', b.dataset.symGroup === activeSymGroup)
+  )
+}
+
 function syncBoxSelUI() {
   const hasRect = boxSelRect && boxSelRect.w > 1 && boxSelRect.h > 1
   if (hasRect) {
@@ -398,7 +449,7 @@ function showOptionsForAnnot(a) {
   const t = a.type
   const sh = id => { const el = document.getElementById(id); if (el) el.classList.remove('hidden') }
   const isFill = t === 'fillrect' || t === 'fillellipse'
-  if (!isFill) sh('grpColor')
+  if (!isFill && t !== 'mosaic') sh('grpColor')
   if (isFill)  sh('grpFillColor')
   if (['rect','ellipse','fillrect','fillellipse','line','polyline','number','pen'].includes(t)) sh('grpThickness')
   syncNumStrokeUI(t === 'number')
@@ -501,6 +552,23 @@ function showOptionsForAnnot(a) {
     document.getElementById('numValueEdit').classList.remove('hidden')
     document.getElementById('numValueInput').value = a.value
     sh('grpNumber'); sh('grpShadow')
+  }
+  if (t === 'mosaic') {
+    mosaicMode      = a.mode      ?? 'mosaic'
+    mosaicBlockSize = a.blockSize ?? 16
+    mosaicBlurRadius= a.blurRadius ?? 8
+    sh('grpMosaic')
+    syncMosaicUI()
+    return
+  }
+  if (t === 'symbol') {
+    symbolChar = a.char  ?? '★'
+    symbolSize = a.size  ?? 64
+    color      = a.color ?? '#ff3b30'; syncColor(color)
+    sh('grpColor'); sh('grpSymbol'); sh('grpShadow')
+    syncSymbolUI()
+    syncShadowCheck(a.shadow ?? false)
+    return
   }
 }
 
@@ -1562,6 +1630,7 @@ function setTool(t) {
   if (t !== 'crop')      { cropRect = null; isCropping = false; cropMoving = false; cropResizeH = null; cropMoveStart = null }
   if (t !== 'ocr')       { ocrRect = null; isOcrSelecting = false; ocrStart = null }
   if (t !== 'boxselect') { boxSelRect = null; isBoxSelecting = false; boxSelStart = null }
+  if (t !== 'mosaic')   { isMosaicDrawing = false; mosaicDrawStart = null; mosaicPreviewRect = null }
   if (t !== 'pen')       { isPenDrawing = false; penPoints = [] }
   _cancelPolyline()   // 切換工具時取消任何進行中的折線
   tool       = t
@@ -1571,7 +1640,7 @@ function setTool(t) {
 
   document.querySelectorAll('.tool-btn[data-tool]').forEach(b => {
     // ellipse 屬於 rect 群組；fillellipse 屬於 fillrect 群組
-    const match = b.dataset.tool === t
+    let match = b.dataset.tool === t
       || (t === 'ellipse'     && b.dataset.tool === 'rect')
       || (t === 'fillellipse' && b.dataset.tool === 'fillrect')
     b.classList.toggle('active', match)
@@ -1842,6 +1911,23 @@ function renderAnnotations() {
     annotCtx.restore()
   }
 
+  // Mosaic tool live preview
+  if (tool === 'mosaic' && mosaicPreviewRect && mosaicPreviewRect.w > 2 && mosaicPreviewRect.h > 2) {
+    drawMosaic(annotCtx, {
+      x: mosaicPreviewRect.x, y: mosaicPreviewRect.y,
+      w: mosaicPreviewRect.w, h: mosaicPreviewRect.h,
+      mode: mosaicMode, blockSize: mosaicBlockSize, blurRadius: mosaicBlurRadius,
+    })
+    annotCtx.save()
+    annotCtx.strokeStyle = '#a78bfa'
+    annotCtx.lineWidth   = 1.5
+    annotCtx.setLineDash([5, 3])
+    annotCtx.strokeRect(c(mosaicPreviewRect.x), c(mosaicPreviewRect.y),
+                        c(mosaicPreviewRect.w), c(mosaicPreviewRect.h))
+    annotCtx.setLineDash([])
+    annotCtx.restore()
+  }
+
   // Pen tool live preview
   if (isPenDrawing && penPoints.length >= 2) {
     annotCtx.save()
@@ -1878,6 +1964,107 @@ function _getOffCanvas(w, h) {
   if (!_offCanvas) _offCanvas = document.createElement('canvas')
   if (_offCanvas.width !== w || _offCanvas.height !== h) { _offCanvas.width = w; _offCanvas.height = h }
   return _offCanvas
+}
+
+// ─── Mosaic / Blur ────────────────────────────────────────────────────────────
+
+function drawMosaic(ctx, a) {
+  const vx = Math.round(a.x * viewScale)
+  const vy = Math.round(a.y * viewScale)
+  const vw = Math.max(1, Math.round(a.w * viewScale))
+  const vh = Math.max(1, Math.round(a.h * viewScale))
+
+  const off  = document.createElement('canvas')
+  off.width  = vw
+  off.height = vh
+  const octx = off.getContext('2d')
+
+  if (a.mode === 'blur') {
+    const r   = Math.max(1, (a.blurRadius ?? 8) * viewScale)
+    const pad = Math.ceil(r * 2.5)
+    // Draw a padded region so blur doesn't darken edges
+    octx.filter = `blur(${r}px)`
+    octx.drawImage(baseCanvas,
+      vx - pad, vy - pad, vw + pad * 2, vh + pad * 2,
+      -pad, -pad, vw + pad * 2, vh + pad * 2)
+  } else {
+    octx.drawImage(baseCanvas, vx, vy, vw, vh, 0, 0, vw, vh)
+    const bs       = Math.max(2, Math.round((a.blockSize ?? 16) * viewScale))
+    const imgData  = octx.getImageData(0, 0, vw, vh)
+    const data     = imgData.data
+    for (let py = 0; py < vh; py += bs) {
+      const pyEnd = Math.min(py + bs, vh)
+      for (let px = 0; px < vw; px += bs) {
+        const pxEnd = Math.min(px + bs, vw)
+        let r = 0, g = 0, b = 0, al = 0, n = 0
+        for (let qy = py; qy < pyEnd; qy++) {
+          for (let qx = px; qx < pxEnd; qx++) {
+            const i = (qy * vw + qx) * 4
+            r += data[i]; g += data[i+1]; b += data[i+2]; al += data[i+3]; n++
+          }
+        }
+        r = Math.round(r/n); g = Math.round(g/n); b = Math.round(b/n); al = Math.round(al/n)
+        for (let qy = py; qy < pyEnd; qy++) {
+          for (let qx = px; qx < pxEnd; qx++) {
+            const i = (qy * vw + qx) * 4
+            data[i] = r; data[i+1] = g; data[i+2] = b; data[i+3] = al
+          }
+        }
+      }
+    }
+    octx.putImageData(imgData, 0, 0)
+  }
+
+  ctx.save()
+  ctx.beginPath()
+  ctx.rect(vx, vy, vw, vh)
+  ctx.clip()
+  ctx.drawImage(off, vx, vy)
+  ctx.restore()
+}
+
+// ─── Symbol Stamp ──────────────────────────────────────────────────────────────
+
+const _symMeasureCache = new Map()
+/**
+ * Measure the actual rendered bounds of a symbol glyph.
+ * Returns { hw, ascent, descent } all in annotation (image) coordinate units
+ * where the draw anchor is at (a.x, a.y) with textAlign=center / textBaseline=middle.
+ */
+function measureSymbol(char, size) {
+  const key = `${char}|${size}`
+  if (_symMeasureCache.has(key)) return _symMeasureCache.get(key)
+  const off = document.createElement('canvas')
+  off.width = off.height = Math.ceil(size * 3)
+  const mctx = off.getContext('2d')
+  mctx.font = `${size}px 'Apple Color Emoji', 'Noto Sans Symbols 2', 'Segoe UI Symbol', sans-serif`
+  mctx.textBaseline = 'middle'
+  mctx.textAlign = 'center'
+  const m = mctx.measureText(char)
+  const result = {
+    hw:      Math.max(m.width / 2,                size * 0.1),
+    ascent:  Math.max(m.actualBoundingBoxAscent,  size * 0.1),
+    descent: Math.max(m.actualBoundingBoxDescent, size * 0.1),
+  }
+  _symMeasureCache.set(key, result)
+  return result
+}
+
+function drawSymbol(ctx, a) {
+  const sz = Math.max(8, (a.size ?? 64) * viewScale)
+  ctx.save()
+  ctx.font          = `${sz}px 'Apple Color Emoji', 'Noto Sans Symbols 2', 'Segoe UI Symbol', sans-serif`
+  ctx.fillStyle     = a.color ?? '#ff3b30'
+  ctx.textAlign     = 'center'
+  ctx.textBaseline  = 'middle'
+  if (a.shadow) {
+    ctx.shadowColor   = 'rgba(0,0,0,0.4)'
+    ctx.shadowBlur    = 4 * viewScale
+    ctx.shadowOffsetX = 2 * viewScale
+    ctx.shadowOffsetY = 2 * viewScale
+  }
+  ctx.fillText(a.char ?? '★', a.x * viewScale, a.y * viewScale)
+  ctx.restore()
 }
 
 function drawOne(ctx, a) {
@@ -1928,6 +2115,8 @@ function drawOne(ctx, a) {
     case 'number':   drawNumber(ctx, a);   break
     case 'polyline': drawPolyline(ctx, a); break
     case 'pen':      drawPen(ctx, a);      break
+    case 'mosaic':   drawMosaic(ctx, a);   break
+    case 'symbol':   drawSymbol(ctx, a);   break
   }
   ctx.restore()
 }
@@ -2500,7 +2689,7 @@ function drawNumber(ctx, a) {
 // ─── Resize handles ───────────────────────────────────────────────────────────
 
 function getHandles(a) {
-  if (a.type === 'rect' || a.type === 'ellipse' || a.type === 'fillrect' || a.type === 'fillellipse' || a.type === 'img') {
+  if (a.type === 'rect' || a.type === 'ellipse' || a.type === 'fillrect' || a.type === 'fillellipse' || a.type === 'img' || a.type === 'mosaic') {
     const { x, y, w, h } = a
     const mx = x + w / 2, my = y + h / 2
     return [
@@ -2523,6 +2712,10 @@ function getHandles(a) {
   if (a.type === 'number') {
     const r = a.size ?? 14
     return [{ id: 'se', x: a.x + r, y: a.y + r, cursor: 'nwse-resize' }]
+  }
+  if (a.type === 'symbol') {
+    const { hw, descent } = measureSymbol(a.char ?? '★', a.size ?? 64)
+    return [{ id: 'se', x: a.x + hw, y: a.y + descent, cursor: 'nwse-resize' }]
   }
   if (a.type === 'pen') {
     const b = bounds(a)
@@ -2575,7 +2768,10 @@ function startResize(hId, a) {
   if (a.type === 'number') {
     info.cx = a.x; info.cy = a.y
   }
-  if (a.type === 'rect' || a.type === 'ellipse' || a.type === 'fillrect' || a.type === 'fillellipse' || a.type === 'img') {
+  if (a.type === 'symbol') {
+    info.cx = a.x; info.cy = a.y
+  }
+  if (a.type === 'rect' || a.type === 'ellipse' || a.type === 'fillrect' || a.type === 'fillellipse' || a.type === 'img' || a.type === 'mosaic') {
     const { x, y, w, h } = a
     switch (hId) {
       case 'nw': info.fixX = x+w; info.fixY = y+h; break
@@ -2658,7 +2854,7 @@ function applyResize(a, pos) {
     return
   }
 
-  if (['rect','ellipse','fillrect','fillellipse'].includes(a.type)) {
+  if (['rect','ellipse','fillrect','fillellipse','mosaic'].includes(a.type)) {
     let x1, y1, x2, y2
     switch (h.id) {
       case 'nw': x1=pos.x;    y1=pos.y;    x2=h.fixX;        y2=h.fixY;        break
@@ -2681,6 +2877,10 @@ function applyResize(a, pos) {
   if (a.type === 'number') {
     const d = Math.max(Math.abs(pos.x - h.cx), Math.abs(pos.y - h.cy))
     a.size = Math.max(d, 6)
+  }
+  if (a.type === 'symbol') {
+    const d = Math.max(Math.abs(pos.x - h.cx), Math.abs(pos.y - h.cy))
+    a.size = Math.max(d * 2, 16)
   }
   if (a.type === 'pen' || a.type === 'polyline') {
     if (h.isBBoxResize) {
@@ -2876,7 +3076,9 @@ function bounds(a) {
     case 'ellipse':
     case 'fillrect':
     case 'fillellipse':
+    case 'mosaic':
     case 'img':    return { x: a.x, y: a.y, w: a.w, h: a.h }
+    case 'symbol': { const { hw, ascent, descent } = measureSymbol(a.char ?? '★', a.size ?? 64); return { x: a.x - hw, y: a.y - ascent, w: hw * 2, h: ascent + descent } }
     case 'line': {
       const minX = Math.min(a.x1,a.x2), maxX = Math.max(a.x1,a.x2)
       const minY = Math.min(a.y1,a.y2), maxY = Math.max(a.y1,a.y2)
@@ -2960,6 +3162,22 @@ annotCanvas.addEventListener('mousedown', e => {
     boxSelStart    = pos
     boxSelRect     = { x: pos.x, y: pos.y, w: 0, h: 0 }
     syncBoxSelUI()
+    return
+  }
+
+  if (tool === 'mosaic') {
+    isMosaicDrawing = true
+    mosaicDrawStart = pos
+    mosaicPreviewRect = { x: pos.x, y: pos.y, w: 0, h: 0 }
+    return
+  }
+
+  if (tool === 'symbol') {
+    selectedId = null   // 清除可能殘留的舊選取，避免 picker 誤改舊印章
+    const ann = { id: newId(), type: 'symbol', x: pos.x, y: pos.y, char: symbolChar, color, size: symbolSize, shadow: false }
+    pushHistory()
+    annotations.push(ann)
+    renderAnnotations()
     return
   }
 
@@ -3125,6 +3343,17 @@ annotCanvas.addEventListener('mousemove', e => {
     return
   }
 
+  if (isMosaicDrawing && mosaicDrawStart) {
+    mosaicPreviewRect = {
+      x: Math.min(mosaicDrawStart.x, pos.x),
+      y: Math.min(mosaicDrawStart.y, pos.y),
+      w: Math.abs(pos.x - mosaicDrawStart.x),
+      h: Math.abs(pos.y - mosaicDrawStart.y),
+    }
+    renderAnnotations()
+    return
+  }
+
   if (isResizing && selectedId) {
     const a = annotations.find(x => x.id === selectedId)
     if (a) {
@@ -3274,6 +3503,28 @@ document.addEventListener('mouseup', e => {
     return
   }
 
+  if (isMosaicDrawing) {
+    isMosaicDrawing = false
+    const r = mosaicPreviewRect
+    if (r && r.w >= 4 && r.h >= 4) {
+      const ann = {
+        id: newId(), type: 'mosaic',
+        x: r.x, y: r.y, w: r.w, h: r.h,
+        mode: mosaicMode, blockSize: mosaicBlockSize, blurRadius: mosaicBlurRadius,
+      }
+      pushHistory()
+      annotations.push(ann)
+      mosaicPreviewRect = null
+      setTool('select')
+      selectedId = ann.id
+      showOptionsForAnnot(ann)
+    } else {
+      mosaicPreviewRect = null
+    }
+    renderAnnotations()
+    return
+  }
+
   if (isPenDrawing) {
     isPenDrawing = false
     if (penPoints.length >= 2) {
@@ -3299,6 +3550,13 @@ document.addEventListener('mouseup', e => {
   if (isResizing) {
     isResizing = false
     pushHistory()
+    // Sync size input if a symbol annotation was just resized
+    if (selectedId) {
+      const _a = annotations.find(x => x.id === selectedId)
+      if (_a && _a.type === 'symbol') {
+        document.getElementById('symbolSizeInput').value = Math.round(_a.size)
+      }
+    }
     return
   }
   if (isDragging) {
@@ -3325,9 +3583,11 @@ function moveAnnot(a, dx, dy) {
     case 'ellipse':
     case 'fillrect':
     case 'fillellipse':
+    case 'mosaic':
     case 'img':
     case 'text':
-    case 'number': a.x += dx; a.y += dy; break
+    case 'number':
+    case 'symbol': a.x += dx; a.y += dy; break
     case 'line':     a.x1 += dx; a.y1 += dy; a.x2 += dx; a.y2 += dy; break
     case 'polyline':
     case 'pen':      a.points.forEach(p => { p.x += dx; p.y += dy }); break
@@ -3617,6 +3877,13 @@ document.addEventListener('keydown', e => {
     case 'e': case 'E': document.getElementById('btnExtend').click();     break
     case 'c': case 'C': setTool('crop');   break
     case 'g': case 'G': setTool('ocr');    break
+    case 'x': case 'X': setTool('mosaic'); break
+    case 'u': case 'U': {
+      setTool('symbol')
+      const _gb = document.querySelector(`#grpSymbol [data-sym-group="${activeSymGroup}"]`)
+      if (_gb) openSymbolGroup(activeSymGroup, _gb)
+      break
+    }
     case 's': case 'S': openResizeModal(); break
     case 'Escape':
       hideCtxMenu()
@@ -3624,6 +3891,7 @@ document.addEventListener('keydown', e => {
       if (tool === 'crop') { cancelCrop(); break }
       if (tool === 'ocr')  { ocrRect = null; isOcrSelecting = false; document.getElementById('ocrStatusLabel').textContent = '請拖曳選取辨識區域'; renderAnnotations(); break }
       if (tool === 'boxselect') { boxSelRect = null; isBoxSelecting = false; syncBoxSelUI(); renderAnnotations(); break }
+      if (tool === 'mosaic')    { mosaicPreviewRect = null; isMosaicDrawing = false; renderAnnotations(); break }
       selectedId = null
       isDrawing  = false
       if (tool === 'select') hideAllOptions()
@@ -3749,7 +4017,7 @@ function confirmCrop() {
     annotations = annotations.map(a => {
       a = JSON.parse(JSON.stringify(a))
       switch (a.type) {
-        case 'rect': case 'fillrect': case 'text': case 'number': a.x -= cx; a.y -= cy; break
+        case 'rect': case 'fillrect': case 'mosaic': case 'text': case 'number': case 'symbol': a.x -= cx; a.y -= cy; break
         case 'line': a.x1 -= cx; a.y1 -= cy; a.x2 -= cx; a.y2 -= cy; break
       }
       return a
@@ -3910,6 +4178,504 @@ document.getElementById('btnOcrDownloadCancel').addEventListener('click', () => 
 })
 
 
+// ─── Mosaic tool controls ─────────────────────────────────────────────────────
+
+document.getElementById('btnMosaicModeMosaic').addEventListener('click', () => {
+  mosaicMode = 'mosaic'; syncMosaicUI()
+  if (selectedId) { const a = annotations.find(x => x.id === selectedId); if (a && a.type === 'mosaic') { updateSelectedAnnot({ mode: 'mosaic' }) } }
+})
+document.getElementById('btnMosaicModeBlur').addEventListener('click', () => {
+  mosaicMode = 'blur'; syncMosaicUI()
+  if (selectedId) { const a = annotations.find(x => x.id === selectedId); if (a && a.type === 'mosaic') { updateSelectedAnnot({ mode: 'blur' }) } }
+})
+document.querySelectorAll('#grpMosaicBlock [data-block]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    mosaicBlockSize = parseInt(btn.dataset.block); syncMosaicUI()
+    if (selectedId) { const a = annotations.find(x => x.id === selectedId); if (a && a.type === 'mosaic') { updateSelectedAnnot({ blockSize: mosaicBlockSize }) } }
+  })
+})
+document.querySelectorAll('#grpMosaicBlur [data-blur]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    mosaicBlurRadius = parseInt(btn.dataset.blur); syncMosaicUI()
+    if (selectedId) { const a = annotations.find(x => x.id === selectedId); if (a && a.type === 'mosaic') { updateSelectedAnnot({ blurRadius: mosaicBlurRadius }) } }
+  })
+})
+
+// ─── Symbol tool controls ─────────────────────────────────────────────────────
+
+// Helper: generate array of Unicode chars from code point range
+const _uchars = (start, end) => Array.from({ length: end - start + 1 }, (_, i) => String.fromCodePoint(start + i))
+
+const SYMBOL_SETS = {
+  shape: {
+    '幾何': ['★','☆','●','○','■','□','▲','△','▼','▽','◆','◇','♥','♡','♦','♠','♣','♤','❤','❥','✦','✧','✩','✪','⬟','⬡','⬢','⬣','⭕','✴','✳','❋'],
+    '裝飾': ['⭐','💫','✨','🌟','🔥','💥','⚡','💧','🌊','☁','🌈','❄','🌸','🌺','🍀','🎯','🎨','🏆','👑','💎','🔮','🎭','⚽','🎪'],
+  },
+  letter: {
+    '圓框': [..._uchars(0x24B6, 0x24CF), ..._uchars(0x24D0, 0x24E9)],  // Ⓐ-Ⓩ ⓐ-ⓩ
+    '全形': [..._uchars(0xFF21, 0xFF3A), ..._uchars(0xFF41, 0xFF5A)],   // Ａ-Ｚ ａ-ｚ
+    '粗體': [..._uchars(0x1D400, 0x1D419), ..._uchars(0x1D41A, 0x1D433)], // 𝐀-𝐙 𝐚-𝐳
+    '粗斜': [..._uchars(0x1D468, 0x1D481), ..._uchars(0x1D482, 0x1D49B)], // 𝑨-𝒁 𝒂-𝒛
+    '草書': [..._uchars(0x1D4D0, 0x1D4E9), ..._uchars(0x1D4EA, 0x1D503)], // 𝓐-𝓩 𝓪-𝔃
+  },
+  arrow: {
+    '一般': ['←','→','↑','↓','↔','↕','↗','↘','↙','↖','↩','↪','↵','↷','↶','↰','↱','↴','↳','↲'],
+    '雙線': ['⇐','⇒','⇑','⇓','⇔','⇕','⇖','⇗','⇘','⇙','⇦','⇧','⇨','⇩','⇄','⇅','⇆','⇇','⇈','⇉'],
+    '三角': ['▶','◀','▲','▼','▷','◁','△','▽','►','◄','▻','◅','➤','➡','⬆','⬇','⬅','➥','➦','⤴'],
+  },
+  misc: {
+    '標記': ['✓','✔','✗','✘','✕','✖','⚠','⚑','ℹ','！','？','＊','⊕','⊗','⊙','⊘','☑','☐'],
+    '貨幣': ['$','€','£','¥','₩','₪','₫','₭','₮','₱','₲','₴','₵','₸','₹','₺','₽','₿','¢','¤','₠','₣','₤','₥'],
+    '數學': ['÷','×','±','∞','√','∑','∏','∫','∂','∇','∈','∉','⊂','⊃','∩','∪','∧','∨','¬','≠','≈','≤','≥','∝'],
+    '技術': ['⌘','⌥','⇧','⌃','⏎','⌫','⌦','⇥','⇤','⎋','©','®','™','§','¶','†','‡','※','°','′','″'],
+  },
+}
+
+let activeSymGroup  = 'shape'
+let symCurrentCat   = Object.keys(SYMBOL_SETS.shape)[0]
+
+function buildSymGrid(group, cat) {
+  const grid = document.getElementById('symGrid')
+  grid.innerHTML = ''
+  const chars = (SYMBOL_SETS[group] ?? {})[cat] ?? []
+  chars.forEach(ch => {
+    const btn = document.createElement('button')
+    btn.className   = 'sym-btn' + (ch === symbolChar ? ' active' : '')
+    btn.textContent = ch
+    btn.title       = ch
+    btn.addEventListener('click', () => {
+      symbolChar = ch
+      document.getElementById('symbolPreviewSwatch').textContent = ch
+      document.querySelectorAll('.sym-btn').forEach(b => b.classList.remove('active'))
+      btn.classList.add('active')
+      // 只有在選取模式下才更新既有的符號 annotation（印章模式不覆蓋已蓋下的印章）
+      if (tool === 'select' && selectedId) {
+        const a = annotations.find(x => x.id === selectedId)
+        if (a && a.type === 'symbol') { updateSelectedAnnot({ char: ch }) }
+      }
+      hideSymbolPanel()
+    })
+    grid.appendChild(btn)
+  })
+}
+
+function buildSymTabs(group) {
+  const row = document.getElementById('symTabsRow')
+  row.innerHTML = ''
+  const cats = Object.keys(SYMBOL_SETS[group] ?? {})
+  cats.forEach((cat, i) => {
+    const btn = document.createElement('button')
+    btn.className       = 'sym-tab' + (i === 0 ? ' active' : '')
+    btn.dataset.cat     = cat
+    btn.textContent     = cat
+    btn.addEventListener('click', () => {
+      symCurrentCat = cat
+      row.querySelectorAll('.sym-tab').forEach(t => t.classList.remove('active'))
+      btn.classList.add('active')
+      buildSymGrid(group, cat)
+    })
+    row.appendChild(btn)
+  })
+}
+
+function openSymbolGroup(group, triggerBtn) {
+  activeSymGroup = group
+  const panel = document.getElementById('symbolPickerPanel')
+  const ar = triggerBtn.getBoundingClientRect()
+  panel.style.left = Math.min(ar.left, window.innerWidth - 272) + 'px'
+  panel.style.top  = (ar.bottom + 4) + 'px'
+  buildSymTabs(group)
+  symCurrentCat = Object.keys(SYMBOL_SETS[group])[0]
+  buildSymGrid(group, symCurrentCat)
+  panel.classList.remove('hidden')
+  // 更新子屬性列群組按鈕 active 狀態
+  document.querySelectorAll('#grpSymbol [data-sym-group]').forEach(b =>
+    b.classList.toggle('active', b.dataset.symGroup === group)
+  )
+}
+
+function hideSymbolPanel() {
+  document.getElementById('symbolPickerPanel').classList.add('hidden')
+}
+
+// Swatch click — re-opens the current group's panel
+document.getElementById('symbolPreviewSwatch').addEventListener('click', e => {
+  e.stopPropagation()
+  const panel = document.getElementById('symbolPickerPanel')
+  if (panel.classList.contains('hidden')) {
+    const gb = document.querySelector(`#grpSymbol [data-sym-group="${activeSymGroup}"]`)
+    if (gb) openSymbolGroup(activeSymGroup, gb)
+  } else {
+    hideSymbolPanel()
+  }
+})
+
+// Sym-group buttons in options bar — open corresponding panel
+document.querySelectorAll('#grpSymbol [data-sym-group]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    openSymbolGroup(btn.dataset.symGroup, btn)
+  })
+})
+
+document.getElementById('symbolSizeInput').addEventListener('change', e => {
+  symbolSize = Math.max(16, Math.min(512, parseInt(e.target.value) || 64))
+  e.target.value = symbolSize
+  if (selectedId) {
+    const a = annotations.find(x => x.id === selectedId)
+    if (a && a.type === 'symbol') { updateSelectedAnnot({ size: symbolSize }); pushHistory() }
+  }
+})
+
+// Close symbol panel on outside click
+document.addEventListener('mousedown', e => {
+  const panel = document.getElementById('symbolPickerPanel')
+  if (!panel.classList.contains('hidden') &&
+      !panel.contains(e.target) &&
+      !e.target.closest('#grpSymbol') &&
+      e.target.id !== 'symbolPreviewSwatch') {
+    hideSymbolPanel()
+  }
+})
+
+// ─── Template (一鍵套版) ──────────────────────────────────────────────────────
+
+function _tplRoundRectPath(ctx, x, y, w, h, r) {
+  ctx.beginPath()
+  ctx.moveTo(x + r, y)
+  ctx.lineTo(x + w - r, y)
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r)
+  ctx.lineTo(x + w, y + h - r)
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h)
+  ctx.lineTo(x + r, y + h)
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r)
+  ctx.lineTo(x, y + r)
+  ctx.quadraticCurveTo(x, y, x + r, y)
+  ctx.closePath()
+}
+
+// Shared: draw image with optional rounded corners + drop shadow
+function _tplDrawImgRounded(ctx, img, x, y, w, h, radius, shadowColor, shadowBlur, shadowOffY) {
+  const r = Math.round(Math.min(w, h) * radius)
+  const blur = Math.round(Math.min(w, h) * shadowBlur)
+  const sOffY = Math.round(Math.min(w, h) * shadowOffY)
+  if (blur > 0) {
+    ctx.save()
+    ctx.shadowColor = shadowColor
+    ctx.shadowBlur = blur
+    ctx.shadowOffsetY = sOffY
+    ctx.fillStyle = 'rgba(0,0,0,0.001)'
+    _tplRoundRectPath(ctx, x, y, w, h, r)
+    ctx.fill()
+    ctx.restore()
+  }
+  ctx.save()
+  if (r > 0) { _tplRoundRectPath(ctx, x, y, w, h, r); ctx.clip() }
+  ctx.drawImage(img, x, y, w, h)
+  ctx.restore()
+}
+
+// ── 套版可調參數 ──────────────────────────────────────────────
+let _tplTargetRatio   = null  // null = auto (uniform padding)
+let _tplPadding       = 9     // 2–30  (% of min dimension)
+let _tplRadius        = 5     // 0–10  → radius factor = value × 0.005
+let _tplShadow        = 5     // 0–10  → blur   factor = value × 0.008
+let _lastAppliedTplId = null  // for slider live-preview re-apply
+
+// Shared layout helper — respects _tplTargetRatio and _tplPadding
+function _tplGradLayout(w, h) {
+  const pad = Math.round(Math.min(w, h) * (_tplPadding / 100))
+  if (!_tplTargetRatio) {
+    return { newW: w + pad * 2, newH: h + pad * 2, imgX: pad, imgY: pad }
+  }
+  const imgRatio = w / h
+  let newW, newH
+  if (imgRatio >= _tplTargetRatio) {
+    newW = w + pad * 2
+    newH = Math.max(h + pad * 2, Math.round(newW / _tplTargetRatio))
+  } else {
+    newH = h + pad * 2
+    newW = Math.max(w + pad * 2, Math.round(newH * _tplTargetRatio))
+  }
+  return { newW, newH, imgX: Math.round((newW - w) / 2), imgY: Math.round((newH - h) / 2) }
+}
+
+// Shared drawImg — rounded corners + white border using _tplRadius / _tplShadow
+function _tplGradDrawImg(ctx, img, x, y, w, h) {
+  const r = _tplRadius * 0.005                               // 0–5% of min(w,h)
+  if (_tplShadow > 0) {
+    const bw  = Math.round(Math.min(w, h) * _tplShadow * 0.003)  // 0–3% border width
+    const rPx = Math.round(Math.min(w, h) * r)
+    _tplRoundRectPath(ctx, x - bw, y - bw, w + bw * 2, h + bw * 2, rPx + bw)
+    ctx.fillStyle = 'rgba(255,255,255,0.92)'
+    ctx.fill()
+  }
+  _tplDrawImgRounded(ctx, img, x, y, w, h, r, 'rgba(0,0,0,0)', 0, 0)
+}
+
+// Mesh gradient: place multiple soft radial colour blobs over a base fill
+// blobs: [ [cx, cy, r, [R,G,B], alpha], ... ]  — cx/cy/r in 0..1 relative to W
+function _tplMesh(ctx, W, H, base, blobs) {
+  ctx.fillStyle = base; ctx.fillRect(0, 0, W, H)
+  for (const [cx, cy, r, [rr, gg, bb], a] of blobs) {
+    const rg = ctx.createRadialGradient(W * cx, H * cy, 0, W * cx, H * cy, W * r)
+    rg.addColorStop(0, `rgba(${rr},${gg},${bb},${a})`)
+    rg.addColorStop(1, `rgba(${rr},${gg},${bb},0)`)
+    ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H)
+  }
+}
+
+const TEMPLATES = [
+  // ── Apple 紅 — 珊瑚玫瑰（Coral / Rose / Peach）────────────────
+  {
+    id: 'apple-red',
+    layout: _tplGradLayout,
+    drawBg(ctx, W, H) {
+      _tplMesh(ctx, W, H, '#fff0f0', [
+        [0.10, 0.88, 0.90, [225, 55, 85],  0.78],  // 深玫瑰 左下
+        [0.92, 0.12, 0.85, [255, 125, 85], 0.68],  // 暖珊瑚 右上
+        [0.50, 0.50, 0.70, [240, 75, 115], 0.42],  // 玫瑰 中央
+      ])
+    },
+    drawImg: _tplGradDrawImg,
+  },
+  // ── Apple 橙 — 琥珀暖陽（Terracotta / Amber / Gold）──────────
+  {
+    id: 'apple-orange',
+    layout: _tplGradLayout,
+    drawBg(ctx, W, H) {
+      _tplMesh(ctx, W, H, '#fff8f0', [
+        [0.05, 0.92, 0.88, [205, 72, 22],  0.78],  // 深陶土 左下
+        [0.90, 0.08, 0.85, [255, 200, 50], 0.70],  // 黃金 右上
+        [0.50, 0.52, 0.68, [255, 135, 42], 0.42],  // 橙 中央
+      ])
+    },
+    drawImg: _tplGradDrawImg,
+  },
+  // ── Apple 黃 — 晴光黃金（Amber / Sunshine / Lemon）───────────
+  {
+    id: 'apple-yellow',
+    layout: _tplGradLayout,
+    drawBg(ctx, W, H) {
+      _tplMesh(ctx, W, H, '#fffde8', [
+        [0.08, 0.90, 0.82, [230, 148, 28], 0.72],  // 琥珀 左下
+        [0.88, 0.10, 0.82, [255, 242, 95], 0.68],  // 亮檸檬 右上
+        [0.48, 0.45, 0.62, [255, 198, 50], 0.35],  // 陽光黃 中
+        [0.88, 0.88, 0.68, [120, 215, 90], 0.35],  // 嫩草綠 右下（跨色）
+      ])
+    },
+    drawImg: _tplGradDrawImg,
+  },
+  // ── Apple 綠 — 翠玉薄荷（Emerald / Aquamarine / Mint）────────
+  {
+    id: 'apple-green',
+    layout: _tplGradLayout,
+    drawBg(ctx, W, H) {
+      _tplMesh(ctx, W, H, '#edfff6', [
+        [0.05, 0.92, 0.92, [4,  112, 80],  0.82],  // 深翠綠 左下
+        [0.90, 0.06, 0.88, [50, 228, 170], 0.72],  // 薄荷青 右上
+        [0.85, 0.82, 0.65, [18, 172, 122], 0.38],  // 中翠 右下
+        [0.12, 0.12, 0.68, [210, 230, 40], 0.42],  // 檸檬黃 左上（跨色）
+      ])
+    },
+    drawImg: _tplGradDrawImg,
+  },
+  // ── Apple 藍 — 晴空碧海（Sky / Aqua / Violet hint）───────────
+  {
+    id: 'apple-blue',
+    layout: _tplGradLayout,
+    drawBg(ctx, W, H) {
+      _tplMesh(ctx, W, H, '#eef7ff', [
+        [0.05, 0.92, 0.92, [18, 98, 198],  0.82],  // 深靛藍 左下
+        [0.90, 0.05, 0.88, [95, 220, 255], 0.72],  // 天水藍 右上
+        [0.88, 0.86, 0.70, [55, 138, 232], 0.45],  // 中藍 右下
+        [0.13, 0.12, 0.66, [115, 85, 255], 0.32],  // 紫藍 左上（跨色）
+      ])
+    },
+    drawImg: _tplGradDrawImg,
+  },
+  // ── Apple 紫 — 極光（Violet / Magenta / Lavender）────────────
+  {
+    id: 'apple-purple',
+    layout: _tplGradLayout,
+    drawBg(ctx, W, H) {
+      _tplMesh(ctx, W, H, '#f8f0ff', [
+        [0.05, 0.90, 0.90, [98,  32, 218], 0.75],  // 深紫羅蘭 左下
+        [0.92, 0.08, 0.88, [222, 90, 205], 0.68],  // 品紅 右上
+        [0.10, 0.10, 0.72, [142, 112, 245], 0.48], // 薰衣草 左上
+        [0.78, 0.82, 0.62, [198, 95,  232], 0.32], // 紫 右下
+      ])
+    },
+    drawImg: _tplGradDrawImg,
+  },
+]
+
+let _tplBaseSnapshot = null
+let _snapImgLoaded   = null   // cached decoded snapshot — avoids repeated async Image load
+
+function applyTemplate(tplId) {
+  if (!imgElement) return
+  const tpl = TEMPLATES.find(t => t.id === tplId)
+  if (!tpl) return
+  if (!_tplBaseSnapshot) return
+
+  _lastAppliedTplId = tplId
+  const snap = _tplBaseSnapshot
+
+  const doApply = (snapImg) => {
+    const layout = tpl.layout(snap.width, snap.height)
+    const { newW, newH, imgX, imgY } = layout
+    const off = document.createElement('canvas')
+    off.width = newW; off.height = newH
+    const ctx = off.getContext('2d')
+    tpl.drawBg(ctx, newW, newH, layout)
+    tpl.drawImg(ctx, snapImg, imgX, imgY, snap.width, snap.height, layout)
+    pushHistory()
+    const newImg = new Image()
+    newImg.onload = () => {
+      imgElement = newImg; imgWidth = newW; imgHeight = newH
+      document.getElementById('imgInfo').textContent = `${newW} × ${newH} px`
+      annotations = JSON.parse(JSON.stringify(snap.annotations))
+      annotations.forEach(a => moveAnnot(a, imgX, imgY))
+      userZoomed = false
+      fitCanvas(); drawBase(); renderAnnotations()
+      showToast('套版已套用')
+    }
+    newImg.src = off.toDataURL()
+  }
+
+  if (_snapImgLoaded) {
+    doApply(_snapImgLoaded)
+  } else {
+    const img = new Image()
+    img.onload = () => { _snapImgLoaded = img; doApply(img) }
+    img.src = snap.dataURL
+  }
+}
+
+function openTemplatePanel() {
+  if (!imgElement) { showToast('請先載入圖片'); return }
+  const panel = document.getElementById('templatePanel')
+  if (!panel.classList.contains('hidden')) { hideTemplatePanel(); return }
+
+  // Take snapshot of current image
+  const sc = document.createElement('canvas')
+  sc.width = imgWidth; sc.height = imgHeight
+  sc.getContext('2d').drawImage(imgElement, 0, 0)
+  _tplBaseSnapshot = { dataURL: sc.toDataURL(), width: imgWidth, height: imgHeight,
+                       annotations: JSON.parse(JSON.stringify(annotations)) }
+  _snapImgLoaded = null
+
+  // Initial position near button
+  const btn = document.getElementById('btnTemplate')
+  const ar  = btn.getBoundingClientRect()
+  panel.style.left = Math.min(ar.left - 8, window.innerWidth - 300) + 'px'
+  panel.style.top  = (ar.bottom + 6) + 'px'
+  panel.classList.remove('hidden')
+
+  // Clamp to viewport after layout paint
+  requestAnimationFrame(() => {
+    const pr = panel.getBoundingClientRect()
+    if (pr.bottom > window.innerHeight - 10)
+      panel.style.top  = Math.max(10, ar.top - pr.height - 6) + 'px'
+    if (pr.right  > window.innerWidth  - 10)
+      panel.style.left = Math.max(10, window.innerWidth - pr.width - 10) + 'px'
+  })
+}
+
+function hideTemplatePanel() {
+  document.getElementById('templatePanel').classList.add('hidden')
+  _tplBaseSnapshot  = null
+  _snapImgLoaded    = null
+  _tplTargetRatio   = null
+  _lastAppliedTplId = null
+  document.querySelectorAll('.tpl-size-btn').forEach(b => b.classList.remove('active'))
+}
+
+document.getElementById('btnTemplate').addEventListener('click', e => {
+  e.stopPropagation()
+  openTemplatePanel()
+})
+
+// ✕ close button — stop propagation so it doesn't trigger panel drag
+;['mousedown', 'click'].forEach(ev => {
+  document.getElementById('tplCloseBtn').addEventListener(ev, e => {
+    e.stopPropagation()
+    if (ev === 'click') hideTemplatePanel()
+  })
+})
+
+document.querySelectorAll('.tpl-card').forEach(card => {
+  card.addEventListener('click', () => applyTemplate(card.dataset.tpl))
+})
+
+// Social size buttons — set target ratio + immediately re-apply if template active
+document.querySelectorAll('.tpl-size-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tpl-size-btn').forEach(b => b.classList.remove('active'))
+    const ratio = parseFloat(btn.dataset.ratio)
+    _tplTargetRatio = ratio > 0 ? ratio : null
+    btn.classList.add('active')
+    if (_lastAppliedTplId && _tplBaseSnapshot) applyTemplate(_lastAppliedTplId)
+  })
+})
+
+// Sliders — labels update on drag (input), apply only on release (change)
+function _syncSliderLabels() {
+  const pEl = document.getElementById('tplPadding')
+  const rEl = document.getElementById('tplRadius')
+  const sEl = document.getElementById('tplShadow')
+  if (pEl) document.getElementById('tplPaddingVal').textContent = pEl.value + '%'
+  if (rEl) document.getElementById('tplRadiusVal').textContent  = rEl.value
+  if (sEl) document.getElementById('tplShadowVal').textContent  = sEl.value
+}
+
+function _applySliderChange() {
+  const pEl = document.getElementById('tplPadding')
+  const rEl = document.getElementById('tplRadius')
+  const sEl = document.getElementById('tplShadow')
+  if (pEl) _tplPadding = parseInt(pEl.value, 10)
+  if (rEl) _tplRadius  = parseInt(rEl.value, 10)
+  if (sEl) _tplShadow  = parseInt(sEl.value, 10)
+  if (_lastAppliedTplId && _tplBaseSnapshot) applyTemplate(_lastAppliedTplId)
+}
+
+;['tplPadding', 'tplRadius', 'tplShadow'].forEach(id => {
+  const el = document.getElementById(id)
+  if (!el) return
+  el.addEventListener('input',  _syncSliderLabels)
+  el.addEventListener('change', _applySliderChange)
+})
+
+// Draggable template panel
+;(function () {
+  const panel  = document.getElementById('templatePanel')
+  const handle = document.getElementById('tplDragHandle')
+  let drag = null
+
+  handle.addEventListener('mousedown', e => {
+    const r = panel.getBoundingClientRect()
+    drag = { ox: e.clientX - r.left, oy: e.clientY - r.top }
+    e.preventDefault()
+  })
+  document.addEventListener('mousemove', e => {
+    if (!drag) return
+    const x = Math.max(0, Math.min(window.innerWidth  - panel.offsetWidth,  e.clientX - drag.ox))
+    const y = Math.max(0, Math.min(window.innerHeight - panel.offsetHeight, e.clientY - drag.oy))
+    panel.style.left = x + 'px'
+    panel.style.top  = y + 'px'
+  })
+  document.addEventListener('mouseup', () => { drag = null })
+})()
+
+document.addEventListener('mousedown', e => {
+  const panel = document.getElementById('templatePanel')
+  if (!panel.classList.contains('hidden') &&
+      !panel.contains(e.target) &&
+      e.target.id !== 'btnTemplate') {
+    hideTemplatePanel()
+  }
+})
+
 // ─── Resize ───────────────────────────────────────────────────────────────────
 
 const resizeModal = document.getElementById('resizeModal')
@@ -3951,10 +4717,17 @@ document.getElementById('btnResizeConfirm').addEventListener('click', () => {
     annotations = annotations.map(a => {
       a = JSON.parse(JSON.stringify(a))
       switch (a.type) {
+        case 'mosaic':
+          a.x *= sx; a.y *= sy; a.w *= sx; a.h *= sy
+          break
         case 'rect':
         case 'fillrect':
           a.x *= sx; a.y *= sy; a.w *= sx; a.h *= sy
           a.thickness = Math.max(1, Math.round(a.thickness * sx))
+          break
+        case 'symbol':
+          a.x *= sx; a.y *= sy
+          a.size = Math.max(8, Math.round(a.size * Math.min(sx, sy)))
           break
         case 'line':
           a.x1 *= sx; a.y1 *= sy; a.x2 *= sx; a.y2 *= sy
@@ -3999,6 +4772,116 @@ function burnIn(format) {
   const mime = format === 'jpg' ? 'image/jpeg' : format === 'webp' ? 'image/webp' : 'image/png'
   return off.toDataURL(mime, 0.92)
 }
+
+// ─── Copy final image to clipboard ───────────────────────────────────────────
+
+function copyFinalImage() {
+  if (!imgElement) { showToast('尚未載入圖片', true); return }
+  const dataURL = burnIn('png')
+  const { clipboard, nativeImage } = require('electron')
+  clipboard.writeImage(nativeImage.createFromDataURL(dataURL))
+  showToast('圖片已複製到剪貼簿')
+}
+
+document.getElementById('btnCopyImage').addEventListener('click', copyFinalImage)
+
+// ─── Drag OUT export (floating button) ────────────────────────────────────────
+
+;(function () {
+  const btn    = document.getElementById('floatDragExport')
+  const handle = document.getElementById('floatDragMove')
+  let drag = null
+
+  // ⠿ handle — reposition the button anywhere on screen
+  handle.addEventListener('mousedown', e => {
+    const r = btn.getBoundingClientRect()
+    drag = { ox: e.clientX - r.left, oy: e.clientY - r.top }
+    e.preventDefault()
+    e.stopPropagation()
+  })
+  document.addEventListener('mousemove', e => {
+    if (!drag) return
+    const x = Math.max(0, Math.min(window.innerWidth  - btn.offsetWidth,  e.clientX - drag.ox))
+    const y = Math.max(0, Math.min(window.innerHeight - btn.offsetHeight, e.clientY - drag.oy))
+    btn.style.left   = x + 'px'
+    btn.style.top    = y + 'px'
+    btn.style.right  = 'auto'
+    btn.style.bottom = 'auto'
+  })
+  document.addEventListener('mouseup', () => { drag = null })
+
+  // Main area — start OS-level drag export
+  btn.addEventListener('mousedown', e => {
+    if (e.target === handle || handle.contains(e.target)) return
+    if (!imgElement) { showToast('尚未載入圖片', true); return }
+    const dataURL = burnIn('png')
+    ipcRenderer.send('start-drag-export', { dataURL })
+  })
+})()
+
+// ─── Drag & Drop import ───────────────────────────────────────────────────────
+
+const _dropOverlay = document.getElementById('dropOverlay')
+let   _dropDepth   = 0  // track nested dragenter/dragleave
+
+function _loadFileIntoEditor(file) {
+  if (!file || !file.type.startsWith('image/')) {
+    showToast('請拖曳圖片檔案（PNG / JPG / WebP / GIF）', true)
+    return
+  }
+  const reader = new FileReader()
+  reader.onload = ev => {
+    const newImg = new Image()
+    newImg.onload = () => {
+      imgElement  = newImg
+      imgWidth    = newImg.naturalWidth
+      imgHeight   = newImg.naturalHeight
+      annotations = []
+      history     = [[]]; historyIdx = 0
+      selectedId  = null; userZoomed = false
+      document.getElementById('imgInfo').textContent = `${imgWidth} × ${imgHeight} px`
+      fitCanvas()
+      drawBase()
+      renderAnnotations()
+      showToast(`已匯入：${file.name}`)
+    }
+    newImg.src = ev.target.result
+  }
+  reader.readAsDataURL(file)
+}
+
+document.addEventListener('dragenter', e => {
+  const hasFile = e.dataTransfer?.types?.includes('Files')
+  if (!hasFile) return
+  _dropDepth++
+  if (_dropDepth === 1) _dropOverlay.classList.add('active')
+})
+
+document.addEventListener('dragleave', () => {
+  _dropDepth = Math.max(0, _dropDepth - 1)
+  if (_dropDepth === 0) _dropOverlay.classList.remove('active')
+})
+
+document.addEventListener('dragover', e => {
+  if (e.dataTransfer?.types?.includes('Files')) e.preventDefault()
+})
+
+document.addEventListener('drop', e => {
+  _dropDepth = 0
+  _dropOverlay.classList.remove('active')
+  e.preventDefault()
+  const file = e.dataTransfer?.files?.[0]
+  if (file) _loadFileIntoEditor(file)
+})
+
+// ─── Keyboard shortcut: ⌘⇧C copies final image ──────────────────────────────
+
+// (Handled in the existing keydown listener — injected here so it stays near the impl)
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === 'c' || e.key === 'C')) {
+    e.preventDefault(); copyFinalImage()
+  }
+}, true)  // capture phase so it fires before other listeners
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
 
