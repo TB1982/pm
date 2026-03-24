@@ -43,6 +43,26 @@
 }
 .drag-export-btn:hover  { background: #2a2a48; border-color: #6b6baa; color: #d0d8f0; }
 .drag-export-btn:active { cursor: grabbing; }
+/* Floating drag-export button */
+.float-drag-export {
+  position: fixed; right: 20px; bottom: 56px;
+  display: flex; align-items: center; gap: 4px;
+  padding: 6px 12px 6px 2px;
+  background: #1e1e38; border: 1px solid #4a4a7a;
+  border-radius: 20px; color: #a0a8c8;
+  font-size: 12px; font-weight: 500;
+  user-select: none; z-index: 300;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.45);
+  transition: background 0.1s, border-color 0.1s;
+}
+.float-drag-export:hover { background: #2a2a48; border-color: #6b6baa; color: #d0d8f0; }
+.float-drag-move {
+  color: #555; font-size: 15px; line-height: 1;
+  cursor: move; padding: 2px 6px; border-radius: 10px;
+}
+.float-drag-move:hover { color: #888; background: rgba(255,255,255,0.07); }
+.float-drag-label { cursor: grab; }
+.float-drag-label:active { cursor: grabbing; }
 .copy-btn {
   padding: 5px 12px;
   font-size: 12px; font-weight: 500;
@@ -145,6 +165,12 @@
 }
 .tpl-drag-handle::before { content: '⠿'; color: #555; font-size: 13px; }
 .tpl-drag-handle:active  { cursor: grabbing; }
+.tpl-close-btn {
+  margin-left: auto; background: none; border: none;
+  color: #555; font-size: 14px; cursor: pointer;
+  padding: 0 3px; line-height: 1; border-radius: 3px;
+}
+.tpl-close-btn:hover { color: #aaa; background: rgba(255,255,255,0.07); }
 .tpl-heading {
   font-size: 11px;
   color: #555;
@@ -766,7 +792,6 @@
     <span class="zoom-label" id="zoomLabel">100%</span>
     <div class="flex-spacer"></div>
     <button class="copy-btn"        id="btnCopyImage"  title="複製最終圖片到剪貼簿 (⌘⇧C)">複製</button>
-    <div   class="drag-export-btn" id="btnDragExport"  title="拖曳到 Line / Slack / Finder 等">⬆ 拖曳匯出</div>
     <button class="save-btn"        id="btnSave">完成並儲存</button>
   </div>
 
@@ -960,7 +985,7 @@
 
 <!-- ─── Template Panel ──────────────────────────────────── -->
 <div id="templatePanel" class="template-panel hidden" role="dialog" aria-label="套版選擇">
-  <div class="tpl-drag-handle" id="tplDragHandle">一鍵套版</div>
+  <div class="tpl-drag-handle" id="tplDragHandle">一鍵套版<button class="tpl-close-btn" id="tplCloseBtn" aria-label="關閉">✕</button></div>
 
   <div class="tpl-heading">背景</div>
   <div class="tpl-grid">
@@ -1029,6 +1054,12 @@
   <button id="ctxMoveUp"   data-dir="up">上移一層</button>
   <button id="ctxMoveDown" data-dir="down">下移一層</button>
   <button id="ctxToBottom" data-dir="bottom">移到最下層</button>
+</div>
+
+<!-- Floating drag-export button -->
+<div id="floatDragExport" class="float-drag-export" title="拖曳匯出到 Line / Slack / Finder 等">
+  <span class="float-drag-move" id="floatDragMove" title="拖曳移動按鈕位置">⠿</span>
+  <span class="float-drag-label">⬆ 拖曳匯出</span>
 </div>
 
 <script src="editor.js"></script>

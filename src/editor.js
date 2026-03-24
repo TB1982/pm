@@ -4596,6 +4596,14 @@ document.getElementById('btnTemplate').addEventListener('click', e => {
   openTemplatePanel()
 })
 
+// ✕ close button — stop propagation so it doesn't trigger panel drag
+;['mousedown', 'click'].forEach(ev => {
+  document.getElementById('tplCloseBtn').addEventListener(ev, e => {
+    e.stopPropagation()
+    if (ev === 'click') hideTemplatePanel()
+  })
+})
+
 document.querySelectorAll('.tpl-card').forEach(card => {
   card.addEventListener('click', () => applyTemplate(card.dataset.tpl))
 })
@@ -4777,13 +4785,39 @@ function copyFinalImage() {
 
 document.getElementById('btnCopyImage').addEventListener('click', copyFinalImage)
 
-// ─── Drag OUT export ──────────────────────────────────────────────────────────
+// ─── Drag OUT export (floating button) ────────────────────────────────────────
 
-document.getElementById('btnDragExport').addEventListener('mousedown', () => {
-  if (!imgElement) { showToast('尚未載入圖片', true); return }
-  const dataURL = burnIn('png')
-  ipcRenderer.send('start-drag-export', { dataURL })
-})
+;(function () {
+  const btn    = document.getElementById('floatDragExport')
+  const handle = document.getElementById('floatDragMove')
+  let drag = null
+
+  // ⠿ handle — reposition the button anywhere on screen
+  handle.addEventListener('mousedown', e => {
+    const r = btn.getBoundingClientRect()
+    drag = { ox: e.clientX - r.left, oy: e.clientY - r.top }
+    e.preventDefault()
+    e.stopPropagation()
+  })
+  document.addEventListener('mousemove', e => {
+    if (!drag) return
+    const x = Math.max(0, Math.min(window.innerWidth  - btn.offsetWidth,  e.clientX - drag.ox))
+    const y = Math.max(0, Math.min(window.innerHeight - btn.offsetHeight, e.clientY - drag.oy))
+    btn.style.left   = x + 'px'
+    btn.style.top    = y + 'px'
+    btn.style.right  = 'auto'
+    btn.style.bottom = 'auto'
+  })
+  document.addEventListener('mouseup', () => { drag = null })
+
+  // Main area — start OS-level drag export
+  btn.addEventListener('mousedown', e => {
+    if (e.target === handle || handle.contains(e.target)) return
+    if (!imgElement) { showToast('尚未載入圖片', true); return }
+    const dataURL = burnIn('png')
+    ipcRenderer.send('start-drag-export', { dataURL })
+  })
+})()
 
 // ─── Drag & Drop import ───────────────────────────────────────────────────────
 
