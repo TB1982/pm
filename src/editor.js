@@ -4374,12 +4374,16 @@ function _tplDrawImgRounded(ctx, img, x, y, w, h, radius, shadowColor, shadowBlu
   ctx.restore()
 }
 
-// ── 社群尺寸比例 ─────────────────────────────────────────────
-let _tplTargetRatio = null   // null = auto (uniform padding)
+// ── 套版可調參數 ──────────────────────────────────────────────
+let _tplTargetRatio   = null  // null = auto (uniform padding)
+let _tplPadding       = 9     // 2–30  (% of min dimension)
+let _tplRadius        = 5     // 0–10  → radius factor = value × 0.005
+let _tplShadow        = 5     // 0–10  → blur   factor = value × 0.008
+let _lastAppliedTplId = null  // for slider live-preview re-apply
 
-// Shared layout helper — respects _tplTargetRatio if set
+// Shared layout helper — respects _tplTargetRatio and _tplPadding
 function _tplGradLayout(w, h) {
-  const pad = Math.round(Math.min(w, h) * 0.09)
+  const pad = Math.round(Math.min(w, h) * (_tplPadding / 100))
   if (!_tplTargetRatio) {
     return { newW: w + pad * 2, newH: h + pad * 2, imgX: pad, imgY: pad }
   }
@@ -4395,9 +4399,12 @@ function _tplGradLayout(w, h) {
   return { newW, newH, imgX: Math.round((newW - w) / 2), imgY: Math.round((newH - h) / 2) }
 }
 
-// Shared drawImg — rounded corners + soft shadow
+// Shared drawImg — rounded corners + shadow using _tplRadius / _tplShadow
 function _tplGradDrawImg(ctx, img, x, y, w, h) {
-  _tplDrawImgRounded(ctx, img, x, y, w, h, 0.025, 'rgba(0,0,0,0.28)', 0.04, 0.015)
+  const r    = _tplRadius * 0.005          // radius fraction of min(w,h)
+  const blur = _tplShadow * 0.008          // shadow blur fraction
+  const offY = _tplShadow > 0 ? blur * 0.38 : 0
+  _tplDrawImgRounded(ctx, img, x, y, w, h, r, 'rgba(0,0,0,0.28)', blur, offY)
 }
 
 // Mesh gradient: place multiple soft radial colour blobs over a base fill
@@ -4502,6 +4509,7 @@ function applyTemplate(tplId) {
   if (!tpl) return
   if (!_tplBaseSnapshot) return
 
+  _lastAppliedTplId = tplId
   // Always apply from snapshot so templates don't stack
   const snap = _tplBaseSnapshot
   const snapImg = new Image()
@@ -4564,8 +4572,9 @@ function openTemplatePanel() {
 
 function hideTemplatePanel() {
   document.getElementById('templatePanel').classList.add('hidden')
-  _tplBaseSnapshot = null
-  _tplTargetRatio  = null
+  _tplBaseSnapshot  = null
+  _tplTargetRatio   = null
+  _lastAppliedTplId = null
   document.querySelectorAll('.tpl-size-btn').forEach(b => b.classList.remove('active'))
 }
 
@@ -4586,6 +4595,34 @@ document.querySelectorAll('.tpl-size-btn').forEach(btn => {
     _tplTargetRatio = ratio > 0 ? ratio : null
     btn.classList.add('active')
   })
+})
+
+// Sliders — live re-apply with debounce
+let _sliderTimer = null
+function _onTplSlider() {
+  const pEl = document.getElementById('tplPadding')
+  const rEl = document.getElementById('tplRadius')
+  const sEl = document.getElementById('tplShadow')
+  if (pEl) {
+    _tplPadding = parseInt(pEl.value, 10)
+    document.getElementById('tplPaddingVal').textContent = _tplPadding + '%'
+  }
+  if (rEl) {
+    _tplRadius = parseInt(rEl.value, 10)
+    document.getElementById('tplRadiusVal').textContent = _tplRadius
+  }
+  if (sEl) {
+    _tplShadow = parseInt(sEl.value, 10)
+    document.getElementById('tplShadowVal').textContent = _tplShadow
+  }
+  if (!_lastAppliedTplId || !_tplBaseSnapshot) return
+  clearTimeout(_sliderTimer)
+  _sliderTimer = setTimeout(() => applyTemplate(_lastAppliedTplId), 120)
+}
+
+;['tplPadding', 'tplRadius', 'tplShadow'].forEach(id => {
+  const el = document.getElementById(id)
+  if (el) el.addEventListener('input', _onTplSlider)
 })
 
 document.addEventListener('mousedown', e => {

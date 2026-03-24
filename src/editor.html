@@ -217,6 +217,25 @@
 }
 .tpl-size-btn:hover  { border-color: #a78bfa; color: #d0d8f8; }
 .tpl-size-btn.active { border-color: #a78bfa; background: rgba(167,139,250,0.15); color: #d0d8f8; }
+/* 三個滑桿 */
+.tpl-sliders { margin-bottom: 10px; }
+.tpl-slider-row {
+  display: flex; align-items: center; gap: 7px; margin-bottom: 6px;
+}
+.tpl-slider-label { font-size: 10px; color: #9098b8; width: 28px; flex-shrink: 0; }
+.tpl-range {
+  flex: 1; height: 3px;
+  -webkit-appearance: none; appearance: none;
+  background: #2a2a42; border-radius: 2px; outline: none; cursor: pointer;
+}
+.tpl-range::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 13px; height: 13px;
+  border-radius: 50%; background: #a78bfa; cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.45);
+  transition: background .15s;
+}
+.tpl-range::-webkit-slider-thumb:hover { background: #c4b5fd; }
+.tpl-slider-val { font-size: 10px; color: #d0d8f8; width: 22px; text-align: right; flex-shrink: 0; }
 .tpl-label {
   font-size: 11px;
   color: #9098b8;
@@ -934,6 +953,23 @@
     <button class="tpl-size-btn" data-ratio="1.914" title="LinkedIn 1200×627">LinkedIn</button>
     <button class="tpl-size-btn" data-ratio="1"     title="Instagram 1080×1080">Instagram</button>
     <button class="tpl-size-btn" data-ratio="1.778" title="X / Twitter 1200×675">𝕏 Twitter</button>
+  </div>
+  <div class="tpl-sliders">
+    <div class="tpl-slider-row">
+      <span class="tpl-slider-label">留白</span>
+      <input type="range" class="tpl-range" id="tplPadding" min="2" max="30" step="1" value="9">
+      <span class="tpl-slider-val" id="tplPaddingVal">9%</span>
+    </div>
+    <div class="tpl-slider-row">
+      <span class="tpl-slider-label">圓角</span>
+      <input type="range" class="tpl-range" id="tplRadius"  min="0" max="10" step="1" value="5">
+      <span class="tpl-slider-val" id="tplRadiusVal">5</span>
+    </div>
+    <div class="tpl-slider-row">
+      <span class="tpl-slider-label">陰影</span>
+      <input type="range" class="tpl-range" id="tplShadow"  min="0" max="10" step="1" value="5">
+      <span class="tpl-slider-val" id="tplShadowVal">5</span>
+    </div>
   </div>
   <div class="tpl-heading">背景</div>
   <div class="tpl-grid">
