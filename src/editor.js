@@ -345,6 +345,7 @@ function applyColor(hex) {
   if (selectedId) updateSelectedAnnot({ color: hex })
   if (textActive) { textInputEl.style.color = hex; renderAnnotations() }
   pushRecentColor(hex)
+  if (tool === 'number') hideColorPanel()
 }
 function syncThickness(t) {
   document.getElementById('strokeWidthInput').value = t
