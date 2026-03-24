@@ -1,15 +1,14 @@
-// OCR utility process — runs in a clean Node.js context (worker_threads supported)
-// Spawned by main.js via utilityProcess.fork()
+// OCR child process — spawned by main.js via child_process.fork()
+// Uses standard process.send() / process.on('message') IPC
 
 const { createWorker } = require('tesseract.js')
 
-process.parentPort.on('message', async ({ data }) => {
-  const { dataURL, cachePath } = data
+process.on('message', async ({ dataURL, cachePath }) => {
   try {
     const worker = await createWorker(['chi_tra', 'eng'], 1, {
       cachePath,
       logger: m => {
-        process.parentPort.postMessage({
+        process.send({
           type: 'progress',
           status: m.status,
           progress: m.progress || 0
@@ -19,8 +18,8 @@ process.parentPort.on('message', async ({ data }) => {
 
     const { data: { text } } = await worker.recognize(dataURL)
     await worker.terminate()
-    process.parentPort.postMessage({ type: 'result', success: true, text: text.trim() })
+    process.send({ type: 'result', success: true, text: text.trim() })
   } catch (err) {
-    process.parentPort.postMessage({ type: 'result', success: false, error: err.message })
+    process.send({ type: 'result', success: false, error: err.message })
   }
 })

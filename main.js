@@ -599,13 +599,15 @@ ipcMain.handle('ocr-check-tessdata', () => {
   )
 })
 
-// OCR recognition runs in a utilityProcess (full Node.js, worker_threads supported)
+// OCR recognition runs in a child_process.fork (ELECTRON_RUN_AS_NODE=1)
 ipcMain.handle('ocr-recognize', (event, { dataURL }) => {
   return new Promise((resolve) => {
-    const { utilityProcess } = require('electron')
+    const { fork } = require('child_process')
     let child
     try {
-      child = utilityProcess.fork(path.join(__dirname, 'src/ocr-worker.js'))
+      child = fork(path.join(__dirname, 'src/ocr-worker.js'), [], {
+        env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' }
+      })
     } catch (err) {
       resolve({ success: false, error: 'OCR 工作程序無法啟動：' + err.message })
       return
@@ -631,12 +633,17 @@ ipcMain.handle('ocr-recognize', (event, { dataURL }) => {
       }
     })
 
-    // 若子程序意外退出（例如模組找不到、記憶體不足），立即回報失敗
     child.on('exit', (code) => {
-      done({ success: false, error: `OCR 工作程序意外結束（exit code ${code}）。請確認已執行 npm install。` })
+      if (code !== 0) {
+        done({ success: false, error: `OCR 工作程序意外結束（exit code ${code}）。請確認已執行 npm install。` })
+      }
     })
 
-    child.postMessage({ dataURL, cachePath: ocrCachePath })
+    child.on('error', (err) => {
+      done({ success: false, error: 'OCR 子程序錯誤：' + err.message })
+    })
+
+    child.send({ dataURL, cachePath: ocrCachePath })
   })
 })
 
