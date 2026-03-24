@@ -4401,10 +4401,11 @@ function _tplGradLayout(w, h) {
 
 // Shared drawImg — rounded corners + shadow using _tplRadius / _tplShadow
 function _tplGradDrawImg(ctx, img, x, y, w, h) {
-  const r    = _tplRadius * 0.005          // radius fraction of min(w,h)
-  const blur = _tplShadow * 0.008          // shadow blur fraction
-  const offY = _tplShadow > 0 ? blur * 0.38 : 0
-  _tplDrawImgRounded(ctx, img, x, y, w, h, r, 'rgba(0,0,0,0.28)', blur, offY)
+  const r     = _tplRadius * 0.005                           // 0–5% of min(w,h)
+  const blur  = _tplShadow * 0.013                           // 0–13% — wider range
+  const offY  = _tplShadow * 0.006                           // 0–6%
+  const alpha = (_tplShadow * 0.06).toFixed(2)               // 0–0.60 opacity
+  _tplDrawImgRounded(ctx, img, x, y, w, h, r, `rgba(0,0,0,${alpha})`, blur, offY)
 }
 
 // Mesh gradient: place multiple soft radial colour blobs over a base fill
@@ -4454,7 +4455,8 @@ const TEMPLATES = [
       _tplMesh(ctx, W, H, '#fffde8', [
         [0.08, 0.90, 0.82, [230, 148, 28], 0.72],  // 琥珀 左下
         [0.88, 0.10, 0.82, [255, 242, 95], 0.68],  // 亮檸檬 右上
-        [0.48, 0.45, 0.62, [255, 198, 50], 0.38],  // 陽光黃 中
+        [0.48, 0.45, 0.62, [255, 198, 50], 0.35],  // 陽光黃 中
+        [0.88, 0.88, 0.68, [120, 215, 90], 0.35],  // 嫩草綠 右下（跨色）
       ])
     },
     drawImg: _tplGradDrawImg,
@@ -4467,8 +4469,8 @@ const TEMPLATES = [
       _tplMesh(ctx, W, H, '#edfff6', [
         [0.05, 0.92, 0.92, [4,  112, 80],  0.82],  // 深翠綠 左下
         [0.90, 0.06, 0.88, [50, 228, 170], 0.72],  // 薄荷青 右上
-        [0.85, 0.82, 0.68, [18, 172, 122], 0.42],  // 中翠 右下
-        [0.14, 0.14, 0.64, [90, 230,  95], 0.32],  // 草黃綠 左上（跨色）
+        [0.85, 0.82, 0.65, [18, 172, 122], 0.38],  // 中翠 右下
+        [0.12, 0.12, 0.68, [210, 230, 40], 0.42],  // 檸檬黃 左上（跨色）
       ])
     },
     drawImg: _tplGradDrawImg,
@@ -4594,13 +4596,14 @@ document.querySelectorAll('.tpl-card').forEach(card => {
   card.addEventListener('click', () => applyTemplate(card.dataset.tpl))
 })
 
-// Social size buttons — set target ratio, highlight active
+// Social size buttons — set target ratio + immediately re-apply if template active
 document.querySelectorAll('.tpl-size-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.tpl-size-btn').forEach(b => b.classList.remove('active'))
     const ratio = parseFloat(btn.dataset.ratio)
     _tplTargetRatio = ratio > 0 ? ratio : null
     btn.classList.add('active')
+    if (_lastAppliedTplId && _tplBaseSnapshot) applyTemplate(_lastAppliedTplId)
   })
 })
 
