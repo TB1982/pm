@@ -302,6 +302,7 @@ function hideAllOptions() {
   })
   document.getElementById('numValueEdit').classList.add('hidden')
   document.getElementById('btnLineOrtho')?.classList.remove('hidden')  // reset to visible by default
+  hideSymbolPanel()
 }
 
 function showOptionsForTool(t) {
@@ -1635,9 +1636,11 @@ function setTool(t) {
 
   document.querySelectorAll('.tool-btn[data-tool]').forEach(b => {
     // ellipse 屬於 rect 群組；fillellipse 屬於 fillrect 群組
-    const match = b.dataset.tool === t
+    let match = b.dataset.tool === t
       || (t === 'ellipse'     && b.dataset.tool === 'rect')
       || (t === 'fillellipse' && b.dataset.tool === 'fillrect')
+    // sym-group 按鈕：只亮起目前的群組按鈕
+    if (b.dataset.symGroup) match = (t === 'symbol' && b.dataset.symGroup === activeSymGroup)
     b.classList.toggle('active', match)
   })
 
@@ -3547,6 +3550,13 @@ document.addEventListener('mouseup', e => {
   if (isResizing) {
     isResizing = false
     pushHistory()
+    // Sync size input if a symbol annotation was just resized
+    if (selectedId) {
+      const _a = annotations.find(x => x.id === selectedId)
+      if (_a && _a.type === 'symbol') {
+        document.getElementById('symbolSizeInput').value = Math.round(_a.size)
+      }
+    }
     return
   }
   if (isDragging) {
@@ -3868,7 +3878,12 @@ document.addEventListener('keydown', e => {
     case 'c': case 'C': setTool('crop');   break
     case 'g': case 'G': setTool('ocr');    break
     case 'x': case 'X': setTool('mosaic'); break
-    case 'u': case 'U': setTool('symbol'); break
+    case 'u': case 'U': {
+      setTool('symbol')
+      const _gb = document.querySelector(`.tool-btn[data-sym-group="${activeSymGroup}"]`)
+      if (_gb) openSymbolGroup(activeSymGroup, _gb)
+      break
+    }
     case 's': case 'S': openResizeModal(); break
     case 'Escape':
       hideCtxMenu()
@@ -4188,19 +4203,42 @@ document.querySelectorAll('#grpMosaicBlur [data-blur]').forEach(btn => {
 
 // ─── Symbol tool controls ─────────────────────────────────────────────────────
 
+// Helper: generate array of Unicode chars from code point range
+const _uchars = (start, end) => Array.from({ length: end - start + 1 }, (_, i) => String.fromCodePoint(start + i))
+
 const SYMBOL_SETS = {
-  shapes: ['★','☆','●','○','■','□','▲','△','▼','▽','◆','◇','♥','♡','♦','♠','♣','♤','❤','❥','✦','✧','✩','✪'],
-  marks:  ['✓','✔','✗','✘','✕','✖','⚠','⚑','ℹ','！','？','＊','⊕','⊗','⊙','⊘','☑','☐'],
-  arrows: ['←','→','↑','↓','↔','↕','↗','↘','↙','↖','⇐','⇒','⇑','⇓','⇔','⇕','↩','↪','↺','↻','▶','◀','▲','▼'],
-  misc:   ['☎','✉','✂','✏','✒','♻','☁','☀','☂','☃','⚡','🔥','💡','⭐','🏆','🔑','🔒','🔓','📌','📎','🔗','💬','🎯','🎨'],
+  shape: {
+    '幾何': ['★','☆','●','○','■','□','▲','△','▼','▽','◆','◇','♥','♡','♦','♠','♣','♤','❤','❥','✦','✧','✩','✪','⬟','⬡','⬢','⬣','⭕','✴','✳','❋'],
+    '裝飾': ['⭐','💫','✨','🌟','🔥','💥','⚡','💧','🌊','☁','🌈','❄','🌸','🌺','🍀','🎯','🎨','🏆','👑','💎','🔮','🎭','⚽','🎪'],
+  },
+  letter: {
+    '圓框': [..._uchars(0x24B6, 0x24CF), ..._uchars(0x24D0, 0x24E9)],  // Ⓐ-Ⓩ ⓐ-ⓩ
+    '全形': [..._uchars(0xFF21, 0xFF3A), ..._uchars(0xFF41, 0xFF5A)],   // Ａ-Ｚ ａ-ｚ
+    '粗體': [..._uchars(0x1D400, 0x1D419), ..._uchars(0x1D41A, 0x1D433)], // 𝐀-𝐙 𝐚-𝐳
+    '粗斜': [..._uchars(0x1D468, 0x1D481), ..._uchars(0x1D482, 0x1D49B)], // 𝑨-𝒁 𝒂-𝒛
+    '草書': [..._uchars(0x1D4D0, 0x1D4E9), ..._uchars(0x1D4EA, 0x1D503)], // 𝓐-𝓩 𝓪-𝔃
+  },
+  arrow: {
+    '一般': ['←','→','↑','↓','↔','↕','↗','↘','↙','↖','↩','↪','↵','↷','↶','↰','↱','↴','↳','↲'],
+    '雙線': ['⇐','⇒','⇑','⇓','⇔','⇕','⇖','⇗','⇘','⇙','⇦','⇧','⇨','⇩','⇄','⇅','⇆','⇇','⇈','⇉'],
+    '三角': ['▶','◀','▲','▼','▷','◁','△','▽','►','◄','▻','◅','➤','➡','⬆','⬇','⬅','➥','➦','⤴'],
+  },
+  misc: {
+    '標記': ['✓','✔','✗','✘','✕','✖','⚠','⚑','ℹ','！','？','＊','⊕','⊗','⊙','⊘','☑','☐'],
+    '貨幣': ['$','€','£','¥','₩','₪','₫','₭','₮','₱','₲','₴','₵','₸','₹','₺','₽','₿','¢','¤','₠','₣','₤','₥'],
+    '數學': ['÷','×','±','∞','√','∑','∏','∫','∂','∇','∈','∉','⊂','⊃','∩','∪','∧','∨','¬','≠','≈','≤','≥','∝'],
+    '技術': ['⌘','⌥','⇧','⌃','⏎','⌫','⌦','⇥','⇤','⎋','©','®','™','§','¶','†','‡','※','°','′','″'],
+  },
 }
 
-let symCurrentCat = 'shapes'
+let activeSymGroup  = 'shape'
+let symCurrentCat   = Object.keys(SYMBOL_SETS.shape)[0]
 
-function buildSymGrid(cat) {
+function buildSymGrid(group, cat) {
   const grid = document.getElementById('symGrid')
   grid.innerHTML = ''
-  ;(SYMBOL_SETS[cat] ?? []).forEach(ch => {
+  const chars = (SYMBOL_SETS[group] ?? {})[cat] ?? []
+  chars.forEach(ch => {
     const btn = document.createElement('button')
     btn.className   = 'sym-btn' + (ch === symbolChar ? ' active' : '')
     btn.textContent = ch
@@ -4220,32 +4258,62 @@ function buildSymGrid(cat) {
   })
 }
 
-function showSymbolPanel() {
+function buildSymTabs(group) {
+  const row = document.getElementById('symTabsRow')
+  row.innerHTML = ''
+  const cats = Object.keys(SYMBOL_SETS[group] ?? {})
+  cats.forEach((cat, i) => {
+    const btn = document.createElement('button')
+    btn.className       = 'sym-tab' + (i === 0 ? ' active' : '')
+    btn.dataset.cat     = cat
+    btn.textContent     = cat
+    btn.addEventListener('click', () => {
+      symCurrentCat = cat
+      row.querySelectorAll('.sym-tab').forEach(t => t.classList.remove('active'))
+      btn.classList.add('active')
+      buildSymGrid(group, cat)
+    })
+    row.appendChild(btn)
+  })
+}
+
+function openSymbolGroup(group, triggerBtn) {
+  activeSymGroup = group
   const panel = document.getElementById('symbolPickerPanel')
-  const swatch = document.getElementById('symbolPreviewSwatch')
-  const ar = swatch.getBoundingClientRect()
+  const ar = triggerBtn.getBoundingClientRect()
   panel.style.left = Math.min(ar.left, window.innerWidth - 272) + 'px'
   panel.style.top  = (ar.bottom + 4) + 'px'
+  buildSymTabs(group)
+  symCurrentCat = Object.keys(SYMBOL_SETS[group])[0]
+  buildSymGrid(group, symCurrentCat)
   panel.classList.remove('hidden')
-  buildSymGrid(symCurrentCat)
+  // Sync active group button highlight
+  document.querySelectorAll('.tool-btn[data-sym-group]').forEach(b =>
+    b.classList.toggle('active', b.dataset.symGroup === group)
+  )
 }
 
 function hideSymbolPanel() {
   document.getElementById('symbolPickerPanel').classList.add('hidden')
 }
 
+// Swatch click — re-opens the current group's panel
 document.getElementById('symbolPreviewSwatch').addEventListener('click', e => {
   e.stopPropagation()
   const panel = document.getElementById('symbolPickerPanel')
-  panel.classList.contains('hidden') ? showSymbolPanel() : hideSymbolPanel()
+  if (panel.classList.contains('hidden')) {
+    const gb = document.querySelector(`.tool-btn[data-sym-group="${activeSymGroup}"]`)
+    if (gb) openSymbolGroup(activeSymGroup, gb)
+  } else {
+    hideSymbolPanel()
+  }
 })
 
-document.querySelectorAll('.sym-tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    symCurrentCat = tab.dataset.cat
-    document.querySelectorAll('.sym-tab').forEach(t => t.classList.remove('active'))
-    tab.classList.add('active')
-    buildSymGrid(symCurrentCat)
+// Sym-group toolbar buttons — activate tool + open group panel
+document.querySelectorAll('.tool-btn[data-sym-group]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const group = btn.dataset.symGroup
+    openSymbolGroup(group, btn)
   })
 })
 
@@ -4263,6 +4331,7 @@ document.addEventListener('mousedown', e => {
   const panel = document.getElementById('symbolPickerPanel')
   if (!panel.classList.contains('hidden') &&
       !panel.contains(e.target) &&
+      !e.target.closest('[data-sym-group]') &&
       e.target.id !== 'symbolPreviewSwatch') {
     hideSymbolPanel()
   }

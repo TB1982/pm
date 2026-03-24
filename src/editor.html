@@ -540,13 +540,13 @@
       </div>
       <div class="opt-sep"></div>
       <span class="opt-label" id="mosaicIntLabel">區塊：</span>
-      <div class="mosaic-int-group" id="grpMosaicBlock">
+      <div class="opt-group" id="grpMosaicBlock">
         <button class="style-btn"        data-block="4" >4</button>
         <button class="style-btn"        data-block="8" >8</button>
         <button class="style-btn active" data-block="16">16</button>
         <button class="style-btn"        data-block="32">32</button>
       </div>
-      <div class="mosaic-int-group hidden" id="grpMosaicBlur">
+      <div class="opt-group hidden" id="grpMosaicBlur">
         <button class="style-btn"        data-blur="4" >4px</button>
         <button class="style-btn active" data-blur="8" >8px</button>
         <button class="style-btn"        data-blur="16">16px</button>
@@ -584,7 +584,10 @@
       <button class="tool-btn"        data-tool="text"         title="文字 (T)">T</button>
       <button class="tool-btn"        disabled                 title="去背（Pro 版功能）">⬜</button>
       <button class="tool-btn"        data-tool="number"       title="編號 (N)">①</button>
-      <button class="tool-btn"        data-tool="symbol"       title="符號印章 (U)">☺</button>
+      <button class="tool-btn" data-tool="symbol" data-sym-group="shape"  title="形狀符號 (U)">★</button>
+      <button class="tool-btn" data-tool="symbol" data-sym-group="letter" title="字母字型">Ａ</button>
+      <button class="tool-btn" data-tool="symbol" data-sym-group="arrow"  title="箭頭符號">→</button>
+      <button class="tool-btn" data-tool="symbol" data-sym-group="misc"   title="其他符號">©</button>
       <button class="tool-btn"        data-tool="ocr"          title="OCR 文字辨識 (G)">文</button>
       <button class="tool-btn"        data-tool="mosaic"       title="馬賽克/模糊 (X)">▦</button>
       <!-- 縮放群 -->
@@ -815,12 +818,7 @@
 
 <!-- ─── Floating symbol picker panel ─────────────────────── -->
 <div id="symbolPickerPanel" class="symbol-picker-panel hidden" role="dialog" aria-label="符號選取面板">
-  <div class="sym-tabs">
-    <button class="sym-tab active" data-cat="shapes">幾何</button>
-    <button class="sym-tab"        data-cat="marks" >標記</button>
-    <button class="sym-tab"        data-cat="arrows">箭頭</button>
-    <button class="sym-tab"        data-cat="misc"  >其他</button>
-  </div>
+  <div class="sym-tabs" id="symTabsRow"></div>
   <div class="sym-grid" id="symGrid"></div>
 </div>
 
