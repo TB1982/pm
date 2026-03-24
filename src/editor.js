@@ -2829,7 +2829,18 @@ async function triggerOcr() {
   startOcrRecognition()
 }
 
-function startOcrRecognition() {
+function _updateOcrProgress({ status, progress }) {
+  const bar   = document.getElementById('ocrProgressInner')
+  const label = document.getElementById('ocrProgressLabel')
+  const pct   = Math.round((progress || 0) * 100)
+  bar.style.width = `${pct}%`
+  if      (status.includes('loading language')) label.textContent = `下載語言包 ${pct}%`
+  else if (status.includes('recognizing'))      label.textContent = `辨識中... ${pct}%`
+  else if (status.includes('initialized'))      label.textContent = `初始化完成`
+  else                                          label.textContent = status
+}
+
+async function startOcrRecognition() {
   if (!ocrRect) return
 
   // Show panel with progress bar
@@ -2851,30 +2862,30 @@ function startOcrRecognition() {
   offCtx.drawImage(baseCanvas, c(r.x), c(r.y), c(r.w), c(r.h), 0, 0, off.width, off.height)
   const dataURL = off.toDataURL('image/png')
 
-  ipcRenderer.invoke('ocr-recognize', { dataURL }).then(result => {
-    document.getElementById('ocrProgressWrap').classList.add('hidden')
-    if (result.success) {
-      document.getElementById('ocrResultText').value = result.text
-      document.getElementById('btnOcrCopy').disabled      = false
-      document.getElementById('btnOcrCopyClose').disabled = false
-      if (!result.text) showToast('OCR 未辨識到文字，請嘗試更清晰的區域')
-    } else {
-      document.getElementById('ocrResultText').value = `辨識失敗：${result.error}`
-      showToast('OCR 辨識失敗')
-    }
-  })
-}
+  try {
+    // Run Tesseract.js directly in renderer (better WASM compatibility in Electron)
+    const { createWorker } = require('tesseract.js')
+    const ocrCachePath = await ipcRenderer.invoke('get-ocr-cache-path')
 
-ipcRenderer.on('ocr-progress', (_, { status, progress }) => {
-  const bar   = document.getElementById('ocrProgressInner')
-  const label = document.getElementById('ocrProgressLabel')
-  const pct   = Math.round((progress || 0) * 100)
-  bar.style.width = `${pct}%`
-  if      (status.includes('loading language')) label.textContent = `下載語言包 ${pct}%`
-  else if (status.includes('recognizing'))      label.textContent = `辨識中... ${pct}%`
-  else if (status.includes('initialized'))      label.textContent = `初始化完成`
-  else                                          label.textContent = status
-})
+    const worker = await createWorker(['chi_tra', 'eng'], 1, {
+      cachePath: ocrCachePath,
+      logger: m => _updateOcrProgress({ status: m.status, progress: m.progress || 0 })
+    })
+
+    const { data: { text } } = await worker.recognize(dataURL)
+    await worker.terminate()
+
+    document.getElementById('ocrProgressWrap').classList.add('hidden')
+    document.getElementById('ocrResultText').value = text.trim()
+    document.getElementById('btnOcrCopy').disabled      = false
+    document.getElementById('btnOcrCopyClose').disabled = false
+    if (!text.trim()) showToast('OCR 未辨識到文字，請嘗試更清晰的區域')
+  } catch (err) {
+    document.getElementById('ocrProgressWrap').classList.add('hidden')
+    document.getElementById('ocrResultText').value = `辨識失敗：${err.message}`
+    showToast('OCR 辨識失敗')
+  }
+}
 
 // OCR panel button handlers
 document.getElementById('ocrPanelClose').addEventListener('click', () => {
