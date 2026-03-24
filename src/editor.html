@@ -225,6 +225,51 @@
       <div class="color-preview" id="numStrokeColorPreview" title="描邊顏色" style="display:none"></div>
     </div>
 
+    <!-- 虛實線（共用：pen / line / polyline / rect / ellipse / fillrect / fillellipse） -->
+    <div class="opt-group hidden" id="grpDashStyle">
+      <span class="opt-label">線條</span>
+      <select id="dashStyleSelect" class="line-style-select">
+        <option value="solid">────  實線</option>
+        <option value="dash">╌╌╌╌  短虛線</option>
+        <option value="dash-lg">─ ─ ─  長虛線</option>
+        <option value="dot">······  點線</option>
+        <option value="dot-dash">·─·─  點虛線</option>
+        <option value="dash-dot-dot">─··─··  長點點</option>
+      </select>
+    </div>
+
+    <div class="opt-group hidden" id="grpRadius">
+      <span class="opt-label">圓角</span>
+      <input type="number" id="cornerRadiusInput" value="0" min="0" max="100" style="width:44px">
+      <span class="opt-label">%</span>
+    </div>
+
+    <div class="opt-group hidden" id="grpCaps">
+      <span class="opt-label">起點</span>
+      <select id="startCapSelect" class="cap-select" title="起點樣式">
+        <option value="none">―</option>
+        <option value="round">○</option>
+        <option value="dot">●</option>
+        <option value="square">⏹</option>
+        <option value="arrow">◀</option>
+      </select>
+      <span class="opt-label" style="margin-left:6px">終點</span>
+      <select id="endCapSelect" class="cap-select" title="終點樣式">
+        <option value="none">―</option>
+        <option value="round">○</option>
+        <option value="dot">●</option>
+        <option value="square">⏹</option>
+        <option value="arrow" selected>▶</option>
+      </select>
+    </div>
+
+    <!-- 不透明度（共用：pen / line / polyline / rect / ellipse） -->
+    <div class="opt-group hidden" id="grpStrokeOpacity">
+      <span class="opt-label">不透明</span>
+      <input type="number" id="strokeOpacityInput" value="100" min="0" max="100" style="width:44px">
+      <span class="opt-label">%</span>
+    </div>
+
     <!-- 線條/折線專屬：外框色 + 粗細 + 虛實線 + 直角 -->
     <div class="opt-group hidden" id="grpLineStyle">
       <span class="opt-label">外框</span>
@@ -276,51 +321,6 @@
       <span class="opt-label">Y</span>
       <input type="number" id="strokeBorderOffsetY" value="0" min="-50" max="50" style="width:44px">
       <span class="opt-label">px</span>
-    </div>
-
-    <!-- 虛實線（共用：pen / line / polyline / rect / ellipse / fillrect / fillellipse） -->
-    <div class="opt-group hidden" id="grpDashStyle">
-      <span class="opt-label">線條</span>
-      <select id="dashStyleSelect" class="line-style-select">
-        <option value="solid">────  實線</option>
-        <option value="dash">╌╌╌╌  短虛線</option>
-        <option value="dash-lg">─ ─ ─  長虛線</option>
-        <option value="dot">······  點線</option>
-        <option value="dot-dash">·─·─  點虛線</option>
-        <option value="dash-dot-dot">─··─··  長點點</option>
-      </select>
-    </div>
-
-    <div class="opt-group hidden" id="grpRadius">
-      <span class="opt-label">圓角</span>
-      <input type="number" id="cornerRadiusInput" value="0" min="0" max="100" style="width:44px">
-      <span class="opt-label">%</span>
-    </div>
-
-    <div class="opt-group hidden" id="grpCaps">
-      <span class="opt-label">起點</span>
-      <select id="startCapSelect" class="cap-select" title="起點樣式">
-        <option value="none">―</option>
-        <option value="round">○</option>
-        <option value="dot">●</option>
-        <option value="square">⏹</option>
-        <option value="arrow">◀</option>
-      </select>
-      <span class="opt-label" style="margin-left:6px">終點</span>
-      <select id="endCapSelect" class="cap-select" title="終點樣式">
-        <option value="none">―</option>
-        <option value="round">○</option>
-        <option value="dot">●</option>
-        <option value="square">⏹</option>
-        <option value="arrow" selected>▶</option>
-      </select>
-    </div>
-
-    <!-- 不透明度（共用：pen / line / polyline / rect / ellipse） -->
-    <div class="opt-group hidden" id="grpStrokeOpacity">
-      <span class="opt-label">不透明</span>
-      <input type="number" id="strokeOpacityInput" value="100" min="0" max="100" style="width:44px">
-      <span class="opt-label">%</span>
     </div>
 
     <div class="opt-group hidden" id="grpFont">

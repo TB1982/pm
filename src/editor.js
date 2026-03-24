@@ -2290,6 +2290,8 @@ function drawPen(ctx, a) {
     ctx.lineTo(c(last.x), c(last.y))
   }
 
+  const borderSz = ((a.borderThickness ?? a.thickness + 4) * 4 + 8) * viewScale
+
   // Border/outline: draw a thicker stroke behind in border colour
   if (a.penBorderColor && a.penBorderColor !== 'transparent') {
     buildPath()
@@ -2298,9 +2300,17 @@ function drawPen(ctx, a) {
     ctx.setLineDash(getLineDash(a.borderDashStyle ?? 'solid', sz))
     ctx.stroke()
     ctx.setLineDash([])
+    // Border caps (drawn behind main caps)
+    if (pts.length >= 2) {
+      const p0 = pts[0], p1 = pts[1]
+      const pN = pts[pts.length - 1], pN1 = pts[pts.length - 2]
+      drawCap(ctx, a.startCap ?? 'round', c(p1.x), c(p1.y), c(p0.x), c(p0.y), a.penBorderColor, borderSz)
+      drawCap(ctx, a.endCap   ?? 'round', c(pN1.x), c(pN1.y), c(pN.x), c(pN.y), a.penBorderColor, borderSz)
+    }
   }
 
-  // Main stroke
+  // Main stroke — re-apply dash after border section may have reset it
+  ctx.setLineDash(getLineDash(a.lineStyle, sz))
   buildPath()
   ctx.strokeStyle = a.color
   ctx.lineWidth   = a.thickness * viewScale
@@ -2311,7 +2321,6 @@ function drawPen(ctx, a) {
   if (pts.length >= 2) {
     const p0 = pts[0], p1 = pts[1]
     const pN = pts[pts.length - 1], pN1 = pts[pts.length - 2]
-    ctx.fillStyle = a.color
     drawCap(ctx, a.startCap ?? 'round', c(p1.x), c(p1.y), c(p0.x), c(p0.y), a.color, sz)
     drawCap(ctx, a.endCap   ?? 'round', c(pN1.x), c(pN1.y), c(pN.x), c(pN.y), a.color, sz)
   }
