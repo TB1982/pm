@@ -517,7 +517,7 @@ function applyColor(hex) {
   if (selectedId) updateSelectedAnnot({ color: hex })
   if (textActive) { textInputEl.style.color = hex; renderAnnotations() }
   pushRecentColor(hex)
-  if (tool === 'number') hideColorPanel()
+  hideColorPanel()
 }
 function syncThickness(t) {
   document.getElementById('strokeWidthInput').value = t
@@ -699,19 +699,19 @@ function applyFillMode(mode) {
 function applyFillColor(hex) {
   fillColor = hex; syncFillColor(hex)
   if (selectedId) updateSelectedAnnot({ fillColor: hex })
-  pushRecentColor(hex)
+  pushRecentColor(hex); hideColorPanel()
 }
 function applyFillColorA(hex) {
   if (hex !== 'transparent') fillPrevColorA = hex
   fillColorA = hex; syncFillColorA(hex)
   if (selectedId) updateSelectedAnnot({ fillColorA: hex })
-  pushRecentColor(hex)
+  pushRecentColor(hex); hideColorPanel()
 }
 function applyFillColorB(hex) {
   if (hex !== 'transparent') fillPrevColorB = hex
   fillColorB = hex; syncFillColorB(hex)
   if (selectedId) updateSelectedAnnot({ fillColorB: hex })
-  pushRecentColor(hex)
+  pushRecentColor(hex); hideColorPanel()
 }
 function applyFillGradientDir(dir) {
   fillGradientDir = dir; syncFillGradientDir(dir)
@@ -724,13 +724,13 @@ function applyFillOpacity(val) {
 function applyFillBorderColor(hex) {
   fillBorderColor = hex; syncFillBorderColor(hex)
   if (selectedId) updateSelectedAnnot({ fillBorderColor: hex })
-  pushRecentColor(hex)
+  pushRecentColor(hex); hideColorPanel()
 }
 function applyTextStrokeColor(hex) {
   textStrokeColor = hex; syncTextStrokeColor(hex)
   if (selectedId) updateSelectedAnnot({ textStrokeColor: hex })
   if (textActive) renderAnnotations()
-  pushRecentColor(hex)
+  pushRecentColor(hex); hideColorPanel()
 }
 function applyTextBgColor(hex) {
   if (hex === 'transparent') {
@@ -746,7 +746,7 @@ function applyTextBgColor(hex) {
   syncTextBgPreview()   // opacity 已確定後再更新色塊
   if (selectedId) updateSelectedAnnot({ textBgColor: hex, textBgOpacity: textBgOpacity })
   if (textActive) renderAnnotations()
-  pushRecentColor(hex)
+  pushRecentColor(hex); hideColorPanel()
 }
 
 // Update selected annotation's properties + push history
@@ -2340,13 +2340,24 @@ function drawPen(ctx, a) {
     return { x: tip.x - (dx / dist) * insetImgPx, y: tip.y - (dy / dist) * insetImgPx }
   }
 
-  // Build smooth bezier path, terminating exactly at the arrow base
+  // Build smooth bezier path, terminating exactly at the arrow base.
+  // A tiny axial step at each arrow endpoint forces the path tangent to align
+  // with the arrow axis so the butt cap is perpendicular to it — hidden under
+  // the arrow fill and causing no露餡 (stroke-head bleed) or gap.
   function buildPath() {
     ctx.beginPath()
 
-    // Start: stroke begins at arrow base so gap = zero
-    const startPt = a.startCap === 'arrow' ? arrowBase(p0, pFrom0) : pts[0]
-    ctx.moveTo(c(startPt.x), c(startPt.y))
+    // ── Start ────────────────────────────────────────────────────────────────
+    if (a.startCap === 'arrow') {
+      const base = arrowBase(p0, pFrom0)
+      const dx = p0.x - pFrom0.x, dy = p0.y - pFrom0.y
+      const len = Math.hypot(dx, dy)
+      ctx.moveTo(c(base.x), c(base.y))
+      // Step 0.5 image-px forward along the arrow axis so the butt cap faces the arrow
+      if (len > 0) ctx.lineTo(c(base.x + dx / len * 0.5), c(base.y + dy / len * 0.5))
+    } else {
+      ctx.moveTo(c(pts[0].x), c(pts[0].y))
+    }
 
     for (let i = 1; i < pts.length - 1; i++) {
       const mx = (pts[i].x + pts[i + 1].x) / 2
@@ -2354,9 +2365,13 @@ function drawPen(ctx, a) {
       ctx.quadraticCurveTo(c(pts[i].x), c(pts[i].y), c(mx), c(my))
     }
 
-    // End: stroke terminates exactly at arrow base
+    // ── End ──────────────────────────────────────────────────────────────────
     if (a.endCap === 'arrow') {
       const base = arrowBase(pN, pFromN)
+      const dx = pN.x - pFromN.x, dy = pN.y - pFromN.y
+      const len = Math.hypot(dx, dy)
+      // Step 0.5 image-px back from base so last segment arrives along the axis
+      if (len > 0) ctx.lineTo(c(base.x - dx / len * 0.5), c(base.y - dy / len * 0.5))
       ctx.lineTo(c(base.x), c(base.y))
     } else {
       ctx.lineTo(c(pts[pts.length - 1].x), c(pts[pts.length - 1].y))

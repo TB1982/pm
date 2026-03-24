@@ -1,8 +1,23 @@
 # SDD：Mac 截圖與圖片編輯工具
-**版本：** 3.15
+**版本：** 3.16
 **日期：** 2026-03-24
 **狀態：** 待審閱
 **變更紀錄：**
+
+### v3.16 — Bug 修正：箭頭露餡 + 缺口 + 調色盤自動收起
+
+#### Bug 修正
+- **鉛筆工具箭頭露餡與缺口**：`buildPath` 在每個箭頭端點加入 0.5 image-px 的小步伐，使 bezier 路徑以箭頭軸向切入箭頭基底，butt cap 垂直於箭頭軸心，完全藏在三角形填色下方
+- **調色盤自動收起**：選色後不再停留在畫面上；`applyColor`、`applyFillColor`、`applyFillColorA`、`applyFillColorB`、`applyFillBorderColor`、`applyTextStrokeColor`、`applyTextBgColor` 統一在執行後呼叫 `hideColorPanel()`
+
+#### TDD v3.16 測試項目
+- [ ] 鉛筆 arrow 箭頭：箭頭基底與線段主體無缺口，無露餡（有無外框皆測）
+- [ ] 鉛筆 arrow 起點與終點：同上
+- [ ] 主色（筆形、線段、外框、色塊、文字）：選色後調色盤自動收起
+- [ ] 漸層色 A/B、填色外框色、文字底色：同上
+- [ ] 外框色（已有自動收起）：行為不受影響
+
+---
 
 ### v3.15 — Bug 修正：鉛筆箭頭與線段斷開
 
