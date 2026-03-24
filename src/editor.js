@@ -2913,6 +2913,12 @@ document.addEventListener('keydown', e => {
 
   // Copy / paste for all annotation types (except overlay images)
   if (meta && (e.key === 'c' || e.key === 'C')) {
+    // Box-select: Cmd+C copies the selected region as pixel clipboard
+    if (tool === 'boxselect' && boxSelRect && boxSelRect.w >= 4 && boxSelRect.h >= 4) {
+      e.preventDefault()
+      document.getElementById('btnBoxSelCopy').click()
+      return
+    }
     const a = annotations.find(x => x.id === selectedId)
     if (a && a.type !== 'img') { annotClipboard = JSON.parse(JSON.stringify(a)); return }
   }
