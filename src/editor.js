@@ -444,7 +444,7 @@ function showOptionsForAnnot(a) {
   const t = a.type
   const sh = id => { const el = document.getElementById(id); if (el) el.classList.remove('hidden') }
   const isFill = t === 'fillrect' || t === 'fillellipse'
-  if (!isFill) sh('grpColor')
+  if (!isFill && t !== 'mosaic') sh('grpColor')
   if (isFill)  sh('grpFillColor')
   if (['rect','ellipse','fillrect','fillellipse','line','polyline','number','pen'].includes(t)) sh('grpThickness')
   syncNumStrokeUI(t === 'number')
