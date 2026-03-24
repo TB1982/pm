@@ -1,8 +1,38 @@
 # SDD：Mac 截圖與圖片編輯工具
-**版本：** 3.9
+**版本：** 3.10
 **日期：** 2026-03-24
 **狀態：** 待審閱
 **變更紀錄：**
+
+### v3.10 — Bug 修正 + 端點 UI 精簡 + 外框粗細/虛實線分組
+
+#### Bug 修正
+- **X 光曝光修正**：line / polyline / pen 在不透明 < 100% 時，使用 offscreen canvas 合成整段線後再以單一 globalAlpha 繪至主畫布，徹底消除 cap 與主線重疊處的雙重曝光效果
+- **鉛筆端點透明修正**：arrow / dot cap 繪製移入同一 save/restore 區塊，正確繼承 globalAlpha
+- **鉛筆縮放 handle**：pen annotation 選取後顯示 8 個外框縮放手把（與 polyline 相同邏輯），支援等比例縮放
+
+#### UI 精簡：grpCaps → 下拉選單
+- 起點 / 終點各改為 `<select class="cap-select">（寬 52px）`，取代原本 5+5 = 10 顆按鈕
+- 選項符號：`―`(none) `○`(round) `●`(dot) `⏹`(square) `◀/▶`(arrow)
+
+#### 外框細節升級（三處）
+- **grpLineStyle**：新增 `lineBorderThicknessInput`（px）+ `lineBorderDashSelect`（虛實線）
+- **grpPenBorder**：新增 `penBorderThicknessInput` + `penBorderDashSelect`
+- **grpStrokeBorder**（rect/ellipse）：新增 `strokeBorderThicknessInput` + `strokeBorderDashSelect`
+- 外框粗細以絕對 px 儲存於 `borderThickness`；外框虛實線儲存於 `borderDashStyle`（與主線 `lineStyle` 獨立）
+
+#### 狀態變數新增
+- `lineBorderThickness`, `lineBorderDashStyle`
+- `penBorderThickness`, `penBorderDashStyle`
+- `rectBorderThickness`, `rectBorderDashStyle`
+- `ellipseBorderThickness`, `ellipseBorderDashStyle`
+
+#### 技術實作細節
+- `drawOne`：新增 offscreen 路徑（`_offCanvas` 共用畫布避免 GC 壓力）
+- `drawLine/drawPen`：讀取 `a.borderThickness` / `a.borderDashStyle`
+- `drawRect/drawEllipse`：讀取 `a.borderThickness` / `a.borderDashStyle`
+- `getHandles`：pen 加入 bb_* 8 個手把
+- `startResize` / `applyResize`：pen 與 polyline 共用 isBBoxResize 邏輯
 
 ### v3.9 — Options Bar 全面對齊；框線外框位移；虛實線全工具覆蓋
 
@@ -1432,6 +1462,30 @@ Menu.buildFromTemplate([{
 - [ ] 外框色為透明（預設），不顯示外框
 - [ ] 陰影勾選，筆跡出現右下陰影
 - [ ] 選取後修改任何屬性（顏色、粗細、透明度），筆跡即時更新
+
+#### Bug 修正 + UI 精簡（v3.10）
+
+**X 光曝光**
+- [ ] 線條不透明設為 60%，起點設箭頭，終點設箭頭：箭頭與線身不應出現「X 光透視」效果
+- [ ] 鉛筆不透明設為 50%，起點 dot：整段筆觸含端點均呈均勻半透明
+
+**鉛筆縮放 handle**
+- [ ] 選取鉛筆筆觸，出現 8 個藍色縮放手把（藍色虛線框四角+四邊）
+- [ ] 拖動角落手把，筆觸整體等比例縮放
+- [ ] 拖動邊中手把，筆觸在該軸方向縮放
+
+**grpCaps 下拉**
+- [ ] 線條工具 options bar 起點 / 終點各顯示一個下拉選單（寬約 52px）
+- [ ] 選單選項符號正確：`―`  `○`  `●`  `⏹`  `◀/▶`
+- [ ] 切換起點為 `●`，線段起點出現圓點標記
+- [ ] 選取已有 arrow 終點的線條，select 顯示 `▶`
+
+**外框粗細 / 外框虛實線**
+- [ ] 線條工具 grpLineStyle 外框色票右方出現 px 數字 input（預設 6）+ 虛實線 select
+- [ ] 外框粗細改為 10，繪製有外框色的線條，外框明顯變粗
+- [ ] 外框虛實線改為「點線」，外框呈點線，主線仍為實線
+- [ ] rect 工具 grpStrokeBorder 同樣出現 px input + 虛實線 select
+- [ ] 選取已有 borderThickness 的 rect annotation，UI 正確顯示
 
 #### Options Bar 全面對齊（v3.9）
 

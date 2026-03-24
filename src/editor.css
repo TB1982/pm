@@ -780,6 +780,18 @@ body {
   font-family: 'Menlo', 'Courier New', monospace;
 }
 
+.cap-select {
+  background: #2a2a3e;
+  border: 1px solid #3a3a5c;
+  color: #c0c8e0;
+  font-size: 15px;
+  padding: 3px 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 52px;
+  text-align: center;
+}
+
 /* ─── Floating colour-picker panel ────────────────────────────────────────── */
 
 #colorPickerPanel.hidden { display: none; }

@@ -225,24 +225,51 @@
       <div class="color-preview" id="numStrokeColorPreview" title="描邊顏色" style="display:none"></div>
     </div>
 
-    <!-- 線條/折線專屬：外框色 + 直角 -->
+    <!-- 線條/折線專屬：外框色 + 粗細 + 虛實線 + 直角 -->
     <div class="opt-group hidden" id="grpLineStyle">
       <span class="opt-label">外框</span>
       <div class="color-preview fill-preview" id="lineBorderColorPreview" title="點擊選色（透明=無外框）"></div>
+      <input type="number" id="lineBorderThicknessInput" value="6" min="1" max="40" style="width:44px" title="外框粗細 px">
+      <select id="lineBorderDashSelect" class="line-style-select">
+        <option value="solid">────  實線</option>
+        <option value="dash">╌╌╌╌  短虛線</option>
+        <option value="dash-lg">─ ─ ─  長虛線</option>
+        <option value="dot">······  點線</option>
+        <option value="dot-dash">·─·─  點虛線</option>
+        <option value="dash-dot-dot">─··─··  長點點</option>
+      </select>
       <div class="opt-sep"></div>
       <button class="style-btn" id="btnLineOrtho" title="正交折線（水平/垂直吸附）">直角</button>
     </div>
 
-    <!-- 筆型專屬：外框色 -->
+    <!-- 筆型專屬：外框色 + 粗細 + 虛實線 -->
     <div class="opt-group hidden" id="grpPenBorder">
       <span class="opt-label">外框</span>
       <div class="color-preview fill-preview" id="penBorderColorPreview" title="點擊選色（透明=無外框）"></div>
+      <input type="number" id="penBorderThicknessInput" value="6" min="1" max="40" style="width:44px" title="外框粗細 px">
+      <select id="penBorderDashSelect" class="line-style-select">
+        <option value="solid">────  實線</option>
+        <option value="dash">╌╌╌╌  短虛線</option>
+        <option value="dash-lg">─ ─ ─  長虛線</option>
+        <option value="dot">······  點線</option>
+        <option value="dot-dash">·─·─  點虛線</option>
+        <option value="dash-dot-dot">─··─··  長點點</option>
+      </select>
     </div>
 
-    <!-- 框線專屬：外框色 + X/Y 位移 -->
+    <!-- 框線專屬：外框色 + 粗細 + 虛實線 + X/Y 位移 -->
     <div class="opt-group hidden" id="grpStrokeBorder">
       <span class="opt-label">外框</span>
       <div class="color-preview fill-preview" id="strokeBorderColorPreview" title="點擊選色（透明=無外框）"></div>
+      <input type="number" id="strokeBorderThicknessInput" value="2" min="1" max="40" style="width:44px" title="外框粗細 px">
+      <select id="strokeBorderDashSelect" class="line-style-select">
+        <option value="solid">────  實線</option>
+        <option value="dash">╌╌╌╌  短虛線</option>
+        <option value="dash-lg">─ ─ ─  長虛線</option>
+        <option value="dot">······  點線</option>
+        <option value="dot-dash">·─·─  點虛線</option>
+        <option value="dash-dot-dot">─··─··  長點點</option>
+      </select>
       <div class="opt-sep"></div>
       <span class="opt-label">X</span>
       <input type="number" id="strokeBorderOffsetX" value="0" min="-50" max="50" style="width:44px">
@@ -272,17 +299,21 @@
 
     <div class="opt-group hidden" id="grpCaps">
       <span class="opt-label">起點</span>
-      <button class="cap-btn active" data-end="start" data-cap="none"   title="平頭">─</button>
-      <button class="cap-btn"        data-end="start" data-cap="round"  title="圓頭">╭</button>
-      <button class="cap-btn"        data-end="start" data-cap="square" title="方頭">┐</button>
-      <button class="cap-btn"        data-end="start" data-cap="dot"    title="圓點">●</button>
-      <button class="cap-btn"        data-end="start" data-cap="arrow"  title="箭頭">◀</button>
+      <select id="startCapSelect" class="cap-select" title="起點樣式">
+        <option value="none">―</option>
+        <option value="round">○</option>
+        <option value="dot">●</option>
+        <option value="square">⏹</option>
+        <option value="arrow">◀</option>
+      </select>
       <span class="opt-label" style="margin-left:6px">終點</span>
-      <button class="cap-btn"        data-end="end" data-cap="none"   title="平頭">─</button>
-      <button class="cap-btn"        data-end="end" data-cap="round"  title="圓頭">╮</button>
-      <button class="cap-btn"        data-end="end" data-cap="square" title="方頭">┘</button>
-      <button class="cap-btn"        data-end="end" data-cap="dot"    title="圓點">●</button>
-      <button class="cap-btn active" data-end="end" data-cap="arrow"  title="箭頭">▶</button>
+      <select id="endCapSelect" class="cap-select" title="終點樣式">
+        <option value="none">―</option>
+        <option value="round">○</option>
+        <option value="dot">●</option>
+        <option value="square">⏹</option>
+        <option value="arrow" selected>▶</option>
+      </select>
     </div>
 
     <!-- 不透明度（共用：pen / line / polyline / rect / ellipse） -->
