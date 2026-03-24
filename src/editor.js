@@ -2948,8 +2948,8 @@ function startOcrRecognition() {
       const isCorrupt = result.error && result.error.includes('exit code 1')
       if (isCorrupt) {
         document.getElementById('ocrResultText').value =
-          '語言包損毀，請點「清除並重試」重新下載。'
-        showToast('OCR 語言包損毀，需重新下載')
+          '語言包損毀，已自動清除。\n請關閉此面板後再點一次 OCR，即可重新下載語言包。'
+        showToast('OCR 語言包損毀，已清除，請重新觸發 OCR')
         // 自動刪除損毀檔案，下次觸發 OCR 時會重新顯示下載對話框
         ipcRenderer.invoke('ocr-delete-tessdata').catch(() => {})
       } else {
