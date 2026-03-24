@@ -4540,39 +4540,48 @@ const TEMPLATES = [
   },
 ]
 
+let _tplBaseSnapshot = null
+
 function applyTemplate(tplId) {
   if (!imgElement) return
   const tpl = TEMPLATES.find(t => t.id === tplId)
   if (!tpl) return
+  if (!_tplBaseSnapshot) return
 
-  const layout = tpl.layout(imgWidth, imgHeight)
-  const { newW, newH, imgX, imgY } = layout
+  // Always apply from snapshot so templates don't stack
+  const snap = _tplBaseSnapshot
+  const snapImg = new Image()
+  snapImg.onload = () => {
+    const layout = tpl.layout(snap.width, snap.height)
+    const { newW, newH, imgX, imgY } = layout
 
-  const off = document.createElement('canvas')
-  off.width = newW; off.height = newH
-  const ctx = off.getContext('2d')
+    const off = document.createElement('canvas')
+    off.width = newW; off.height = newH
+    const ctx = off.getContext('2d')
 
-  tpl.drawBg(ctx, newW, newH, layout)
-  tpl.drawImg(ctx, imgElement, imgX, imgY, imgWidth, imgHeight, layout)
+    tpl.drawBg(ctx, newW, newH, layout)
+    tpl.drawImg(ctx, snapImg, imgX, imgY, snap.width, snap.height, layout)
 
-  pushHistory()
+    pushHistory()
 
-  const newImg = new Image()
-  newImg.onload = () => {
-    imgElement = newImg
-    imgWidth   = newW
-    imgHeight  = newH
-    document.getElementById('imgInfo').textContent = `${newW} × ${newH} px`
-    // Translate all existing annotations by (imgX, imgY)
-    annotations.forEach(a => moveAnnot(a, imgX, imgY))
-    userZoomed = false
-    fitCanvas()
-    drawBase()
-    renderAnnotations()
-    hideTemplatePanel()
-    showToast('套版已套用')
+    const newImg = new Image()
+    newImg.onload = () => {
+      imgElement = newImg
+      imgWidth   = newW
+      imgHeight  = newH
+      document.getElementById('imgInfo').textContent = `${newW} × ${newH} px`
+      // Restore snapshot annotations then translate by (imgX, imgY)
+      annotations = JSON.parse(JSON.stringify(snap.annotations))
+      annotations.forEach(a => moveAnnot(a, imgX, imgY))
+      userZoomed = false
+      fitCanvas()
+      drawBase()
+      renderAnnotations()
+      showToast('套版已套用')
+    }
+    newImg.src = off.toDataURL()
   }
-  newImg.src = off.toDataURL()
+  snapImg.src = snap.dataURL
 }
 
 function openTemplatePanel() {
@@ -4582,11 +4591,26 @@ function openTemplatePanel() {
   const ar    = btn.getBoundingClientRect()
   panel.style.left = Math.min(ar.left - 8, window.innerWidth - 300) + 'px'
   panel.style.top  = (ar.bottom + 6) + 'px'
+
+  // Capture snapshot when opening (not closing)
+  if (panel.classList.contains('hidden')) {
+    const snapCanvas = document.createElement('canvas')
+    snapCanvas.width = imgWidth; snapCanvas.height = imgHeight
+    snapCanvas.getContext('2d').drawImage(imgElement, 0, 0)
+    _tplBaseSnapshot = {
+      dataURL: snapCanvas.toDataURL(),
+      width: imgWidth,
+      height: imgHeight,
+      annotations: JSON.parse(JSON.stringify(annotations)),
+    }
+  }
+
   panel.classList.toggle('hidden')
 }
 
 function hideTemplatePanel() {
   document.getElementById('templatePanel').classList.add('hidden')
+  _tplBaseSnapshot = null
 }
 
 document.getElementById('btnTemplate').addEventListener('click', e => {
