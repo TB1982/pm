@@ -3173,6 +3173,7 @@ annotCanvas.addEventListener('mousedown', e => {
   }
 
   if (tool === 'symbol') {
+    selectedId = null   // 清除可能殘留的舊選取，避免 picker 誤改舊印章
     const ann = { id: newId(), type: 'symbol', x: pos.x, y: pos.y, char: symbolChar, color, size: symbolSize, shadow: false }
     pushHistory()
     annotations.push(ann)
@@ -4247,7 +4248,8 @@ function buildSymGrid(group, cat) {
       document.getElementById('symbolPreviewSwatch').textContent = ch
       document.querySelectorAll('.sym-btn').forEach(b => b.classList.remove('active'))
       btn.classList.add('active')
-      if (selectedId) {
+      // 只有在選取模式下才更新既有的符號 annotation（印章模式不覆蓋已蓋下的印章）
+      if (tool === 'select' && selectedId) {
         const a = annotations.find(x => x.id === selectedId)
         if (a && a.type === 'symbol') { updateSelectedAnnot({ char: ch }) }
       }
