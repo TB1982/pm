@@ -2020,6 +2020,31 @@ function drawMosaic(ctx, a) {
 
 // ─── Symbol Stamp ──────────────────────────────────────────────────────────────
 
+const _symMeasureCache = new Map()
+/**
+ * Measure the actual rendered bounds of a symbol glyph.
+ * Returns { hw, ascent, descent } all in annotation (image) coordinate units
+ * where the draw anchor is at (a.x, a.y) with textAlign=center / textBaseline=middle.
+ */
+function measureSymbol(char, size) {
+  const key = `${char}|${size}`
+  if (_symMeasureCache.has(key)) return _symMeasureCache.get(key)
+  const off = document.createElement('canvas')
+  off.width = off.height = Math.ceil(size * 3)
+  const mctx = off.getContext('2d')
+  mctx.font = `${size}px 'Apple Color Emoji', 'Noto Sans Symbols 2', 'Segoe UI Symbol', sans-serif`
+  mctx.textBaseline = 'middle'
+  mctx.textAlign = 'center'
+  const m = mctx.measureText(char)
+  const result = {
+    hw:      Math.max(m.width / 2,                size * 0.1),
+    ascent:  Math.max(m.actualBoundingBoxAscent,  size * 0.1),
+    descent: Math.max(m.actualBoundingBoxDescent, size * 0.1),
+  }
+  _symMeasureCache.set(key, result)
+  return result
+}
+
 function drawSymbol(ctx, a) {
   const sz = Math.max(8, (a.size ?? 64) * viewScale)
   ctx.save()
@@ -2684,8 +2709,8 @@ function getHandles(a) {
     return [{ id: 'se', x: a.x + r, y: a.y + r, cursor: 'nwse-resize' }]
   }
   if (a.type === 'symbol') {
-    const r = (a.size ?? 64) / 2
-    return [{ id: 'se', x: a.x + r, y: a.y + r, cursor: 'nwse-resize' }]
+    const { hw, descent } = measureSymbol(a.char ?? '★', a.size ?? 64)
+    return [{ id: 'se', x: a.x + hw, y: a.y + descent, cursor: 'nwse-resize' }]
   }
   if (a.type === 'pen') {
     const b = bounds(a)
@@ -3048,7 +3073,7 @@ function bounds(a) {
     case 'fillellipse':
     case 'mosaic':
     case 'img':    return { x: a.x, y: a.y, w: a.w, h: a.h }
-    case 'symbol': { const r = (a.size ?? 64) / 2; return { x: a.x - r, y: a.y - r, w: a.size ?? 64, h: a.size ?? 64 } }
+    case 'symbol': { const { hw, ascent, descent } = measureSymbol(a.char ?? '★', a.size ?? 64); return { x: a.x - hw, y: a.y - ascent, w: hw * 2, h: ascent + descent } }
     case 'line': {
       const minX = Math.min(a.x1,a.x2), maxX = Math.max(a.x1,a.x2)
       const minY = Math.min(a.y1,a.y2), maxY = Math.max(a.y1,a.y2)
@@ -4165,7 +4190,7 @@ document.querySelectorAll('#grpMosaicBlur [data-blur]').forEach(btn => {
 
 const SYMBOL_SETS = {
   shapes: ['★','☆','●','○','■','□','▲','△','▼','▽','◆','◇','♥','♡','♦','♠','♣','♤','❤','❥','✦','✧','✩','✪'],
-  marks:  ['✓','✔','✗','✘','✕','✖','⚠','⚑','ℹ','！','？','＊','⊕','⊗','⊙','⊘','☑','☐','⓪','①','②','③'],
+  marks:  ['✓','✔','✗','✘','✕','✖','⚠','⚑','ℹ','！','？','＊','⊕','⊗','⊙','⊘','☑','☐'],
   arrows: ['←','→','↑','↓','↔','↕','↗','↘','↙','↖','⇐','⇒','⇑','⇓','⇔','⇕','↩','↪','↺','↻','▶','◀','▲','▼'],
   misc:   ['☎','✉','✂','✏','✒','♻','☁','☀','☂','☃','⚡','🔥','💡','⭐','🏆','🔑','🔒','🔓','📌','📎','🔗','💬','🎯','🎨'],
 }
