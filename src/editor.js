@@ -285,12 +285,10 @@ function showOptionsForTool(t) {
 
 function syncBoxSelUI() {
   const hasRect = boxSelRect && boxSelRect.w > 1 && boxSelRect.h > 1
-  const btn = document.getElementById('btnBoxSelCopy')
-  btn.disabled = !hasRect
   if (hasRect) {
     const w = Math.round(Math.abs(boxSelRect.w))
     const h = Math.round(Math.abs(boxSelRect.h))
-    document.getElementById('boxSelSizeLabel').textContent = `${w} × ${h} px`
+    document.getElementById('boxSelSizeLabel').textContent = `${w} × ${h} px　Cmd+C 複製`
   } else {
     document.getElementById('boxSelSizeLabel').textContent = '請拖曳選取區域'
   }
@@ -2916,7 +2914,7 @@ document.addEventListener('keydown', e => {
     // Box-select: Cmd+C copies the selected region as pixel clipboard
     if (tool === 'boxselect' && boxSelRect && boxSelRect.w >= 4 && boxSelRect.h >= 4) {
       e.preventDefault()
-      document.getElementById('btnBoxSelCopy').click()
+      copyBoxSelection()
       return
     }
     const a = annotations.find(x => x.id === selectedId)
@@ -2981,6 +2979,7 @@ document.addEventListener('keydown', e => {
       if (polylineActive) { _cancelPolyline(); renderAnnotations(); break }
       if (tool === 'crop') { cancelCrop(); break }
       if (tool === 'ocr')  { ocrRect = null; isOcrSelecting = false; document.getElementById('ocrStatusLabel').textContent = '請拖曳選取辨識區域'; renderAnnotations(); break }
+      if (tool === 'boxselect') { boxSelRect = null; isBoxSelecting = false; syncBoxSelUI(); renderAnnotations(); break }
       selectedId = null
       isDrawing  = false
       if (tool === 'select') hideAllOptions()
@@ -3135,13 +3134,12 @@ document.getElementById('btnCropCancel').addEventListener('click', cancelCrop)
 
 // ─── Box select ───────────────────────────────────────────────────────────────
 
-document.getElementById('btnBoxSelCopy').addEventListener('click', () => {
+function copyBoxSelection() {
   if (!boxSelRect || boxSelRect.w < 4 || boxSelRect.h < 4) return
 
   const r = boxSelRect
   const sw = Math.round(r.w), sh = Math.round(r.h)
 
-  // Render full image + annotations to offscreen canvas at image resolution
   const off = document.createElement('canvas')
   off.width  = imgWidth
   off.height = imgHeight
@@ -3152,33 +3150,19 @@ document.getElementById('btnBoxSelCopy').addEventListener('click', () => {
   annotations.forEach(a => drawOne(offCtx, a))
   viewScale = savedScale
 
-  // Crop to selection
   const crop = document.createElement('canvas')
   crop.width  = sw
   crop.height = sh
   crop.getContext('2d').drawImage(off, Math.round(r.x), Math.round(r.y), sw, sh, 0, 0, sw, sh)
   const dataURL = crop.toDataURL('image/png')
 
-  // Store in pixel clipboard
   pixelClipboard = { dataURL, w: sw, h: sh }
 
-  // Also write to system clipboard
   const { nativeImage, clipboard } = require('electron')
-  const ni = nativeImage.createFromDataURL(dataURL)
-  clipboard.writeImage(ni)
+  clipboard.writeImage(nativeImage.createFromDataURL(dataURL))
 
-  showToast(`已複製 ${sw} × ${sh} px，可貼上為浮動圖層`)
-})
-
-document.getElementById('btnBoxSelClear').addEventListener('click', () => {
-  boxSelRect     = null
-  isBoxSelecting = false
-  syncBoxSelUI()
-  renderAnnotations()
-})
-
-// Keyboard: Cmd+V pastes pixel clipboard as img annotation
-// (merged into the existing keydown handler below)
+  showToast(`已複製 ${sw} × ${sh} px，Cmd+V 貼上為浮動圖層`)
+}
 
 // ─── OCR ─────────────────────────────────────────────────────────────────────
 
