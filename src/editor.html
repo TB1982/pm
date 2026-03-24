@@ -342,6 +342,13 @@
       <span class="opt-label" id="ocrStatusLabel">請拖曳選取辨識區域</span>
     </div>
 
+    <div class="opt-group hidden" id="grpBoxSelect">
+      <span class="opt-label" id="boxSelSizeLabel">請拖曳選取區域</span>
+      <div class="opt-sep"></div>
+      <button class="btn-primary btn-sm"   id="btnBoxSelCopy"  disabled>複製為圖層</button>
+      <button class="btn-secondary btn-sm" id="btnBoxSelClear">取消選取</button>
+    </div>
+
   </div>
 
   <!-- Body -->
@@ -351,7 +358,7 @@
     <div class="editor-toolbar">
       <!-- 選取群 -->
       <button class="tool-btn"        data-tool="select"      title="選取 (V)">↖</button>
-      <button class="tool-btn"        disabled                 title="框型選取（即將推出）">⬚</button>
+      <button class="tool-btn"        data-tool="boxselect"    title="框型選取 (M)">⬚</button>
       <!-- 繪圖群 -->
       <div class="tool-sep"></div>
       <button class="tool-btn"        disabled                 title="筆形（即將推出）">✏</button>

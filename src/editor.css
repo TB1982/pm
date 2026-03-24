@@ -766,6 +766,7 @@ body {
 /* ─── Small inline buttons (for options bar) ─────────────────────────────── */
 
 .btn-sm { padding: 4px 12px; font-size: 12px; border-radius: 6px; }
+.btn-primary:disabled, .btn-secondary:disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
 
 /* ─── Floating colour-picker panel ────────────────────────────────────────── */
 

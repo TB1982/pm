@@ -166,6 +166,12 @@ let isOcrSelecting = false  // currently drawing OCR selection rect
 let ocrRect        = null   // { x, y, w, h } in image coordinates
 let ocrStart       = null   // drag start pos
 
+// Box select
+let isBoxSelecting  = false  // currently drawing selection rect
+let boxSelRect      = null   // { x, y, w, h } in image coordinates (normalised after mouseup)
+let boxSelStart     = null   // drag start pos
+let pixelClipboard  = null   // { dataURL, w, h } — last copied region
+
 // Polyline drawing (line tool + lineOrtho = true)
 // 互動：點擊加點 → 雙擊完成；各段自動折直角（H→V 或 V→H）
 let polylineActive = false
@@ -215,7 +221,7 @@ function getTextColor(hex) {
 // ─── Options bar helpers ──────────────────────────────────────────────────────
 
 function hideAllOptions() {
-  ['grpRectShape','grpFillShape','grpColor','grpFillColor','grpThickness','grpLineStyle','grpCaps','grpRadius','grpFont','grpNumber','grpShadow','grpZoom','grpCrop','grpOcr'].forEach(id =>
+  ['grpRectShape','grpFillShape','grpColor','grpFillColor','grpThickness','grpLineStyle','grpCaps','grpRadius','grpFont','grpNumber','grpShadow','grpZoom','grpCrop','grpOcr','grpBoxSelect'].forEach(id =>
     document.getElementById(id).classList.add('hidden')
   )
   document.getElementById('numValueEdit').classList.add('hidden')
@@ -234,6 +240,11 @@ function showOptionsForTool(t) {
   if (t === 'ocr') {
     document.getElementById('grpOcr').classList.remove('hidden')
     document.getElementById('ocrStatusLabel').textContent = '請拖曳選取辨識區域'
+    return
+  }
+  if (t === 'boxselect') {
+    document.getElementById('grpBoxSelect').classList.remove('hidden')
+    syncBoxSelUI()
     return
   }
   if (!['rect','ellipse','fillrect','fillellipse','line','text','number'].includes(t)) return
@@ -270,6 +281,19 @@ function showOptionsForTool(t) {
   if (t === 'ellipse')      { document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(ellipseShadow) }
   if (t === 'fillrect')     { document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(fillrectShadow) }
   if (t === 'fillellipse')  { document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(fillellipseShadow) }
+}
+
+function syncBoxSelUI() {
+  const hasRect = boxSelRect && boxSelRect.w > 1 && boxSelRect.h > 1
+  const btn = document.getElementById('btnBoxSelCopy')
+  btn.disabled = !hasRect
+  if (hasRect) {
+    const w = Math.round(Math.abs(boxSelRect.w))
+    const h = Math.round(Math.abs(boxSelRect.h))
+    document.getElementById('boxSelSizeLabel').textContent = `${w} × ${h} px`
+  } else {
+    document.getElementById('boxSelSizeLabel').textContent = '請拖曳選取區域'
+  }
 }
 
 function showOptionsForAnnot(a) {
@@ -1249,8 +1273,9 @@ document.getElementById('btnRedo').addEventListener('click', redo)
 function setTool(t) {
   commitText(false)
   hideColorPanel()
-  if (t !== 'crop') { cropRect = null; isCropping = false; cropMoving = false; cropResizeH = null; cropMoveStart = null }
-  if (t !== 'ocr')  { ocrRect = null; isOcrSelecting = false; ocrStart = null }
+  if (t !== 'crop')      { cropRect = null; isCropping = false; cropMoving = false; cropResizeH = null; cropMoveStart = null }
+  if (t !== 'ocr')       { ocrRect = null; isOcrSelecting = false; ocrStart = null }
+  if (t !== 'boxselect') { boxSelRect = null; isBoxSelecting = false; boxSelStart = null }
   _cancelPolyline()   // 切換工具時取消任何進行中的折線
   tool       = t
   selectedId = null
@@ -1511,6 +1536,20 @@ function renderAnnotations() {
     annotCtx.setLineDash([5, 3])
     annotCtx.strokeRect(c(r.x), c(r.y), c(r.w), c(r.h))
     annotCtx.fillStyle = 'rgba(59,130,246,0.08)'
+    annotCtx.fillRect(c(r.x), c(r.y), c(r.w), c(r.h))
+    annotCtx.setLineDash([])
+    annotCtx.restore()
+  }
+
+  // Box-select overlay: green dashed rect + semi-transparent fill
+  if (tool === 'boxselect' && boxSelRect && boxSelRect.w > 1 && boxSelRect.h > 1) {
+    const r = boxSelRect
+    annotCtx.save()
+    annotCtx.strokeStyle = '#22c55e'
+    annotCtx.lineWidth   = 1.5
+    annotCtx.setLineDash([5, 3])
+    annotCtx.strokeRect(c(r.x), c(r.y), c(r.w), c(r.h))
+    annotCtx.fillStyle = 'rgba(34,197,94,0.10)'
     annotCtx.fillRect(c(r.x), c(r.y), c(r.w), c(r.h))
     annotCtx.setLineDash([])
     annotCtx.restore()
@@ -2313,6 +2352,14 @@ annotCanvas.addEventListener('mousedown', e => {
     return
   }
 
+  if (tool === 'boxselect') {
+    isBoxSelecting = true
+    boxSelStart    = pos
+    boxSelRect     = { x: pos.x, y: pos.y, w: 0, h: 0 }
+    syncBoxSelUI()
+    return
+  }
+
   if (tool === 'zoom-in' || tool === 'zoom-out') {
     isPanning = true
     panStart  = { x: e.clientX, y: e.clientY,
@@ -2457,6 +2504,18 @@ annotCanvas.addEventListener('mousemove', e => {
     return
   }
 
+  if (isBoxSelecting && boxSelStart) {
+    boxSelRect = {
+      x: Math.min(boxSelStart.x, pos.x),
+      y: Math.min(boxSelStart.y, pos.y),
+      w: Math.abs(pos.x - boxSelStart.x),
+      h: Math.abs(pos.y - boxSelStart.y)
+    }
+    syncBoxSelUI()
+    renderAnnotations()
+    return
+  }
+
   if (isResizing && selectedId) {
     const a = annotations.find(x => x.id === selectedId)
     if (a) {
@@ -2584,6 +2643,16 @@ document.addEventListener('mouseup', e => {
     }
     renderAnnotations()
     triggerOcr()
+    return
+  }
+
+  if (isBoxSelecting) {
+    isBoxSelecting = false
+    if (!boxSelRect || boxSelRect.w < 4 || boxSelRect.h < 4) {
+      boxSelRect = null
+    }
+    syncBoxSelUI()
+    renderAnnotations()
     return
   }
 
@@ -2848,6 +2917,25 @@ document.addEventListener('keydown', e => {
     if (a && a.type !== 'img') { annotClipboard = JSON.parse(JSON.stringify(a)); return }
   }
   if (meta && (e.key === 'v' || e.key === 'V')) {
+    // Paste pixel clipboard as floating img annotation
+    if (pixelClipboard) {
+      e.preventDefault()
+      const { dataURL, w, h } = pixelClipboard
+      // Place at centre of current view
+      const cx = Math.round(imgWidth  / 2 - w / 2)
+      const cy = Math.round(imgHeight / 2 - h / 2)
+      const id = newId()
+      const tempImg = new Image()
+      _imgCache.set(id, tempImg)
+      tempImg.onload = () => renderAnnotations()
+      tempImg.src = dataURL
+      pushHistory()
+      annotations.push({ id, type: 'img', x: cx, y: cy, w, h, src: dataURL, aspectRatio: w / h })
+      setTool('select')
+      selectedId = id
+      renderAnnotations()
+      return
+    }
     if (annotClipboard) {
       e.preventDefault()
       const newA = JSON.parse(JSON.stringify(annotClipboard))
@@ -2870,7 +2958,8 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && tool === 'crop') { e.preventDefault(); confirmCrop(); return }
 
   switch (e.key) {
-    case 'v': case 'V': setTool('select'); break
+    case 'v': case 'V': setTool('select');    break
+    case 'm': case 'M': setTool('boxselect'); break
     case 'r': case 'R': setTool('rect');     break
     case 'b': case 'B': setTool('fillrect'); break
     case 'l': case 'L': setTool('line');     break
@@ -3037,6 +3126,53 @@ function cancelCrop() {
 
 document.getElementById('btnCropConfirm').addEventListener('click', confirmCrop)
 document.getElementById('btnCropCancel').addEventListener('click', cancelCrop)
+
+// ─── Box select ───────────────────────────────────────────────────────────────
+
+document.getElementById('btnBoxSelCopy').addEventListener('click', () => {
+  if (!boxSelRect || boxSelRect.w < 4 || boxSelRect.h < 4) return
+
+  const r = boxSelRect
+  const sw = Math.round(r.w), sh = Math.round(r.h)
+
+  // Render full image + annotations to offscreen canvas at image resolution
+  const off = document.createElement('canvas')
+  off.width  = imgWidth
+  off.height = imgHeight
+  const offCtx = off.getContext('2d')
+  offCtx.drawImage(imgElement, 0, 0, imgWidth, imgHeight)
+  const savedScale = viewScale
+  viewScale = 1
+  annotations.forEach(a => drawOne(offCtx, a))
+  viewScale = savedScale
+
+  // Crop to selection
+  const crop = document.createElement('canvas')
+  crop.width  = sw
+  crop.height = sh
+  crop.getContext('2d').drawImage(off, Math.round(r.x), Math.round(r.y), sw, sh, 0, 0, sw, sh)
+  const dataURL = crop.toDataURL('image/png')
+
+  // Store in pixel clipboard
+  pixelClipboard = { dataURL, w: sw, h: sh }
+
+  // Also write to system clipboard
+  const { nativeImage, clipboard } = require('electron')
+  const ni = nativeImage.createFromDataURL(dataURL)
+  clipboard.writeImage(ni)
+
+  showToast(`已複製 ${sw} × ${sh} px，可貼上為浮動圖層`)
+})
+
+document.getElementById('btnBoxSelClear').addEventListener('click', () => {
+  boxSelRect     = null
+  isBoxSelecting = false
+  syncBoxSelUI()
+  renderAnnotations()
+})
+
+// Keyboard: Cmd+V pastes pixel clipboard as img annotation
+// (merged into the existing keydown handler below)
 
 // ─── OCR ─────────────────────────────────────────────────────────────────────
 

@@ -1,8 +1,26 @@
 # SDD：Mac 截圖與圖片編輯工具
-**版本：** 3.5
+**版本：** 3.6
 **日期：** 2026-03-24
 **狀態：** 待審閱
 **變更紀錄：**
+
+### v3.6 — 框型選取工具（矩形區域複製為浮動圖層）
+
+#### 框型選取工具（boxselect）
+- 工具列「⬚」按鈕從 `disabled` 改為可點選，綁定工具 `boxselect`，快捷鍵 `M`
+- 拖曳繪製選取框，canvas 以綠色虛線（`#22c55e`）＋10% 填充標示選取區域
+- Options bar 顯示即時尺寸（`W × H px`）
+- 「複製為圖層」按鈕：
+  - 將選取區域的像素（base image + 所有已燒入標註）繪製至 offscreen canvas
+  - 裁切後轉為 `image/png` dataURL
+  - 透過 `nativeImage` + Electron `clipboard.writeImage` 同時寫入系統剪貼簿
+  - `pixelClipboard` 變數存留，供後續 `Cmd+V` 使用
+- `Cmd+V`：優先貼上 `pixelClipboard`（若有）為 `img` 型 annotation，置中於畫布，進入選取模式可移動/縮放
+- 「取消選取」按鈕清除選取框
+- 切換至其他工具自動清除選取框狀態
+
+#### 修正
+- `btn-primary:disabled` / `btn-secondary:disabled` 補充 CSS 樣式（`opacity: 0.35, cursor: not-allowed`）
 
 ### v3.5 — 工具列雙排佈局；Smart Semantic Numbering；粗細 px 輸入
 
@@ -1306,6 +1324,20 @@ Menu.buildFromTemplate([{
 - [ ] 選取已放置的 glyph 風格編號 → 切換風格 → 畫布即時更新
 - [ ] 舊版存檔（無 `numberStyle` 欄位）開啟後顯示為 `dot` 樣式，不出錯
 - [ ] 點擊「重置編號」後再放置，計數從 1 重新開始，風格保持不變
+
+#### 框型選取工具（v3.6）
+- [ ] 工具列「⬚」按鈕可點選，點擊後切換到 boxselect 工具（options bar 顯示 grpBoxSelect）
+- [ ] 按 `M` 快捷鍵切換到 boxselect 工具
+- [ ] 拖曳選取區域，canvas 出現綠色虛線框＋淡綠色填充，options bar 即時顯示 `W × H px`
+- [ ] 選取完成後，「複製為圖層」按鈕由灰色（disabled）變為可點選
+- [ ] 點擊「複製為圖層」，toast 顯示「已複製 W × H px，可貼上為浮動圖層」
+- [ ] 複製後按 `Cmd+V`，選取區域像素以 `img` annotation 形式出現於畫布中心，自動進入選取模式
+- [ ] 貼上的浮動圖層可被拖曳移動
+- [ ] 貼上的浮動圖層可被角落 handle 縮放（維持長寬比）
+- [ ] 複製動作同時寫入系統剪貼簿（可在 macOS 預覽、Notes 等 App 中直接貼上）
+- [ ] 點擊「取消選取」清除綠色虛線框
+- [ ] 切換至其他工具（如矩形框、文字），綠色選取框自動消失
+- [ ] 拖曳範圍小於 4px 視為無效選取，不顯示選取框，按鈕保持 disabled
 
 #### 最近使用色（v2.3 階段 A）
 - [ ] 初始開啟面板時，「最近使用」區塊不顯示（`#cppRecentSection` 隱藏）
