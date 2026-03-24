@@ -1,8 +1,29 @@
 # SDD：Mac 截圖與圖片編輯工具
-**版本：** 3.7
+**版本：** 3.8
 **日期：** 2026-03-24
 **狀態：** 待審閱
 **變更紀錄：**
+
+### v3.8 — 工具一致性升級（邊框／陰影統一）
+
+#### 色塊工具邊框簡化
+- 移除 `grpFillColor` 中的「有」「無」邊框按鈕（`btnFillBorderOn` / `btnFillBorderOff`）
+- 邊框顯示邏輯改為：`thickness > 0` 且 `fillBorder !== false` 才繪製（向下相容舊資料）
+- 新建 fillrect / fillellipse 時不再寫入 `fillBorder` 欄位（預設有邊框 = 粗細 > 0 即顯示）
+- 移除 `fillBorderEnabled` 狀態變數、`syncFillBorder()`、`applyFillBorder()` 函式及對應事件綁定
+
+#### 線條／折線新增外框色
+- `grpLineStyle` 新增「外框」色彩 swatch（`lineBorderColorPreview`）
+- 預設 `transparent`（無外框）；使用者點選後啟用外框，顏色選完後自動關閉選色面板
+- `lineBorderColor` 狀態變數（預設 `'transparent'`）；`syncLineBorderColor()` 同步 UI
+- `drawLine` / `drawPolyline` 繪製時：先以 `(thickness + 4) × viewScale` 線寬描邊外框色，再疊上主色
+- `line` / `polyline` annotation 新增 `lineBorderColor` 欄位
+
+#### 線條／折線新增陰影
+- `grpShadow` 現在在工具切換為 `line` 時也會顯示
+- `lineShadow` 狀態變數（預設 `false`）；`shadowCheck` handler 統一分派
+- `line` / `polyline` annotation 新增 `shadow` 欄位
+- `showOptionsForAnnot` 讀取已存 annotation 的 `shadow` 與 `lineBorderColor` 並同步 UI
 
 ### v3.7 — 筆型工具；虛線種類升級；端點樣式升級
 
@@ -1374,19 +1395,41 @@ Menu.buildFromTemplate([{
 - [ ] 陰影勾選，筆跡出現右下陰影
 - [ ] 選取後修改任何屬性（顏色、粗細、透明度），筆跡即時更新
 
+#### 工具一致性升級（v3.8）
+
+**色塊工具邊框簡化**
+- [ ] 矩形色塊（fillrect）選項列中，不再出現「有」「無」邊框按鈕
+- [ ] 粗細 = 0 時，fillrect / fillellipse 不繪製邊框；粗細 ≥ 1 時顯示邊框
+- [ ] 舊版含 `fillBorder: false` 的 annotation 仍不顯示邊框（向下相容）
+- [ ] 切換到 fillrect / fillellipse 工具，UI 無 「有」「無」按鈕出現
+
+**線條 / 折線外框色**
+- [ ] 線條（line）選項列中，`grpLineStyle` 出現「外框」色塊 swatch
+- [ ] 折線（polyline）選取後，選項列也顯示「外框」色塊
+- [ ] 預設外框色 swatch 顯示棋盤格（透明）
+- [ ] 點擊外框色 swatch 開啟選色面板；選色後關閉面板、swatch 更新為選取色
+- [ ] 選取外框色後，線條繪製出現明顯外框（比主線寬 4px）
+- [ ] 若外框色為透明，渲染結果與 v3.7 相同（無外框）
+- [ ] 選取已有外框色的 line annotation，UI 正確顯示該外框色
+
+**線條 / 折線陰影**
+- [ ] 切換至線條（line）工具，`grpShadow`（陰影選項）出現於選項列
+- [ ] 勾選陰影後拖曳繪製線條，線條具有陰影效果
+- [ ] 選取已有陰影的 line annotation，陰影 checkbox 呈現勾選狀態
+- [ ] 折線（polyline）同樣支援陰影（commit 後重新選取可見陰影 checkbox 正確）
+
 #### 框型選取工具（v3.6）
-- [ ] 工具列「⬚」按鈕可點選，點擊後切換到 boxselect 工具（options bar 顯示 grpBoxSelect）
+- [ ] 工具列「⬚」按鈕可點選，點擊後切換到 boxselect 工具（options bar 顯示尺寸標籤）
 - [ ] 按 `M` 快捷鍵切換到 boxselect 工具
-- [ ] 拖曳選取區域，canvas 出現綠色虛線框＋淡綠色填充，options bar 即時顯示 `W × H px`
-- [ ] 選取完成後，「複製為圖層」按鈕由灰色（disabled）變為可點選
-- [ ] 點擊「複製為圖層」，toast 顯示「已複製 W × H px，可貼上為浮動圖層」
+- [ ] 拖曳選取區域，canvas 出現綠色虛線框＋淡綠色填充，options bar 即時顯示 `W × H px　Cmd+C 複製`
+- [ ] 拖曳完成後按 `Cmd+C`，toast 顯示「已複製 W × H px，Cmd+V 貼上為浮動圖層」
 - [ ] 複製後按 `Cmd+V`，選取區域像素以 `img` annotation 形式出現於畫布中心，自動進入選取模式
 - [ ] 貼上的浮動圖層可被拖曳移動
 - [ ] 貼上的浮動圖層可被角落 handle 縮放（維持長寬比）
 - [ ] 複製動作同時寫入系統剪貼簿（可在 macOS 預覽、Notes 等 App 中直接貼上）
-- [ ] 點擊「取消選取」清除綠色虛線框
+- [ ] 按 `Esc` 清除綠色虛線框，取消選取
 - [ ] 切換至其他工具（如矩形框、文字），綠色選取框自動消失
-- [ ] 拖曳範圍小於 4px 視為無效選取，不顯示選取框，按鈕保持 disabled
+- [ ] 拖曳範圍小於 4px 視為無效選取，不顯示選取框
 
 #### 最近使用色（v2.3 階段 A）
 - [ ] 初始開啟面板時，「最近使用」區塊不顯示（`#cppRecentSection` 隱藏）

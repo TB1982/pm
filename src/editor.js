@@ -92,7 +92,6 @@ let fillColorA       = '#ffcc00'     // gradient start colour
 let fillColorB       = 'transparent' // gradient end colour ('transparent' or hex)
 let fillGradientDir  = 'h'           // 'h' | 'v' | 'dr' | 'ur'
 let fillOpacity      = 100
-let fillBorderEnabled = true
 let fillBorderColor   = '#ffffff'    // border stroke colour
 let fillPrevColorA    = '#ffcc00'    // last non-transparent colorA (for 透 toggle)
 let fillPrevColorB    = '#333333'    // last non-transparent colorB (for 透 toggle)
@@ -116,7 +115,11 @@ let fontFamily        = 'system'   // FONT_FAMILIES id
 let rectShadow      = false
 let ellipseShadow   = false
 let fillrectShadow  = false
+let lineShadow      = false
 let textShadow      = false
+
+// Line/polyline border
+let lineBorderColor = 'transparent'
 let numShadow       = false
 
 // Recent colours (shared across all colour pickers, max 10, session-only)
@@ -299,12 +302,18 @@ function showOptionsForTool(t) {
     syncFillColorB(fillColorB)
     syncFillGradientDir(fillGradientDir)
     syncFillOpacity(fillOpacity)
-    syncFillBorder(fillBorderEnabled)
     syncFillBorderColor(fillBorderColor)
   }
   if (['rect','ellipse','fillrect','fillellipse','line','number'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
   syncNumStrokeUI(t === 'number')
-  if (t === 'line')   { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden'); syncLineOrtho(lineOrtho) }
+  if (t === 'line')   {
+    document.getElementById('grpLineStyle').classList.remove('hidden')
+    document.getElementById('grpCaps').classList.remove('hidden')
+    document.getElementById('grpShadow').classList.remove('hidden')
+    syncLineOrtho(lineOrtho)
+    syncLineBorderColor(lineBorderColor)
+    syncShadowCheck(lineShadow)
+  }
   if (['rect','fillrect'].includes(t)) { document.getElementById('grpRadius').classList.remove('hidden'); syncCornerRadius(cornerRadius) }
   if (t === 'text') {
     document.getElementById('grpFont').classList.remove('hidden')
@@ -344,7 +353,16 @@ function showOptionsForAnnot(a) {
   if (isFill)  document.getElementById('grpFillColor').classList.remove('hidden')
   if (['rect','ellipse','fillrect','fillellipse','line','polyline','number','pen'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
   syncNumStrokeUI(t === 'number')
-  if (['line','polyline','pen'].includes(t)) { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden') }
+  if (['line','polyline','pen'].includes(t)) {
+    document.getElementById('grpLineStyle').classList.remove('hidden')
+    document.getElementById('grpCaps').classList.remove('hidden')
+  }
+  if (['line','polyline'].includes(t)) {
+    document.getElementById('grpShadow').classList.remove('hidden')
+    syncShadowCheck(a.shadow ?? false)
+    lineBorderColor = a.lineBorderColor ?? 'transparent'
+    syncLineBorderColor(lineBorderColor)
+  }
   if (['rect','fillrect'].includes(t)) document.getElementById('grpRadius').classList.remove('hidden')
   if (t === 'number') document.getElementById('grpNumber').classList.remove('hidden')
   if (t === 'pen') {
@@ -370,11 +388,11 @@ function showOptionsForAnnot(a) {
     if (fillColorB !== 'transparent') fillPrevColorB = fillColorB
     fillGradientDir = a.fillGradientDir ?? 'h'; syncFillGradientDir(fillGradientDir)
     fillOpacity = a.fillOpacity ?? 100; syncFillOpacity(fillOpacity)
-    fillBorderEnabled = a.fillBorder !== false; syncFillBorder(fillBorderEnabled)
     fillBorderColor = a.fillBorderColor ?? '#ffffff'; syncFillBorderColor(fillBorderColor)
   }
   if (t === 'line')     { lineStyle = a.lineStyle; startCap = a.startCap; endCap = a.endCap; lineOrtho = a.lineOrtho ?? false; syncLineStyle(lineStyle); syncCaps(startCap, endCap); syncLineOrtho(lineOrtho) }
   if (t === 'polyline') { lineStyle = a.lineStyle; startCap = a.startCap; endCap = a.endCap; syncLineStyle(lineStyle); syncCaps(startCap, endCap) }
+  if (['line','polyline'].includes(t)) { lineBorderColor = a.lineBorderColor ?? 'transparent'; syncLineBorderColor(lineBorderColor) }
   if (['rect','fillrect'].includes(t)) { cornerRadius = a.cornerRadius ?? 0; syncCornerRadius(cornerRadius) }
   if (t === 'text') {
     fontSize        = a.fontSize;                     syncFontSize(fontSize)
@@ -435,6 +453,10 @@ function syncLineOrtho(v) { document.getElementById('btnLineOrtho')?.classList.t
 function syncLineStyle(ls) {
   const sel = document.getElementById('lineStyleSelect')
   if (sel) sel.value = ls
+}
+function syncLineBorderColor(hex) {
+  const p = document.getElementById('lineBorderColorPreview')
+  if (p) p.style.background = (hex === 'transparent' || !hex) ? 'repeating-linear-gradient(45deg,#888 0,#888 3px,#fff 3px,#fff 6px)' : hex
 }
 function syncPenOpacity(v) { document.getElementById('penOpacityInput').value = v }
 function syncPenBorderColor(hex) {
@@ -506,13 +528,6 @@ function syncFillGradientDir(dir) {
 function syncFillOpacity(val) {
   const inp = document.getElementById('fillOpacityInput')
   if (inp) inp.value = val
-}
-function syncFillBorder(enabled) {
-  const on  = document.getElementById('btnFillBorderOn')
-  const off = document.getElementById('btnFillBorderOff')
-  if (enabled) { on.classList.add('active');  off.classList.remove('active') }
-  else         { off.classList.add('active'); on.classList.remove('active') }
-  document.getElementById('fillBorderColorPreview').classList.toggle('hidden', !enabled)
 }
 function syncFillBorderColor(hex) {
   const p = document.getElementById('fillBorderColorPreview')
@@ -607,10 +622,6 @@ function applyFillOpacity(val) {
   fillOpacity = val; syncFillOpacity(val)
   if (selectedId) updateSelectedAnnot({ fillOpacity: val })
 }
-function applyFillBorder(enabled) {
-  fillBorderEnabled = enabled; syncFillBorder(enabled)
-  if (selectedId) updateSelectedAnnot({ fillBorder: enabled })
-}
 function applyFillBorderColor(hex) {
   fillBorderColor = hex; syncFillBorderColor(hex)
   if (selectedId) updateSelectedAnnot({ fillBorderColor: hex })
@@ -668,9 +679,6 @@ document.getElementById('fillOpacityInput').addEventListener('change', e =>
 )
 document.getElementById('fillOpacityInput').addEventListener('keydown', e => e.stopPropagation())
 
-// Border toggle
-document.getElementById('btnFillBorderOn').addEventListener('click',  () => applyFillBorder(true))
-document.getElementById('btnFillBorderOff').addEventListener('click', () => applyFillBorder(false))
 
 // Sync initial state
 syncFillMode(fillMode)
@@ -679,7 +687,6 @@ syncFillColorA(fillColorA)
 syncFillColorB(fillColorB)
 syncFillGradientDir(fillGradientDir)
 syncFillOpacity(fillOpacity)
-syncFillBorder(fillBorderEnabled)
 syncFillBorderColor(fillBorderColor)
 
 // ─── Extend canvas ────────────────────────────────────────────────────────────
@@ -1056,6 +1063,16 @@ document.getElementById('numStrokeColorPreview').addEventListener('click', funct
   }, () => numStrokeColor)
 })
 
+// Line border colour
+document.getElementById('lineBorderColorPreview').addEventListener('click', function() {
+  openColorPanel(this, hex => {
+    lineBorderColor = hex
+    syncLineBorderColor(hex)
+    if (selectedId) updateSelectedAnnot({ lineBorderColor: hex })
+    hideColorPanel()
+  }, () => lineBorderColor)
+})
+
 // Pen border colour
 document.getElementById('penBorderColorPreview').addEventListener('click', function() {
   openColorPanel(this, hex => {
@@ -1238,7 +1255,7 @@ document.getElementById('fontFamilySelect').addEventListener('change', e => {
     })
 })
 
-// Shared shadow checkbox (rect / ellipse / fillrect / fillellipse / number)
+// Shared shadow checkbox (rect / ellipse / fillrect / fillellipse / number / line / polyline / pen)
 document.getElementById('shadowCheck').addEventListener('change', e => {
   const val = e.target.checked
   if      (tool === 'rect')        rectShadow        = val
@@ -1246,6 +1263,8 @@ document.getElementById('shadowCheck').addEventListener('change', e => {
   else if (tool === 'fillrect')    fillrectShadow    = val
   else if (tool === 'fillellipse') fillellipseShadow = val
   else if (tool === 'number')      numShadow         = val
+  else if (tool === 'line' || tool === 'polyline') lineShadow = val
+  else if (tool === 'pen')         penShadow         = val
   if (selectedId) {
     const a = annotations.find(x => x.id === selectedId)
     if (a) {
@@ -1254,6 +1273,8 @@ document.getElementById('shadowCheck').addEventListener('change', e => {
       if (a.type === 'fillrect')    fillrectShadow    = val
       if (a.type === 'fillellipse') fillellipseShadow = val
       if (a.type === 'number')      numShadow         = val
+      if (a.type === 'line' || a.type === 'polyline') lineShadow = val
+      if (a.type === 'pen')         penShadow         = val
       updateSelectedAnnot({ shadow: val })
     }
   }
@@ -1737,7 +1758,7 @@ function drawFillRect(ctx, a) {
     ctx.fillRect(rx, ry, rw, rh)
   }
   ctx.restore()
-  if (a.fillBorder !== false) {
+  if (a.fillBorder !== false && a.thickness > 0) {
     ctx.strokeStyle = a.fillBorderColor ?? '#ffffff'
     if (r > 0) {
       ctx.beginPath(); ctx.roundRect(rx, ry, rw, rh, r); ctx.stroke()
@@ -1772,7 +1793,7 @@ function drawFillEllipse(ctx, a) {
   }
   ctx.fill()
   ctx.restore()
-  if (a.fillBorder !== false) {
+  if (a.fillBorder !== false && a.thickness > 0) {
     ctx.save()
     ctx.strokeStyle = a.fillBorderColor ?? '#ffffff'
     ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2); ctx.stroke()
@@ -1783,7 +1804,19 @@ function drawFillEllipse(ctx, a) {
 function drawLine(ctx, a) {
   const x1 = c(a.x1), y1 = c(a.y1), x2 = c(a.x2), y2 = c(a.y2)
   const sz  = (a.thickness * 4 + 8) * viewScale
+  if (a.shadow) setShadow(ctx)
   ctx.lineCap = capToLineCap(a.startCap, a.endCap)
+  // Border stroke (drawn behind main line)
+  if (a.lineBorderColor && a.lineBorderColor !== 'transparent') {
+    ctx.save()
+    ctx.strokeStyle = a.lineBorderColor
+    ctx.lineWidth   = (a.thickness + 4) * viewScale
+    ctx.setLineDash(getLineDash(a.lineStyle, sz))
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke()
+    ctx.setLineDash([])
+    ctx.restore()
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0  // shadow already applied above
+  }
   ctx.beginPath()
   ctx.setLineDash(getLineDash(a.lineStyle, sz))
   ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke()
@@ -1906,15 +1939,30 @@ function drawPolyline(ctx, a, liveEnd) {
   if (pts.length < 1) return
 
   const sz = (a.thickness * 4 + 8) * viewScale
+  if (a.shadow) setShadow(ctx)
   ctx.lineCap = capToLineCap(a.startCap, a.endCap)
-  ctx.setLineDash(getLineDash(a.lineStyle, sz))
 
-  ctx.beginPath()
-  ctx.moveTo(pts[0].x, pts[0].y)
-  // 儲存的頂點已 snap 至 H/V，每段為純直線
-  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y)
-  // live 段：從最後頂點路由至游標（仍需 H/V elbow）
-  if (liveEnd) _polylineRouteThrough(ctx, pts[pts.length - 1], { x: c(liveEnd.x), y: c(liveEnd.y) })
+  function buildPath() {
+    ctx.beginPath()
+    ctx.moveTo(pts[0].x, pts[0].y)
+    for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y)
+    if (liveEnd) _polylineRouteThrough(ctx, pts[pts.length - 1], { x: c(liveEnd.x), y: c(liveEnd.y) })
+  }
+
+  // Border stroke
+  if (!liveEnd && a.lineBorderColor && a.lineBorderColor !== 'transparent') {
+    ctx.save()
+    ctx.strokeStyle = a.lineBorderColor
+    ctx.lineWidth   = (a.thickness + 4) * viewScale
+    ctx.setLineDash(getLineDash(a.lineStyle, sz))
+    buildPath(); ctx.stroke()
+    ctx.setLineDash([])
+    ctx.restore()
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0
+  }
+
+  ctx.setLineDash(getLineDash(a.lineStyle, sz))
+  buildPath()
   ctx.stroke()
   ctx.setLineDash([])
 
@@ -1990,9 +2038,8 @@ function _commitPolyline() {
   if (polylinePoints.length < 2) { _cancelPolyline(); renderAnnotations(); return }
   const ann = {
     id: newId(), type: 'polyline',
-    color, thickness, lineStyle, startCap, endCap,
+    color, thickness, lineStyle, startCap, endCap, lineBorderColor, shadow: lineShadow,
     points: [...polylinePoints],
-    shadow: false,
   }
   _cancelPolyline()
   pushHistory()
@@ -2321,17 +2368,17 @@ function buildPreview() {
     return { ...base, type:'ellipse', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y), shadow: ellipseShadow }
   if (tool === 'fillrect')
     return { ...base, type:'fillrect', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y),
-             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled, fillBorderColor, shadow: fillrectShadow, cornerRadius }
+             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorderColor, shadow: fillrectShadow, cornerRadius }
   if (tool === 'fillellipse')
     return { ...base, type:'fillellipse', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y),
-             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled, fillBorderColor, shadow: fillellipseShadow }
+             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorderColor, shadow: fillellipseShadow }
   if (tool === 'line') {
     let x2 = e.x, y2 = e.y
     if (lineOrtho) {
       if (Math.abs(e.x - s.x) >= Math.abs(e.y - s.y)) y2 = s.y
       else x2 = s.x
     }
-    return { ...base, type:'line', x1:s.x, y1:s.y, x2, y2, lineStyle, startCap, endCap, lineOrtho }
+    return { ...base, type:'line', x1:s.x, y1:s.y, x2, y2, lineStyle, startCap, endCap, lineOrtho, lineBorderColor, shadow: lineShadow }
   }
   return null
 }
@@ -2352,13 +2399,13 @@ function commitShape(start, end) {
     const w = Math.abs(end.x - start.x), h = Math.abs(end.y - start.y)
     if (w < 2 || h < 2) return null
     return { ...base, type:'fillrect', x:Math.min(start.x,end.x), y:Math.min(start.y,end.y), w, h,
-             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled, fillBorderColor, shadow: fillrectShadow, cornerRadius }
+             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorderColor, shadow: fillrectShadow, cornerRadius }
   }
   if (tool === 'fillellipse') {
     const w = Math.abs(end.x - start.x), h = Math.abs(end.y - start.y)
     if (w < 2 || h < 2) return null
     return { ...base, type:'fillellipse', x:Math.min(start.x,end.x), y:Math.min(start.y,end.y), w, h,
-             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled, fillBorderColor, shadow: fillellipseShadow }
+             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorderColor, shadow: fillellipseShadow }
   }
   if (tool === 'line') {
     let ex = end.x, ey = end.y
