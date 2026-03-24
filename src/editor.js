@@ -76,6 +76,9 @@ let fontSize  = 48
 let numCount  = 1
 let numSize   = 48    // radius, image pixels
 
+// Fill ellipse shadow state
+let fillellipseShadow = false
+
 // Fill rect (色塊工具) state
 let fillMode         = 'solid'       // 'solid' | 'gradient'
 let fillColor        = '#ffcc00'     // solid mode fill colour
@@ -201,7 +204,7 @@ function getTextColor(hex) {
 // ─── Options bar helpers ──────────────────────────────────────────────────────
 
 function hideAllOptions() {
-  ['grpRectShape','grpColor','grpFillColor','grpThickness','grpLineStyle','grpCaps','grpRadius','grpFont','grpNumber','grpShadow','grpZoom','grpCrop'].forEach(id =>
+  ['grpRectShape','grpFillShape','grpColor','grpFillColor','grpThickness','grpLineStyle','grpCaps','grpRadius','grpFont','grpNumber','grpShadow','grpZoom','grpCrop'].forEach(id =>
     document.getElementById(id).classList.add('hidden')
   )
   document.getElementById('numValueEdit').classList.add('hidden')
@@ -217,10 +220,11 @@ function showOptionsForTool(t) {
     document.getElementById('grpCrop').classList.remove('hidden')
     return
   }
-  if (!['rect','ellipse','fillrect','line','text','number'].includes(t)) return
+  if (!['rect','ellipse','fillrect','fillellipse','line','text','number'].includes(t)) return
   // (polyline 由 line tool + lineOrtho 切換控制，此處不需獨立 tool id)
-  if (t !== 'fillrect') document.getElementById('grpColor').classList.remove('hidden')
-  if (t === 'fillrect') {
+  const isFill = t === 'fillrect' || t === 'fillellipse'
+  if (!isFill) document.getElementById('grpColor').classList.remove('hidden')
+  if (isFill) {
     document.getElementById('grpFillColor').classList.remove('hidden')
     syncFillMode(fillMode)
     syncFillColorA(fillColorA)
@@ -230,7 +234,7 @@ function showOptionsForTool(t) {
     syncFillBorder(fillBorderEnabled)
     syncFillBorderColor(fillBorderColor)
   }
-  if (['rect','ellipse','fillrect','line'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
+  if (['rect','ellipse','fillrect','fillellipse','line'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
   if (t === 'line')   { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden'); syncLineOrtho(lineOrtho) }
   if (['rect','fillrect'].includes(t)) { document.getElementById('grpRadius').classList.remove('hidden'); syncCornerRadius(cornerRadius) }
   if (t === 'text') {
@@ -243,26 +247,29 @@ function showOptionsForTool(t) {
     syncFontFamily(fontFamily)
   }
   if (t === 'number') { document.getElementById('grpNumber').classList.remove('hidden'); document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(numShadow) }
-  if (t === 'rect' || t === 'ellipse') { document.getElementById('grpRectShape').classList.remove('hidden'); syncRectShape(t) }
-  if (t === 'rect')    { document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(rectShadow) }
-  if (t === 'ellipse') { document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(ellipseShadow) }
-  if (t === 'fillrect') document.getElementById('grpShadow').classList.remove('hidden')
+  if (t === 'rect' || t === 'ellipse')         { document.getElementById('grpRectShape').classList.remove('hidden'); syncRectShape(t) }
+  if (t === 'fillrect' || t === 'fillellipse') { document.getElementById('grpFillShape').classList.remove('hidden'); syncFillShape(t) }
+  if (t === 'rect')         { document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(rectShadow) }
+  if (t === 'ellipse')      { document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(ellipseShadow) }
+  if (t === 'fillrect')     { document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(fillrectShadow) }
+  if (t === 'fillellipse')  { document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(fillellipseShadow) }
 }
 
 function showOptionsForAnnot(a) {
   hideAllOptions()
   if (a.type === 'img') return   // overlay image has no editable colour/thickness options
   const t = a.type
-  if (t !== 'fillrect') document.getElementById('grpColor').classList.remove('hidden')
-  if (t === 'fillrect') document.getElementById('grpFillColor').classList.remove('hidden')
-  if (['rect','ellipse','fillrect','line','polyline'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
+  const isFill = t === 'fillrect' || t === 'fillellipse'
+  if (!isFill) document.getElementById('grpColor').classList.remove('hidden')
+  if (isFill)  document.getElementById('grpFillColor').classList.remove('hidden')
+  if (['rect','ellipse','fillrect','fillellipse','line','polyline'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
   if (['line','polyline'].includes(t)) { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden') }
   if (['rect','fillrect'].includes(t)) document.getElementById('grpRadius').classList.remove('hidden')
   if (t === 'number') document.getElementById('grpNumber').classList.remove('hidden')
   // Sync UI state to annotation values
   color = a.color; syncColor(color)
   if ('thickness' in a) { thickness = a.thickness; syncThickness(thickness) }
-  if (t === 'fillrect') {
+  if (isFill) {
     fillMode = a.fillMode ?? 'solid'; syncFillMode(fillMode)
     fillColor = a.fillColor ?? '#ffcc00'; syncFillColor(fillColor)
     fillColorA = a.fillColorA ?? '#ffcc00'; syncFillColorA(fillColorA)
@@ -299,19 +306,12 @@ function showOptionsForAnnot(a) {
     document.getElementById('numValueInput').value = a.value
     document.getElementById('grpShadow').classList.remove('hidden')
   }
-  if (t === 'rect' || t === 'ellipse') { document.getElementById('grpRectShape').classList.remove('hidden'); syncRectShape(t) }
-  if (t === 'rect') {
-    rectShadow = a.shadow ?? false; syncShadowCheck(rectShadow)
-    document.getElementById('grpShadow').classList.remove('hidden')
-  }
-  if (t === 'ellipse') {
-    ellipseShadow = a.shadow ?? false; syncShadowCheck(ellipseShadow)
-    document.getElementById('grpShadow').classList.remove('hidden')
-  }
-  if (t === 'fillrect') {
-    fillrectShadow = a.shadow ?? false; syncShadowCheck(fillrectShadow)
-    document.getElementById('grpShadow').classList.remove('hidden')
-  }
+  if (t === 'rect' || t === 'ellipse')         { document.getElementById('grpRectShape').classList.remove('hidden'); syncRectShape(t) }
+  if (t === 'fillrect' || t === 'fillellipse') { document.getElementById('grpFillShape').classList.remove('hidden'); syncFillShape(t) }
+  if (t === 'rect')        { rectShadow        = a.shadow ?? false; syncShadowCheck(rectShadow);        document.getElementById('grpShadow').classList.remove('hidden') }
+  if (t === 'ellipse')     { ellipseShadow     = a.shadow ?? false; syncShadowCheck(ellipseShadow);     document.getElementById('grpShadow').classList.remove('hidden') }
+  if (t === 'fillrect')    { fillrectShadow    = a.shadow ?? false; syncShadowCheck(fillrectShadow);    document.getElementById('grpShadow').classList.remove('hidden') }
+  if (t === 'fillellipse') { fillellipseShadow = a.shadow ?? false; syncShadowCheck(fillellipseShadow); document.getElementById('grpShadow').classList.remove('hidden') }
 }
 
 // Sync UI controls
@@ -439,6 +439,10 @@ function syncTextAlign(v) {
 function syncRectShape(shape) {
   document.getElementById('btnShapeRect')   ?.classList.toggle('active', shape === 'rect')
   document.getElementById('btnShapeEllipse')?.classList.toggle('active', shape === 'ellipse')
+}
+function syncFillShape(shape) {
+  document.getElementById('btnFillShapeRect')   ?.classList.toggle('active', shape === 'fillrect')
+  document.getElementById('btnFillShapeEllipse')?.classList.toggle('active', shape === 'fillellipse')
 }
 function syncShadowCheck(val) {
   const el = document.getElementById('shadowCheck')
@@ -1060,21 +1064,22 @@ document.getElementById('fontFamilySelect').addEventListener('change', e => {
     })
 })
 
-// Shared shadow checkbox (rect / ellipse / fillrect / number)
+// Shared shadow checkbox (rect / ellipse / fillrect / fillellipse / number)
 document.getElementById('shadowCheck').addEventListener('change', e => {
   const val = e.target.checked
-  if      (tool === 'rect')     rectShadow     = val
-  else if (tool === 'ellipse')  ellipseShadow  = val
-  else if (tool === 'fillrect') fillrectShadow = val
-  else if (tool === 'number')   numShadow      = val
-  // also reflect selected annotation's tool type when using Select tool
+  if      (tool === 'rect')        rectShadow        = val
+  else if (tool === 'ellipse')     ellipseShadow     = val
+  else if (tool === 'fillrect')    fillrectShadow    = val
+  else if (tool === 'fillellipse') fillellipseShadow = val
+  else if (tool === 'number')      numShadow         = val
   if (selectedId) {
     const a = annotations.find(x => x.id === selectedId)
     if (a) {
-      if (a.type === 'rect')     rectShadow     = val
-      if (a.type === 'ellipse')  ellipseShadow  = val
-      if (a.type === 'fillrect') fillrectShadow = val
-      if (a.type === 'number')   numShadow      = val
+      if (a.type === 'rect')        rectShadow        = val
+      if (a.type === 'ellipse')     ellipseShadow     = val
+      if (a.type === 'fillrect')    fillrectShadow    = val
+      if (a.type === 'fillellipse') fillellipseShadow = val
+      if (a.type === 'number')      numShadow         = val
       updateSelectedAnnot({ shadow: val })
     }
   }
@@ -1092,6 +1097,21 @@ document.getElementById('shadowCheck').addEventListener('change', e => {
       renderAnnotations()
     } else {
       // 無選取標注：切換繪圖工具
+      setTool(shape)
+    }
+  })
+})
+
+// 色塊 ↔ 橢圓色塊 切換（grpFillShape 按鈕）
+;['fillrect','fillellipse'].forEach(shape => {
+  document.getElementById(shape === 'fillrect' ? 'btnFillShapeRect' : 'btnFillShapeEllipse').addEventListener('click', () => {
+    const a = selectedId ? annotations.find(x => x.id === selectedId) : null
+    if (a && (a.type === 'fillrect' || a.type === 'fillellipse')) {
+      if (a.type !== shape) { a.type = shape; pushHistory() }
+      syncFillShape(shape)
+      showOptionsForAnnot(a)
+      renderAnnotations()
+    } else {
       setTool(shape)
     }
   })
@@ -1144,8 +1164,10 @@ function setTool(t) {
   isPanning  = false
 
   document.querySelectorAll('.tool-btn[data-tool]').forEach(b => {
-    // ellipse 屬於 rect 群組，左側工具列以 rect 按鈕表示 active
-    const match = b.dataset.tool === t || (t === 'ellipse' && b.dataset.tool === 'rect')
+    // ellipse 屬於 rect 群組；fillellipse 屬於 fillrect 群組
+    const match = b.dataset.tool === t
+      || (t === 'ellipse'     && b.dataset.tool === 'rect')
+      || (t === 'fillellipse' && b.dataset.tool === 'fillrect')
     b.classList.toggle('active', match)
   })
 
@@ -1418,7 +1440,8 @@ function drawOne(ctx, a) {
   switch (a.type) {
     case 'rect':     drawRect(ctx, a);     break
     case 'ellipse':  drawEllipse(ctx, a);  break
-    case 'fillrect': drawFillRect(ctx, a); break
+    case 'fillrect':    drawFillRect(ctx, a);    break
+    case 'fillellipse': drawFillEllipse(ctx, a); break
     case 'line':     drawLine(ctx, a);     break
     case 'text':     drawText(ctx, a);     break
     case 'number':   drawNumber(ctx, a);   break
@@ -1490,6 +1513,39 @@ function drawFillRect(ctx, a) {
     } else {
       ctx.strokeRect(rx, ry, rw, rh)
     }
+  }
+}
+
+function drawFillEllipse(ctx, a) {
+  const cx = c(a.x + a.w / 2), cy = c(a.y + a.h / 2)
+  const rx = Math.max(c(a.w / 2), 1), ry = Math.max(c(a.h / 2), 1)
+  ctx.save()
+  if (a.shadow) setShadow(ctx)
+  ctx.globalAlpha = (a.fillOpacity ?? 100) / 100
+  ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2)
+  if (a.fillMode === 'gradient') {
+    const bx = c(a.x), by = c(a.y), bw = c(a.w), bh = c(a.h)
+    const ca = resolveGradientColor(a.fillColorA ?? '#ffcc00')
+    const cb = resolveGradientColor(a.fillColorB ?? 'transparent')
+    let grad
+    switch (a.fillGradientDir ?? 'h') {
+      case 'h':  grad = ctx.createLinearGradient(bx, by, bx+bw, by   ); break
+      case 'v':  grad = ctx.createLinearGradient(bx, by, bx,    by+bh); break
+      case 'dr': grad = ctx.createLinearGradient(bx, by, bx+bw, by+bh); break
+      case 'ur': grad = ctx.createLinearGradient(bx, by+bh, bx+bw, by); break
+    }
+    grad.addColorStop(0, ca); grad.addColorStop(1, cb)
+    ctx.fillStyle = grad
+  } else {
+    ctx.fillStyle = a.fillColor ?? '#ffcc00'
+  }
+  ctx.fill()
+  ctx.restore()
+  if (a.fillBorder !== false) {
+    ctx.save()
+    ctx.strokeStyle = a.fillBorderColor ?? '#ffffff'
+    ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2); ctx.stroke()
+    ctx.restore()
   }
 }
 
@@ -1679,7 +1735,7 @@ function drawNumber(ctx, a) {
 // ─── Resize handles ───────────────────────────────────────────────────────────
 
 function getHandles(a) {
-  if (a.type === 'rect' || a.type === 'ellipse' || a.type === 'fillrect' || a.type === 'img') {
+  if (a.type === 'rect' || a.type === 'ellipse' || a.type === 'fillrect' || a.type === 'fillellipse' || a.type === 'img') {
     const { x, y, w, h } = a
     const mx = x + w / 2, my = y + h / 2
     return [
@@ -1719,20 +1775,7 @@ function startResize(hId, a) {
   if (a.type === 'number') {
     info.cx = a.x; info.cy = a.y
   }
-  if (a.type === 'rect' || a.type === 'ellipse' || a.type === 'img') {
-    const { x, y, w, h } = a
-    switch (hId) {
-      case 'nw': info.fixX = x+w; info.fixY = y+h; break
-      case 'ne': info.fixX = x;   info.fixY = y+h; break
-      case 'se': info.fixX = x;   info.fixY = y;   break
-      case 'sw': info.fixX = x+w; info.fixY = y;   break
-      case 'n':  info.fixX = x;   info.fixY = y+h; info.fixW = w; break
-      case 's':  info.fixX = x;   info.fixY = y;   info.fixW = w; break
-      case 'e':  info.fixX = x;   info.fixY = y;   info.fixH = h; break
-      case 'w':  info.fixX = x+w; info.fixY = y;   info.fixH = h; break
-    }
-  }
-  if (a.type === 'fillrect') {
+  if (a.type === 'rect' || a.type === 'ellipse' || a.type === 'fillrect' || a.type === 'fillellipse' || a.type === 'img') {
     const { x, y, w, h } = a
     switch (hId) {
       case 'nw': info.fixX = x+w; info.fixY = y+h; break
@@ -1792,23 +1835,7 @@ function applyResize(a, pos) {
     return
   }
 
-  if (a.type === 'rect' || a.type === 'ellipse') {
-    let x1, y1, x2, y2
-    switch (h.id) {
-      case 'nw': x1=pos.x;    y1=pos.y;    x2=h.fixX;        y2=h.fixY;        break
-      case 'ne': x1=h.fixX;   y1=pos.y;    x2=pos.x;         y2=h.fixY;        break
-      case 'se': x1=h.fixX;   y1=h.fixY;   x2=pos.x;         y2=pos.y;         break
-      case 'sw': x1=pos.x;    y1=h.fixY;   x2=h.fixX;        y2=pos.y;         break
-      case 'n':  x1=h.fixX;   y1=pos.y;    x2=h.fixX+h.fixW; y2=h.fixY;        break
-      case 's':  x1=h.fixX;   y1=h.fixY;   x2=h.fixX+h.fixW; y2=pos.y;         break
-      case 'e':  x1=h.fixX;   y1=h.fixY;   x2=pos.x;         y2=h.fixY+h.fixH; break
-      case 'w':  x1=pos.x;    y1=h.fixY;   x2=h.fixX;        y2=h.fixY+h.fixH; break
-    }
-    a.x = Math.min(x1, x2); a.y = Math.min(y1, y2)
-    a.w = Math.max(Math.abs(x2 - x1), 2)
-    a.h = Math.max(Math.abs(y2 - y1), 2)
-  }
-  if (a.type === 'fillrect') {
+  if (['rect','ellipse','fillrect','fillellipse'].includes(a.type)) {
     let x1, y1, x2, y2
     switch (h.id) {
       case 'nw': x1=pos.x;    y1=pos.y;    x2=h.fixX;        y2=h.fixY;        break
@@ -1874,6 +1901,9 @@ function buildPreview() {
   if (tool === 'fillrect')
     return { ...base, type:'fillrect', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y),
              fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled, fillBorderColor, shadow: fillrectShadow, cornerRadius }
+  if (tool === 'fillellipse')
+    return { ...base, type:'fillellipse', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y),
+             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled, fillBorderColor, shadow: fillellipseShadow }
   if (tool === 'line') {
     let x2 = e.x, y2 = e.y
     if (lineOrtho) {
@@ -1902,6 +1932,12 @@ function commitShape(start, end) {
     if (w < 2 || h < 2) return null
     return { ...base, type:'fillrect', x:Math.min(start.x,end.x), y:Math.min(start.y,end.y), w, h,
              fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled, fillBorderColor, shadow: fillrectShadow, cornerRadius }
+  }
+  if (tool === 'fillellipse') {
+    const w = Math.abs(end.x - start.x), h = Math.abs(end.y - start.y)
+    if (w < 2 || h < 2) return null
+    return { ...base, type:'fillellipse', x:Math.min(start.x,end.x), y:Math.min(start.y,end.y), w, h,
+             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled, fillBorderColor, shadow: fillellipseShadow }
   }
   if (tool === 'line') {
     let ex = end.x, ey = end.y
@@ -1955,6 +1991,7 @@ function bounds(a) {
     case 'rect':
     case 'ellipse':
     case 'fillrect':
+    case 'fillellipse':
     case 'img':    return { x: a.x, y: a.y, w: a.w, h: a.h }
     case 'line': {
       const minX = Math.min(a.x1,a.x2), maxX = Math.max(a.x1,a.x2)
@@ -2152,7 +2189,34 @@ annotCanvas.addEventListener('mousemove', e => {
 
   if (isResizing && selectedId) {
     const a = annotations.find(x => x.id === selectedId)
-    if (a) applyResize(a, pos)
+    if (a) {
+      let snapPos = pos
+      if (e.shiftKey) {
+        const h = resizeHandle
+        // 矩形系（rect/ellipse/fillrect/fillellipse）角落把手：Shift = 鎖正方形/正圓
+        if (['rect','ellipse','fillrect','fillellipse'].includes(a.type) && ['nw','ne','se','sw'].includes(h.id)) {
+          const dx = pos.x - h.fixX, dy = pos.y - h.fixY
+          const side = Math.min(Math.abs(dx), Math.abs(dy))
+          snapPos = { x: h.fixX + Math.sign(dx || 1) * side, y: h.fixY + Math.sign(dy || 1) * side }
+        }
+        // 線條端點：Shift = 鎖水平/垂直
+        if (a.type === 'line') {
+          const fixed = h.id === 'p1' ? { x: a.x2, y: a.y2 } : { x: a.x1, y: a.y1 }
+          const adx = Math.abs(pos.x - fixed.x), ady = Math.abs(pos.y - fixed.y)
+          snapPos = adx >= ady ? { x: pos.x, y: fixed.y } : { x: fixed.x, y: pos.y }
+        }
+        // 折線頂點：Shift = 鎖水平/垂直（相對相鄰頂點）
+        if (a.type === 'polyline' && typeof h.ptIdx === 'number') {
+          const pi = h.ptIdx
+          const nb = pi > 0 ? a.points[pi - 1] : a.points[pi + 1]
+          if (nb) {
+            const adx = Math.abs(pos.x - nb.x), ady = Math.abs(pos.y - nb.y)
+            snapPos = adx >= ady ? { x: pos.x, y: nb.y } : { x: nb.x, y: pos.y }
+          }
+        }
+      }
+      applyResize(a, snapPos)
+    }
     renderAnnotations()
     return
   }
@@ -2174,7 +2238,7 @@ annotCanvas.addEventListener('mousemove', e => {
     if (e.shiftKey && tool === 'line' && drawStart) {
       const dx = Math.abs(pos.x - drawStart.x), dy = Math.abs(pos.y - drawStart.y)
       drawCurrent = dx >= dy ? { x: pos.x, y: drawStart.y } : { x: drawStart.x, y: pos.y }
-    } else if (e.shiftKey && (tool === 'rect' || tool === 'fillrect' || tool === 'ellipse') && drawStart) {
+    } else if (e.shiftKey && (tool === 'rect' || tool === 'fillrect' || tool === 'ellipse' || tool === 'fillellipse') && drawStart) {
       const side = Math.min(Math.abs(pos.x - drawStart.x), Math.abs(pos.y - drawStart.y))
       drawCurrent = {
         x: drawStart.x + Math.sign(pos.x - drawStart.x) * side,
@@ -2272,6 +2336,7 @@ function moveAnnot(a, dx, dy) {
     case 'rect':
     case 'ellipse':
     case 'fillrect':
+    case 'fillellipse':
     case 'img':
     case 'text':
     case 'number': a.x += dx; a.y += dy; break
