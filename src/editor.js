@@ -248,7 +248,7 @@ function showOptionsForTool(t) {
     syncFillBorder(fillBorderEnabled)
     syncFillBorderColor(fillBorderColor)
   }
-  if (['rect','ellipse','fillrect','fillellipse','line'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
+  if (['rect','ellipse','fillrect','fillellipse','line','number'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
   if (t === 'line')   { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden'); syncLineOrtho(lineOrtho) }
   if (['rect','fillrect'].includes(t)) { document.getElementById('grpRadius').classList.remove('hidden'); syncCornerRadius(cornerRadius) }
   if (t === 'text') {
@@ -276,7 +276,7 @@ function showOptionsForAnnot(a) {
   const isFill = t === 'fillrect' || t === 'fillellipse'
   if (!isFill) document.getElementById('grpColor').classList.remove('hidden')
   if (isFill)  document.getElementById('grpFillColor').classList.remove('hidden')
-  if (['rect','ellipse','fillrect','fillellipse','line','polyline'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
+  if (['rect','ellipse','fillrect','fillellipse','line','polyline','number'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
   if (['line','polyline'].includes(t)) { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden') }
   if (['rect','fillrect'].includes(t)) document.getElementById('grpRadius').classList.remove('hidden')
   if (t === 'number') document.getElementById('grpNumber').classList.remove('hidden')
@@ -1817,20 +1817,34 @@ function drawNumber(ctx, a) {
 
   if (glyph) {
     // Unicode glyph 直接渲染 — Zero Overhead
-    const fs = (a.size ?? 48) * 2 * viewScale
+    const fs  = (a.size ?? 48) * 2 * viewScale
+    const sw  = (a.thickness ?? 0) * viewScale
     if (a.shadow) setShadow(ctx)
-    ctx.fillStyle    = a.color
     ctx.font         = `${Math.round(fs)}px -apple-system, 'Noto Sans TC', sans-serif`
     ctx.textAlign    = 'center'
     ctx.textBaseline = 'middle'
-    ctx.fillText(glyph, cx, cy)
+    // 描邊先畫（外框壓在填色下面的外側）
+    if (sw > 0) {
+      ctx.strokeStyle = getTextColor(a.color)
+      ctx.lineWidth   = sw * 2   // strokeText 向外向內各半，×2 讓可見外框等於 sw
+      ctx.lineJoin    = 'round'
+      ctx.strokeText(glyph, cx, cy)
+    }
     ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0
+    ctx.fillStyle   = a.color
+    ctx.fillText(glyph, cx, cy)
   } else {
     // dot 樣式（預設或超出 Unicode 範圍 fallback）
-    const r = (a.size ?? 48) * viewScale
+    const r  = (a.size ?? 48) * viewScale
+    const sw = (a.thickness ?? 0) * viewScale
     if (a.shadow) setShadow(ctx)
     ctx.fillStyle = a.color
     ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill()
+    if (sw > 0) {
+      ctx.strokeStyle = getTextColor(a.color)
+      ctx.lineWidth   = sw
+      ctx.stroke()
+    }
     ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0
     ctx.fillStyle    = getTextColor(a.color)
     ctx.font         = `bold ${Math.round(r * 0.9)}px -apple-system`
