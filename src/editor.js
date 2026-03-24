@@ -362,6 +362,10 @@ function syncFontSize(fs) { document.getElementById('fontSizeInput').value = fs 
 function syncNumSize(ns) {
   document.querySelectorAll('.ns-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.ns) === ns))
 }
+function syncNumCount() {
+  const el = document.getElementById('numCountDisplay')
+  if (el) el.textContent = numCount
+}
 function syncNumStyle(s) {
   document.querySelectorAll('.ns-style-btn').forEach(b => b.classList.toggle('active', b.dataset.nstyle === s))
   const limit = getStyleLimit(s)
@@ -1159,6 +1163,7 @@ document.querySelectorAll('.ns-style-btn').forEach(btn =>
     numberStyle = btn.dataset.nstyle
     numCount = 1   // 切換風格一律從 1 開始
     syncNumStyle(numberStyle)
+    syncNumCount()
     if (selectedId) { updateSelectedAnnot({ numberStyle }); renderAnnotations() }
   })
 )
@@ -1181,6 +1186,7 @@ document.getElementById('numValueInput').addEventListener('input', e => {
 // Number reset
 document.getElementById('btnNumReset').addEventListener('click', () => {
   numCount = 1
+  syncNumCount()
   showToast('編號已重置，下一個從 1 開始')
 })
 
@@ -2161,6 +2167,7 @@ function redo() {
 function recalcNumCount() {
   const nums = annotations.filter(a => a.type === 'number').map(a => a.value)
   numCount = nums.length ? Math.max(...nums) + 1 : 1
+  syncNumCount()
 }
 
 // ─── Hit testing ─────────────────────────────────────────────────────────────
@@ -2294,6 +2301,7 @@ annotCanvas.addEventListener('mousedown', e => {
     }
     pushHistory()
     annotations.push({ id:newId(), type:'number', color, thickness, x:pos.x, y:pos.y, value:numCount++, size:numSize, shadow:numShadow, numberStyle })
+    syncNumCount()
     renderAnnotations()
     return
   }

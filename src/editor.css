@@ -262,11 +262,28 @@ body {
   outline: none;
 }
 
+/* Number style buttons — larger than default sz-btn */
+.ns-style-btn {
+  font-size: 15px;
+  padding: 4px 10px;
+  min-width: 34px;
+  text-align: center;
+}
+
 /* Number style limit display */
 .num-style-limit {
   color: #5a9eff;
   font-size: 11px;
   min-width: 52px;
+}
+
+/* Number counter display */
+.num-count-display {
+  color: #ffd060;
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 20px;
+  text-align: center;
 }
 
 /* Number value edit */
