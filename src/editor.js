@@ -4337,6 +4337,276 @@ document.addEventListener('mousedown', e => {
   }
 })
 
+// ─── Template (一鍵套版) ──────────────────────────────────────────────────────
+
+function _tplRoundRectPath(ctx, x, y, w, h, r) {
+  ctx.beginPath()
+  ctx.moveTo(x + r, y)
+  ctx.lineTo(x + w - r, y)
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r)
+  ctx.lineTo(x + w, y + h - r)
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h)
+  ctx.lineTo(x + r, y + h)
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r)
+  ctx.lineTo(x, y + r)
+  ctx.quadraticCurveTo(x, y, x + r, y)
+  ctx.closePath()
+}
+
+// Shared: draw image with optional rounded corners + drop shadow
+function _tplDrawImgRounded(ctx, img, x, y, w, h, radius, shadowColor, shadowBlur, shadowOffY) {
+  const r = Math.round(Math.min(w, h) * radius)
+  const blur = Math.round(Math.min(w, h) * shadowBlur)
+  const sOffY = Math.round(Math.min(w, h) * shadowOffY)
+  if (blur > 0) {
+    ctx.save()
+    ctx.shadowColor = shadowColor
+    ctx.shadowBlur = blur
+    ctx.shadowOffsetY = sOffY
+    ctx.fillStyle = 'rgba(0,0,0,0.001)'
+    _tplRoundRectPath(ctx, x, y, w, h, r)
+    ctx.fill()
+    ctx.restore()
+  }
+  ctx.save()
+  if (r > 0) { _tplRoundRectPath(ctx, x, y, w, h, r); ctx.clip() }
+  ctx.drawImage(img, x, y, w, h)
+  ctx.restore()
+}
+
+const TEMPLATES = [
+  // ── 拍立得 ──────────────────────────────────────────────────
+  {
+    id: 'polaroid',
+    layout(w, h) {
+      const s = Math.min(w, h)
+      const pad = Math.round(s * 0.055)
+      const bot = Math.round(s * 0.19)
+      return { newW: w + pad * 2, newH: h + pad + bot, imgX: pad, imgY: pad }
+    },
+    drawBg(ctx, W, H) {
+      ctx.fillStyle = '#f8f8f6'
+      ctx.fillRect(0, 0, W, H)
+    },
+    drawImg(ctx, img, x, y, w, h) {
+      // subtle inset shadow on the photo area
+      ctx.save()
+      ctx.shadowColor = 'rgba(0,0,0,0.18)'
+      ctx.shadowBlur = 8
+      ctx.shadowOffsetY = 2
+      ctx.fillStyle = 'rgba(0,0,0,0.001)'
+      ctx.fillRect(x, y, w, h)
+      ctx.restore()
+      ctx.drawImage(img, x, y, w, h)
+    },
+  },
+  // ── 底片 ─────────────────────────────────────────────────────
+  {
+    id: 'film',
+    layout(w, h) {
+      const s = Math.min(w, h)
+      const padX = Math.round(s * 0.065)
+      const padY = Math.round(s * 0.05)
+      return { newW: w + padX * 2, newH: h + padY * 2, imgX: padX, imgY: padY, padX, padY }
+    },
+    drawBg(ctx, W, H, layout) {
+      ctx.fillStyle = '#111108'
+      ctx.fillRect(0, 0, W, H)
+      const { padX } = layout
+      const hW = Math.max(4, Math.round(padX * 0.42))
+      const hH = Math.max(7, Math.round(hW * 1.7))
+      const hR = Math.round(hW * 0.3)
+      const marginX = Math.round(padX * 0.22)
+      const spacing = hH * 2.3
+      const numH = Math.max(3, Math.floor(H / spacing))
+      const startY = (H - (numH - 1) * spacing) / 2
+      ctx.fillStyle = '#000000'
+      for (let i = 0; i < numH; i++) {
+        const cy = startY + i * spacing
+        _tplRoundRectPath(ctx, marginX, cy - hH / 2, hW, hH, hR)
+        ctx.fill()
+        _tplRoundRectPath(ctx, W - marginX - hW, cy - hH / 2, hW, hH, hR)
+        ctx.fill()
+      }
+    },
+    drawImg(ctx, img, x, y, w, h) {
+      ctx.drawImage(img, x, y, w, h)
+    },
+  },
+  // ── Apple 暖漸層 ──────────────────────────────────────────────
+  {
+    id: 'apple-warm',
+    layout(w, h) {
+      const pad = Math.round(Math.min(w, h) * 0.09)
+      return { newW: w + pad * 2, newH: h + pad * 2, imgX: pad, imgY: pad }
+    },
+    drawBg(ctx, W, H) {
+      const g = ctx.createLinearGradient(0, 0, W, H)
+      g.addColorStop(0,    '#ff9a9e')
+      g.addColorStop(0.45, '#fad0c4')
+      g.addColorStop(1,    '#ffecd2')
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
+    },
+    drawImg(ctx, img, x, y, w, h) {
+      _tplDrawImgRounded(ctx, img, x, y, w, h, 0.025, 'rgba(0,0,0,0.28)', 0.04, 0.015)
+    },
+  },
+  // ── Apple 冷漸層 ──────────────────────────────────────────────
+  {
+    id: 'apple-cool',
+    layout(w, h) {
+      const pad = Math.round(Math.min(w, h) * 0.09)
+      return { newW: w + pad * 2, newH: h + pad * 2, imgX: pad, imgY: pad }
+    },
+    drawBg(ctx, W, H) {
+      const g = ctx.createLinearGradient(0, 0, W, H)
+      g.addColorStop(0,    '#0f0c29')
+      g.addColorStop(0.5,  '#302b63')
+      g.addColorStop(1,    '#24243e')
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
+    },
+    drawImg(ctx, img, x, y, w, h) {
+      _tplDrawImgRounded(ctx, img, x, y, w, h, 0.025, 'rgba(0,0,0,0.5)', 0.05, 0.02)
+    },
+  },
+  // ── Mac 視窗 ──────────────────────────────────────────────────
+  {
+    id: 'mac-window',
+    layout(w, h) {
+      const s = Math.min(w, h)
+      const titleH = Math.max(28, Math.round(s * 0.048))
+      return { newW: w, newH: h + titleH, imgX: 0, imgY: titleH, titleH }
+    },
+    drawBg(ctx, W, H, layout) {
+      const { titleH, imgY: imgY_, newW: W_, newH: H_ } = layout
+      const r = Math.min(12, Math.round(titleH * 0.4))
+      // Window chrome background
+      _tplRoundRectPath(ctx, 0, 0, W, H, r)
+      ctx.fillStyle = '#e8e8e8'; ctx.fill()
+      // Title bar gradient
+      const tbg = ctx.createLinearGradient(0, 0, 0, titleH)
+      tbg.addColorStop(0, '#f0f0f0'); tbg.addColorStop(1, '#d8d8d8')
+      ctx.fillStyle = tbg; ctx.fillRect(0, 0, W, titleH)
+      // Separator
+      ctx.fillStyle = '#c0c0c0'; ctx.fillRect(0, titleH - 1, W, 1)
+      // Traffic lights
+      const dotY = titleH / 2
+      const dotR = Math.max(5, titleH * 0.20)
+      const dotGap = dotR * 2.5
+      const startX = titleH * 0.65
+      ;[['#ff5f57'], ['#febc2e'], ['#28c840']].forEach(([c], i) => {
+        ctx.beginPath()
+        ctx.arc(startX + i * dotGap, dotY, dotR, 0, Math.PI * 2)
+        ctx.fillStyle = c; ctx.fill()
+      })
+    },
+    drawImg(ctx, img, x, y, w, h) {
+      ctx.drawImage(img, x, y, w, h)
+    },
+  },
+  // ── 行動裝置 ──────────────────────────────────────────────────
+  {
+    id: 'mobile',
+    layout(w, h) {
+      const s = Math.min(w, h)
+      const fw = Math.round(s * 0.07)
+      const topH = Math.round(s * 0.10)
+      const botH = Math.round(s * 0.08)
+      const cr = Math.round(s * 0.07)
+      return { newW: w + fw * 2, newH: h + topH + botH, imgX: fw, imgY: topH, fw, topH, botH, cr }
+    },
+    drawBg(ctx, W, H, layout) {
+      const { fw, topH, botH, cr } = layout
+      // Phone body
+      _tplRoundRectPath(ctx, 0, 0, W, H, cr)
+      ctx.fillStyle = '#1c1c1e'; ctx.fill()
+      // Screen area
+      ctx.fillStyle = '#000'
+      ctx.fillRect(fw, topH, W - fw * 2, H - topH - botH)
+      // Dynamic island pill
+      const pilW = Math.round(W * 0.22)
+      const pilH = Math.round(topH * 0.35)
+      _tplRoundRectPath(ctx, (W - pilW) / 2, Math.round(topH * 0.28), pilW, pilH, pilH / 2)
+      ctx.fillStyle = '#000'; ctx.fill()
+      // Home indicator bar
+      const barW = Math.round(W * 0.28)
+      const barH = Math.max(3, Math.round(botH * 0.18))
+      _tplRoundRectPath(ctx, (W - barW) / 2, H - Math.round(botH * 0.45), barW, barH, barH / 2)
+      ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.fill()
+    },
+    drawImg(ctx, img, x, y, w, h) {
+      ctx.drawImage(img, x, y, w, h)
+    },
+  },
+]
+
+function applyTemplate(tplId) {
+  if (!imgElement) return
+  const tpl = TEMPLATES.find(t => t.id === tplId)
+  if (!tpl) return
+
+  const layout = tpl.layout(imgWidth, imgHeight)
+  const { newW, newH, imgX, imgY } = layout
+
+  const off = document.createElement('canvas')
+  off.width = newW; off.height = newH
+  const ctx = off.getContext('2d')
+
+  tpl.drawBg(ctx, newW, newH, layout)
+  tpl.drawImg(ctx, imgElement, imgX, imgY, imgWidth, imgHeight, layout)
+
+  pushHistory()
+
+  const newImg = new Image()
+  newImg.onload = () => {
+    imgElement = newImg
+    imgWidth   = newW
+    imgHeight  = newH
+    document.getElementById('imgInfo').textContent = `${newW} × ${newH} px`
+    // Translate all existing annotations by (imgX, imgY)
+    annotations.forEach(a => moveAnnot(a, imgX, imgY))
+    userZoomed = false
+    fitCanvas()
+    drawBase()
+    renderAnnotations()
+    hideTemplatePanel()
+    showToast('套版已套用')
+  }
+  newImg.src = off.toDataURL()
+}
+
+function openTemplatePanel() {
+  if (!imgElement) { showToast('請先載入圖片'); return }
+  const panel = document.getElementById('templatePanel')
+  const btn   = document.getElementById('btnTemplate')
+  const ar    = btn.getBoundingClientRect()
+  panel.style.left = Math.min(ar.left - 8, window.innerWidth - 300) + 'px'
+  panel.style.top  = (ar.bottom + 6) + 'px'
+  panel.classList.toggle('hidden')
+}
+
+function hideTemplatePanel() {
+  document.getElementById('templatePanel').classList.add('hidden')
+}
+
+document.getElementById('btnTemplate').addEventListener('click', e => {
+  e.stopPropagation()
+  openTemplatePanel()
+})
+
+document.querySelectorAll('.tpl-card').forEach(card => {
+  card.addEventListener('click', () => applyTemplate(card.dataset.tpl))
+})
+
+document.addEventListener('mousedown', e => {
+  const panel = document.getElementById('templatePanel')
+  if (!panel.classList.contains('hidden') &&
+      !panel.contains(e.target) &&
+      e.target.id !== 'btnTemplate') {
+    hideTemplatePanel()
+  }
+})
+
 // ─── Resize ───────────────────────────────────────────────────────────────────
 
 const resizeModal = document.getElementById('resizeModal')

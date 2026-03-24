@@ -121,6 +121,114 @@
 }
 .symbol-preview-swatch:hover { border-color: #6b6baa; }
 
+/* ─── Template Panel ────────────────────────────────────── */
+.template-panel {
+  position: fixed;
+  background: #1e1e2e;
+  border: 1px solid #3a3a5c;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  z-index: 1400;
+  padding: 12px;
+  width: 282px;
+}
+.template-panel.hidden { display: none; }
+.tpl-heading {
+  font-size: 11px;
+  color: #666;
+  margin-bottom: 10px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid #2a2a42;
+  letter-spacing: .05em;
+}
+.tpl-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.tpl-card {
+  background: none;
+  border: 1.5px solid #2a2a42;
+  border-radius: 8px;
+  padding: 7px 4px 5px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  transition: border-color .15s, background .15s;
+  color: inherit;
+  font-family: inherit;
+}
+.tpl-card:hover { border-color: #a78bfa; background: rgba(167,139,250,0.08); }
+.tpl-preview {
+  width: 72px;
+  height: 50px;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  flex-shrink: 0;
+}
+/* 拍立得 */
+.tpl-preview-polaroid { background: #f8f8f8; border: 1px solid #ddd; }
+.tpl-preview-polaroid::after {
+  content: ''; position: absolute;
+  inset: 5px 5px 16px; background: #c8d4e8; border-radius: 1px;
+}
+/* 底片 */
+.tpl-preview-film { background: #111108; }
+.tpl-preview-film::before {
+  content: ''; position: absolute;
+  inset: 0; left: 0; width: 9px;
+  background: repeating-linear-gradient(to bottom, #111108 0 5px, #000 5px 9px);
+}
+.tpl-preview-film::after {
+  content: ''; position: absolute;
+  inset: 4px 11px; background: #3a3830;
+}
+/* Apple 暖 */
+.tpl-preview-apple-warm { background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 50%, #ffecd2 100%); }
+.tpl-preview-apple-warm::after {
+  content: ''; position: absolute;
+  inset: 8px; background: #c8d4e8; border-radius: 2px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+/* Apple 冷 */
+.tpl-preview-apple-cool { background: linear-gradient(135deg, #0f0c29 0%, #302b63 55%, #24243e 100%); }
+.tpl-preview-apple-cool::after {
+  content: ''; position: absolute;
+  inset: 8px; background: #c8d4e8; border-radius: 2px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.55);
+}
+/* Mac 視窗 */
+.tpl-preview-mac-window { background: #e0e0e0; border-radius: 4px; }
+.tpl-preview-mac-window::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 13px;
+  background: linear-gradient(to bottom, #e8e8e8, #d8d8d8);
+  border-radius: 4px 4px 0 0;
+}
+.tpl-preview-mac-window::after {
+  content: ''; position: absolute;
+  inset: 15px 4px 4px; background: #c8d4e8;
+}
+.tpl-preview-mac-window .tpl-dots {
+  position: absolute; top: 3px; left: 6px;
+  display: flex; gap: 3px; z-index: 1;
+}
+.tpl-preview-mac-window .tpl-dot { width: 5px; height: 5px; border-radius: 50%; }
+/* 行動裝置 */
+.tpl-preview-mobile { background: #1c1c1e; border-radius: 8px; }
+.tpl-preview-mobile::after {
+  content: ''; position: absolute;
+  inset: 9px 8px 7px; background: #c8d4e8; border-radius: 1px;
+}
+.tpl-label {
+  font-size: 11px;
+  color: #9098b8;
+  text-align: center;
+}
+
 /* ─── OCR Panel ─────────────────────────────────────────── */
 .ocr-panel {
   position: fixed;
@@ -603,6 +711,7 @@
       <button class="tool-btn" id="btnResize"                  title="調整大小 (S)">⇔</button>
       <button class="tool-btn" id="btnExtend"                  title="延伸畫布 (E)">⊞</button>
       <button class="tool-btn" id="btnOverlayImg"              title="疊入圖片 (O)">⧉</button>
+      <button class="tool-btn" id="btnTemplate"               title="一鍵套版">▣</button>
       <!-- 操作群 -->
       <div class="tool-sep"></div>
       <button class="tool-btn" id="btnUndo"                    title="撤銷 (⌘Z)">↩</button>
@@ -821,6 +930,43 @@
 <div id="symbolPickerPanel" class="symbol-picker-panel hidden" role="dialog" aria-label="符號選取面板">
   <div class="sym-tabs" id="symTabsRow"></div>
   <div class="sym-grid" id="symGrid"></div>
+</div>
+
+<!-- ─── Template Panel ──────────────────────────────────── -->
+<div id="templatePanel" class="template-panel hidden" role="dialog" aria-label="套版選擇">
+  <div class="tpl-heading">一鍵套版</div>
+  <div class="tpl-grid">
+    <button class="tpl-card" data-tpl="polaroid">
+      <div class="tpl-preview tpl-preview-polaroid"></div>
+      <span class="tpl-label">拍立得</span>
+    </button>
+    <button class="tpl-card" data-tpl="film">
+      <div class="tpl-preview tpl-preview-film"></div>
+      <span class="tpl-label">底片</span>
+    </button>
+    <button class="tpl-card" data-tpl="apple-warm">
+      <div class="tpl-preview tpl-preview-apple-warm"></div>
+      <span class="tpl-label">Apple 暖</span>
+    </button>
+    <button class="tpl-card" data-tpl="apple-cool">
+      <div class="tpl-preview tpl-preview-apple-cool"></div>
+      <span class="tpl-label">Apple 冷</span>
+    </button>
+    <button class="tpl-card" data-tpl="mac-window">
+      <div class="tpl-preview tpl-preview-mac-window">
+        <div class="tpl-dots">
+          <div class="tpl-dot" style="background:#ff5f57"></div>
+          <div class="tpl-dot" style="background:#febc2e"></div>
+          <div class="tpl-dot" style="background:#28c840"></div>
+        </div>
+      </div>
+      <span class="tpl-label">Mac 視窗</span>
+    </button>
+    <button class="tpl-card" data-tpl="mobile">
+      <div class="tpl-preview tpl-preview-mobile"></div>
+      <span class="tpl-label">行動裝置</span>
+    </button>
+  </div>
 </div>
 
 <!-- Drag & Drop import overlay -->
