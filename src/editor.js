@@ -2894,12 +2894,7 @@ document.getElementById('btnCropCancel').addEventListener('click', cancelCrop)
 
 // ─── OCR ─────────────────────────────────────────────────────────────────────
 
-async function triggerOcr() {
-  const hasData = await ipcRenderer.invoke('ocr-check-tessdata')
-  if (!hasData) {
-    document.getElementById('ocrDownloadModal').classList.remove('hidden')
-    return
-  }
+function triggerOcr() {
   startOcrRecognition()
 }
 
@@ -2922,7 +2917,7 @@ function startOcrRecognition() {
   panel.classList.remove('hidden')
   document.getElementById('ocrProgressWrap').classList.remove('hidden')
   document.getElementById('ocrProgressInner').style.width = '0%'
-  document.getElementById('ocrProgressLabel').textContent = '準備中...'
+  document.getElementById('ocrProgressLabel').textContent = '辨識中...'
   document.getElementById('ocrResultText').value = ''
   document.getElementById('btnOcrCopy').disabled = true
   document.getElementById('btnOcrCopyClose').disabled = true
@@ -2945,17 +2940,8 @@ function startOcrRecognition() {
       document.getElementById('btnOcrCopyClose').disabled = false
       if (!result.text) showToast('OCR 未辨識到文字，請嘗試更清晰的區域')
     } else {
-      const isCorrupt = result.error && result.error.includes('exit code 1')
-      if (isCorrupt) {
-        document.getElementById('ocrResultText').value =
-          '語言包損毀，已自動清除。\n請關閉此面板後再點一次 OCR，即可重新下載語言包。'
-        showToast('OCR 語言包損毀，已清除，請重新觸發 OCR')
-        // 自動刪除損毀檔案，下次觸發 OCR 時會重新顯示下載對話框
-        ipcRenderer.invoke('ocr-delete-tessdata').catch(() => {})
-      } else {
-        document.getElementById('ocrResultText').value = `辨識失敗：${result.error}`
-        showToast('OCR 辨識失敗')
-      }
+      document.getElementById('ocrResultText').value = `辨識失敗：${result.error}`
+      showToast('OCR 辨識失敗')
     }
   })
 }

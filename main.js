@@ -581,80 +581,61 @@ ipcMain.handle('open-permission-settings', () => {
   )
 })
 
-// ─── OCR (Tesseract.js) ───────────────────────────────────────────────────────
+// ─── OCR (macOS Vision framework via Swift) ───────────────────────────────────
+// 使用 macOS 內建 Vision 框架，不需要下載語言包，支援繁中 + 英文
 
-let ocrCachePath = null
+const SWIFT_OCR = `
+import Vision
+import AppKit
 
-function initOcrCache() {
-  ocrCachePath = path.join(app.getPath('userData'), 'tessdata')
-  try { fs.mkdirSync(ocrCachePath, { recursive: true }) } catch {}
+let imgPath = CommandLine.arguments[1]
+guard let img = NSImage(contentsOfFile: imgPath),
+      let tiff = img.tiffRepresentation,
+      let rep  = NSBitmapImageRep(data: tiff),
+      let cg   = rep.cgImage else {
+  fputs("ERROR: Cannot load image\\n", stderr); exit(1)
 }
+let sem = DispatchSemaphore(value: 0)
+var lines: [String] = []
+let req = VNRecognizeTextRequest { req, _ in
+  lines = (req.results as? [VNRecognizedTextObservation] ?? [])
+    .compactMap { $0.topCandidates(1).first?.string }
+  sem.signal()
+}
+req.recognitionLevel = .accurate
+req.recognitionLanguages = ["zh-Hant", "en-US"]
+req.usesLanguageCorrection = true
+try? VNImageRequestHandler(cgImage: cg, options: [:]).perform([req])
+sem.wait()
+print(lines.joined(separator: "\\n"))
+`
 
-const OCR_LANGS = ['chi_tra', 'eng']
-
-// chi_tra ~10MB, eng ~4MB — 小於 1MB 視為下載損毀，強制重新下載
-const MIN_TESSDATA_BYTES = 1 * 1024 * 1024
-
-ipcMain.handle('ocr-check-tessdata', () => {
-  if (!ocrCachePath) return false
-  return OCR_LANGS.every(lang => {
-    const p = path.join(ocrCachePath, `${lang}.traineddata`)
-    try {
-      return fs.existsSync(p) && fs.statSync(p).size >= MIN_TESSDATA_BYTES
-    } catch { return false }
-  })
-})
-
-// 刪除損毀的 tessdata 讓使用者重新下載
-ipcMain.handle('ocr-delete-tessdata', () => {
-  if (!ocrCachePath) return
-  OCR_LANGS.forEach(lang => {
-    const p = path.join(ocrCachePath, `${lang}.traineddata`)
-    try { if (fs.existsSync(p)) fs.unlinkSync(p) } catch {}
-  })
-})
-
-// OCR recognition via worker_threads（在 main process 內跑，避免 Electron fork 雙層問題）
 ipcMain.handle('ocr-recognize', (event, { dataURL }) => {
   return new Promise((resolve) => {
-    const { Worker } = require('worker_threads')
-    let worker
+    // 將 dataURL 寫入暫存 PNG
+    const tmpDir   = os.tmpdir()
+    const tmpImg   = path.join(tmpDir, `ocr_img_${Date.now()}.png`)
+    const tmpSwift = path.join(tmpDir, `ocr_run_${Date.now()}.swift`)
     try {
-      worker = new Worker(path.join(__dirname, 'src/ocr-worker.js'), {
-        workerData: { dataURL, cachePath: ocrCachePath }
-      })
+      const b64 = dataURL.replace(/^data:image\/\w+;base64,/, '')
+      fs.writeFileSync(tmpImg, Buffer.from(b64, 'base64'))
+      fs.writeFileSync(tmpSwift, SWIFT_OCR)
     } catch (err) {
-      resolve({ success: false, error: 'OCR worker 無法啟動：' + err.message })
+      resolve({ success: false, error: '暫存檔案寫入失敗：' + err.message })
       return
     }
 
-    let settled = false
-    const done = (result) => {
-      if (settled) return
-      settled = true
-      try { worker.terminate() } catch {}
-      resolve(result)
+    const cleanup = () => {
+      try { fs.unlinkSync(tmpImg)   } catch {}
+      try { fs.unlinkSync(tmpSwift) } catch {}
     }
 
-    worker.on('message', msg => {
-      if (msg.type === 'progress') {
-        try {
-          if (!event.sender.isDestroyed()) {
-            event.sender.send('ocr-progress', { status: msg.status, progress: msg.progress })
-          }
-        } catch {}
-      } else if (msg.type === 'result') {
-        done({ success: msg.success, text: msg.text, error: msg.error })
-      }
-    })
-
-    worker.on('error', (err) => {
-      done({ success: false, error: 'OCR 錯誤：' + err.message })
-    })
-
-    worker.on('exit', (code) => {
-      if (code !== 0) {
-        done({ success: false, error: `OCR worker 意外結束（code ${code}）` })
+    exec(`swift "${tmpSwift}" "${tmpImg}"`, { timeout: 60000 }, (err, stdout, stderr) => {
+      cleanup()
+      if (err) {
+        resolve({ success: false, error: stderr.trim() || err.message })
+      } else {
+        resolve({ success: true, text: stdout.trim() })
       }
     })
   })
@@ -664,7 +645,6 @@ ipcMain.handle('ocr-recognize', (event, { dataURL }) => {
 
 app.whenReady().then(() => {
   posFilePath = path.join(app.getPath('userData'), 'toolbar-pos.json')
-  initOcrCache()
   createWindow()
 
   globalShortcut.register('CommandOrControl+Ctrl+1', () => {
