@@ -599,9 +599,28 @@ ipcMain.handle('ocr-check-tessdata', () => {
   )
 })
 
-// OCR recognition runs in the renderer process (better WASM compatibility in Electron)
-// Main process only exposes the cache path so renderer can configure Tesseract.js
-ipcMain.handle('get-ocr-cache-path', () => ocrCachePath)
+// OCR recognition runs in a utilityProcess (full Node.js, worker_threads supported)
+ipcMain.handle('ocr-recognize', (event, { dataURL }) => {
+  return new Promise((resolve) => {
+    const { utilityProcess } = require('electron')
+    const child = utilityProcess.fork(path.join(__dirname, 'src/ocr-worker.js'))
+
+    child.on('message', msg => {
+      if (msg.type === 'progress') {
+        try {
+          if (!event.sender.isDestroyed()) {
+            event.sender.send('ocr-progress', { status: msg.status, progress: msg.progress })
+          }
+        } catch {}
+      } else if (msg.type === 'result') {
+        child.kill()
+        resolve({ success: msg.success, text: msg.text, error: msg.error })
+      }
+    })
+
+    child.postMessage({ dataURL, cachePath: ocrCachePath })
+  })
+})
 
 // ─── App lifecycle ────────────────────────────────────────────────────────────
 
