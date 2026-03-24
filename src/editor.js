@@ -2945,8 +2945,17 @@ function startOcrRecognition() {
       document.getElementById('btnOcrCopyClose').disabled = false
       if (!result.text) showToast('OCR 未辨識到文字，請嘗試更清晰的區域')
     } else {
-      document.getElementById('ocrResultText').value = `辨識失敗：${result.error}`
-      showToast('OCR 辨識失敗')
+      const isCorrupt = result.error && result.error.includes('exit code 1')
+      if (isCorrupt) {
+        document.getElementById('ocrResultText').value =
+          '語言包損毀，請點「清除並重試」重新下載。'
+        showToast('OCR 語言包損毀，需重新下載')
+        // 自動刪除損毀檔案，下次觸發 OCR 時會重新顯示下載對話框
+        ipcRenderer.invoke('ocr-delete-tessdata').catch(() => {})
+      } else {
+        document.getElementById('ocrResultText').value = `辨識失敗：${result.error}`
+        showToast('OCR 辨識失敗')
+      }
     }
   })
 }

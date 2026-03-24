@@ -592,11 +592,26 @@ function initOcrCache() {
 
 const OCR_LANGS = ['chi_tra', 'eng']
 
+// chi_tra ~10MB, eng ~4MB — 小於 1MB 視為下載損毀，強制重新下載
+const MIN_TESSDATA_BYTES = 1 * 1024 * 1024
+
 ipcMain.handle('ocr-check-tessdata', () => {
   if (!ocrCachePath) return false
-  return OCR_LANGS.every(lang =>
-    fs.existsSync(path.join(ocrCachePath, `${lang}.traineddata`))
-  )
+  return OCR_LANGS.every(lang => {
+    const p = path.join(ocrCachePath, `${lang}.traineddata`)
+    try {
+      return fs.existsSync(p) && fs.statSync(p).size >= MIN_TESSDATA_BYTES
+    } catch { return false }
+  })
+})
+
+// 刪除損毀的 tessdata 讓使用者重新下載
+ipcMain.handle('ocr-delete-tessdata', () => {
+  if (!ocrCachePath) return
+  OCR_LANGS.forEach(lang => {
+    const p = path.join(ocrCachePath, `${lang}.traineddata`)
+    try { if (fs.existsSync(p)) fs.unlinkSync(p) } catch {}
+  })
 })
 
 // OCR recognition runs in a child_process.fork (ELECTRON_RUN_AS_NODE=1)
