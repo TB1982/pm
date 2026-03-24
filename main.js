@@ -614,18 +614,17 @@ ipcMain.handle('ocr-delete-tessdata', () => {
   })
 })
 
-// OCR recognition runs in a child_process.fork (ELECTRON_RUN_AS_NODE=1)
+// OCR recognition via worker_threads（在 main process 內跑，避免 Electron fork 雙層問題）
 ipcMain.handle('ocr-recognize', (event, { dataURL }) => {
   return new Promise((resolve) => {
-    const { fork } = require('child_process')
-    let child
+    const { Worker } = require('worker_threads')
+    let worker
     try {
-      child = fork(path.join(__dirname, 'src/ocr-worker.js'), [], {
-        env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' },
-        stdio: [0, 1, 2, 'ipc']   // 繼承 stderr → 直接出現在終端機
+      worker = new Worker(path.join(__dirname, 'src/ocr-worker.js'), {
+        workerData: { dataURL, cachePath: ocrCachePath }
       })
     } catch (err) {
-      resolve({ success: false, error: 'OCR 工作程序無法啟動：' + err.message })
+      resolve({ success: false, error: 'OCR worker 無法啟動：' + err.message })
       return
     }
 
@@ -633,11 +632,11 @@ ipcMain.handle('ocr-recognize', (event, { dataURL }) => {
     const done = (result) => {
       if (settled) return
       settled = true
-      try { child.kill() } catch {}
+      try { worker.terminate() } catch {}
       resolve(result)
     }
 
-    child.on('message', msg => {
+    worker.on('message', msg => {
       if (msg.type === 'progress') {
         try {
           if (!event.sender.isDestroyed()) {
@@ -649,17 +648,15 @@ ipcMain.handle('ocr-recognize', (event, { dataURL }) => {
       }
     })
 
-    child.on('exit', (code) => {
+    worker.on('error', (err) => {
+      done({ success: false, error: 'OCR 錯誤：' + err.message })
+    })
+
+    worker.on('exit', (code) => {
       if (code !== 0) {
-        done({ success: false, error: `OCR 工作程序意外結束（exit code ${code}）。請確認已執行 npm install。` })
+        done({ success: false, error: `OCR worker 意外結束（code ${code}）` })
       }
     })
-
-    child.on('error', (err) => {
-      done({ success: false, error: 'OCR 子程序錯誤：' + err.message })
-    })
-
-    child.send({ dataURL, cachePath: ocrCachePath })
   })
 })
 
