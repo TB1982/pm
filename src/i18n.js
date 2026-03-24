@@ -110,6 +110,9 @@ const STRINGS = {
     opt_italic: '斜體',
     opt_underline: '底線',
     opt_strikethrough: '刪除線',
+    align_left: '左',
+    align_center: '中',
+    align_right: '右',
     opt_align_left: '靠左對齊',
     opt_align_center: '置中對齊',
     opt_align_right: '靠右對齊',
@@ -118,6 +121,18 @@ const STRINGS = {
     opt_shadow: '陰影',
     opt_zoom: '縮放比例',
     opt_transparent: '透明',
+
+    // ── Line dash styles ─────────────────────────────────────────
+    dash_solid: '────  實線',
+    dash_dash: '╌╌╌╌  短虛線',
+    'dash_dash-lg': '─ ─ ─  長虛線',
+    dash_dot: '······  點線',
+    'dash_dot-dash': '·─·─  點虛線',
+    'dash_dash-dot-dot': '─··─··  長點點',
+
+    // ── Crop confirm ─────────────────────────────────────────────
+    crop_confirm: '確認裁切',
+    crop_cancel: '取消',
 
     // ── Crop / OCR / BoxSelect labels ────────────────────────────
     crop_drag: '請拖曳選取範圍',
@@ -387,6 +402,9 @@ const STRINGS = {
     opt_italic: 'Italic',
     opt_underline: 'Underline',
     opt_strikethrough: 'Strikethrough',
+    align_left: 'L',
+    align_center: 'C',
+    align_right: 'R',
     opt_align_left: 'Left',
     opt_align_center: 'Center',
     opt_align_right: 'Right',
@@ -395,6 +413,18 @@ const STRINGS = {
     opt_shadow: 'Shadow',
     opt_zoom: 'Zoom',
     opt_transparent: 'Transparent',
+
+    // ── Line dash styles ─────────────────────────────────────────
+    dash_solid: '────  Solid',
+    dash_dash: '╌╌╌╌  Dashed',
+    'dash_dash-lg': '─ ─ ─  Long Dash',
+    dash_dot: '······  Dotted',
+    'dash_dot-dash': '·─·─  Dot-Dash',
+    'dash_dash-dot-dot': '─··─··  Dash-Dot-Dot',
+
+    // ── Crop confirm ─────────────────────────────────────────────
+    crop_confirm: 'Apply Crop',
+    crop_cancel: 'Cancel',
 
     // ── Crop / OCR / BoxSelect labels ────────────────────────────
     crop_drag: 'Drag to select crop area',

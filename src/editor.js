@@ -243,6 +243,13 @@ let polylineLastMs = 0       // 上次 mousedown 時間戳，用於雙擊判斷
 
 applyI18n()
 
+// Translate line-style select options (appear in multiple selects)
+document.querySelectorAll('.line-style-select option').forEach(opt => {
+  const key = 'dash_' + opt.value
+  const str = t(key)
+  if (str !== key) opt.textContent = str
+})
+
 const baseCanvas    = document.getElementById('baseCanvas')
 const annotCanvas   = document.getElementById('annotCanvas')
 const baseCtx       = baseCanvas.getContext('2d')
