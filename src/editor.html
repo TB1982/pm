@@ -4,6 +4,109 @@
   <meta charset="UTF-8">
   <title>圖片編輯器</title>
   <link rel="stylesheet" href="editor.css">
+<style>
+/* ─── OCR Panel ─────────────────────────────────────────── */
+.ocr-panel {
+  position: fixed;
+  bottom: 68px;
+  right: 24px;
+  width: 320px;
+  background: #1e1e2e;
+  border: 1px solid #3a3a5c;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+  z-index: 1500;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.ocr-panel.hidden { display: none; }
+.ocr-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #a0a8c0;
+  border-bottom: 1px solid #2a2a42;
+}
+.ocr-panel-header button {
+  background: none;
+  border: none;
+  color: #6b6b8a;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+}
+.ocr-panel-header button:hover { color: #c0c8e0; }
+.ocr-progress-wrap {
+  padding: 10px 14px 6px;
+}
+.ocr-progress-bar {
+  height: 4px;
+  background: #2a2a42;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+.ocr-progress-inner {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #6366f1);
+  border-radius: 2px;
+  transition: width 0.2s ease;
+  width: 0%;
+}
+.ocr-progress-label {
+  font-size: 11px;
+  color: #8888aa;
+}
+#ocrResultText {
+  width: 100%;
+  box-sizing: border-box;
+  background: #111120;
+  color: #d0d8f0;
+  border: none;
+  border-top: 1px solid #2a2a42;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-family: 'Noto Sans TC', 'PingFang TC', sans-serif;
+  resize: vertical;
+  min-height: 90px;
+  outline: none;
+  line-height: 1.6;
+}
+.ocr-panel-actions {
+  display: flex;
+  gap: 8px;
+  padding: 10px 14px;
+  border-top: 1px solid #2a2a42;
+}
+.ocr-panel-actions .btn-primary,
+.ocr-panel-actions .btn-secondary {
+  flex: 1;
+  padding: 6px 0;
+  font-size: 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+}
+.ocr-panel-actions .btn-primary {
+  background: #3b82f6;
+  color: #fff;
+}
+.ocr-panel-actions .btn-primary:hover { background: #2563eb; }
+.ocr-panel-actions .btn-secondary {
+  background: #2a2a42;
+  color: #a0a8c0;
+}
+.ocr-panel-actions .btn-secondary:hover { background: #363658; }
+.ocr-panel-actions button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+</style>
 </head>
 <body>
 
@@ -132,6 +235,12 @@
       <button class="btn-secondary btn-sm" id="btnCropCancel">取消</button>
     </div>
 
+    <div class="opt-group hidden" id="grpOcr">
+      <span class="opt-label" id="ocrStatusLabel">請拖曳選取辨識區域</span>
+      <div class="opt-sep"></div>
+      <button class="btn-secondary btn-sm" id="btnOcrCancel">取消</button>
+    </div>
+
   </div>
 
   <!-- Body -->
@@ -146,6 +255,7 @@
       <button class="tool-btn"        data-tool="line"   title="線條 (L)">╱</button>
       <button class="tool-btn"        data-tool="text"   title="文字 (T)">T</button>
       <button class="tool-btn"        data-tool="number"   title="編號 (N)">①</button>
+      <button class="tool-btn"        data-tool="ocr"      title="OCR 文字辨識 (G)">文</button>
       <button class="tool-btn" id="btnOverlayImg" title="疊入圖片 (O)">⧉</button>
       <div class="tool-sep"></div>
       <button class="tool-btn"        data-tool="zoom-in"  title="放大 (⌘=)">⊕</button>
@@ -293,6 +403,45 @@
 
 <!-- Toast -->
 <div class="toast" id="toast"></div>
+
+<!-- OCR download confirmation modal -->
+<div class="modal-overlay hidden" id="ocrDownloadModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>OCR 語言包</h2>
+    </div>
+    <div class="modal-body">
+      <p style="margin-bottom:16px;font-size:13px;color:#888;line-height:1.6">
+        首次使用 OCR 需下載語言資料：<br>
+        繁體中文 (~18 MB) + 英文 (~4 MB)<br>
+        下載後離線即可使用，無需重複下載。
+      </p>
+      <div class="modal-actions">
+        <button class="btn-secondary" id="btnOcrDownloadCancel">取消</button>
+        <button class="btn-primary"   id="btnOcrDownloadConfirm">確認下載並辨識</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- OCR result panel (floating) -->
+<div id="ocrPanel" class="ocr-panel hidden">
+  <div class="ocr-panel-header">
+    <span>OCR 辨識結果</span>
+    <button id="ocrPanelClose" title="關閉">✕</button>
+  </div>
+  <div id="ocrProgressWrap" class="ocr-progress-wrap hidden">
+    <div class="ocr-progress-bar">
+      <div class="ocr-progress-inner" id="ocrProgressInner"></div>
+    </div>
+    <span class="ocr-progress-label" id="ocrProgressLabel">準備中...</span>
+  </div>
+  <textarea id="ocrResultText" placeholder="辨識結果將顯示在此..." spellcheck="false"></textarea>
+  <div class="ocr-panel-actions">
+    <button id="btnOcrCopy"      class="btn-primary"   disabled>複製</button>
+    <button id="btnOcrCopyClose" class="btn-secondary" disabled>複製並關閉</button>
+  </div>
+</div>
 
 <!-- ─── Floating colour-picker panel (shared by ALL colour previews) ─────── -->
 <div id="colorPickerPanel" class="hidden" role="dialog" aria-label="選色面板">

@@ -23,6 +23,23 @@ const PALETTE_STANDARD = [
   'transparent',
 ]
 
+// Font families available in the text tool
+const FONT_FAMILIES = [
+  { id: 'system',    label: '系統預設',       css: '-apple-system, "Helvetica Neue", sans-serif' },
+  { id: 'pingfang',  label: '蘋方-繁',        css: '"PingFang TC", "Heiti TC", sans-serif' },
+  { id: 'heiti',     label: '黑體-繁',        css: '"Heiti TC", "STHeiti", sans-serif' },
+  { id: 'songti',    label: '宋體-繁',        css: '"Songti TC", "STSong", serif' },
+  { id: 'kaiti',     label: '楷體-繁',        css: '"Kaiti TC", "STKaiti", cursive' },
+  { id: 'helvetica', label: 'Helvetica Neue', css: '"Helvetica Neue", Helvetica, Arial, sans-serif' },
+  { id: 'georgia',   label: 'Georgia',        css: 'Georgia, "Times New Roman", serif' },
+  { id: 'verdana',   label: 'Verdana',        css: 'Verdana, Geneva, sans-serif' },
+  { id: 'impact',    label: 'Impact',         css: 'Impact, "Arial Black", sans-serif' },
+  { id: 'mono',      label: '等寬 Menlo',     css: 'Menlo, "Courier New", monospace' },
+]
+function getFontCss(id) {
+  return (FONT_FAMILIES.find(f => f.id === id) ?? FONT_FAMILIES[0]).css
+}
+
 // ─── State ───────────────────────────────────────────────────────────────────
 
 // Image
@@ -50,12 +67,17 @@ let historyIdx  = 0
 let tool      = 'rect'
 let color     = '#ff3b30'
 let thickness = 2
-let lineStyle = 'solid'
-let startCap  = 'none'
-let endCap    = 'arrow'
+let lineStyle   = 'solid'
+let lineOrtho   = false   // 正交折線：true = 水平/垂直吸附
+let startCap    = 'none'
+let endCap      = 'arrow'
+let cornerRadius = 0      // 0–100%，套用於 rect / fillrect 的圓角半徑
 let fontSize  = 48
 let numCount  = 1
-let numSize   = 36    // radius, image pixels
+let numSize   = 48    // radius, image pixels
+
+// Fill ellipse shadow state
+let fillellipseShadow = false
 
 // Fill rect (色塊工具) state
 let fillMode         = 'solid'       // 'solid' | 'gradient'
@@ -71,6 +93,25 @@ let fillPrevColorB    = '#333333'    // last non-transparent colorB (for 透 tog
 
 // Annotation clipboard (for Cmd+C / Cmd+V on number annotations)
 let annotClipboard = null
+
+// Text style (描邊 + 背景色塊 + B/I/U)
+let textStrokeColor = '#000000'
+let textStrokeWidth = 0        // 0=none 1=細 2=中 3=粗
+let textBgColor     = '#000000'
+let textBgOpacity   = 0        // 0–100 %（預設透明；使用者選色後自動升至 50）
+let textBold        = false
+let textItalic      = false
+let textUnderline     = false
+let textStrikethrough = false
+let textAlign         = 'left'     // 'left' | 'center' | 'right'
+let fontFamily        = 'system'   // FONT_FAMILIES id
+
+// Shadow (per-tool default; each annotation also stores its own value)
+let rectShadow      = false
+let ellipseShadow   = false
+let fillrectShadow  = false
+let textShadow      = false
+let numShadow       = false
 
 // Recent colours (shared across all colour pickers, max 10, session-only)
 let recentColors     = []
@@ -114,6 +155,18 @@ let cropMoving    = false  // dragging rect to reposition
 let cropResizeH   = null   // handle id being dragged ('nw','n','ne','e','se','s','sw','w')
 let cropMoveStart = null   // { pos, origRect } snapshot at drag start
 
+// OCR
+let isOcrSelecting = false  // currently drawing OCR selection rect
+let ocrRect        = null   // { x, y, w, h } in image coordinates
+let ocrStart       = null   // drag start pos
+
+// Polyline drawing (line tool + lineOrtho = true)
+// 互動：點擊加點 → 雙擊完成；各段自動折直角（H→V 或 V→H）
+let polylineActive = false
+let polylinePoints = []      // {x,y}[] 已確認的頂點
+let polylineMouse  = null    // 游標即時位置，供 live 預覽用
+let polylineLastMs = 0       // 上次 mousedown 時間戳，用於雙擊判斷
+
 // ─── DOM ─────────────────────────────────────────────────────────────────────
 
 const baseCanvas    = document.getElementById('baseCanvas')
@@ -128,6 +181,23 @@ const textMirrorEl  = document.getElementById('textMirror')
 
 // ─── Utility ─────────────────────────────────────────────────────────────────
 
+// hex + alpha → rgba string
+function hexToRgba(hex, alpha) {
+  if (!hex || hex === 'transparent') return `rgba(0,0,0,0)`
+  const r = parseInt(hex.slice(1,3), 16)
+  const g = parseInt(hex.slice(3,5), 16)
+  const b = parseInt(hex.slice(5,7), 16)
+  return `rgba(${r},${g},${b},${alpha})`
+}
+
+// Apply drop-shadow to canvas context (cleared by ctx.restore())
+function setShadow(ctx) {
+  ctx.shadowColor   = 'rgba(0,0,0,0.45)'
+  ctx.shadowBlur    = 8  * viewScale
+  ctx.shadowOffsetX = 3  * viewScale
+  ctx.shadowOffsetY = 3  * viewScale
+}
+
 // WCAG perceived luminance → AA-compliant text colour
 function getTextColor(hex) {
   const r = parseInt(hex.slice(1, 3), 16) / 255
@@ -139,7 +209,7 @@ function getTextColor(hex) {
 // ─── Options bar helpers ──────────────────────────────────────────────────────
 
 function hideAllOptions() {
-  ['grpColor','grpFillColor','grpThickness','grpLineStyle','grpCaps','grpFont','grpNumber','grpZoom','grpCrop'].forEach(id =>
+  ['grpRectShape','grpFillShape','grpColor','grpFillColor','grpThickness','grpLineStyle','grpCaps','grpRadius','grpFont','grpNumber','grpShadow','grpZoom','grpCrop','grpOcr'].forEach(id =>
     document.getElementById(id).classList.add('hidden')
   )
   document.getElementById('numValueEdit').classList.add('hidden')
@@ -155,9 +225,16 @@ function showOptionsForTool(t) {
     document.getElementById('grpCrop').classList.remove('hidden')
     return
   }
-  if (!['rect','fillrect','line','text','number'].includes(t)) return
-  if (t !== 'fillrect') document.getElementById('grpColor').classList.remove('hidden')
-  if (t === 'fillrect') {
+  if (t === 'ocr') {
+    document.getElementById('grpOcr').classList.remove('hidden')
+    document.getElementById('ocrStatusLabel').textContent = '請拖曳選取辨識區域'
+    return
+  }
+  if (!['rect','ellipse','fillrect','fillellipse','line','text','number'].includes(t)) return
+  // (polyline 由 line tool + lineOrtho 切換控制，此處不需獨立 tool id)
+  const isFill = t === 'fillrect' || t === 'fillellipse'
+  if (!isFill) document.getElementById('grpColor').classList.remove('hidden')
+  if (isFill) {
     document.getElementById('grpFillColor').classList.remove('hidden')
     syncFillMode(fillMode)
     syncFillColorA(fillColorA)
@@ -167,26 +244,42 @@ function showOptionsForTool(t) {
     syncFillBorder(fillBorderEnabled)
     syncFillBorderColor(fillBorderColor)
   }
-  if (['rect','fillrect','line'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
-  if (t === 'line')   { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden') }
-  if (t === 'text')   document.getElementById('grpFont').classList.remove('hidden')
-  if (t === 'number') document.getElementById('grpNumber').classList.remove('hidden')
+  if (['rect','ellipse','fillrect','fillellipse','line'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
+  if (t === 'line')   { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden'); syncLineOrtho(lineOrtho) }
+  if (['rect','fillrect'].includes(t)) { document.getElementById('grpRadius').classList.remove('hidden'); syncCornerRadius(cornerRadius) }
+  if (t === 'text') {
+    document.getElementById('grpFont').classList.remove('hidden')
+    syncTextShadowCheck(textShadow)
+    syncTextBold(textBold); syncTextItalic(textItalic); syncTextUnderline(textUnderline); syncTextStrikethrough(textStrikethrough)
+    syncTextAlign(textAlign)
+    syncTextStrokeColor(textStrokeColor); syncTextStrokeWidth(textStrokeWidth)
+    syncTextBgOpacity(textBgOpacity); syncTextBgPreview()
+    syncFontFamily(fontFamily)
+  }
+  if (t === 'number') { document.getElementById('grpNumber').classList.remove('hidden'); document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(numShadow) }
+  if (t === 'rect' || t === 'ellipse')         { document.getElementById('grpRectShape').classList.remove('hidden'); syncRectShape(t) }
+  if (t === 'fillrect' || t === 'fillellipse') { document.getElementById('grpFillShape').classList.remove('hidden'); syncFillShape(t) }
+  if (t === 'rect')         { document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(rectShadow) }
+  if (t === 'ellipse')      { document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(ellipseShadow) }
+  if (t === 'fillrect')     { document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(fillrectShadow) }
+  if (t === 'fillellipse')  { document.getElementById('grpShadow').classList.remove('hidden'); syncShadowCheck(fillellipseShadow) }
 }
 
 function showOptionsForAnnot(a) {
   hideAllOptions()
   if (a.type === 'img') return   // overlay image has no editable colour/thickness options
   const t = a.type
-  if (t !== 'fillrect') document.getElementById('grpColor').classList.remove('hidden')
-  if (t === 'fillrect') document.getElementById('grpFillColor').classList.remove('hidden')
-  if (['rect','fillrect','line'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
-  if (t === 'line')   { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden') }
-  if (t === 'text')   document.getElementById('grpFont').classList.remove('hidden')
+  const isFill = t === 'fillrect' || t === 'fillellipse'
+  if (!isFill) document.getElementById('grpColor').classList.remove('hidden')
+  if (isFill)  document.getElementById('grpFillColor').classList.remove('hidden')
+  if (['rect','ellipse','fillrect','fillellipse','line','polyline'].includes(t)) document.getElementById('grpThickness').classList.remove('hidden')
+  if (['line','polyline'].includes(t)) { document.getElementById('grpLineStyle').classList.remove('hidden'); document.getElementById('grpCaps').classList.remove('hidden') }
+  if (['rect','fillrect'].includes(t)) document.getElementById('grpRadius').classList.remove('hidden')
   if (t === 'number') document.getElementById('grpNumber').classList.remove('hidden')
   // Sync UI state to annotation values
   color = a.color; syncColor(color)
   if ('thickness' in a) { thickness = a.thickness; syncThickness(thickness) }
-  if (t === 'fillrect') {
+  if (isFill) {
     fillMode = a.fillMode ?? 'solid'; syncFillMode(fillMode)
     fillColor = a.fillColor ?? '#ffcc00'; syncFillColor(fillColor)
     fillColorA = a.fillColorA ?? '#ffcc00'; syncFillColorA(fillColorA)
@@ -198,13 +291,37 @@ function showOptionsForAnnot(a) {
     fillBorderEnabled = a.fillBorder !== false; syncFillBorder(fillBorderEnabled)
     fillBorderColor = a.fillBorderColor ?? '#ffffff'; syncFillBorderColor(fillBorderColor)
   }
-  if (t === 'line')   { lineStyle = a.lineStyle; startCap = a.startCap; endCap = a.endCap; syncLineStyle(lineStyle); syncCaps(startCap, endCap) }
-  if (t === 'text')   { fontSize = a.fontSize;   syncFontSize(fontSize) }
+  if (t === 'line')     { lineStyle = a.lineStyle; startCap = a.startCap; endCap = a.endCap; lineOrtho = a.lineOrtho ?? false; syncLineStyle(lineStyle); syncCaps(startCap, endCap); syncLineOrtho(lineOrtho) }
+  if (t === 'polyline') { lineStyle = a.lineStyle; startCap = a.startCap; endCap = a.endCap; syncLineStyle(lineStyle); syncCaps(startCap, endCap) }
+  if (['rect','fillrect'].includes(t)) { cornerRadius = a.cornerRadius ?? 0; syncCornerRadius(cornerRadius) }
+  if (t === 'text') {
+    fontSize        = a.fontSize;                     syncFontSize(fontSize)
+    textStrokeColor = a.textStrokeColor ?? '#000000'; syncTextStrokeColor(textStrokeColor)
+    textStrokeWidth = a.textStrokeWidth ?? 0;         syncTextStrokeWidth(textStrokeWidth)
+    textBgColor     = a.textBgColor   ?? '#000000'
+    textBgOpacity   = a.textBgOpacity ?? 0;  syncTextBgOpacity(textBgOpacity); syncTextBgPreview()
+    textShadow      = a.shadow ?? false;              syncTextShadowCheck(textShadow)
+    textBold        = a.bold      ?? false;           syncTextBold(textBold)
+    textItalic      = a.italic    ?? false;           syncTextItalic(textItalic)
+    textUnderline     = a.underline     ?? false; syncTextUnderline(textUnderline)
+    textStrikethrough = a.strikethrough ?? false; syncTextStrikethrough(textStrikethrough)
+    textAlign         = a.textAlign     ?? 'left';    syncTextAlign(textAlign)
+    fontFamily        = a.fontFamily    ?? 'system';  syncFontFamily(fontFamily)
+    document.getElementById('grpFont').classList.remove('hidden')
+  }
   if (t === 'number') {
-    numSize = a.size ?? 36; syncNumSize(numSize)
+    numSize   = a.size ?? 48; syncNumSize(numSize)
+    numShadow = a.shadow ?? false; syncShadowCheck(numShadow)
     document.getElementById('numValueEdit').classList.remove('hidden')
     document.getElementById('numValueInput').value = a.value
+    document.getElementById('grpShadow').classList.remove('hidden')
   }
+  if (t === 'rect' || t === 'ellipse')         { document.getElementById('grpRectShape').classList.remove('hidden'); syncRectShape(t) }
+  if (t === 'fillrect' || t === 'fillellipse') { document.getElementById('grpFillShape').classList.remove('hidden'); syncFillShape(t) }
+  if (t === 'rect')        { rectShadow        = a.shadow ?? false; syncShadowCheck(rectShadow);        document.getElementById('grpShadow').classList.remove('hidden') }
+  if (t === 'ellipse')     { ellipseShadow     = a.shadow ?? false; syncShadowCheck(ellipseShadow);     document.getElementById('grpShadow').classList.remove('hidden') }
+  if (t === 'fillrect')    { fillrectShadow    = a.shadow ?? false; syncShadowCheck(fillrectShadow);    document.getElementById('grpShadow').classList.remove('hidden') }
+  if (t === 'fillellipse') { fillellipseShadow = a.shadow ?? false; syncShadowCheck(fillellipseShadow); document.getElementById('grpShadow').classList.remove('hidden') }
 }
 
 // Sync UI controls
@@ -218,12 +335,14 @@ function applyColor(hex) {
   color = hex
   syncColor(hex)
   if (selectedId) updateSelectedAnnot({ color: hex })
-  if (textActive) textInputEl.style.color = hex
+  if (textActive) { textInputEl.style.color = hex; renderAnnotations() }
   pushRecentColor(hex)
 }
 function syncThickness(t) {
-  document.querySelectorAll('.sz-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.sz) === t))
+  document.querySelectorAll('.sz-btn[data-sz]').forEach(b => b.classList.toggle('active', parseInt(b.dataset.sz) === t))
 }
+function syncCornerRadius(v) { document.getElementById('cornerRadiusInput').value = v }
+function syncLineOrtho(v) { document.getElementById('btnLineOrtho')?.classList.toggle('active', v) }
 function syncLineStyle(ls) {
   document.querySelectorAll('.style-btn[data-ls]').forEach(b => b.classList.toggle('active', b.dataset.ls === ls))
 }
@@ -283,6 +402,67 @@ function syncFillBorderColor(hex) {
   if (p) p.style.background = fillPreviewBg(hex)
 }
 
+// ── Text style sync ───────────────────────────────────────────────────────────
+function syncTextStrokeColor(hex) {
+  const p = document.getElementById('textStrokeColorPreview')
+  if (p) p.style.background = hex
+}
+function syncTextStrokeWidth(w) {
+  document.querySelectorAll('.tsw-btn').forEach(b =>
+    b.classList.toggle('active', parseInt(b.dataset.tsw) === w)
+  )
+}
+function syncTextBgColor(hex) {
+  const p = document.getElementById('textBgColorPreview')
+  if (!p) return
+  if (hex === 'transparent') {
+    p.style.background = ''
+    p.classList.add('cpp-swatch-transparent')
+  } else {
+    p.style.background = hex
+    p.classList.remove('cpp-swatch-transparent')
+  }
+}
+// 根據當前 textBgOpacity 決定預覽色塊顯示透明或實色
+function syncTextBgPreview() {
+  syncTextBgColor(textBgOpacity === 0 ? 'transparent' : textBgColor)
+}
+function syncTextBgOpacity(v) {
+  const el = document.getElementById('textBgOpacityInput')
+  if (el) el.value = v
+}
+function syncFontFamily(id) {
+  const sel = document.getElementById('fontFamilySelect')
+  if (sel) sel.value = id
+}
+function syncTextBold(v)      { document.getElementById('btnTextBold')     ?.classList.toggle('active', v) }
+function syncTextItalic(v)    { document.getElementById('btnTextItalic')   ?.classList.toggle('active', v) }
+function syncTextUnderline(v)     { document.getElementById('btnTextUnderline')    ?.classList.toggle('active', v) }
+function syncTextStrikethrough(v) { document.getElementById('btnTextStrikethrough')?.classList.toggle('active', v) }
+function syncTextAlign(v) {
+  textAlign = v
+  document.getElementById('btnAlignLeft')  ?.classList.toggle('active', v === 'left')
+  document.getElementById('btnAlignCenter')?.classList.toggle('active', v === 'center')
+  document.getElementById('btnAlignRight') ?.classList.toggle('active', v === 'right')
+}
+
+function syncRectShape(shape) {
+  document.getElementById('btnShapeRect')   ?.classList.toggle('active', shape === 'rect')
+  document.getElementById('btnShapeEllipse')?.classList.toggle('active', shape === 'ellipse')
+}
+function syncFillShape(shape) {
+  document.getElementById('btnFillShapeRect')   ?.classList.toggle('active', shape === 'fillrect')
+  document.getElementById('btnFillShapeEllipse')?.classList.toggle('active', shape === 'fillellipse')
+}
+function syncShadowCheck(val) {
+  const el = document.getElementById('shadowCheck')
+  if (el) el.checked = val
+}
+function syncTextShadowCheck(val) {
+  const el = document.getElementById('textShadowCheck')
+  if (el) el.checked = val
+}
+
 function applyFillMode(mode) {
   fillMode = mode; syncFillMode(mode)
   if (selectedId) updateSelectedAnnot({ fillMode: mode })
@@ -319,6 +499,28 @@ function applyFillBorder(enabled) {
 function applyFillBorderColor(hex) {
   fillBorderColor = hex; syncFillBorderColor(hex)
   if (selectedId) updateSelectedAnnot({ fillBorderColor: hex })
+  pushRecentColor(hex)
+}
+function applyTextStrokeColor(hex) {
+  textStrokeColor = hex; syncTextStrokeColor(hex)
+  if (selectedId) updateSelectedAnnot({ textStrokeColor: hex })
+  if (textActive) renderAnnotations()
+  pushRecentColor(hex)
+}
+function applyTextBgColor(hex) {
+  if (hex === 'transparent') {
+    // 選「透明」= 關閉背景（將 opacity 歸零）
+    textBgOpacity = 0; syncTextBgOpacity(0); syncTextBgPreview()
+    if (selectedId) updateSelectedAnnot({ textBgOpacity: 0 })
+    if (textActive) renderAnnotations()
+    return
+  }
+  textBgColor = hex
+  // 若之前因選透明而歸零，選新色時自動恢復預設 50%
+  if (textBgOpacity === 0) { textBgOpacity = 50; syncTextBgOpacity(50) }
+  syncTextBgPreview()   // opacity 已確定後再更新色塊
+  if (selectedId) updateSelectedAnnot({ textBgColor: hex, textBgOpacity: textBgOpacity })
+  if (textActive) renderAnnotations()
   pushRecentColor(hex)
 }
 
@@ -730,13 +932,41 @@ document.getElementById('fillBorderColorPreview').addEventListener('click', func
 })
 
 // Thickness
-document.querySelectorAll('.sz-btn').forEach(btn =>
+document.querySelectorAll('.sz-btn[data-sz]').forEach(btn =>
   btn.addEventListener('click', () => {
     thickness = parseInt(btn.dataset.sz)
     syncThickness(thickness)
     if (selectedId) updateSelectedAnnot({ thickness })
   })
 )
+
+// Corner radius (rect / fillrect)
+document.getElementById('cornerRadiusInput').addEventListener('input', e => {
+  cornerRadius = Math.max(0, Math.min(100, parseInt(e.target.value) || 0))
+  syncCornerRadius(cornerRadius)
+  if (selectedId) updateSelectedAnnot({ cornerRadius })
+  else redraw()
+})
+
+// Line ortho toggle
+// OFF → ON（tool=line，無選取）：切換成折線繪製模式（click-click-雙擊）
+// OFF → ON（有選取 line）：吸附已選線段至水平/垂直
+// ON  → OFF：取消進行中折線（如有）
+document.getElementById('btnLineOrtho').addEventListener('click', () => {
+  lineOrtho = !lineOrtho
+  syncLineOrtho(lineOrtho)
+  if (!lineOrtho) { _cancelPolyline(); renderAnnotations() }
+  if (selectedId) {
+    const ann = annotations.find(x => x.id === selectedId)
+    if (ann && ann.type === 'line' && lineOrtho) {
+      const dx = Math.abs(ann.x2 - ann.x1), dy = Math.abs(ann.y2 - ann.y1)
+      const snapped = dx >= dy ? { y2: ann.y1 } : { x2: ann.x1 }
+      updateSelectedAnnot({ lineOrtho, ...snapped })
+    } else if (ann && ann.type === 'line') {
+      updateSelectedAnnot({ lineOrtho })
+    }
+  }
+})
 
 // Line style
 document.querySelectorAll('.style-btn[data-ls]').forEach(btn =>
@@ -758,7 +988,7 @@ document.querySelectorAll('.cap-btn').forEach(btn =>
   })
 )
 
-// Font size
+// Font size — manual input
 document.getElementById('fontSizeInput').addEventListener('input', e => {
   fontSize = Math.max(8, Math.min(400, parseInt(e.target.value) || 48))
   if (selectedId) updateSelectedAnnot({ fontSize })
@@ -766,6 +996,135 @@ document.getElementById('fontSizeInput').addEventListener('input', e => {
     textInputEl.style.fontSize = Math.max(fontSize * viewScale, 14) + 'px'
     resizeTextInput()
   }
+})
+
+// Font size — quick preset select
+document.getElementById('fontSizePreset').addEventListener('change', e => {
+  if (!e.target.value) return
+  fontSize = parseInt(e.target.value)
+  syncFontSize(fontSize)
+  e.target.value = ''   // reset to "—" placeholder
+  if (selectedId) updateSelectedAnnot({ fontSize })
+  if (textActive) {
+    textInputEl.style.fontSize = Math.max(fontSize * viewScale, 14) + 'px'
+    resizeTextInput()
+  }
+})
+
+// Text stroke width buttons
+document.querySelectorAll('.tsw-btn').forEach(btn =>
+  btn.addEventListener('click', () => {
+    textStrokeWidth = parseInt(btn.dataset.tsw)
+    syncTextStrokeWidth(textStrokeWidth)
+    if (selectedId) updateSelectedAnnot({ textStrokeWidth })
+    if (textActive) renderAnnotations()
+  })
+)
+
+// Text stroke colour preview
+document.getElementById('textStrokeColorPreview').addEventListener('click', function() {
+  openColorPanel(this, applyTextStrokeColor, () => textStrokeColor)
+})
+
+// Text background colour preview
+document.getElementById('textBgColorPreview').addEventListener('click', function() {
+  openColorPanel(this, applyTextBgColor, () => textBgColor)
+})
+
+// Text background opacity
+document.getElementById('textBgOpacityInput').addEventListener('input', e => {
+  textBgOpacity = Math.max(0, Math.min(100, parseInt(e.target.value) || 0))
+  syncTextBgPreview()
+  if (selectedId) updateSelectedAnnot({ textBgOpacity })
+  if (textActive) renderAnnotations()
+})
+
+// Text shadow checkbox
+document.getElementById('textShadowCheck').addEventListener('change', e => {
+  textShadow = e.target.checked
+  if (selectedId) updateSelectedAnnot({ shadow: textShadow })
+  if (textActive) renderAnnotations()
+})
+
+// Font family select
+document.getElementById('fontFamilySelect').addEventListener('change', e => {
+  fontFamily = e.target.value
+  if (selectedId) updateSelectedAnnot({ fontFamily })
+  applyTextStyleToInput()
+  if (textActive) renderAnnotations()
+})
+
+// B / I / U toggles
+;[
+  ['btnTextBold',      () => { textBold      = !textBold;      syncTextBold(textBold);           if (selectedId) updateSelectedAnnot({ bold:      textBold      }); applyTextStyleToInput() }],
+  ['btnTextItalic',    () => { textItalic    = !textItalic;    syncTextItalic(textItalic);       if (selectedId) updateSelectedAnnot({ italic:    textItalic    }); applyTextStyleToInput() }],
+  ['btnTextUnderline',     () => { textUnderline     = !textUnderline;     syncTextUnderline(textUnderline);         if (selectedId) updateSelectedAnnot({ underline:     textUnderline     }); applyTextStyleToInput() }],
+  ['btnTextStrikethrough', () => { textStrikethrough = !textStrikethrough; syncTextStrikethrough(textStrikethrough); if (selectedId) updateSelectedAnnot({ strikethrough: textStrikethrough }); applyTextStyleToInput() }],
+].forEach(([id, fn]) => document.getElementById(id).addEventListener('click', fn))
+
+// 對齊按鈕
+;['left','center','right'].forEach(v => {
+  document.getElementById(`btnAlign${v.charAt(0).toUpperCase()}${v.slice(1)}`)
+    .addEventListener('click', () => {
+      syncTextAlign(v)
+      if (selectedId) updateSelectedAnnot({ textAlign: v })
+      applyTextStyleToInput()
+      _repositionTextInput()          // 輸入中時同步移動 textarea 錨點
+      if (textActive) renderAnnotations()
+    })
+})
+
+// Shared shadow checkbox (rect / ellipse / fillrect / fillellipse / number)
+document.getElementById('shadowCheck').addEventListener('change', e => {
+  const val = e.target.checked
+  if      (tool === 'rect')        rectShadow        = val
+  else if (tool === 'ellipse')     ellipseShadow     = val
+  else if (tool === 'fillrect')    fillrectShadow    = val
+  else if (tool === 'fillellipse') fillellipseShadow = val
+  else if (tool === 'number')      numShadow         = val
+  if (selectedId) {
+    const a = annotations.find(x => x.id === selectedId)
+    if (a) {
+      if (a.type === 'rect')        rectShadow        = val
+      if (a.type === 'ellipse')     ellipseShadow     = val
+      if (a.type === 'fillrect')    fillrectShadow    = val
+      if (a.type === 'fillellipse') fillellipseShadow = val
+      if (a.type === 'number')      numShadow         = val
+      updateSelectedAnnot({ shadow: val })
+    }
+  }
+})
+
+// 矩形框 ↔ 橢圓框 切換（grpRectShape 按鈕）
+;['rect','ellipse'].forEach(shape => {
+  document.getElementById(shape === 'rect' ? 'btnShapeRect' : 'btnShapeEllipse').addEventListener('click', () => {
+    const a = selectedId ? annotations.find(x => x.id === selectedId) : null
+    if (a && (a.type === 'rect' || a.type === 'ellipse')) {
+      // 已選取 rect/ellipse 標注：直接轉換形狀，留在 select 模式
+      if (a.type !== shape) { a.type = shape; pushHistory() }
+      syncRectShape(shape)
+      showOptionsForAnnot(a)
+      renderAnnotations()
+    } else {
+      // 無選取標注：切換繪圖工具
+      setTool(shape)
+    }
+  })
+})
+
+// 色塊 ↔ 橢圓色塊 切換（grpFillShape 按鈕）
+;['fillrect','fillellipse'].forEach(shape => {
+  document.getElementById(shape === 'fillrect' ? 'btnFillShapeRect' : 'btnFillShapeEllipse').addEventListener('click', () => {
+    const a = selectedId ? annotations.find(x => x.id === selectedId) : null
+    if (a && (a.type === 'fillrect' || a.type === 'fillellipse')) {
+      if (a.type !== shape) { a.type = shape; pushHistory() }
+      syncFillShape(shape)
+      showOptionsForAnnot(a)
+      renderAnnotations()
+    } else {
+      setTool(shape)
+    }
+  })
 })
 
 // Number size
@@ -805,17 +1164,23 @@ document.getElementById('btnRedo').addEventListener('click', redo)
 // ─── Tool activation ─────────────────────────────────────────────────────────
 
 function setTool(t) {
-  commitText()
+  commitText(false)
   hideColorPanel()
   if (t !== 'crop') { cropRect = null; isCropping = false; cropMoving = false; cropResizeH = null; cropMoveStart = null }
+  if (t !== 'ocr')  { ocrRect = null; isOcrSelecting = false; ocrStart = null }
+  _cancelPolyline()   // 切換工具時取消任何進行中的折線
   tool       = t
   selectedId = null
   isDrawing  = false
   isPanning  = false
 
-  document.querySelectorAll('.tool-btn[data-tool]').forEach(b =>
-    b.classList.toggle('active', b.dataset.tool === t)
-  )
+  document.querySelectorAll('.tool-btn[data-tool]').forEach(b => {
+    // ellipse 屬於 rect 群組；fillellipse 屬於 fillrect 群組
+    const match = b.dataset.tool === t
+      || (t === 'ellipse'     && b.dataset.tool === 'rect')
+      || (t === 'fillellipse' && b.dataset.tool === 'fillrect')
+    b.classList.toggle('active', match)
+  })
 
   if      (t === 'zoom-in')  annotCanvas.style.cursor = 'zoom-in'
   else if (t === 'zoom-out') annotCanvas.style.cursor = 'zoom-out'
@@ -997,6 +1362,28 @@ function renderAnnotations() {
       annotCtx.restore()
     }
   }
+
+  // 折線即時預覽：已確認頂點 + 游標位置
+  if (polylineActive && polylinePoints.length >= 1 && polylineMouse) {
+    const previewAnn = {
+      id: '_pl', type: 'polyline',
+      color, thickness, lineStyle, startCap, endCap,
+      points: polylinePoints,
+    }
+    annotCtx.save(); annotCtx.globalAlpha = 0.65
+    annotCtx.strokeStyle = color
+    annotCtx.fillStyle   = color
+    annotCtx.lineWidth   = thickness * viewScale
+    drawPolyline(annotCtx, previewAnn, { x: polylineMouse.x, y: polylineMouse.y })
+    annotCtx.restore()
+    // 已確認頂點標記（小圓點）
+    annotCtx.save()
+    annotCtx.fillStyle = color
+    polylinePoints.forEach(p => {
+      annotCtx.beginPath(); annotCtx.arc(c(p.x), c(p.y), 3 * viewScale, 0, Math.PI * 2); annotCtx.fill()
+    })
+    annotCtx.restore()
+  }
   if (selectedId) {
     const a = annotations.find(x => x.id === selectedId)
     if (a) drawSelection(annotCtx, a)
@@ -1031,6 +1418,36 @@ function renderAnnotations() {
       })
     }
   }
+
+  // OCR selection overlay: blue dashed rect
+  if (tool === 'ocr' && ocrRect && ocrRect.w > 1 && ocrRect.h > 1) {
+    const r = ocrRect
+    annotCtx.save()
+    annotCtx.strokeStyle = '#3b82f6'
+    annotCtx.lineWidth   = 1.5
+    annotCtx.setLineDash([5, 3])
+    annotCtx.strokeRect(c(r.x), c(r.y), c(r.w), c(r.h))
+    annotCtx.fillStyle = 'rgba(59,130,246,0.08)'
+    annotCtx.fillRect(c(r.x), c(r.y), c(r.w), c(r.h))
+    annotCtx.setLineDash([])
+    annotCtx.restore()
+  }
+
+  // 輸入中的文字即時預覽：在 canvas 畫出背景色塊、描邊、陰影效果，
+  // textarea 的文字字元疊在正上方（定位相同），不會跑位
+  if (textActive && textPos) {
+    const previewContent = textInputEl.value || ' '
+    annotCtx.save()
+    drawText(annotCtx, {
+      type: 'text', color, fontSize,
+      x: textPos.x, y: textPos.y, content: previewContent,
+      textStrokeColor, textStrokeWidth, textBgColor, textBgOpacity,
+      shadow: textShadow,
+      bold: textBold, italic: textItalic, underline: textUnderline, strikethrough: textStrikethrough,
+      textAlign, fontFamily,
+    }, { previewOnly: true })
+    annotCtx.restore()
+  }
 }
 
 function drawOne(ctx, a) {
@@ -1047,16 +1464,37 @@ function drawOne(ctx, a) {
   ctx.lineWidth   = a.thickness * viewScale
   switch (a.type) {
     case 'rect':     drawRect(ctx, a);     break
-    case 'fillrect': drawFillRect(ctx, a); break
+    case 'ellipse':  drawEllipse(ctx, a);  break
+    case 'fillrect':    drawFillRect(ctx, a);    break
+    case 'fillellipse': drawFillEllipse(ctx, a); break
     case 'line':     drawLine(ctx, a);     break
     case 'text':     drawText(ctx, a);     break
     case 'number':   drawNumber(ctx, a);   break
+    case 'polyline': drawPolyline(ctx, a); break
   }
   ctx.restore()
 }
 
+function cornerRadiusPx(a) {
+  const cr = a.cornerRadius ?? 0
+  return cr === 0 ? 0 : c((cr / 100) * Math.min(a.w, a.h) / 2)
+}
+
 function drawRect(ctx, a) {
-  ctx.strokeRect(c(a.x), c(a.y), c(a.w), c(a.h))
+  if (a.shadow) setShadow(ctx)
+  const r = cornerRadiusPx(a)
+  if (r > 0) {
+    ctx.beginPath(); ctx.roundRect(c(a.x), c(a.y), c(a.w), c(a.h), r); ctx.stroke()
+  } else {
+    ctx.strokeRect(c(a.x), c(a.y), c(a.w), c(a.h))
+  }
+}
+
+function drawEllipse(ctx, a) {
+  if (a.shadow) setShadow(ctx)
+  const cx = c(a.x + a.w / 2), cy = c(a.y + a.h / 2)
+  const rx = c(a.w / 2),       ry = c(a.h / 2)
+  ctx.beginPath(); ctx.ellipse(cx, cy, Math.max(rx, 1), Math.max(ry, 1), 0, 0, Math.PI * 2); ctx.stroke()
 }
 
 function resolveGradientColor(col) {
@@ -1066,6 +1504,7 @@ function resolveGradientColor(col) {
 function drawFillRect(ctx, a) {
   const rx = c(a.x), ry = c(a.y), rw = c(a.w), rh = c(a.h)
   ctx.save()
+  if (a.shadow) setShadow(ctx)
   ctx.globalAlpha = (a.fillOpacity ?? 100) / 100
 
   if (a.fillMode === 'gradient') {
@@ -1085,11 +1524,53 @@ function drawFillRect(ctx, a) {
     ctx.fillStyle = a.fillColor ?? '#ffcc00'
   }
 
-  ctx.fillRect(rx, ry, rw, rh)
+  const r = cornerRadiusPx(a)
+  if (r > 0) {
+    ctx.beginPath(); ctx.roundRect(rx, ry, rw, rh, r); ctx.fill()
+  } else {
+    ctx.fillRect(rx, ry, rw, rh)
+  }
   ctx.restore()
   if (a.fillBorder !== false) {
     ctx.strokeStyle = a.fillBorderColor ?? '#ffffff'
-    ctx.strokeRect(rx, ry, rw, rh)
+    if (r > 0) {
+      ctx.beginPath(); ctx.roundRect(rx, ry, rw, rh, r); ctx.stroke()
+    } else {
+      ctx.strokeRect(rx, ry, rw, rh)
+    }
+  }
+}
+
+function drawFillEllipse(ctx, a) {
+  const cx = c(a.x + a.w / 2), cy = c(a.y + a.h / 2)
+  const rx = Math.max(c(a.w / 2), 1), ry = Math.max(c(a.h / 2), 1)
+  ctx.save()
+  if (a.shadow) setShadow(ctx)
+  ctx.globalAlpha = (a.fillOpacity ?? 100) / 100
+  ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2)
+  if (a.fillMode === 'gradient') {
+    const bx = c(a.x), by = c(a.y), bw = c(a.w), bh = c(a.h)
+    const ca = resolveGradientColor(a.fillColorA ?? '#ffcc00')
+    const cb = resolveGradientColor(a.fillColorB ?? 'transparent')
+    let grad
+    switch (a.fillGradientDir ?? 'h') {
+      case 'h':  grad = ctx.createLinearGradient(bx, by, bx+bw, by   ); break
+      case 'v':  grad = ctx.createLinearGradient(bx, by, bx,    by+bh); break
+      case 'dr': grad = ctx.createLinearGradient(bx, by, bx+bw, by+bh); break
+      case 'ur': grad = ctx.createLinearGradient(bx, by+bh, bx+bw, by); break
+    }
+    grad.addColorStop(0, ca); grad.addColorStop(1, cb)
+    ctx.fillStyle = grad
+  } else {
+    ctx.fillStyle = a.fillColor ?? '#ffcc00'
+  }
+  ctx.fill()
+  ctx.restore()
+  if (a.fillBorder !== false) {
+    ctx.save()
+    ctx.strokeStyle = a.fillBorderColor ?? '#ffffff'
+    ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2); ctx.stroke()
+    ctx.restore()
   }
 }
 
@@ -1119,20 +1600,156 @@ function drawCap(ctx, type, fx, fy, tx, ty, col, sz) {
   }
 }
 
-function drawText(ctx, a) {
-  const fs = a.fontSize * viewScale
-  ctx.font         = `${fs}px -apple-system, "Helvetica Neue", sans-serif`
-  ctx.fillStyle    = a.color
-  ctx.textAlign    = 'left'
+function drawText(ctx, a, { previewOnly = false } = {}) {
+  const fs      = a.fontSize * viewScale
+  const lines   = a.content.split('\n')
+  const fontMod = [a.italic ? 'italic' : '', a.bold ? 'bold' : ''].filter(Boolean).join(' ')
+  const align   = a.textAlign ?? 'left'
+  ctx.font         = `${fontMod} ${fs}px ${getFontCss(a.fontFamily ?? 'system')}`.trimStart()
+  ctx.textAlign    = align
   ctx.textBaseline = 'top'
-  a.content.split('\n').forEach((line, i) => ctx.fillText(line, c(a.x), c(a.y) + i * fs * 1.25))
+  const ax = c(a.x)
+  // 各行裝飾線（底線/刪除線）的起始 X，依對齊方式計算
+  const lineX = (w) => align === 'center' ? ax - w / 2 : align === 'right' ? ax - w : ax
+
+  // Background colour block (drawn first, shadow applied here if enabled)
+  // Height = visual text height (no extra trailing line-gap), so padding is uniform on all sides.
+  const bgOpacity = a.textBgOpacity ?? 0
+  if (bgOpacity > 0) {
+    ctx.save()
+    if (a.shadow) setShadow(ctx)
+    const maxW   = Math.max(...lines.map(l => ctx.measureText(l).width))
+    const pad    = 5
+    const totalH = (lines.length - 1) * fs * 1.25 + fs   // last line uses fs not fs*1.25
+    const bgX    = lineX(maxW)
+    ctx.fillStyle = hexToRgba(a.textBgColor ?? '#000000', bgOpacity / 100)
+    ctx.fillRect(bgX - pad, c(a.y) - pad, maxW + pad * 2, totalH + pad * 2)
+    ctx.restore()
+  }
+
+  // Stroke (outline) — no shadow on stroke layer
+  // strokeText draws centred on the text path: half inside (covered by fill), half outside.
+  // Multiply by 2 so the *visible* outside width equals the design values 3/6/10 px.
+  const strokeW = a.textStrokeWidth ?? 0
+  const strokePxMap = [0, 6, 12, 20]   // lineWidth → visible outside: 0/3/6/10 px
+  if (strokeW > 0) {
+    ctx.save()
+    ctx.strokeStyle = a.textStrokeColor ?? '#000000'
+    ctx.lineWidth   = strokePxMap[strokeW] * viewScale
+    ctx.lineJoin    = 'round'
+    lines.forEach((line, i) => ctx.strokeText(line, ax, c(a.y) + i * fs * 1.25))
+    ctx.restore()
+  }
+
+  // Fill text + decorations — 預覽模式跳過（文字字元由 textarea 負責顯示）
+  if (previewOnly) return
+  if (a.shadow && bgOpacity === 0) setShadow(ctx)
+  ctx.fillStyle = a.color
+  lines.forEach((line, i) => ctx.fillText(line, ax, c(a.y) + i * fs * 1.25))
+
+  // Strikethrough — through the middle of the glyphs (~45% from top)
+  if (a.strikethrough) {
+    ctx.save()
+    ctx.strokeStyle = a.color
+    ctx.lineWidth   = Math.max(1, fs * 0.055)
+    ctx.lineCap     = 'round'
+    lines.forEach((line, i) => {
+      const lineY = c(a.y) + i * fs * 1.25
+      const sy    = lineY + fs * 0.45
+      const w     = ctx.measureText(line).width
+      const x0    = lineX(w)
+      ctx.beginPath(); ctx.moveTo(x0, sy); ctx.lineTo(x0 + w, sy); ctx.stroke()
+    })
+    ctx.restore()
+  }
+
+  // Underline — draw after fill so shadow (if any) doesn't double-render
+  // Position: ~85% of em-size from top ≈ just below the alphabetic baseline for CJK & Latin,
+  // then add a small gap so it doesn't overlap descenders.
+  if (a.underline) {
+    ctx.save()
+    ctx.strokeStyle = a.color
+    ctx.lineWidth   = Math.max(1, fs * 0.055)
+    ctx.lineCap     = 'round'
+    lines.forEach((line, i) => {
+      const lineY = c(a.y) + i * fs * 1.25
+      const uy    = lineY + fs * 0.95 + 8 * viewScale
+      const w     = ctx.measureText(line).width
+      const x0    = lineX(w)
+      ctx.beginPath()
+      ctx.moveTo(x0, uy)
+      ctx.lineTo(x0 + w, uy)
+      ctx.stroke()
+    })
+    ctx.restore()
+  }
+}
+
+// ─── Polyline drawing ─────────────────────────────────────────────────────────
+// 每段 p[i-1]→p[i] 自動折直角：|ΔX|≥|ΔY| → 先水平後垂直，否則先垂直後水平
+// liveEnd: 如果傳入，追加為末尾點（繪製中即時預覽用，不畫端點箭頭）
+
+function _polylineRouteThrough(ctx, p0, p1) {
+  const dx = Math.abs(p1.x - p0.x), dy = Math.abs(p1.y - p0.y)
+  if (dx >= dy) { ctx.lineTo(p1.x, p0.y); ctx.lineTo(p1.x, p1.y) }
+  else          { ctx.lineTo(p0.x, p1.y); ctx.lineTo(p1.x, p1.y) }
+}
+
+function drawPolyline(ctx, a, liveEnd) {
+  const pts = a.points.map(p => ({ x: c(p.x), y: c(p.y) }))
+  if (pts.length < 1) return
+
+  const sz = (a.thickness * 4 + 8) * viewScale
+  if (a.lineStyle === 'dashed') ctx.setLineDash([sz * 1.2, sz * 0.7])
+
+  ctx.beginPath()
+  ctx.moveTo(pts[0].x, pts[0].y)
+  // 儲存的頂點已 snap 至 H/V，每段為純直線
+  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y)
+  // live 段：從最後頂點路由至游標（仍需 H/V elbow）
+  if (liveEnd) _polylineRouteThrough(ctx, pts[pts.length - 1], { x: c(liveEnd.x), y: c(liveEnd.y) })
+  ctx.stroke()
+  ctx.setLineDash([])
+
+  if (liveEnd || pts.length < 2) return
+
+  // 箭頭方向：段為純直線，直接用相鄰頂點決定方向
+  const p0 = pts[0], p1 = pts[1]
+  drawCap(ctx, a.startCap, p1.x, p1.y, p0.x, p0.y, a.color, sz)
+
+  const pN = pts[pts.length - 1], pN1 = pts[pts.length - 2]
+  drawCap(ctx, a.endCap, pN1.x, pN1.y, pN.x, pN.y, a.color, sz)
+}
+
+function _cancelPolyline() {
+  polylineActive = false; polylinePoints = []; polylineMouse = null
+}
+
+function _commitPolyline() {
+  if (polylinePoints.length < 2) { _cancelPolyline(); renderAnnotations(); return }
+  const ann = {
+    id: newId(), type: 'polyline',
+    color, thickness, lineStyle, startCap, endCap,
+    points: [...polylinePoints],
+    shadow: false,
+  }
+  _cancelPolyline()
+  pushHistory()
+  annotations.push(ann)
+  setTool('select')
+  selectedId = ann.id
+  showOptionsForAnnot(ann)
+  renderAnnotations()
 }
 
 function drawNumber(ctx, a) {
   const r  = (a.size ?? 14) * viewScale
   const cx = c(a.x), cy = c(a.y)
+  if (a.shadow) setShadow(ctx)
   ctx.fillStyle = a.color
   ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill()
+  // Clear shadow before inner text so it doesn't cast its own shadow
+  ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0
   ctx.fillStyle    = getTextColor(a.color)
   ctx.font         = `bold ${Math.round(r * 0.9)}px -apple-system`
   ctx.textAlign    = 'center'
@@ -1143,7 +1760,7 @@ function drawNumber(ctx, a) {
 // ─── Resize handles ───────────────────────────────────────────────────────────
 
 function getHandles(a) {
-  if (a.type === 'rect' || a.type === 'img') {
+  if (a.type === 'rect' || a.type === 'ellipse' || a.type === 'fillrect' || a.type === 'fillellipse' || a.type === 'img') {
     const { x, y, w, h } = a
     const mx = x + w / 2, my = y + h / 2
     return [
@@ -1167,6 +1784,9 @@ function getHandles(a) {
     const r = a.size ?? 14
     return [{ id: 'se', x: a.x + r, y: a.y + r, cursor: 'nwse-resize' }]
   }
+  if (a.type === 'polyline') {
+    return a.points.map((p, i) => ({ id: `v${i}`, x: p.x, y: p.y, cursor: 'crosshair' }))
+  }
   return []
 }
 
@@ -1180,7 +1800,7 @@ function startResize(hId, a) {
   if (a.type === 'number') {
     info.cx = a.x; info.cy = a.y
   }
-  if (a.type === 'rect' || a.type === 'img') {
+  if (a.type === 'rect' || a.type === 'ellipse' || a.type === 'fillrect' || a.type === 'fillellipse' || a.type === 'img') {
     const { x, y, w, h } = a
     switch (hId) {
       case 'nw': info.fixX = x+w; info.fixY = y+h; break
@@ -1192,6 +1812,10 @@ function startResize(hId, a) {
       case 'e':  info.fixX = x;   info.fixY = y;   info.fixH = h; break
       case 'w':  info.fixX = x+w; info.fixY = y;   info.fixH = h; break
     }
+  }
+  // polyline: id 格式為 'vN'，記錄頂點 index
+  if (a.type === 'polyline') {
+    info.ptIdx = parseInt(hId.slice(1))
   }
   resizeHandle = info
   isResizing   = true
@@ -1236,7 +1860,7 @@ function applyResize(a, pos) {
     return
   }
 
-  if (a.type === 'rect') {
+  if (['rect','ellipse','fillrect','fillellipse'].includes(a.type)) {
     let x1, y1, x2, y2
     switch (h.id) {
       case 'nw': x1=pos.x;    y1=pos.y;    x2=h.fixX;        y2=h.fixY;        break
@@ -1259,6 +1883,9 @@ function applyResize(a, pos) {
   if (a.type === 'number') {
     const d = Math.max(Math.abs(pos.x - h.cx), Math.abs(pos.y - h.cy))
     a.size = Math.max(d, 6)
+  }
+  if (a.type === 'polyline' && typeof h.ptIdx === 'number') {
+    a.points[h.ptIdx] = { x: pos.x, y: pos.y }
   }
 }
 
@@ -1293,12 +1920,23 @@ function buildPreview() {
   const base = { id: '_p', color, thickness }
   const s = drawStart, e = drawCurrent
   if (tool === 'rect')
-    return { ...base, type:'rect', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y) }
+    return { ...base, type:'rect', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y), shadow: rectShadow, cornerRadius }
+  if (tool === 'ellipse')
+    return { ...base, type:'ellipse', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y), shadow: ellipseShadow }
   if (tool === 'fillrect')
     return { ...base, type:'fillrect', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y),
-             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled, fillBorderColor }
-  if (tool === 'line')
-    return { ...base, type:'line', x1:s.x, y1:s.y, x2:e.x, y2:e.y, lineStyle, startCap, endCap }
+             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled, fillBorderColor, shadow: fillrectShadow, cornerRadius }
+  if (tool === 'fillellipse')
+    return { ...base, type:'fillellipse', x:Math.min(s.x,e.x), y:Math.min(s.y,e.y), w:Math.abs(e.x-s.x), h:Math.abs(e.y-s.y),
+             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled, fillBorderColor, shadow: fillellipseShadow }
+  if (tool === 'line') {
+    let x2 = e.x, y2 = e.y
+    if (lineOrtho) {
+      if (Math.abs(e.x - s.x) >= Math.abs(e.y - s.y)) y2 = s.y
+      else x2 = s.x
+    }
+    return { ...base, type:'line', x1:s.x, y1:s.y, x2, y2, lineStyle, startCap, endCap, lineOrtho }
+  }
   return null
 }
 
@@ -1307,17 +1945,33 @@ function commitShape(start, end) {
   if (tool === 'rect') {
     const w = Math.abs(end.x - start.x), h = Math.abs(end.y - start.y)
     if (w < 2 || h < 2) return null
-    return { ...base, type:'rect', x:Math.min(start.x,end.x), y:Math.min(start.y,end.y), w, h }
+    return { ...base, type:'rect', x:Math.min(start.x,end.x), y:Math.min(start.y,end.y), w, h, shadow: rectShadow, cornerRadius }
+  }
+  if (tool === 'ellipse') {
+    const w = Math.abs(end.x - start.x), h = Math.abs(end.y - start.y)
+    if (w < 2 || h < 2) return null
+    return { ...base, type:'ellipse', x:Math.min(start.x,end.x), y:Math.min(start.y,end.y), w, h, shadow: ellipseShadow }
   }
   if (tool === 'fillrect') {
     const w = Math.abs(end.x - start.x), h = Math.abs(end.y - start.y)
     if (w < 2 || h < 2) return null
     return { ...base, type:'fillrect', x:Math.min(start.x,end.x), y:Math.min(start.y,end.y), w, h,
-             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled, fillBorderColor }
+             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled, fillBorderColor, shadow: fillrectShadow, cornerRadius }
+  }
+  if (tool === 'fillellipse') {
+    const w = Math.abs(end.x - start.x), h = Math.abs(end.y - start.y)
+    if (w < 2 || h < 2) return null
+    return { ...base, type:'fillellipse', x:Math.min(start.x,end.x), y:Math.min(start.y,end.y), w, h,
+             fillMode, fillColor, fillColorA, fillColorB, fillGradientDir, fillOpacity, fillBorder: fillBorderEnabled, fillBorderColor, shadow: fillellipseShadow }
   }
   if (tool === 'line') {
-    if (Math.hypot(end.x-start.x, end.y-start.y) < 2) return null
-    return { ...base, type:'line', x1:start.x, y1:start.y, x2:end.x, y2:end.y, lineStyle, startCap, endCap }
+    let ex = end.x, ey = end.y
+    if (lineOrtho) {
+      if (Math.abs(end.x - start.x) >= Math.abs(end.y - start.y)) ey = start.y
+      else ex = start.x
+    }
+    if (Math.hypot(ex-start.x, ey-start.y) < 2) return null
+    return { ...base, type:'line', x1:start.x, y1:start.y, x2:ex, y2:ey, lineStyle, startCap, endCap, lineOrtho }
   }
   return null
 }
@@ -1360,7 +2014,9 @@ function recalcNumCount() {
 function bounds(a) {
   switch (a.type) {
     case 'rect':
+    case 'ellipse':
     case 'fillrect':
+    case 'fillellipse':
     case 'img':    return { x: a.x, y: a.y, w: a.w, h: a.h }
     case 'line': {
       const minX = Math.min(a.x1,a.x2), maxX = Math.max(a.x1,a.x2)
@@ -1370,10 +2026,18 @@ function bounds(a) {
     case 'text': {
       const lines = a.content.split('\n')
       annotCtx.font = `${a.fontSize}px -apple-system, "Helvetica Neue", sans-serif`
-      const maxW = lines.reduce((m, l) => Math.max(m, annotCtx.measureText(l).width), 0)
-      return { x:a.x, y:a.y, w:maxW, h:lines.length*a.fontSize*1.25 }
+      const maxW  = lines.reduce((m, l) => Math.max(m, annotCtx.measureText(l).width), 0)
+      const tal   = a.textAlign ?? 'left'
+      const bx    = tal === 'center' ? a.x - maxW / 2 : tal === 'right' ? a.x - maxW : a.x
+      return { x:bx, y:a.y, w:maxW, h:lines.length*a.fontSize*1.25 }
     }
     case 'number': { const r = a.size ?? 14; return { x:a.x-r, y:a.y-r, w:r*2, h:r*2 } }
+    case 'polyline': {
+      const xs = a.points.map(p => p.x), ys = a.points.map(p => p.y)
+      const minX = Math.min(...xs), maxX = Math.max(...xs)
+      const minY = Math.min(...ys), maxY = Math.max(...ys)
+      return { x: minX, y: minY, w: Math.max(maxX - minX, 1), h: Math.max(maxY - minY, 1) }
+    }
   }
   return null
 }
@@ -1398,8 +2062,11 @@ annotCanvas.addEventListener('mousedown', e => {
   if (e.button !== 0) return
   const pos = evToImg(e)
 
+  // Close colour panel on any canvas interaction
+  hideColorPanel()
+
   // If text input is open and user clicks outside the textarea, commit it first
-  if (textActive) commitText()
+  if (textActive) commitText(false)
 
   if (tool === 'crop') {
     if (cropRect) {
@@ -1417,6 +2084,14 @@ annotCanvas.addEventListener('mousedown', e => {
     cropRect   = { x: pos.x, y: pos.y, w: 0, h: 0 }
     drawStart  = pos
     document.getElementById('cropSizeLabel').textContent = '請拖曳選取範圍'
+    return
+  }
+
+  if (tool === 'ocr') {
+    isOcrSelecting = true
+    ocrStart = pos
+    ocrRect  = { x: pos.x, y: pos.y, w: 0, h: 0 }
+    document.getElementById('ocrStatusLabel').textContent = '請拖曳選取辨識區域'
     return
   }
 
@@ -1459,14 +2134,41 @@ annotCanvas.addEventListener('mousedown', e => {
 
   if (tool === 'number') {
     pushHistory()
-    annotations.push({ id:newId(), type:'number', color, thickness, x:pos.x, y:pos.y, value:numCount++, size:numSize })
+    annotations.push({ id:newId(), type:'number', color, thickness, x:pos.x, y:pos.y, value:numCount++, size:numSize, shadow: numShadow })
     renderAnnotations()
     return
   }
 
   if (tool === 'text') {
-    commitText()
+    commitText(false)
     showTextInput(pos)
+    return
+  }
+
+  // 折線模式（line tool + lineOrtho = true）：點擊加點，雙擊完成
+  if (tool === 'line' && lineOrtho) {
+    const now = Date.now()
+    const isDouble = polylineActive && (now - polylineLastMs) < 380
+    polylineLastMs = now
+    if (isDouble) {
+      // 雙擊第二下已被第一次 mousedown 加進去了，移除再 commit
+      if (polylinePoints.length > 1) polylinePoints.pop()
+      _commitPolyline()
+    } else {
+      if (!polylineActive) { polylineActive = true; polylinePoints = [] }
+      let newPt
+      if (polylinePoints.length === 0) {
+        newPt = { ...pos }  // 第一點：不 snap
+      } else {
+        // 第二點起：snap 至前一頂點的水平或垂直，使每段都是純直線
+        const prev = polylinePoints[polylinePoints.length - 1]
+        const adx = Math.abs(pos.x - prev.x), ady = Math.abs(pos.y - prev.y)
+        newPt = adx >= ady ? { x: pos.x, y: prev.y } : { x: prev.x, y: pos.y }
+      }
+      polylinePoints.push(newPt)
+      polylineMouse = pos
+      renderAnnotations()
+    }
     return
   }
 
@@ -1518,9 +2220,49 @@ annotCanvas.addEventListener('mousemove', e => {
     return
   }
 
+  if (isOcrSelecting && ocrStart) {
+    ocrRect = {
+      x: Math.min(ocrStart.x, pos.x),
+      y: Math.min(ocrStart.y, pos.y),
+      w: Math.abs(pos.x - ocrStart.x),
+      h: Math.abs(pos.y - ocrStart.y)
+    }
+    const wPx = Math.round(ocrRect.w), hPx = Math.round(ocrRect.h)
+    document.getElementById('ocrStatusLabel').textContent = `${wPx} × ${hPx} px`
+    renderAnnotations()
+    return
+  }
+
   if (isResizing && selectedId) {
     const a = annotations.find(x => x.id === selectedId)
-    if (a) applyResize(a, pos)
+    if (a) {
+      let snapPos = pos
+      if (e.shiftKey) {
+        const h = resizeHandle
+        // 矩形系（rect/ellipse/fillrect/fillellipse）角落把手：Shift = 鎖正方形/正圓
+        if (['rect','ellipse','fillrect','fillellipse'].includes(a.type) && ['nw','ne','se','sw'].includes(h.id)) {
+          const dx = pos.x - h.fixX, dy = pos.y - h.fixY
+          const side = Math.min(Math.abs(dx), Math.abs(dy))
+          snapPos = { x: h.fixX + Math.sign(dx || 1) * side, y: h.fixY + Math.sign(dy || 1) * side }
+        }
+        // 線條端點：Shift = 鎖水平/垂直
+        if (a.type === 'line') {
+          const fixed = h.id === 'p1' ? { x: a.x2, y: a.y2 } : { x: a.x1, y: a.y1 }
+          const adx = Math.abs(pos.x - fixed.x), ady = Math.abs(pos.y - fixed.y)
+          snapPos = adx >= ady ? { x: pos.x, y: fixed.y } : { x: fixed.x, y: pos.y }
+        }
+        // 折線頂點：Shift = 鎖水平/垂直（相對相鄰頂點）
+        if (a.type === 'polyline' && typeof h.ptIdx === 'number') {
+          const pi = h.ptIdx
+          const nb = pi > 0 ? a.points[pi - 1] : a.points[pi + 1]
+          if (nb) {
+            const adx = Math.abs(pos.x - nb.x), ady = Math.abs(pos.y - nb.y)
+            snapPos = adx >= ady ? { x: pos.x, y: nb.y } : { x: nb.x, y: pos.y }
+          }
+        }
+      }
+      applyResize(a, snapPos)
+    }
     renderAnnotations()
     return
   }
@@ -1536,7 +2278,23 @@ annotCanvas.addEventListener('mousemove', e => {
     return
   }
 
-  if (isDrawing) { drawCurrent = pos; renderAnnotations(); return }
+  if (polylineActive) { polylineMouse = pos; renderAnnotations(); return }
+  if (isDrawing) {
+    // Shift 鍵：線條鎖定水平／垂直（類 PPT 行為）；矩形鎖正方形
+    if (e.shiftKey && tool === 'line' && drawStart) {
+      const dx = Math.abs(pos.x - drawStart.x), dy = Math.abs(pos.y - drawStart.y)
+      drawCurrent = dx >= dy ? { x: pos.x, y: drawStart.y } : { x: drawStart.x, y: pos.y }
+    } else if (e.shiftKey && (tool === 'rect' || tool === 'fillrect' || tool === 'ellipse' || tool === 'fillellipse') && drawStart) {
+      const side = Math.min(Math.abs(pos.x - drawStart.x), Math.abs(pos.y - drawStart.y))
+      drawCurrent = {
+        x: drawStart.x + Math.sign(pos.x - drawStart.x) * side,
+        y: drawStart.y + Math.sign(pos.y - drawStart.y) * side,
+      }
+    } else {
+      drawCurrent = pos
+    }
+    renderAnnotations(); return
+  }
 
   // Update cursor for select tool
   if (tool === 'select') {
@@ -1596,6 +2354,19 @@ document.addEventListener('mouseup', e => {
     return
   }
 
+  if (isOcrSelecting) {
+    isOcrSelecting = false
+    if (!ocrRect || ocrRect.w < 4 || ocrRect.h < 4) {
+      ocrRect = null
+      document.getElementById('ocrStatusLabel').textContent = '請拖曳選取辨識區域'
+      renderAnnotations()
+      return
+    }
+    renderAnnotations()
+    triggerOcr()
+    return
+  }
+
   if (isResizing) {
     isResizing = false
     pushHistory()
@@ -1609,26 +2380,36 @@ document.addEventListener('mouseup', e => {
   if (!isDrawing) return
   isDrawing = false
 
-  const end = evToImg(e)
+  // 使用 drawCurrent（mousemove 已套用 Shift 吸附）；fallback 至 evToImg
+  const end = drawCurrent ?? evToImg(e)
   const ann = commitShape(drawStart, end)
-  if (ann) { pushHistory(); annotations.push(ann) }
+  if (ann) {
+    pushHistory(); annotations.push(ann)
+    setTool('select'); selectedId = ann.id; showOptionsForAnnot(ann)
+  }
   renderAnnotations()
 })
 
 function moveAnnot(a, dx, dy) {
   switch (a.type) {
     case 'rect':
+    case 'ellipse':
     case 'fillrect':
+    case 'fillellipse':
     case 'img':
     case 'text':
     case 'number': a.x += dx; a.y += dy; break
-    case 'line':   a.x1 += dx; a.y1 += dy; a.x2 += dx; a.y2 += dy; break
+    case 'line':     a.x1 += dx; a.y1 += dy; a.x2 += dx; a.y2 += dy; break
+    case 'polyline': a.points.forEach(p => { p.x += dx; p.y += dy }); break
   }
 }
 
 // ─── Double-click: re-edit text ───────────────────────────────────────────────
 
 annotCanvas.addEventListener('dblclick', e => {
+  // 折線模式下，雙擊第二下的 mousedown 已被timing偵測處理，dblclick 不再重複 commit
+  // （但以防萬一：若 polylineActive 仍為 true，再次 commit）
+  if (polylineActive) { _commitPolyline(); return }
   if (tool !== 'select') return
   const pos = evToImg(e)
   const a = findAt(pos)
@@ -1653,33 +2434,81 @@ annotCanvas.addEventListener('dblclick', e => {
 
 // ─── Text input ───────────────────────────────────────────────────────────────
 
+// 把 B/I/U/S 狀態同步到 textarea 的 CSS，讓使用者在輸入時即時看到效果
+function applyTextStyleToInput() {
+  const decs = []
+  if (textUnderline)     decs.push('underline')
+  if (textStrikethrough) decs.push('line-through')
+  textInputEl.style.fontWeight     = textBold   ? 'bold'   : ''
+  textInputEl.style.fontStyle      = textItalic ? 'italic' : ''
+  textInputEl.style.textDecoration = decs.join(' ')
+  textInputEl.style.fontFamily     = getFontCss(fontFamily)
+  textInputEl.style.textAlign      = textAlign
+}
+
+// 依目前 textAlign 更新 textarea 的水平錨點（left + transform）。
+// 在 showTextInput 以及對齊按鈕切換時都需要呼叫，確保輸入框始終對齊 canvas 錨點。
+function _repositionTextInput() {
+  if (!textActive || !textPos) return
+  if (textAlign === 'center') {
+    textInputEl.style.left      = c(textPos.x) + 'px'
+    textInputEl.style.transform = 'translateX(-50%)'
+  } else if (textAlign === 'right') {
+    textInputEl.style.left      = (c(textPos.x) + 5.5) + 'px'
+    textInputEl.style.transform = 'translateX(-100%)'
+  } else {
+    textInputEl.style.left      = (c(textPos.x) - 5.5) + 'px'
+    textInputEl.style.transform = ''
+  }
+}
+
 function showTextInput(pos) {
   textActive = true
   textPos    = pos
-  const fs   = Math.max(fontSize * viewScale, 14)
+  const fs      = Math.max(fontSize * viewScale, 14)
+  const lineH   = 1.25
+  // half-leading: CSS line-height pushes text down by (lineH-1)*fs/2 within each line box.
+  // Subtract it from the top so the visual glyph top aligns with canvas textBaseline='top'.
+  const halfLead = Math.round((lineH - 1) * fs / 2)
 
-  // Offset by border (1.5px) + padding (4px left, 2px top) so inner text aligns with canvas text
-  textInputEl.style.left       = (c(pos.x) - 5.5) + 'px'
-  textInputEl.style.top        = (c(pos.y) - 3.5) + 'px'
+  _repositionTextInput()
+  textInputEl.style.top        = (c(pos.y) - 3.5 - halfLead) + 'px'
   textInputEl.style.fontSize   = fs + 'px'
   textInputEl.style.color      = color
-  textInputEl.style.lineHeight = '1.25'
+  textInputEl.style.lineHeight = String(lineH)
   textInputEl.value            = ''
+  applyTextStyleToInput()
 
   textInputWrap.classList.remove('hidden')
   setTimeout(() => textInputEl.focus(), 10)
 }
 
-function commitText() {
+// autoSelect: Shift+Enter 觸發時自動切換到選取工具並選中；
+//             由 setTool / mousedown 觸發時傳 false，讓呼叫者決定工具狀態。
+function commitText(autoSelect = true) {
   if (!textActive) return
   const content = textInputEl.value
-  textEditOrig  = null   // discard original; new content replaces it
-  if (content.trim()) {
-    pushHistory()
-    annotations.push({ id:newId(), type:'text', color, fontSize, x:textPos.x, y:textPos.y, content })
-    renderAnnotations()
+  const pos     = textPos          // 在 _closeTextInput() 將 textPos 設為 null 之前先存起來
+  textEditOrig  = null
+  _closeTextInput()                // textActive=false；不再有循環風險
+  if (!content.trim()) return
+  pushHistory()
+  const txtAnn = { id:newId(), type:'text', color, fontSize, x:pos.x, y:pos.y, content,
+                   textStrokeColor, textStrokeWidth, textBgColor, textBgOpacity, shadow: textShadow,
+                   bold: textBold, italic: textItalic, underline: textUnderline, strikethrough: textStrikethrough,
+                   textAlign, fontFamily }
+  annotations.push(txtAnn)
+  if (autoSelect) {
+    // 直接更新狀態，不呼叫 setTool()，避免 selectedId 被重置
+    tool = 'select'
+    selectedId = txtAnn.id
+    document.querySelectorAll('.tool-btn[data-tool]').forEach(b =>
+      b.classList.toggle('active', b.dataset.tool === 'select')
+    )
+    annotCanvas.style.cursor = 'default'
+    showOptionsForAnnot(txtAnn)
   }
-  _closeTextInput()
+  renderAnnotations()
 }
 
 function cancelText() {
@@ -1720,24 +2549,92 @@ function resizeTextInput() {
 
 textInputEl.addEventListener('input', resizeTextInput)
 
+// ─── Right-click context menu: layer ordering ─────────────────────────────────
+
+const ctxMenu = document.getElementById('ctxMenu')
+
+function hideCtxMenu() { ctxMenu.classList.add('hidden') }
+
+function showCtxMenu(clientX, clientY, targetId) {
+  const idx  = annotations.findIndex(a => a.id === targetId)
+  const last = annotations.length - 1
+  const atTop    = idx === last
+  const atBottom = idx === 0
+  document.getElementById('ctxToTop').style.display    = atTop    ? 'none' : ''
+  document.getElementById('ctxMoveUp').style.display   = atTop    ? 'none' : ''
+  document.getElementById('ctxMoveDown').style.display = atBottom ? 'none' : ''
+  document.getElementById('ctxToBottom').style.display = atBottom ? 'none' : ''
+
+  // Clamp to viewport
+  ctxMenu.classList.remove('hidden')
+  const mw = ctxMenu.offsetWidth  || 140
+  const mh = ctxMenu.offsetHeight || 120
+  const x  = Math.min(clientX, window.innerWidth  - mw - 8)
+  const y  = Math.min(clientY, window.innerHeight - mh - 8)
+  ctxMenu.style.left = x + 'px'
+  ctxMenu.style.top  = y + 'px'
+}
+
+function moveLayer(dir) {
+  const idx = annotations.findIndex(a => a.id === selectedId)
+  if (idx < 0) { hideCtxMenu(); return }
+  pushHistory()
+  const last = annotations.length - 1
+  if (dir === 'top' && idx < last) {
+    const [a] = annotations.splice(idx, 1); annotations.push(a)
+  } else if (dir === 'up' && idx < last) {
+    ;[annotations[idx], annotations[idx + 1]] = [annotations[idx + 1], annotations[idx]]
+  } else if (dir === 'down' && idx > 0) {
+    ;[annotations[idx], annotations[idx - 1]] = [annotations[idx - 1], annotations[idx]]
+  } else if (dir === 'bottom' && idx > 0) {
+    const [a] = annotations.splice(idx, 1); annotations.unshift(a)
+  }
+  renderAnnotations()
+  hideCtxMenu()
+}
+
+annotCanvas.addEventListener('contextmenu', e => {
+  e.preventDefault()
+  if (tool !== 'select') return
+  const pos = evToImg(e)
+  const a   = findAt(pos)
+  if (!a) { hideCtxMenu(); return }
+  selectedId = a.id
+  showOptionsForAnnot(a)
+  renderAnnotations()
+  showCtxMenu(e.clientX, e.clientY, a.id)
+})
+
+document.addEventListener('click', () => hideCtxMenu())
+ctxMenu.querySelectorAll('button[data-dir]').forEach(btn =>
+  btn.addEventListener('click', e => { e.stopPropagation(); moveLayer(btn.dataset.dir) })
+)
+
 // ─── Keyboard shortcuts ───────────────────────────────────────────────────────
 
 document.addEventListener('keydown', e => {
+  // Never intercept when an <input> or <textarea> has focus
+  const tag = document.activeElement?.tagName
+  if (tag === 'INPUT' || tag === 'TEXTAREA') return
   if (textActive) return
   const meta = e.metaKey || e.ctrlKey
   if (meta && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); return }
   if (meta && (e.key === 'Z' || (e.key === 'z' && e.shiftKey))) { e.preventDefault(); redo(); return }
   if (meta && e.key === 's') { e.preventDefault(); openSaveModal(); return }
 
-  // Copy/paste for number annotations
+  // Copy / paste for all annotation types (except overlay images)
   if (meta && (e.key === 'c' || e.key === 'C')) {
     const a = annotations.find(x => x.id === selectedId)
-    if (a && a.type === 'number') { annotClipboard = { ...a }; return }
+    if (a && a.type !== 'img') { annotClipboard = JSON.parse(JSON.stringify(a)); return }
   }
   if (meta && (e.key === 'v' || e.key === 'V')) {
-    if (annotClipboard && annotClipboard.type === 'number') {
+    if (annotClipboard) {
       e.preventDefault()
-      const newA = { ...annotClipboard, id: newId(), x: annotClipboard.x + 8, y: annotClipboard.y + 8 }
+      const newA = JSON.parse(JSON.stringify(annotClipboard))
+      newA.id = newId()
+      if (newA.type === 'line')     { newA.x1 += 8; newA.y1 += 8; newA.x2 += 8; newA.y2 += 8 }
+      else if (newA.type === 'polyline') { newA.points.forEach(p => { p.x += 8; p.y += 8 }) }
+      else                               { newA.x  += 8; newA.y  += 8 }
       pushHistory()
       annotations.push(newA)
       selectedId = newA.id
@@ -1762,9 +2659,13 @@ document.addEventListener('keydown', e => {
     case 'o': case 'O': document.getElementById('btnOverlayImg').click(); break
     case 'e': case 'E': document.getElementById('btnExtend').click();     break
     case 'c': case 'C': setTool('crop');   break
+    case 'g': case 'G': setTool('ocr');    break
     case 's': case 'S': openResizeModal(); break
     case 'Escape':
+      hideCtxMenu()
+      if (polylineActive) { _cancelPolyline(); renderAnnotations(); break }
       if (tool === 'crop') { cancelCrop(); break }
+      if (tool === 'ocr')  { ocrRect = null; isOcrSelecting = false; document.getElementById('ocrStatusLabel').textContent = '請拖曳選取辨識區域'; renderAnnotations(); break }
       selectedId = null
       isDrawing  = false
       if (tool === 'select') hideAllOptions()
@@ -1787,7 +2688,7 @@ document.addEventListener('keydown', e => {
 const saveModal = document.getElementById('saveModal')
 
 function openSaveModal() {
-  commitText()
+  commitText(false)
   saveModal.classList.remove('hidden')
 }
 
@@ -1916,6 +2817,103 @@ function cancelCrop() {
 
 document.getElementById('btnCropConfirm').addEventListener('click', confirmCrop)
 document.getElementById('btnCropCancel').addEventListener('click', cancelCrop)
+
+// ─── OCR ─────────────────────────────────────────────────────────────────────
+
+async function triggerOcr() {
+  const hasData = await ipcRenderer.invoke('ocr-check-tessdata')
+  if (!hasData) {
+    document.getElementById('ocrDownloadModal').classList.remove('hidden')
+    return
+  }
+  startOcrRecognition()
+}
+
+function startOcrRecognition() {
+  if (!ocrRect) return
+
+  // Show panel with progress bar
+  const panel = document.getElementById('ocrPanel')
+  panel.classList.remove('hidden')
+  document.getElementById('ocrProgressWrap').classList.remove('hidden')
+  document.getElementById('ocrProgressInner').style.width = '0%'
+  document.getElementById('ocrProgressLabel').textContent = '準備中...'
+  document.getElementById('ocrResultText').value = ''
+  document.getElementById('btnOcrCopy').disabled = true
+  document.getElementById('btnOcrCopyClose').disabled = true
+
+  // Extract region at original image resolution
+  const r = ocrRect
+  const off = document.createElement('canvas')
+  off.width  = Math.max(1, Math.round(r.w))
+  off.height = Math.max(1, Math.round(r.h))
+  const offCtx = off.getContext('2d')
+  offCtx.drawImage(baseCanvas, c(r.x), c(r.y), c(r.w), c(r.h), 0, 0, off.width, off.height)
+  const dataURL = off.toDataURL('image/png')
+
+  ipcRenderer.invoke('ocr-recognize', { dataURL }).then(result => {
+    document.getElementById('ocrProgressWrap').classList.add('hidden')
+    if (result.success) {
+      document.getElementById('ocrResultText').value = result.text
+      document.getElementById('btnOcrCopy').disabled      = false
+      document.getElementById('btnOcrCopyClose').disabled = false
+      if (!result.text) showToast('OCR 未辨識到文字，請嘗試更清晰的區域')
+    } else {
+      document.getElementById('ocrResultText').value = `辨識失敗：${result.error}`
+      showToast('OCR 辨識失敗')
+    }
+  })
+}
+
+ipcRenderer.on('ocr-progress', (_, { status, progress }) => {
+  const bar   = document.getElementById('ocrProgressInner')
+  const label = document.getElementById('ocrProgressLabel')
+  const pct   = Math.round((progress || 0) * 100)
+  bar.style.width = `${pct}%`
+  if      (status.includes('loading language')) label.textContent = `下載語言包 ${pct}%`
+  else if (status.includes('recognizing'))      label.textContent = `辨識中... ${pct}%`
+  else if (status.includes('initialized'))      label.textContent = `初始化完成`
+  else                                          label.textContent = status
+})
+
+// OCR panel button handlers
+document.getElementById('ocrPanelClose').addEventListener('click', () => {
+  document.getElementById('ocrPanel').classList.add('hidden')
+})
+
+document.getElementById('btnOcrCopy').addEventListener('click', () => {
+  const text = document.getElementById('ocrResultText').value
+  const { clipboard } = require('electron')
+  clipboard.writeText(text)
+  showToast('文字已複製到剪貼簿')
+})
+
+document.getElementById('btnOcrCopyClose').addEventListener('click', () => {
+  const text = document.getElementById('ocrResultText').value
+  const { clipboard } = require('electron')
+  clipboard.writeText(text)
+  showToast('文字已複製到剪貼簿')
+  document.getElementById('ocrPanel').classList.add('hidden')
+})
+
+// OCR download confirmation
+document.getElementById('btnOcrDownloadConfirm').addEventListener('click', () => {
+  document.getElementById('ocrDownloadModal').classList.add('hidden')
+  startOcrRecognition()
+})
+
+document.getElementById('btnOcrDownloadCancel').addEventListener('click', () => {
+  document.getElementById('ocrDownloadModal').classList.add('hidden')
+  ocrRect = null
+  document.getElementById('ocrStatusLabel').textContent = '請拖曳選取辨識區域'
+  renderAnnotations()
+})
+
+document.getElementById('btnOcrCancel').addEventListener('click', () => {
+  ocrRect = null
+  isOcrSelecting = false
+  setTool('rect')
+})
 
 // ─── Resize ───────────────────────────────────────────────────────────────────
 

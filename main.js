@@ -581,10 +581,57 @@ ipcMain.handle('open-permission-settings', () => {
   )
 })
 
+// ─── OCR (Tesseract.js) ───────────────────────────────────────────────────────
+
+let ocrCachePath = null
+
+function initOcrCache() {
+  ocrCachePath = path.join(app.getPath('userData'), 'tessdata')
+  try { fs.mkdirSync(ocrCachePath, { recursive: true }) } catch {}
+}
+
+const OCR_LANGS = ['chi_tra', 'eng']
+
+ipcMain.handle('ocr-check-tessdata', () => {
+  if (!ocrCachePath) return false
+  return OCR_LANGS.every(lang =>
+    fs.existsSync(path.join(ocrCachePath, `${lang}.traineddata`))
+  )
+})
+
+ipcMain.handle('ocr-recognize', async (event, { dataURL }) => {
+  try {
+    const { createWorker } = require('tesseract.js')
+    const base64 = dataURL.replace(/^data:image\/[^;]+;base64,/, '')
+    const imgBuffer = Buffer.from(base64, 'base64')
+
+    const worker = await createWorker(OCR_LANGS, 1, {
+      cachePath: ocrCachePath,
+      logger: m => {
+        try {
+          if (!event.sender.isDestroyed()) {
+            event.sender.send('ocr-progress', {
+              status: m.status,
+              progress: m.progress || 0
+            })
+          }
+        } catch {}
+      }
+    })
+
+    const { data: { text } } = await worker.recognize(imgBuffer)
+    await worker.terminate()
+    return { success: true, text: text.trim() }
+  } catch (err) {
+    return { success: false, error: err.message }
+  }
+})
+
 // ─── App lifecycle ────────────────────────────────────────────────────────────
 
 app.whenReady().then(() => {
   posFilePath = path.join(app.getPath('userData'), 'toolbar-pos.json')
+  initOcrCache()
   createWindow()
 
   globalShortcut.register('CommandOrControl+Ctrl+1', () => {
