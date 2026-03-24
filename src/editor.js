@@ -2090,45 +2090,76 @@ function drawFillEllipse(ctx, a) {
 function drawLine(ctx, a) {
   const x1 = c(a.x1), y1 = c(a.y1), x2 = c(a.x2), y2 = c(a.y2)
   const sz  = (a.thickness * 4 + 8) * viewScale
+  const hasBorder = !!(a.lineBorderColor && a.lineBorderColor !== 'transparent')
+  // capBorderW: full stroke width → outer half acts as the visible border ring
+  const capBorderW = hasBorder ? ((a.borderThickness ?? a.thickness + 4) - a.thickness) * viewScale * 2 : 0
+  const capBorderCol = hasBorder ? a.lineBorderColor : null
+
   if (a.shadow) setShadow(ctx)
   ctx.globalAlpha = (a.opacity ?? 100) / 100
   ctx.lineCap = capToLineCap(a.startCap, a.endCap)
-  // Border stroke (drawn behind main line)
-  if (a.lineBorderColor && a.lineBorderColor !== 'transparent') {
-    const borderSz = sz + ((a.borderThickness ?? a.thickness + 4) - a.thickness) * viewScale
+
+  // Trim stroke at arrow endpoints so the line body stops at the arrow base (not the tip),
+  // eliminating the square butt-cap that would otherwise poke through the triangle tip.
+  const ang      = Math.atan2(y2 - y1, x2 - x1)
+  const arrInset = sz * 0.8   // ≈ sz × |cos(2.5)|  (distance tip→base of arrow)
+  let sx1 = x1, sy1 = y1, sx2 = x2, sy2 = y2
+  if (a.startCap === 'arrow') { sx1 += Math.cos(ang) * arrInset; sy1 += Math.sin(ang) * arrInset }
+  if (a.endCap   === 'arrow') { sx2 -= Math.cos(ang) * arrInset; sy2 -= Math.sin(ang) * arrInset }
+
+  // Border stroke body
+  if (hasBorder) {
     ctx.save()
     ctx.strokeStyle = a.lineBorderColor
     ctx.lineWidth   = (a.borderThickness ?? a.thickness + 4) * viewScale
     ctx.setLineDash(getLineDash(a.borderDashStyle ?? a.lineStyle, sz))
-    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke()
+    ctx.beginPath(); ctx.moveTo(sx1, sy1); ctx.lineTo(sx2, sy2); ctx.stroke()
     ctx.setLineDash([])
     ctx.restore()
-    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0  // shadow already applied above
-    // Border caps (drawn behind main caps)
-    drawCap(ctx, a.startCap, x2, y2, x1, y1, a.lineBorderColor, borderSz)
-    drawCap(ctx, a.endCap,   x1, y1, x2, y2, a.lineBorderColor, borderSz)
+    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0
   }
+
+  // Main stroke body
   ctx.beginPath()
   ctx.setLineDash(getLineDash(a.lineStyle, sz))
-  ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke()
+  ctx.moveTo(sx1, sy1); ctx.lineTo(sx2, sy2); ctx.stroke()
   ctx.setLineDash([])
-  drawCap(ctx, a.startCap, x2, y2, x1, y1, a.color, sz)
-  drawCap(ctx, a.endCap,   x1, y1, x2, y2, a.color, sz)
+
+  // Caps: single call — strokes border outline first, then fills main colour
+  drawCap(ctx, a.startCap, x2, y2, x1, y1, a.color, sz, capBorderCol, capBorderW)
+  drawCap(ctx, a.endCap,   x1, y1, x2, y2, a.color, sz, capBorderCol, capBorderW)
 }
 
-function drawCap(ctx, type, fx, fy, tx, ty, col, sz) {
+// borderCol / borderW: if set, stroke the cap path in border colour BEFORE filling in col.
+// Canvas stroke is centred on the path, so the outer half of the stroke acts as the visible border.
+function drawCap(ctx, type, fx, fy, tx, ty, col, sz, borderCol, borderW) {
   if (type === 'none' || type === 'round' || type === 'square') return  // handled by lineCap
   const ang = Math.atan2(ty - fy, tx - fx)
-  ctx.fillStyle = col
+  const hasBorder = borderCol && borderCol !== 'transparent' && borderW > 0
+  ctx.save()
   if (type === 'arrow') {
     ctx.beginPath()
     ctx.moveTo(tx, ty)
     ctx.lineTo(tx + Math.cos(ang + 2.5) * sz, ty + Math.sin(ang + 2.5) * sz)
     ctx.lineTo(tx + Math.cos(ang - 2.5) * sz, ty + Math.sin(ang - 2.5) * sz)
-    ctx.closePath(); ctx.fill()
+    ctx.closePath()
+    if (hasBorder) {
+      ctx.lineJoin = 'miter'
+      ctx.strokeStyle = borderCol
+      ctx.lineWidth = borderW
+      ctx.stroke()
+    }
+    ctx.fillStyle = col; ctx.fill()
   } else if (type === 'dot') {
-    ctx.beginPath(); ctx.arc(tx, ty, sz * 0.42, 0, Math.PI * 2); ctx.fill()
+    ctx.beginPath(); ctx.arc(tx, ty, sz * 0.42, 0, Math.PI * 2)
+    if (hasBorder) {
+      ctx.strokeStyle = borderCol
+      ctx.lineWidth = borderW
+      ctx.stroke()
+    }
+    ctx.fillStyle = col; ctx.fill()
   }
+  ctx.restore()
 }
 
 function drawText(ctx, a, { previewOnly = false } = {}) {
@@ -2273,8 +2304,12 @@ function drawPen(ctx, a) {
   if (!pts || pts.length < 2) return
 
   const sz = (a.thickness * 4 + 8) * viewScale
-  // borderSz: main cap size + border extension only (avoids pyramid effect)
-  const borderSz = sz + ((a.borderThickness ?? a.thickness + 4) - a.thickness) * viewScale
+  const hasBorder  = !!(a.penBorderColor && a.penBorderColor !== 'transparent')
+  const capBorderW = hasBorder ? ((a.borderThickness ?? a.thickness + 4) - a.thickness) * viewScale * 2 : 0
+  const capBorderCol = hasBorder ? a.penBorderColor : null
+
+  // Trim amount in image-pixels so arrow-capped strokes stop at the arrow base
+  const insetImgPx = (a.thickness * 4 + 8) * 0.8
 
   ctx.save()
   if (a.shadow) setShadow(ctx)
@@ -2282,48 +2317,66 @@ function drawPen(ctx, a) {
   ctx.lineCap  = capToLineCap(a.startCap ?? 'round', a.endCap ?? 'round')
   ctx.lineJoin = 'round'
 
-  // Build smooth path using quadratic bezier curves
+  // Build smooth bezier path, trimming endpoints for arrow caps
   function buildPath() {
     ctx.beginPath()
-    ctx.moveTo(c(pts[0].x), c(pts[0].y))
+
+    // Start: move start inward for arrow cap
+    let sp = pts[0]
+    if (a.startCap === 'arrow' && pts.length >= 2) {
+      const dx = pts[1].x - pts[0].x, dy = pts[1].y - pts[0].y
+      const dist = Math.hypot(dx, dy)
+      if (dist > 0) {
+        const t = Math.min(insetImgPx / dist, 0.9)
+        sp = { x: pts[0].x + dx * t, y: pts[0].y + dy * t }
+      }
+    }
+    ctx.moveTo(c(sp.x), c(sp.y))
+
     for (let i = 1; i < pts.length - 1; i++) {
       const mx = (pts[i].x + pts[i + 1].x) / 2
       const my = (pts[i].y + pts[i + 1].y) / 2
       ctx.quadraticCurveTo(c(pts[i].x), c(pts[i].y), c(mx), c(my))
     }
+
+    // End: trim last segment for arrow cap
     const last = pts[pts.length - 1]
-    ctx.lineTo(c(last.x), c(last.y))
+    if (a.endCap === 'arrow' && pts.length >= 2) {
+      const prev = pts[pts.length - 2]
+      const dx = last.x - prev.x, dy = last.y - prev.y
+      const dist = Math.hypot(dx, dy)
+      const t = dist > insetImgPx ? 1 - insetImgPx / dist : 0.1
+      ctx.lineTo(c(prev.x + dx * t), c(prev.y + dy * t))
+    } else {
+      ctx.lineTo(c(last.x), c(last.y))
+    }
   }
 
-  // Find a point at least `threshold` image-px away from tip for stable direction
+  // Find a point at least `threshold` image-px from tip for a stable direction
   function stableFrom(tipIdx, step) {
-    const threshold = a.thickness * 2 + 4
+    const threshold = Math.max(a.thickness * 2 + 4, insetImgPx * 1.2)
     const tip = pts[tipIdx]
     for (let i = tipIdx + step; i >= 0 && i < pts.length; i += step) {
-      const dx = pts[i].x - tip.x, dy = pts[i].y - tip.y
-      if (Math.hypot(dx, dy) >= threshold) return pts[i]
+      if (Math.hypot(pts[i].x - tip.x, pts[i].y - tip.y) >= threshold) return pts[i]
     }
-    const fallback = tipIdx + step
-    return pts[Math.max(0, Math.min(pts.length - 1, fallback))]
+    const fb = tipIdx + step
+    return pts[Math.max(0, Math.min(pts.length - 1, fb))]
   }
 
-  const p0    = pts[0],             pFrom0 = stableFrom(0, 1)
+  const p0    = pts[0],              pFrom0 = stableFrom(0, 1)
   const pN    = pts[pts.length - 1], pFromN = stableFrom(pts.length - 1, -1)
 
-  // Border/outline: draw a thicker stroke behind in border colour
-  if (a.penBorderColor && a.penBorderColor !== 'transparent') {
+  // Border stroke body
+  if (hasBorder) {
     buildPath()
     ctx.strokeStyle = a.penBorderColor
     ctx.lineWidth   = (a.borderThickness ?? a.thickness + 4) * viewScale
     ctx.setLineDash(getLineDash(a.borderDashStyle ?? 'solid', sz))
     ctx.stroke()
     ctx.setLineDash([])
-    // Border caps (drawn behind main caps)
-    drawCap(ctx, a.startCap ?? 'round', c(pFrom0.x), c(pFrom0.y), c(p0.x), c(p0.y), a.penBorderColor, borderSz)
-    drawCap(ctx, a.endCap   ?? 'round', c(pFromN.x), c(pFromN.y), c(pN.x), c(pN.y), a.penBorderColor, borderSz)
   }
 
-  // Main stroke — re-apply dash after border section may have reset it
+  // Main stroke body
   ctx.setLineDash(getLineDash(a.lineStyle, sz))
   buildPath()
   ctx.strokeStyle = a.color
@@ -2331,9 +2384,9 @@ function drawPen(ctx, a) {
   ctx.stroke()
   ctx.setLineDash([])
 
-  // Cap decorations (inside same save block → inherits globalAlpha)
-  drawCap(ctx, a.startCap ?? 'round', c(pFrom0.x), c(pFrom0.y), c(p0.x), c(p0.y), a.color, sz)
-  drawCap(ctx, a.endCap   ?? 'round', c(pFromN.x), c(pFromN.y), c(pN.x), c(pN.y), a.color, sz)
+  // Caps: stroke border outline first, then fill main colour (no separate border-triangle)
+  drawCap(ctx, a.startCap ?? 'round', c(pFrom0.x), c(pFrom0.y), c(p0.x), c(p0.y), a.color, sz, capBorderCol, capBorderW)
+  drawCap(ctx, a.endCap   ?? 'round', c(pFromN.x), c(pFromN.y), c(pN.x), c(pN.y), a.color, sz, capBorderCol, capBorderW)
 
   ctx.restore()
 }
