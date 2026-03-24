@@ -2095,7 +2095,7 @@ function drawLine(ctx, a) {
   ctx.lineCap = capToLineCap(a.startCap, a.endCap)
   // Border stroke (drawn behind main line)
   if (a.lineBorderColor && a.lineBorderColor !== 'transparent') {
-    const borderSz = ((a.borderThickness ?? a.thickness + 4) * 4 + 8) * viewScale
+    const borderSz = sz + ((a.borderThickness ?? a.thickness + 4) - a.thickness) * viewScale
     ctx.save()
     ctx.strokeStyle = a.lineBorderColor
     ctx.lineWidth   = (a.borderThickness ?? a.thickness + 4) * viewScale
@@ -2273,13 +2273,14 @@ function drawPen(ctx, a) {
   if (!pts || pts.length < 2) return
 
   const sz = (a.thickness * 4 + 8) * viewScale
+  // borderSz: main cap size + border extension only (avoids pyramid effect)
+  const borderSz = sz + ((a.borderThickness ?? a.thickness + 4) - a.thickness) * viewScale
 
   ctx.save()
   if (a.shadow) setShadow(ctx)
   ctx.globalAlpha = (a.penOpacity ?? 100) / 100
   ctx.lineCap  = capToLineCap(a.startCap ?? 'round', a.endCap ?? 'round')
   ctx.lineJoin = 'round'
-  ctx.setLineDash(getLineDash(a.lineStyle, sz))
 
   // Build smooth path using quadratic bezier curves
   function buildPath() {
@@ -2294,7 +2295,20 @@ function drawPen(ctx, a) {
     ctx.lineTo(c(last.x), c(last.y))
   }
 
-  const borderSz = ((a.borderThickness ?? a.thickness + 4) * 4 + 8) * viewScale
+  // Find a point at least `threshold` image-px away from tip for stable direction
+  function stableFrom(tipIdx, step) {
+    const threshold = a.thickness * 2 + 4
+    const tip = pts[tipIdx]
+    for (let i = tipIdx + step; i >= 0 && i < pts.length; i += step) {
+      const dx = pts[i].x - tip.x, dy = pts[i].y - tip.y
+      if (Math.hypot(dx, dy) >= threshold) return pts[i]
+    }
+    const fallback = tipIdx + step
+    return pts[Math.max(0, Math.min(pts.length - 1, fallback))]
+  }
+
+  const p0    = pts[0],             pFrom0 = stableFrom(0, 1)
+  const pN    = pts[pts.length - 1], pFromN = stableFrom(pts.length - 1, -1)
 
   // Border/outline: draw a thicker stroke behind in border colour
   if (a.penBorderColor && a.penBorderColor !== 'transparent') {
@@ -2305,12 +2319,8 @@ function drawPen(ctx, a) {
     ctx.stroke()
     ctx.setLineDash([])
     // Border caps (drawn behind main caps)
-    if (pts.length >= 2) {
-      const p0 = pts[0], p1 = pts[1]
-      const pN = pts[pts.length - 1], pN1 = pts[pts.length - 2]
-      drawCap(ctx, a.startCap ?? 'round', c(p1.x), c(p1.y), c(p0.x), c(p0.y), a.penBorderColor, borderSz)
-      drawCap(ctx, a.endCap   ?? 'round', c(pN1.x), c(pN1.y), c(pN.x), c(pN.y), a.penBorderColor, borderSz)
-    }
+    drawCap(ctx, a.startCap ?? 'round', c(pFrom0.x), c(pFrom0.y), c(p0.x), c(p0.y), a.penBorderColor, borderSz)
+    drawCap(ctx, a.endCap   ?? 'round', c(pFromN.x), c(pFromN.y), c(pN.x), c(pN.y), a.penBorderColor, borderSz)
   }
 
   // Main stroke — re-apply dash after border section may have reset it
@@ -2322,12 +2332,9 @@ function drawPen(ctx, a) {
   ctx.setLineDash([])
 
   // Cap decorations (inside same save block → inherits globalAlpha)
-  if (pts.length >= 2) {
-    const p0 = pts[0], p1 = pts[1]
-    const pN = pts[pts.length - 1], pN1 = pts[pts.length - 2]
-    drawCap(ctx, a.startCap ?? 'round', c(p1.x), c(p1.y), c(p0.x), c(p0.y), a.color, sz)
-    drawCap(ctx, a.endCap   ?? 'round', c(pN1.x), c(pN1.y), c(pN.x), c(pN.y), a.color, sz)
-  }
+  drawCap(ctx, a.startCap ?? 'round', c(pFrom0.x), c(pFrom0.y), c(p0.x), c(p0.y), a.color, sz)
+  drawCap(ctx, a.endCap   ?? 'round', c(pFromN.x), c(pFromN.y), c(pN.x), c(pN.y), a.color, sz)
+
   ctx.restore()
 }
 
