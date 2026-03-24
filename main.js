@@ -606,7 +606,8 @@ ipcMain.handle('ocr-recognize', (event, { dataURL }) => {
     let child
     try {
       child = fork(path.join(__dirname, 'src/ocr-worker.js'), [], {
-        env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' }
+        env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' },
+        stdio: [0, 1, 2, 'ipc']   // 繼承 stderr → 直接出現在終端機
       })
     } catch (err) {
       resolve({ success: false, error: 'OCR 工作程序無法啟動：' + err.message })
