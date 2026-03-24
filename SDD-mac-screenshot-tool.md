@@ -1,8 +1,46 @@
 # SDD：Mac 截圖與圖片編輯工具
-**版本：** 3.8
+**版本：** 3.9
 **日期：** 2026-03-24
 **狀態：** 待審閱
 **變更紀錄：**
+
+### v3.9 — Options Bar 全面對齊；框線外框位移；虛實線全工具覆蓋
+
+#### Options Bar 重構
+- 新增 `grpDashStyle`（虛實線 select）：共用於 pen / line / polyline / rect / ellipse / fillrect / fillellipse
+- 新增 `grpPenBorder`：筆型工具外框色 swatch（從 grpPen 拆出，DOM 位置移至粗細後）
+- 新增 `grpStrokeBorder`：框線工具（rect / ellipse）外框色 + X/Y 位移輸入
+- 新增 `grpStrokeOpacity`：共用不透明度 input（pen / line / polyline / rect / ellipse）
+- `grpLineStyle` 精簡為：外框色 swatch + 直角按鈕（線條/折線專屬）
+- `grpPen` 移除（功能分拆至 grpPenBorder + grpStrokeOpacity）
+- 直角（`btnLineOrtho`）：顯示於 line 工具；折線 annotation 選取時自動隱藏
+
+#### 各工具最終 Options Bar 順序
+- **筆形**：顏色－粗細－外框－虛實線－起點－終點－不透明－陰影
+- **線條**：顏色－粗細－外框＋直角－虛實線－起點－終點－不透明－陰影
+- **框線**：方/圓－顏色－粗細－外框（色+XY）－虛實線－圓角－不透明－陰影
+- **色塊**：方/圓－實色/漸層－粗細－邊框色－虛實線－圓角－透明度（grpFillColor 內）－陰影
+
+#### 框線工具新功能
+- **外框色**：rect/ellipse 新增第二層描框，`borderColor`（預設 transparent）
+- **外框位移**：`borderOffsetX` / `borderOffsetY`（px，-50 至 +50），形成位移外框設計效果
+- 外框繪製在主框之前，不帶陰影；主框繪製在後，套用陰影（若啟用）
+- **透明度**：rect/ellipse 新增 `opacity` 欄位（0–100，預設 100）
+- **虛實線**：rect/ellipse 邊框現在支援全部 6 種虛實線樣式
+
+#### 線條／折線新功能
+- **透明度**：line/polyline 新增 `opacity` 欄位（0–100，預設 100）
+
+#### 色塊工具新功能
+- **虛實線**：fillrect/fillellipse 邊框現在支援全部 6 種虛實線樣式，存於 `lineStyle` 欄位
+
+#### 狀態變數新增
+- `rectOpacity`, `ellipseOpacity`, `lineOpacity`
+- `rectBorderColor`, `rectBorderOffsetX`, `rectBorderOffsetY`
+- `ellipseBorderColor`, `ellipseBorderOffsetX`, `ellipseBorderOffsetY`
+- `rectLineStyle`, `ellipseLineStyle`, `fillrectLineStyle`, `fillellipseLineStyle`
+- `syncDashStyle()` 取代 `syncLineStyle()`（保留 alias 向下相容）
+- `syncStrokeOpacity()`, `syncStrokeBorderColor()`, `syncStrokeBorderOffset()`
 
 ### v3.8 — 工具一致性升級（邊框／陰影統一）
 
@@ -1394,6 +1432,41 @@ Menu.buildFromTemplate([{
 - [ ] 外框色為透明（預設），不顯示外框
 - [ ] 陰影勾選，筆跡出現右下陰影
 - [ ] 選取後修改任何屬性（顏色、粗細、透明度），筆跡即時更新
+
+#### Options Bar 全面對齊（v3.9）
+
+**框線工具外框 + 位移**
+- [ ] 切換至矩形框（rect）工具，options bar 顯示「外框」色票，預設棋盤格（透明）
+- [ ] 點擊外框色票，選色後 swatch 更新為選取色，X/Y 輸入框預設為 0
+- [ ] X = 0, Y = 0 時，外框與主框重疊（等同純描框加粗效果）
+- [ ] 設 X = 8，繪製矩形框，可見外框向右偏移 8px
+- [ ] 設 Y = -8，繪製矩形框，可見外框向上偏移 8px
+- [ ] 選取已有外框的 rect annotation，UI 正確顯示外框色與 X/Y 數值
+- [ ] 橢圓框（ellipse）同樣支援外框色 + X/Y 位移
+
+**框線工具透明度**
+- [ ] rect/ellipse 工具 options bar 顯示「不透明」數字輸入（0–100）
+- [ ] 設不透明 = 50，繪製矩形框，框線呈半透明
+- [ ] 選取已有 opacity 的 rect annotation，UI 正確顯示數值
+
+**線條/折線透明度**
+- [ ] line 工具 options bar 顯示「不透明」輸入
+- [ ] 設不透明 = 30，繪製線條，線條明顯半透明
+- [ ] polyline annotation 選取後同樣顯示不透明輸入，數值正確
+
+**虛實線全工具覆蓋**
+- [ ] rect 工具 options bar 顯示「線條」虛實線 select
+- [ ] 選擇「點線」後繪製矩形框，邊框呈點線樣式
+- [ ] fillrect 工具顯示虛實線 select；色塊邊框可呈虛線
+- [ ] pen / line 的虛實線 select 移至 grpDashStyle，功能不變
+
+**直角按鈕顯示邏輯**
+- [ ] line 工具時，直角按鈕顯示
+- [ ] 選取 polyline annotation 時，直角按鈕隱藏
+
+**筆型外框位置**
+- [ ] pen 工具時，外框色 swatch 出現在「粗細」後、「虛實線」前
+- [ ] 設外框色後繪製筆觸，可見外框描邊
 
 #### 工具一致性升級（v3.8）
 
