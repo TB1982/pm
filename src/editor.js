@@ -411,11 +411,7 @@ function syncTextStrokeColor(hex) {
   if (p) p.style.background = hex
 }
 function syncTextStrokeWidth(w) {
-  const isNone = (w === 0)
-  document.getElementById('btnTextStrokeNone').classList.toggle('active', isNone)
-  document.getElementById('textStrokeWidthInput').disabled = isNone
-  document.getElementById('textStrokeWidthPreset').disabled = isNone
-  if (!isNone) document.getElementById('textStrokeWidthInput').value = w
+  document.getElementById('textStrokeWidthInput').value = w
 }
 function syncTextBgColor(hex) {
   const p = document.getElementById('textBgColorPreview')
@@ -1023,26 +1019,16 @@ document.getElementById('fontSizePreset').addEventListener('change', e => {
   }
 })
 
-// Text stroke — "無" toggle
-document.getElementById('btnTextStrokeNone').addEventListener('click', () => {
-  textStrokeWidth = 0
-  syncTextStrokeWidth(0)
-  if (selectedId) updateSelectedAnnot({ textStrokeWidth })
-  if (textActive) renderAnnotations()
-})
-
 // Text stroke — manual input
 document.getElementById('textStrokeWidthInput').addEventListener('input', e => {
-  const v = Math.max(1, Math.min(99, parseInt(e.target.value) || 1))
-  textStrokeWidth = v
-  syncTextStrokeWidth(v)
+  textStrokeWidth = Math.max(0, Math.min(99, parseInt(e.target.value) || 0))
   if (selectedId) updateSelectedAnnot({ textStrokeWidth })
   if (textActive) renderAnnotations()
 })
 
 // Text stroke — quick preset
 document.getElementById('textStrokeWidthPreset').addEventListener('change', e => {
-  if (!e.target.value) return
+  if (e.target.value === '') return
   textStrokeWidth = parseInt(e.target.value)
   syncTextStrokeWidth(textStrokeWidth)
   e.target.value = ''
