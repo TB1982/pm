@@ -4374,108 +4374,121 @@ function _tplDrawImgRounded(ctx, img, x, y, w, h, radius, shadowColor, shadowBlu
   ctx.restore()
 }
 
-// Shared layout helper — all 6 gradient templates use uniform padding
+// ── 社群尺寸比例 ─────────────────────────────────────────────
+let _tplTargetRatio = null   // null = auto (uniform padding)
+
+// Shared layout helper — respects _tplTargetRatio if set
 function _tplGradLayout(w, h) {
   const pad = Math.round(Math.min(w, h) * 0.09)
-  return { newW: w + pad * 2, newH: h + pad * 2, imgX: pad, imgY: pad }
+  if (!_tplTargetRatio) {
+    return { newW: w + pad * 2, newH: h + pad * 2, imgX: pad, imgY: pad }
+  }
+  const imgRatio = w / h
+  let newW, newH
+  if (imgRatio >= _tplTargetRatio) {
+    newW = w + pad * 2
+    newH = Math.max(h + pad * 2, Math.round(newW / _tplTargetRatio))
+  } else {
+    newH = h + pad * 2
+    newW = Math.max(w + pad * 2, Math.round(newH * _tplTargetRatio))
+  }
+  return { newW, newH, imgX: Math.round((newW - w) / 2), imgY: Math.round((newH - h) / 2) }
 }
 
-// Shared drawImg helper — rounded corners + soft drop shadow
+// Shared drawImg — rounded corners + soft shadow
 function _tplGradDrawImg(ctx, img, x, y, w, h) {
-  _tplDrawImgRounded(ctx, img, x, y, w, h, 0.025, 'rgba(0,0,0,0.30)', 0.04, 0.015)
+  _tplDrawImgRounded(ctx, img, x, y, w, h, 0.025, 'rgba(0,0,0,0.28)', 0.04, 0.015)
 }
 
-// Shared: draw radial bloom highlight overlay
-function _tplBloom(ctx, W, H, cx, cy, r, rgba) {
-  const rg = ctx.createRadialGradient(W * cx, H * cy, 0, W * cx, H * cy, W * r)
-  rg.addColorStop(0, rgba)
-  rg.addColorStop(1, rgba.replace(/[\d.]+\)$/, '0)'))
-  ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H)
+// Mesh gradient: place multiple soft radial colour blobs over a base fill
+// blobs: [ [cx, cy, r, [R,G,B], alpha], ... ]  — cx/cy/r in 0..1 relative to W
+function _tplMesh(ctx, W, H, base, blobs) {
+  ctx.fillStyle = base; ctx.fillRect(0, 0, W, H)
+  for (const [cx, cy, r, [rr, gg, bb], a] of blobs) {
+    const rg = ctx.createRadialGradient(W * cx, H * cy, 0, W * cx, H * cy, W * r)
+    rg.addColorStop(0, `rgba(${rr},${gg},${bb},${a})`)
+    rg.addColorStop(1, `rgba(${rr},${gg},${bb},0)`)
+    ctx.fillStyle = rg; ctx.fillRect(0, 0, W, H)
+  }
 }
 
 const TEMPLATES = [
-  // ── Apple 紅 — 珊瑚玫瑰 ──────────────────────────────────────
+  // ── Apple 紅 — 珊瑚玫瑰（Coral / Rose / Peach）────────────────
   {
     id: 'apple-red',
     layout: _tplGradLayout,
     drawBg(ctx, W, H) {
-      const g = ctx.createLinearGradient(0, H, W, 0)   // BL → TR
-      g.addColorStop(0,    '#f77062')   // 暖珊瑚
-      g.addColorStop(0.52, '#ee5a71')   // 玫瑰中調
-      g.addColorStop(1,    '#d6336c')   // 深莓紅
-      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
-      _tplBloom(ctx, W, H, 0.80, 0.12, 0.72, 'rgba(255,190,150,0.42)')
+      _tplMesh(ctx, W, H, '#fff0f0', [
+        [0.10, 0.88, 0.90, [225, 55, 85],  0.78],  // 深玫瑰 左下
+        [0.92, 0.12, 0.85, [255, 125, 85], 0.68],  // 暖珊瑚 右上
+        [0.50, 0.50, 0.70, [240, 75, 115], 0.42],  // 玫瑰 中央
+      ])
     },
     drawImg: _tplGradDrawImg,
   },
-  // ── Apple 橙 — 琥珀暖陽 ──────────────────────────────────────
+  // ── Apple 橙 — 琥珀暖陽（Terracotta / Amber / Gold）──────────
   {
     id: 'apple-orange',
     layout: _tplGradLayout,
     drawBg(ctx, W, H) {
-      const g = ctx.createLinearGradient(0, H, W, 0)
-      g.addColorStop(0,    '#c95b18')   // 深陶土橙
-      g.addColorStop(0.5,  '#f07821')   // 暖橙中調
-      g.addColorStop(1,    '#fbb034')   // 琥珀金
-      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
-      _tplBloom(ctx, W, H, 0.22, 0.18, 0.65, 'rgba(255,232,110,0.48)')
+      _tplMesh(ctx, W, H, '#fff8f0', [
+        [0.05, 0.92, 0.88, [205, 72, 22],  0.78],  // 深陶土 左下
+        [0.90, 0.08, 0.85, [255, 200, 50], 0.70],  // 黃金 右上
+        [0.50, 0.52, 0.68, [255, 135, 42], 0.42],  // 橙 中央
+      ])
     },
     drawImg: _tplGradDrawImg,
   },
-  // ── Apple 黃 — 晨光黃金 ──────────────────────────────────────
+  // ── Apple 黃 — 晴光黃金（Amber / Sunshine / Lemon）───────────
   {
     id: 'apple-yellow',
     layout: _tplGradLayout,
     drawBg(ctx, W, H) {
-      const g = ctx.createLinearGradient(0, H, W, 0)
-      g.addColorStop(0,    '#f5a623')   // 暖琥珀
-      g.addColorStop(0.5,  '#f9cf37')   // 陽光黃
-      g.addColorStop(1,    '#fef28a')   // 淡檸檬
-      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
-      _tplBloom(ctx, W, H, 0.50, 0.08, 0.60, 'rgba(255,255,210,0.52)')
+      _tplMesh(ctx, W, H, '#fffde8', [
+        [0.08, 0.90, 0.82, [230, 148, 28], 0.72],  // 琥珀 左下
+        [0.88, 0.10, 0.82, [255, 242, 95], 0.68],  // 亮檸檬 右上
+        [0.48, 0.45, 0.62, [255, 198, 50], 0.38],  // 陽光黃 中
+      ])
     },
     drawImg: _tplGradDrawImg,
   },
-  // ── Apple 綠 — 翠玉薄荷 ──────────────────────────────────────
+  // ── Apple 綠 — 翠玉薄荷（Emerald / Aquamarine / Mint）────────
   {
     id: 'apple-green',
     layout: _tplGradLayout,
     drawBg(ctx, W, H) {
-      const g = ctx.createLinearGradient(0, H, W, 0)
-      g.addColorStop(0,    '#0d9f72')   // 深翠綠
-      g.addColorStop(0.5,  '#2dcea0')   // 薄荷中調
-      g.addColorStop(1,    '#6ee7b7')   // 淺青
-      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
-      _tplBloom(ctx, W, H, 0.78, 0.15, 0.60, 'rgba(180,255,230,0.40)')
+      _tplMesh(ctx, W, H, '#f0fff8', [
+        [0.06, 0.90, 0.88, [8,  138, 102], 0.75],  // 深翠 左下
+        [0.90, 0.10, 0.84, [75, 238, 188], 0.65],  // 水藍綠 右上
+        [0.50, 0.50, 0.64, [45, 200, 162], 0.38],  // 薄荷 中
+      ])
     },
     drawImg: _tplGradDrawImg,
   },
-  // ── Apple 藍（水藍色系）— 晴空碧海 ──────────────────────────
+  // ── Apple 藍 — 晴空碧海（Sky / Aqua / Periwinkle）────────────
   {
     id: 'apple-blue',
     layout: _tplGradLayout,
     drawBg(ctx, W, H) {
-      const g = ctx.createLinearGradient(0, H, W, 0)
-      g.addColorStop(0,    '#1a7ac2')   // 深空藍
-      g.addColorStop(0.5,  '#3db8dc')   // 天藍中調
-      g.addColorStop(1,    '#82d8f0')   // 水藍淡色
-      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
-      _tplBloom(ctx, W, H, 0.80, 0.10, 0.65, 'rgba(200,242,255,0.52)')
+      _tplMesh(ctx, W, H, '#f0f8ff', [
+        [0.05, 0.90, 0.90, [32, 122, 205], 0.75],  // 深天藍 左下
+        [0.90, 0.08, 0.88, [95, 215, 255], 0.65],  // 天水藍 右上
+        [0.50, 0.48, 0.65, [128, 162, 235], 0.35], // 薰藍 中
+      ])
     },
     drawImg: _tplGradDrawImg,
   },
-  // ── Apple 紫 — 薰衣草夢境 ──────────────────────────────────
+  // ── Apple 紫 — 極光（Violet / Magenta / Lavender）────────────
   {
     id: 'apple-purple',
     layout: _tplGradLayout,
     drawBg(ctx, W, H) {
-      const g = ctx.createLinearGradient(0, H, W, 0)
-      g.addColorStop(0,    '#7c3aed')   // 濃郁紫羅蘭
-      g.addColorStop(0.5,  '#9d5cf6')   // 中紫
-      g.addColorStop(1,    '#c4a9ff')   // 薰衣草淡紫
-      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
-      _tplBloom(ctx, W, H, 0.75, 0.12, 0.68, 'rgba(220,200,255,0.45)')
-      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H)
+      _tplMesh(ctx, W, H, '#f8f0ff', [
+        [0.05, 0.90, 0.90, [98,  32, 218], 0.75],  // 深紫羅蘭 左下
+        [0.92, 0.08, 0.88, [222, 90, 205], 0.68],  // 品紅 右上
+        [0.10, 0.10, 0.72, [142, 112, 245], 0.48], // 薰衣草 左上
+        [0.78, 0.82, 0.62, [198, 95,  232], 0.32], // 紫 右下
+      ])
     },
     drawImg: _tplGradDrawImg,
   },
@@ -4552,6 +4565,8 @@ function openTemplatePanel() {
 function hideTemplatePanel() {
   document.getElementById('templatePanel').classList.add('hidden')
   _tplBaseSnapshot = null
+  _tplTargetRatio  = null
+  document.querySelectorAll('.tpl-size-btn').forEach(b => b.classList.remove('active'))
 }
 
 document.getElementById('btnTemplate').addEventListener('click', e => {
@@ -4561,6 +4576,16 @@ document.getElementById('btnTemplate').addEventListener('click', e => {
 
 document.querySelectorAll('.tpl-card').forEach(card => {
   card.addEventListener('click', () => applyTemplate(card.dataset.tpl))
+})
+
+// Social size buttons — set target ratio, highlight active
+document.querySelectorAll('.tpl-size-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tpl-size-btn').forEach(b => b.classList.remove('active'))
+    const ratio = parseFloat(btn.dataset.ratio)
+    _tplTargetRatio = ratio > 0 ? ratio : null
+    btn.classList.add('active')
+  })
 })
 
 document.addEventListener('mousedown', e => {

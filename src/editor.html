@@ -169,24 +169,54 @@
   position: relative;
   flex-shrink: 0;
 }
-/* 共用 Apple 漸層縮圖樣式 */
+/* 共用 Apple 縮圖白色圖片模擬 */
 [class^="tpl-preview-apple-"]::after {
   content: ''; position: absolute;
-  inset: 8px; background: rgba(255,255,255,0.25); border-radius: 3px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.22);
+  inset: 8px; background: rgba(255,255,255,0.28); border-radius: 3px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.22);
 }
-/* Apple 紅 — 珊瑚玫瑰 */
-.tpl-preview-apple-red    { background: linear-gradient(45deg, #f77062, #ee5a71 52%, #d6336c); }
-/* Apple 橙 — 琥珀暖陽 */
-.tpl-preview-apple-orange { background: linear-gradient(45deg, #c95b18, #f07821 50%, #fbb034); }
-/* Apple 黃 — 晨光黃金 */
-.tpl-preview-apple-yellow { background: linear-gradient(45deg, #f5a623, #f9cf37 50%, #fef28a); }
-/* Apple 綠 — 翠玉薄荷 */
-.tpl-preview-apple-green  { background: linear-gradient(45deg, #0d9f72, #2dcea0 50%, #6ee7b7); }
-/* Apple 藍 — 晴空碧海 */
-.tpl-preview-apple-blue   { background: linear-gradient(45deg, #1a7ac2, #3db8dc 50%, #82d8f0); }
-/* Apple 紫 — 薰衣草夢境 */
-.tpl-preview-apple-purple { background: linear-gradient(45deg, #7c3aed, #9d5cf6 50%, #c4a9ff); }
+/* Apple 紅 — 珊瑚 + 玫瑰 + 桃（mesh） */
+.tpl-preview-apple-red {
+  background: radial-gradient(ellipse at 10% 90%, rgba(225,55,85,0.90) 0%, transparent 65%),
+              radial-gradient(ellipse at 92% 12%, rgba(255,125,85,0.85) 0%, transparent 62%), #fff0f0;
+}
+/* Apple 橙 — 陶土 + 橙 + 金（mesh） */
+.tpl-preview-apple-orange {
+  background: radial-gradient(ellipse at 5% 92%,  rgba(205,72,22,0.90)  0%, transparent 65%),
+              radial-gradient(ellipse at 90%  8%,  rgba(255,200,50,0.85) 0%, transparent 62%), #fff8f0;
+}
+/* Apple 黃 — 琥珀 + 陽光 + 檸檬（mesh） */
+.tpl-preview-apple-yellow {
+  background: radial-gradient(ellipse at 8% 90%,  rgba(230,148,28,0.88) 0%, transparent 62%),
+              radial-gradient(ellipse at 88% 10%,  rgba(255,242,95,0.85) 0%, transparent 62%), #fffde8;
+}
+/* Apple 綠 — 翠綠 + 薄荷 + 水色（mesh） */
+.tpl-preview-apple-green {
+  background: radial-gradient(ellipse at 6% 90%,  rgba(8,138,102,0.90)  0%, transparent 65%),
+              radial-gradient(ellipse at 90% 10%,  rgba(75,238,188,0.82) 0%, transparent 62%), #f0fff8;
+}
+/* Apple 藍 — 天藍 + 水藍 + 薰藍（mesh） */
+.tpl-preview-apple-blue {
+  background: radial-gradient(ellipse at 5% 90%,  rgba(32,122,205,0.90)  0%, transparent 65%),
+              radial-gradient(ellipse at 90%  8%,  rgba(95,215,255,0.82)  0%, transparent 62%), #f0f8ff;
+}
+/* Apple 紫 — 極光（紫 + 品紅 + 薰衣草，mesh） */
+.tpl-preview-apple-purple {
+  background: radial-gradient(ellipse at 5% 90%,  rgba(98,32,218,0.90)   0%, transparent 65%),
+              radial-gradient(ellipse at 92%  8%,  rgba(222,90,205,0.82)  0%, transparent 62%),
+              radial-gradient(ellipse at 10% 10%,  rgba(142,112,245,0.60) 0%, transparent 55%), #f8f0ff;
+}
+/* 社群尺寸按鈕 */
+.tpl-sizes { display: flex; gap: 5px; margin-bottom: 10px; }
+.tpl-size-btn {
+  flex: 1;
+  background: none; border: 1.5px solid #2a2a42; border-radius: 6px;
+  padding: 5px 2px; font-size: 10px; color: #9098b8; cursor: pointer;
+  transition: border-color .15s, background .15s, color .15s;
+  font-family: inherit; text-align: center; white-space: nowrap;
+}
+.tpl-size-btn:hover  { border-color: #a78bfa; color: #d0d8f8; }
+.tpl-size-btn.active { border-color: #a78bfa; background: rgba(167,139,250,0.15); color: #d0d8f8; }
 .tpl-label {
   font-size: 11px;
   color: #9098b8;
@@ -898,7 +928,14 @@
 
 <!-- ─── Template Panel ──────────────────────────────────── -->
 <div id="templatePanel" class="template-panel hidden" role="dialog" aria-label="套版選擇">
-  <div class="tpl-heading">一鍵套版</div>
+  <div class="tpl-heading">社群尺寸（選用）</div>
+  <div class="tpl-sizes">
+    <button class="tpl-size-btn" data-ratio="0"     title="等比留白，不限制比例">Auto</button>
+    <button class="tpl-size-btn" data-ratio="1.914" title="LinkedIn 1200×627">LinkedIn</button>
+    <button class="tpl-size-btn" data-ratio="1"     title="Instagram 1080×1080">Instagram</button>
+    <button class="tpl-size-btn" data-ratio="1.778" title="X / Twitter 1200×675">𝕏 Twitter</button>
+  </div>
+  <div class="tpl-heading">背景</div>
   <div class="tpl-grid">
     <button class="tpl-card" data-tpl="apple-red">
       <div class="tpl-preview tpl-preview-apple-red"></div>
