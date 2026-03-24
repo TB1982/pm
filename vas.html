@@ -100,9 +100,13 @@
     <main>
 
         <!-- Hero -->
-        <section class="container mx-auto px-6 pt-24 pb-20 text-center" aria-labelledby="hero-heading">
+        <section class="container mx-auto px-6 pt-16 pb-20 text-center" aria-labelledby="hero-heading">
             <div class="inline-block mb-6 px-4 py-1.5 rounded-full text-xs font-semibold tracking-widest" style="background: rgba(196,113,245,0.18); color: #e2aaff; border: 1px solid rgba(196,113,245,0.3);">
                 <span data-lang-key="badge">Mac 專屬 · v0.1.0 正式發布</span>
+            </div>
+
+            <div class="flex justify-center mb-6">
+                <img src="img/vas.png" alt="VAS app icon" width="120" height="120" class="drop-shadow-2xl" style="filter: drop-shadow(0 0 32px rgba(196,113,245,0.5));">
             </div>
 
             <h1 id="hero-heading" class="text-5xl md:text-7xl font-extrabold tracking-tight mb-4">
@@ -157,6 +161,14 @@
             </div>
         </section>
 
+        <!-- App Preview -->
+        <section class="container mx-auto px-4 md:px-6 py-8 max-w-5xl" aria-labelledby="preview-heading">
+            <h2 id="preview-heading" class="sr-only">VAS 編輯器介面預覽</h2>
+            <div class="rounded-2xl overflow-hidden shadow-2xl" style="border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 32px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06);">
+                <img src="img/vasframe.jpg" alt="VAS 編輯器介面：深色工作區，左側工具列，頂部選項列，中央為圖片標注畫布" class="w-full block" loading="lazy">
+            </div>
+        </section>
+
         <!-- Features -->
         <section class="container mx-auto px-6 py-16 max-w-4xl" aria-labelledby="features-heading">
             <h2 id="features-heading" class="text-2xl md:text-3xl font-bold text-center mb-3 text-white/90" data-lang-key="featuresTitle">核心功能</h2>
@@ -201,6 +213,12 @@
                 </div>
 
             </div>
+        </section>
+
+        <!-- Toolbar Preview -->
+        <section class="container mx-auto px-6 pb-4 max-w-3xl text-center" aria-labelledby="toolbar-heading">
+            <h2 id="toolbar-heading" class="text-sm font-semibold tracking-widest text-white/30 uppercase mb-6" data-lang-key="toolbarLabel">Capture Toolbar</h2>
+            <img src="img/vastoolbar.png" alt="VAS 截圖工具列：全螢幕、視窗、矩形、延遲、開啟、批次轉等功能按鈕" class="mx-auto max-w-full rounded-2xl shadow-xl" loading="lazy" style="box-shadow: 0 8px 40px rgba(0,0,0,0.4);">
         </section>
 
         <!-- Origin Story -->
@@ -251,6 +269,7 @@
                 f5Desc: '一次選取多張，PNG / JPG / GIF 三格互轉，省去繁瑣的逐張操作。',
                 f6Title: '示意圖繪製',
                 f6Desc: '不需要 Figma、不需要 Keynote，在截圖上直接完成流程說明與架構示意。',
+                toolbarLabel: '截圖工具列',
                 storyTitle: 'Origin',
                 storyBody: '來自一位<strong class="text-white">一行程式碼都不會寫的 PM</strong>，以及 Claude Code 的 Claude，<br>人機協作 <strong class="gradient-text text-2xl font-bold">36 小時</strong>內迭代至 v3.26 而誕生的作品。',
                 storyByline: '— Nova & Claude，2026'
@@ -280,6 +299,7 @@
                 f5Desc: 'Select multiple files, convert between PNG / JPG / GIF in one go.',
                 f6Title: 'Diagram Sketching',
                 f6Desc: 'No Figma. No Keynote. Draw flowcharts and architecture diagrams directly on your screenshots.',
+                toolbarLabel: 'Capture Toolbar',
                 storyTitle: 'Origin',
                 storyBody: 'Born from a collaboration between <strong class="text-white">a PM who can\'t write a single line of code</strong> and Claude from Claude Code —<br>iterated together to v3.26 in <strong class="gradient-text text-2xl font-bold">36 hours</strong>.',
                 storyByline: '— Nova & Claude, 2026'
