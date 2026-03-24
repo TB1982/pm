@@ -13,7 +13,8 @@
     "electron-builder": "^24.0.0"
   },
   "dependencies": {
-    "sharp": "^0.33.0"
+    "sharp": "^0.33.0",
+    "tesseract.js": "^4.1.1"
   },
   "build": {
     "appId": "com.yourname.mac-screenshot-tool",

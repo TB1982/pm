@@ -484,6 +484,8 @@ ipcMain.handle('open-overlay', async () => {
     win.setAlwaysOnTop(true, 'screen-saver')
     win.setVisibleOnAllWorkspaces(true)
     win.loadFile('src/overlay.html')
+    // 載入後 focus，讓 macOS 立即套用 CSS cursor: crosshair
+    win.webContents.once('did-finish-load', () => win.focus())
     return win
   })
 })
@@ -579,6 +581,66 @@ ipcMain.handle('open-permission-settings', () => {
   shell.openExternal(
     'x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture'
   )
+})
+
+// ─── OCR (macOS Vision framework via Swift) ───────────────────────────────────
+// 使用 macOS 內建 Vision 框架，不需要下載語言包，支援繁中 + 英文
+
+const SWIFT_OCR = `
+import Vision
+import AppKit
+
+let imgPath = CommandLine.arguments[1]
+guard let img = NSImage(contentsOfFile: imgPath),
+      let tiff = img.tiffRepresentation,
+      let rep  = NSBitmapImageRep(data: tiff),
+      let cg   = rep.cgImage else {
+  fputs("ERROR: Cannot load image\\n", stderr); exit(1)
+}
+let sem = DispatchSemaphore(value: 0)
+var lines: [String] = []
+let req = VNRecognizeTextRequest { req, _ in
+  lines = (req.results as? [VNRecognizedTextObservation] ?? [])
+    .compactMap { $0.topCandidates(1).first?.string }
+  sem.signal()
+}
+req.recognitionLevel = .accurate
+req.recognitionLanguages = ["zh-Hant", "en-US"]
+req.usesLanguageCorrection = true
+try? VNImageRequestHandler(cgImage: cg, options: [:]).perform([req])
+sem.wait()
+print(lines.joined(separator: "\\n"))
+`
+
+ipcMain.handle('ocr-recognize', (event, { dataURL }) => {
+  return new Promise((resolve) => {
+    // 將 dataURL 寫入暫存 PNG
+    const tmpDir   = os.tmpdir()
+    const tmpImg   = path.join(tmpDir, `ocr_img_${Date.now()}.png`)
+    const tmpSwift = path.join(tmpDir, `ocr_run_${Date.now()}.swift`)
+    try {
+      const b64 = dataURL.replace(/^data:image\/\w+;base64,/, '')
+      fs.writeFileSync(tmpImg, Buffer.from(b64, 'base64'))
+      fs.writeFileSync(tmpSwift, SWIFT_OCR)
+    } catch (err) {
+      resolve({ success: false, error: '暫存檔案寫入失敗：' + err.message })
+      return
+    }
+
+    const cleanup = () => {
+      try { fs.unlinkSync(tmpImg)   } catch {}
+      try { fs.unlinkSync(tmpSwift) } catch {}
+    }
+
+    exec(`swift "${tmpSwift}" "${tmpImg}"`, { timeout: 60000 }, (err, stdout, stderr) => {
+      cleanup()
+      if (err) {
+        resolve({ success: false, error: stderr.trim() || err.message })
+      } else {
+        resolve({ success: true, text: stdout.trim() })
+      }
+    })
+  })
 })
 
 // ─── App lifecycle ────────────────────────────────────────────────────────────
