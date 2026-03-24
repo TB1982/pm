@@ -45,11 +45,17 @@ function savePos(x, y) {
 
 function createWindow() {
   const saved = loadPos()
+  const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize
+  const validPos = saved &&
+    saved.x >= 0 && saved.x + TOOLBAR_W <= sw &&
+    saved.y >= 0 && saved.y + TOOLBAR_H <= sh
+  const winX = validPos ? saved.x : Math.round((sw - TOOLBAR_W) / 2)
+  const winY = validPos ? saved.y : Math.round(sh * 0.1)
   mainWindow = new BrowserWindow({
     width:  TOOLBAR_W,
     height: TOOLBAR_H,
-    x: saved?.x,
-    y: saved?.y,
+    x: winX,
+    y: winY,
     frame:       false,
     transparent: true,
     alwaysOnTop: true,
