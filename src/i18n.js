@@ -66,6 +66,16 @@ const STRINGS = {
     batch_dismiss: '忽略提示',
     batch_start: '開始轉換',
     batch_n_files: (n) => `共 ${n} 個檔案`,
+    batch_wm_enable:      '加入浮水印',
+    batch_wm_text:        '文字',
+    batch_wm_text_placeholder: '輸入浮水印文字',
+    batch_wm_img:         '圖片（Logo）',
+    batch_wm_choose_img:  '選取圖片…',
+    batch_wm_size:        '字級',
+    batch_wm_opacity:     '不透明',
+    batch_wm_img_size:    '寬度佔比',
+    batch_wm_position:    '位置',
+    batch_wm_margin:      '邊距',
 
     // ── Toast messages (renderer) ────────────────────────────────
     toast_copied: (w, h) => `已複製到剪貼簿  ${w} × ${h} px`,
@@ -180,6 +190,10 @@ const STRINGS = {
     tool_fillrect: '色塊 (B)',
     tool_text: '文字 (T)',
     tool_text_pro: '去背（Pro 版功能）',
+    tool_removebg: '主體去背 (K)',
+    toast_rmbg_processing: '主體提取中…',
+    toast_rmbg_done: '去背完成',
+    toast_rmbg_fail: '去背失敗',
     tool_number: '編號 (N)',
     tool_symbol: '符號印章 (U)',
     tool_ocr: 'OCR 文字辨識 (G)',
@@ -196,6 +210,12 @@ const STRINGS = {
     tool_redo: '重做 (⌘⇧Z)',
 
     // ── Bottom bar ───────────────────────────────────────────────
+    btn_history: '歷史',
+    btn_history_title: '歷史截圖',
+    history_title: '歷史截圖',
+    history_empty: '尚無紀錄',
+    history_copied_label: '已複製',
+    history_file_not_found: '檔案已移動或刪除',
     btn_copy: '複製',
     btn_copy_title: '複製最終圖片到剪貼簿 (⌘⇧C)',
     btn_save: '完成並儲存',
@@ -242,6 +262,10 @@ const STRINGS = {
     // ── Color picker ─────────────────────────────────────────────
     cpp_standard: '標準色彩',
     cpp_recent: '最近使用',
+    cpp_brand: '品牌色庫',
+    cpp_brand_add_title: '將目前顏色加入品牌色庫',
+    cpp_brand_empty: '尚未儲存品牌色',
+    cpp_brand_remove: '移除此品牌色',
     cpp_eyedropper: '滴管選色（從螢幕取色）',
     cpp_hex: '色碼（16 進位）',
 
@@ -360,6 +384,16 @@ const STRINGS = {
     batch_dismiss: 'Dismiss',
     batch_start: 'Start Convert',
     batch_n_files: (n) => `${n} file${n === 1 ? '' : 's'}`,
+    batch_wm_enable:      'Add Watermark',
+    batch_wm_text:        'Text',
+    batch_wm_text_placeholder: 'Enter watermark text',
+    batch_wm_img:         'Image (Logo)',
+    batch_wm_choose_img:  'Choose image…',
+    batch_wm_size:        'Font size',
+    batch_wm_opacity:     'Opacity',
+    batch_wm_img_size:    'Width %',
+    batch_wm_position:    'Position',
+    batch_wm_margin:      'Margin',
 
     // ── Toast messages (renderer) ────────────────────────────────
     toast_copied: (w, h) => `Copied to clipboard  ${w} × ${h} px`,
@@ -474,6 +508,10 @@ const STRINGS = {
     tool_fillrect: 'Fill (B)',
     tool_text: 'Text (T)',
     tool_text_pro: 'Remove BG (Pro)',
+    tool_removebg: 'Remove BG (K)',
+    toast_rmbg_processing: 'Extracting subject…',
+    toast_rmbg_done: 'Background removed',
+    toast_rmbg_fail: 'Remove BG failed',
     tool_number: 'Number (N)',
     tool_symbol: 'Stamp (U)',
     tool_ocr: 'OCR (G)',
@@ -490,6 +528,12 @@ const STRINGS = {
     tool_redo: 'Redo (⌘⇧Z)',
 
     // ── Bottom bar ───────────────────────────────────────────────
+    btn_history: 'History',
+    btn_history_title: 'Screenshot History',
+    history_title: 'Screenshot History',
+    history_empty: 'No history yet',
+    history_copied_label: 'Copied',
+    history_file_not_found: 'File moved or deleted',
     btn_copy: 'Copy',
     btn_copy_title: 'Copy to Clipboard (⌘⇧C)',
     btn_save: 'Save',
@@ -536,6 +580,10 @@ const STRINGS = {
     // ── Color picker ─────────────────────────────────────────────
     cpp_standard: 'Standard Colors',
     cpp_recent: 'Recent',
+    cpp_brand: 'Brand Colors',
+    cpp_brand_add_title: 'Add current color to brand library',
+    cpp_brand_empty: 'No brand colors saved',
+    cpp_brand_remove: 'Remove brand color',
     cpp_eyedropper: 'Eyedropper (pick from screen)',
     cpp_hex: 'Hex color code',
 

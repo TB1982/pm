@@ -746,7 +746,7 @@
       <button class="tool-btn active" data-tool="rect"         title="矩形框 (R)" data-i18n-title="tool_rect">□</button>
       <button class="tool-btn"        data-tool="fillrect"     title="色塊 (B)" data-i18n-title="tool_fillrect">■</button>
       <button class="tool-btn"        data-tool="text"         title="文字 (T)" data-i18n-title="tool_text">T</button>
-      <button class="tool-btn"        disabled                 title="去背（Pro 版功能）" data-i18n-title="tool_text_pro">⬜</button>
+      <button class="tool-btn"        id="btnRemoveBg" data-tool="removebg" title="主體去背 (K)" data-i18n-title="tool_removebg">⬜</button>
       <button class="tool-btn"        data-tool="number"       title="編號 (N)" data-i18n-title="tool_number">①</button>
       <button class="tool-btn"        data-tool="symbol"       title="符號印章 (U)" data-i18n-title="tool_symbol">☺</button>
       <button class="tool-btn"        data-tool="ocr"          title="OCR 文字辨識 (G)" data-i18n-title="tool_ocr">文</button>
@@ -787,10 +787,20 @@
 
   </div>
 
+  <!-- History panel (slides up from bottom bar) -->
+  <div id="historyPanel" class="history-panel hidden">
+    <div class="history-header">
+      <span data-i18n="history_title">歷史截圖</span>
+      <button class="history-close" id="historyClose">✕</button>
+    </div>
+    <div class="history-list" id="historyList"></div>
+  </div>
+
   <!-- Bottom bar -->
   <div class="editor-bottombar">
     <span class="zoom-label" id="zoomLabel">100%</span>
     <div class="flex-spacer"></div>
+    <button class="history-btn"     id="btnHistory" title="歷史截圖" data-i18n-title="btn_history_title" data-i18n="btn_history">歷史</button>
     <button class="copy-btn"        id="btnCopyImage"  title="複製最終圖片到剪貼簿 (⌘⇧C)" data-i18n="btn_copy" data-i18n-title="btn_copy_title">複製</button>
     <button class="save-btn"        id="btnSave" data-i18n="btn_save">完成並儲存</button>
   </div>
@@ -958,6 +968,14 @@
     <span class="cpp-section-label" data-i18n="cpp_recent">最近使用</span>
     <div id="cppRecent"></div>
   </div>
+  <!-- Brand colors -->
+  <div class="cpp-divider"></div>
+  <div class="cpp-section-header">
+    <span class="cpp-section-label" data-i18n="cpp_brand">品牌色庫</span>
+    <button class="cpp-brand-add" id="cppBrandAdd" title="將目前顏色加入品牌色庫" data-i18n-title="cpp_brand_add_title">+</button>
+  </div>
+  <div id="cppBrand"></div>
+
   <!-- Layer 2 + 3: Eyedropper + Hex input -->
   <div class="cpp-divider"></div>
   <div id="cppTools">

@@ -214,6 +214,18 @@ ipcMain.handle('open-image-file', async (event) => {
   openEditorWindow(result.filePaths[0])
 })
 
+// ─── Select watermark image ────────────────────────────────────────────────────
+
+ipcMain.handle('select-watermark-image', async (event) => {
+  const win = BrowserWindow.fromWebContents(event.sender)
+  const result = await dialog.showOpenDialog(win, {
+    filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'webp', 'gif'] }],
+    properties: ['openFile']
+  })
+  if (result.canceled || result.filePaths.length === 0) return null
+  return result.filePaths[0]
+})
+
 // ─── Batch conversion ─────────────────────────────────────────────────────────
 
 ipcMain.handle('select-batch-files', async (event) => {
@@ -235,8 +247,42 @@ ipcMain.handle('select-output-dir', async (event) => {
   return result.filePaths[0]
 })
 
+// 浮水印位置 → SVG text-anchor 與座標
+function wmCalcTextPos(position, imgW, imgH, margin, fontSize) {
+  const col = position.includes('west') ? 'left' : position.includes('east') ? 'right' : 'center'
+  const row = position.includes('north') ? 'top' : position.includes('south') ? 'bottom' : 'middle'
+  let x, anchor
+  if      (col === 'left')   { x = margin;           anchor = 'start'  }
+  else if (col === 'right')  { x = imgW - margin;    anchor = 'end'    }
+  else                       { x = Math.round(imgW / 2); anchor = 'middle' }
+  let y
+  if      (row === 'top')    y = margin + fontSize
+  else if (row === 'bottom') y = imgH - margin
+  else                       y = Math.round(imgH / 2 + fontSize * 0.35)
+  return { x, y, anchor }
+}
+
+// 浮水印位置 → composite top/left offset
+function wmCalcImgOffset(position, imgW, imgH, overlayW, overlayH, margin) {
+  const col = position.includes('west') ? 'left' : position.includes('east') ? 'right' : 'center'
+  const row = position.includes('north') ? 'top' : position.includes('south') ? 'bottom' : 'middle'
+  let left
+  if      (col === 'left')   left = margin
+  else if (col === 'right')  left = imgW - overlayW - margin
+  else                       left = Math.round((imgW - overlayW) / 2)
+  let top
+  if      (row === 'top')    top = margin
+  else if (row === 'bottom') top = imgH - overlayH - margin
+  else                       top = Math.round((imgH - overlayH) / 2)
+  return { top: Math.max(0, top), left: Math.max(0, left) }
+}
+
+function escapeXml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+}
+
 ipcMain.handle('batch-convert', async (event, {
-  files, format, quality, svgWidth, resize, outputMode, outputDir, deleteOriginals
+  files, format, quality, svgWidth, resize, outputMode, outputDir, deleteOriginals, watermark
 }) => {
   const results = []
 
@@ -272,6 +318,44 @@ ipcMain.handle('batch-convert', async (event, {
       else if (format === 'webp') s = s.webp({ quality })
       else if (format === 'gif')  s = s.gif()
       else                        s = s.png()
+
+      // 浮水印合成
+      if (watermark) {
+        const meta = await s.clone().metadata()
+        const { width: imgW, height: imgH } = meta
+        const overlays = []
+
+        // 文字浮水印
+        if (watermark.text?.enabled && watermark.text.content) {
+          const { x, y, anchor } = wmCalcTextPos(watermark.position, imgW, imgH, watermark.margin, watermark.text.size)
+          const opacity = (watermark.text.opacity / 100).toFixed(2)
+          const svgText = `<svg xmlns="http://www.w3.org/2000/svg" width="${imgW}" height="${imgH}"><text x="${x}" y="${y}" font-size="${watermark.text.size}" fill="${escapeXml(watermark.text.color)}" opacity="${opacity}" text-anchor="${anchor}" font-family="Arial,sans-serif" font-weight="bold">${escapeXml(watermark.text.content)}</text></svg>`
+          overlays.push({ input: Buffer.from(svgText), top: 0, left: 0 })
+        }
+
+        // 圖片浮水印
+        if (watermark.img?.enabled && watermark.img.path && fs.existsSync(watermark.img.path)) {
+          const targetW = Math.max(1, Math.round(imgW * watermark.img.sizePercent / 100))
+          const { data: rawData, info: rawInfo } = await sharp(watermark.img.path)
+            .resize({ width: targetW })
+            .ensureAlpha()
+            .raw()
+            .toBuffer({ resolveWithObject: true })
+          // 套用不透明度
+          const opacity = watermark.img.opacity / 100
+          for (let i = 3; i < rawData.length; i += 4) {
+            rawData[i] = Math.round(rawData[i] * opacity)
+          }
+          const logoBuf = await sharp(rawData, {
+            raw: { width: rawInfo.width, height: rawInfo.height, channels: 4 }
+          }).png().toBuffer()
+          const logoMeta = await sharp(logoBuf).metadata()
+          const { top, left } = wmCalcImgOffset(watermark.position, imgW, imgH, logoMeta.width, logoMeta.height, watermark.margin)
+          overlays.push({ input: logoBuf, top, left, blend: 'over' })
+        }
+
+        if (overlays.length > 0) s = s.composite(overlays)
+      }
 
       await s.toFile(outPath)
 
@@ -756,6 +840,100 @@ ipcMain.handle('ocr-recognize', (event, { dataURL }) => {
   })
 })
 
+// ─── Remove Background (macOS 12+ Vision framework via Swift) ────────────────
+
+const SWIFT_REMOVE_BG = `
+import Vision
+import AppKit
+
+guard CommandLine.arguments.count >= 3 else {
+  fputs("ERROR: usage: swift script.swift <input> <output>\\n", stderr); exit(1)
+}
+let imgPath = CommandLine.arguments[1]
+let outPath = CommandLine.arguments[2]
+
+guard let nsImg = NSImage(contentsOfFile: imgPath),
+      let tiff  = nsImg.tiffRepresentation,
+      let rep   = NSBitmapImageRep(data: tiff),
+      let cg    = rep.cgImage else {
+  fputs("ERROR: Cannot load image\\n", stderr); exit(1)
+}
+
+if #available(macOS 12.0, *) {
+  let handler = VNImageRequestHandler(cgImage: cg, options: [:])
+  let request = VNGenerateForegroundInstanceMaskRequest()
+  do {
+    try handler.perform([request])
+  } catch {
+    fputs("ERROR: \\(error.localizedDescription)\\n", stderr); exit(1)
+  }
+  guard let result = request.results?.first else {
+    fputs("ERROR: No foreground detected\\n", stderr); exit(1)
+  }
+  do {
+    let masked = try result.generateMaskedImage(
+      ofInstances: result.allInstances,
+      from: handler,
+      croppedToInstancesExtent: false
+    )
+    let ci  = CIImage(cvPixelBuffer: masked)
+    let ctx = CIContext()
+    guard let out = ctx.createCGImage(ci, from: ci.extent) else {
+      fputs("ERROR: Cannot create output image\\n", stderr); exit(1)
+    }
+    let outRep = NSBitmapImageRep(cgImage: out)
+    guard let png = outRep.representation(using: .png, properties: [:]) else {
+      fputs("ERROR: Cannot encode PNG\\n", stderr); exit(1)
+    }
+    try png.write(to: URL(fileURLWithPath: outPath))
+    print("OK")
+  } catch {
+    fputs("ERROR: \\(error.localizedDescription)\\n", stderr); exit(1)
+  }
+} else {
+  fputs("ERROR: Requires macOS 12 or later\\n", stderr); exit(1)
+}
+`
+
+ipcMain.handle('remove-background', (event, { dataURL }) => {
+  if (process.platform !== 'darwin') {
+    return { success: false, error: '此功能僅支援 macOS 12 以上' }
+  }
+  return new Promise((resolve) => {
+    const tmpDir    = os.tmpdir()
+    const tmpImg    = path.join(tmpDir, `rmbg_in_${Date.now()}.png`)
+    const tmpOut    = path.join(tmpDir, `rmbg_out_${Date.now()}.png`)
+    const tmpSwift  = path.join(tmpDir, `rmbg_${Date.now()}.swift`)
+    try {
+      const b64 = dataURL.replace(/^data:image\/\w+;base64,/, '')
+      fs.writeFileSync(tmpImg, Buffer.from(b64, 'base64'))
+      fs.writeFileSync(tmpSwift, SWIFT_REMOVE_BG)
+    } catch (err) {
+      resolve({ success: false, error: '暫存檔寫入失敗：' + err.message })
+      return
+    }
+    const cleanup = () => {
+      try { fs.unlinkSync(tmpImg)   } catch {}
+      try { fs.unlinkSync(tmpSwift) } catch {}
+    }
+    exec(`swift "${tmpSwift}" "${tmpImg}" "${tmpOut}"`, { timeout: 60000 }, (err, stdout, stderr) => {
+      cleanup()
+      if (err) {
+        try { fs.unlinkSync(tmpOut) } catch {}
+        resolve({ success: false, error: stderr.trim() || err.message })
+        return
+      }
+      try {
+        const outBuf = fs.readFileSync(tmpOut)
+        fs.unlinkSync(tmpOut)
+        resolve({ success: true, dataURL: 'data:image/png;base64,' + outBuf.toString('base64') })
+      } catch (readErr) {
+        resolve({ success: false, error: readErr.message })
+      }
+    })
+  })
+})
+
 // ─── Drag OUT export (renderer → OS drag) ────────────────────────────────────
 
 ipcMain.on('start-drag-export', (event, { dataURL }) => {
@@ -767,6 +945,64 @@ ipcMain.on('start-drag-export', (event, { dataURL }) => {
     event.sender.startDrag({ file: tmpPath, icon })
   } catch (err) {
     console.error('start-drag-export failed:', err.message)
+  }
+})
+
+// ─── Screenshot History ───────────────────────────────────────────────────────
+
+function getHistoryPath() {
+  return path.join(app.getPath('userData'), 'history.json')
+}
+
+ipcMain.handle('get-history', () => {
+  try {
+    return JSON.parse(fs.readFileSync(getHistoryPath(), 'utf8'))
+  } catch {
+    return []
+  }
+})
+
+ipcMain.handle('add-history-entry', (_, entry) => {
+  try {
+    let history = []
+    try { history = JSON.parse(fs.readFileSync(getHistoryPath(), 'utf8')) } catch {}
+    history.unshift(entry)
+    if (history.length > 20) history = history.slice(0, 20)
+    fs.writeFileSync(getHistoryPath(), JSON.stringify(history))
+    return true
+  } catch {
+    return false
+  }
+})
+
+ipcMain.handle('open-history-file', (_, filePath) => {
+  if (!fs.existsSync(filePath)) return { success: false, error: 'File not found' }
+  mainWindow.hide()
+  openEditorWindow(filePath)
+  return { success: true }
+})
+
+// ─── Brand Colors ─────────────────────────────────────────────────────────────
+
+function getBrandColorsPath() {
+  return path.join(app.getPath('userData'), 'brand-colors.json')
+}
+
+ipcMain.handle('get-brand-colors', () => {
+  try {
+    const raw = fs.readFileSync(getBrandColorsPath(), 'utf8')
+    return JSON.parse(raw)
+  } catch {
+    return []
+  }
+})
+
+ipcMain.handle('save-brand-colors', (_, colors) => {
+  try {
+    fs.writeFileSync(getBrandColorsPath(), JSON.stringify(colors))
+    return true
+  } catch {
+    return false
   }
 })
 

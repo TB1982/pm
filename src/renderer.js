@@ -221,6 +221,8 @@ let batchFiles       = []
 let selectedOutputDir = null
 let batchRunning     = false
 let warnPreemptive   = false   // true = warning shown before "開始轉換" was clicked
+let wmImgFilePath    = null
+let wmPosition       = 'southeast'
 
 const batchModal = document.getElementById('batchModal')
 
@@ -355,6 +357,38 @@ document.getElementById('batchDirBtn').addEventListener('click', async () => {
     pathEl.textContent = dir.split('/').pop() || dir
     pathEl.title = dir
   }
+})
+
+// ── Watermark ────────────────────────────────────────────────────────────────
+
+document.getElementById('batchWatermarkCheck').addEventListener('change', (e) => {
+  document.getElementById('watermarkOptions').classList.toggle('hidden', !e.target.checked)
+})
+
+document.getElementById('wmTextCheck').addEventListener('change', (e) => {
+  document.getElementById('wmTextOpts').classList.toggle('hidden', !e.target.checked)
+})
+
+document.getElementById('wmImgCheck').addEventListener('change', (e) => {
+  document.getElementById('wmImgOpts').classList.toggle('hidden', !e.target.checked)
+})
+
+document.getElementById('wmImgSelectBtn').addEventListener('click', async () => {
+  const filePath = await ipcRenderer.invoke('select-watermark-image')
+  if (filePath) {
+    wmImgFilePath = filePath
+    const el = document.getElementById('wmImgPath')
+    el.textContent = filePath.split(/[\\/]/).pop()
+    el.title = filePath
+  }
+})
+
+document.getElementById('wmGrid').addEventListener('click', (e) => {
+  const cell = e.target.closest('.wm-cell')
+  if (!cell) return
+  document.querySelectorAll('.wm-cell').forEach(c => c.classList.remove('active'))
+  cell.classList.add('active')
+  wmPosition = cell.dataset.pos
 })
 
 // ── Same-format warning ─────────────────────────────────────────────────────
@@ -505,9 +539,29 @@ async function runConversion(files) {
   const outputMode      = document.querySelector('input[name="outputMode"]:checked').value
   const deleteOriginals = document.getElementById('batchDeleteCheck').checked
 
+  const wmEnabled = document.getElementById('batchWatermarkCheck').checked
+  const watermark = wmEnabled ? {
+    text: {
+      enabled:  document.getElementById('wmTextCheck').checked,
+      content:  document.getElementById('wmText').value.trim(),
+      size:     parseInt(document.getElementById('wmTextSize').value, 10) || 32,
+      color:    document.getElementById('wmTextColor').value,
+      opacity:  parseInt(document.getElementById('wmTextOpacity').value, 10) || 80
+    },
+    img: {
+      enabled:     document.getElementById('wmImgCheck').checked,
+      path:        wmImgFilePath,
+      sizePercent: parseInt(document.getElementById('wmImgSize').value, 10) || 20,
+      opacity:     parseInt(document.getElementById('wmImgOpacity').value, 10) || 80
+    },
+    position: wmPosition,
+    margin:   parseInt(document.getElementById('wmMargin').value, 10) || 20
+  } : null
+
   const results = await ipcRenderer.invoke('batch-convert', {
     files, format: fmt, quality, svgWidth, resize,
-    outputMode, outputDir: selectedOutputDir, deleteOriginals
+    outputMode, outputDir: selectedOutputDir, deleteOriginals,
+    watermark
   })
 
   ipcRenderer.removeListener('batch-progress', onProgress)
