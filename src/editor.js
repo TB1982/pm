@@ -5209,6 +5209,7 @@ async function runPrivacyScan(region) {
   })
   renderAnnotations()
   showToast(t('toast_privacy_done', boxes.length))
+  setTool('select')  // auto-switch so user can immediately drag resize handles on any generated mosaic
 }
 
 // ─── Toast ────────────────────────────────────────────────────────────────────

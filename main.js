@@ -887,14 +887,23 @@ func toBox(_ r: VNRectangleObservation) -> Box {
 let detectorTypes: NSTextCheckingResult.CheckingType = [.phoneNumber, .link, .address]
 let detector = try? NSDataDetector(types: detectorTypes.rawValue)
 
-// 3. Regex — TW ID, TW business reg no., credit card, IPv4, IPv6, API token
+// 3. Regex — structured patterns + label-context lookbehind
 let regexes = [
   "[A-Z][12]\\\\d{8}",                                                          // TW national ID
   "\\\\b\\\\d{8}\\\\b",                                                         // TW biz reg no. (word-bounded)
   "\\\\d{4}[\\\\s\\\\-]?\\\\d{4}[\\\\s\\\\-]?\\\\d{4}[\\\\s\\\\-]?\\\\d{4}", // credit card
   "\\\\b(?:\\\\d{1,3}\\\\.){3}\\\\d{1,3}\\\\b",                               // IPv4
   "[0-9a-fA-F]{1,4}(?::[0-9a-fA-F]{1,4}){7}",                                 // IPv6 full form
-  "[A-Za-z0-9_\\\\-]{20,}"                                                      // API key / token (no spaces)
+  "[A-Za-z0-9_\\\\-]{20,}",                                                     // API key / token (no spaces)
+  // Label-context: mask the value after known field labels (lookbehind = don't mask the label itself)
+  "(?<=姓名[：:])\\\\S+",
+  "(?<=名字[：:])\\\\S+",
+  "(?<=聯絡人[：:])\\\\S+",
+  "(?<=收件人[：:])\\\\S+",
+  "(?<=寄件人[：:])\\\\S+",
+  "(?<=負責人[：:])\\\\S+",
+  "(?<=承辦人[：:])\\\\S+",
+  "(?<=Name[：: ])\\\\S+"
 ]
 
 // 4. Process each observation: extract matched *ranges*, return precise sub-boxes
