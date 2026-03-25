@@ -211,6 +211,8 @@ let ocrStart       = null   // drag start pos
 let isPrivacySelecting = false
 let privacySelRect     = null   // { x, y, w, h } in image coordinates
 let privacySelStart    = null
+let privacyBlockSize   = 16
+let privacyBlurRadius  = 8
 
 // Box select
 let isBoxSelecting  = false  // currently drawing selection rect
@@ -355,6 +357,7 @@ function showOptionsForTool(t) {
   }
   if (t === 'privacymask') {
     document.getElementById('grpPrivacyMask').classList.remove('hidden')
+    syncPrivacyUI()
     return
   }
   if (t === 'symbol') {
@@ -4323,12 +4326,29 @@ document.getElementById('btnOcrDownloadCancel').addEventListener('click', () => 
 
 // ─── Mosaic tool controls ─────────────────────────────────────────────────────
 
-// Privacy mask mode toggle (mosaic / blur)
+// Privacy mask mode toggle + precision rows
+function syncPrivacyUI() {
+  const mode = _privacyMosaicMode()
+  document.getElementById('grpPrivacyBlock').classList.toggle('hidden', mode === 'blur')
+  document.getElementById('grpPrivacyBlur').classList.toggle('hidden', mode === 'mosaic')
+  document.querySelectorAll('#grpPrivacyBlock [data-pmblock]').forEach(b =>
+    b.classList.toggle('active', parseInt(b.dataset.pmblock) === privacyBlockSize))
+  document.querySelectorAll('#grpPrivacyBlur [data-pmblur]').forEach(b =>
+    b.classList.toggle('active', parseInt(b.dataset.pmblur) === privacyBlurRadius))
+}
+
 document.querySelectorAll('#grpPrivacyMode .pmmode-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('#grpPrivacyMode .pmmode-btn').forEach(b => b.classList.remove('active'))
     btn.classList.add('active')
+    syncPrivacyUI()
   })
+})
+document.querySelectorAll('#grpPrivacyBlock [data-pmblock]').forEach(btn => {
+  btn.addEventListener('click', () => { privacyBlockSize = parseInt(btn.dataset.pmblock); syncPrivacyUI() })
+})
+document.querySelectorAll('#grpPrivacyBlur [data-pmblur]').forEach(btn => {
+  btn.addEventListener('click', () => { privacyBlurRadius = parseInt(btn.dataset.pmblur); syncPrivacyUI() })
 })
 
 document.getElementById('btnMosaicModeMosaic').addEventListener('click', () => {
@@ -5183,8 +5203,8 @@ async function runPrivacyScan(region) {
       w:          Math.max(4, Math.round(b.w)),
       h:          Math.max(4, Math.round(b.h)),
       mode,
-      blockSize:  16,
-      blurRadius: 12,
+      blockSize:  privacyBlockSize,
+      blurRadius: privacyBlurRadius,
     })
   })
   renderAnnotations()

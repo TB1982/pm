@@ -696,7 +696,21 @@
         <button class="style-btn pmmode-btn"        data-mode="blur"   data-i18n="mosaic_blur">模糊</button>
       </div>
       <div class="opt-sep"></div>
-      <span class="opt-label" data-i18n="privacy_hint">K = 全圖掃描　拖曳 = 指定區域</span>
+      <div class="opt-group" id="grpPrivacyBlock">
+        <span class="opt-label" data-i18n="mosaic_block">區塊：</span>
+        <button class="style-btn"        data-pmblock="4" >4</button>
+        <button class="style-btn"        data-pmblock="8" >8</button>
+        <button class="style-btn active" data-pmblock="16">16</button>
+        <button class="style-btn"        data-pmblock="32">32</button>
+      </div>
+      <div class="opt-group hidden" id="grpPrivacyBlur">
+        <button class="style-btn"        data-pmblur="4" >4px</button>
+        <button class="style-btn active" data-pmblur="8" >8px</button>
+        <button class="style-btn"        data-pmblur="16">16px</button>
+        <button class="style-btn"        data-pmblur="24">24px</button>
+      </div>
+      <div class="opt-sep"></div>
+      <span class="opt-label" data-i18n="privacy_hint">K = 全圖　拖曳 = 指定區域</span>
     </div>
 
     <div class="opt-group hidden" id="grpBoxSelect">
