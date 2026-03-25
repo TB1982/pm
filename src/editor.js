@@ -1680,6 +1680,7 @@ document.querySelectorAll('.tool-btn[data-tool]').forEach(btn =>
     setTool(t)
     if (t === 'zoom-in')  zoomIn()
     if (t === 'zoom-out') zoomOut()
+    if (t === 'removebg') triggerRemoveBg()
   })
 )
 document.getElementById('btnFitZoom').addEventListener('click', fitToWindow)
@@ -5034,8 +5035,6 @@ async function addHistoryEntry({ path: filePath, label, dataURL }) {
 })()
 
 // ─── Remove Background ───────────────────────────────────────────────────────
-
-document.getElementById('btnRemoveBg').addEventListener('click', () => triggerRemoveBg())
 
 async function triggerRemoveBg() {
   // 將目前畫面（底圖 + 標注）攤平為 dataURL
