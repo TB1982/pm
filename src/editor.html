@@ -787,22 +787,24 @@
 
   </div>
 
-  <!-- History panel -->
-  <div id="historyPanel" class="history-panel hidden">
-    <div class="history-header">
-      <span data-i18n="history_title">歷史截圖</span>
-      <button class="history-close" id="historyClose">✕</button>
-    </div>
-    <div class="history-list" id="historyList"></div>
-  </div>
-
   <!-- Bottom bar -->
   <div class="editor-bottombar">
     <span class="zoom-label" id="zoomLabel">100%</span>
     <div class="flex-spacer"></div>
-    <button class="history-btn"     id="btnHistory" title="歷史截圖" data-i18n-title="btn_history_title" data-i18n="btn_history">歷史</button>
-    <button class="copy-btn"        id="btnCopyImage"  title="複製最終圖片到剪貼簿 (⌘⇧C)" data-i18n="btn_copy" data-i18n-title="btn_copy_title">複製</button>
-    <button class="save-btn"        id="btnSave" data-i18n="btn_save">完成並儲存</button>
+    <button class="copy-btn" id="btnCopyImage" title="複製最終圖片到剪貼簿 (⌘⇧C)" data-i18n="btn_copy" data-i18n-title="btn_copy_title">複製</button>
+    <button class="save-btn" id="btnSave" data-i18n="btn_save">完成並儲存</button>
+  </div>
+
+  <!-- History drawer — 右側書籤抽屜 -->
+  <div id="historyDrawer" class="history-drawer">
+    <button id="historyTab" class="history-tab" data-i18n="btn_history">歷史截圖</button>
+    <div id="historyPanel" class="history-panel-inner">
+      <div class="history-panel-header">
+        <span class="history-panel-title" data-i18n="btn_history">歷史截圖</span>
+        <button id="historyClose" class="history-panel-close" title="關閉">✕</button>
+      </div>
+      <div id="historyList" class="history-list"></div>
+    </div>
   </div>
 
 </div>

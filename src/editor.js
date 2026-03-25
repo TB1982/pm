@@ -4981,10 +4981,10 @@ async function addHistoryEntry({ path: filePath, label, dataURL }) {
 }
 
 ;(function initHistoryPanel() {
-  const panel   = document.getElementById('historyPanel')
-  const listEl  = document.getElementById('historyList')
+  const panel    = document.getElementById('historyPanel')
+  const tab      = document.getElementById('historyTab')
+  const listEl   = document.getElementById('historyList')
   const closeBtn = document.getElementById('historyClose')
-  const openBtn  = document.getElementById('btnHistory')
 
   async function renderHistory() {
     listEl.innerHTML = ''
@@ -5021,11 +5021,18 @@ async function addHistoryEntry({ path: filePath, label, dataURL }) {
     })
   }
 
-  function openHistory()  { panel.classList.remove('hidden'); annotCanvas.style.pointerEvents = 'none' }
-  function closeHistory() { panel.classList.add('hidden');    annotCanvas.style.pointerEvents = '' }
+  function openHistory() {
+    panel.classList.add('open')
+    tab.classList.add('open')
+  }
 
-  openBtn.addEventListener('click', async () => {
-    if (!panel.classList.contains('hidden')) { closeHistory(); return }
+  function closeHistory() {
+    panel.classList.remove('open')
+    tab.classList.remove('open')
+  }
+
+  tab.addEventListener('click', async () => {
+    if (panel.classList.contains('open')) { closeHistory(); return }
     await renderHistory()
     openHistory()
   })
