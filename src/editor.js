@@ -5031,7 +5031,7 @@ async function addHistoryEntry({ path: filePath, label, dataURL }) {
     }
   })
 
-  closeBtn.addEventListener('click', () => panel.classList.add('hidden'))
+  closeBtn.addEventListener('click', (e) => { e.stopPropagation(); panel.classList.add('hidden') })
 })()
 
 // ─── Remove Background ───────────────────────────────────────────────────────
@@ -5043,7 +5043,7 @@ async function triggerRemoveBg() {
   flat.height = baseCanvas.height
   const flatCtx = flat.getContext('2d')
   flatCtx.drawImage(baseCanvas, 0, 0)
-  flatCtx.drawImage(canvas, 0, 0)
+  flatCtx.drawImage(annotCanvas, 0, 0)
   const dataURL = flat.toDataURL('image/png')
 
   showToast(t('toast_rmbg_processing'))
