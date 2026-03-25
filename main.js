@@ -30,6 +30,28 @@ let overlayWindows     = []   // rect-selection overlays, one per display
 let screenSelectWindows = []  // screen-selection overlays, one per display
 let editorWindows      = []   // open editor windows
 let posFilePath        = null // set after app.getPath('userData') available
+let savePrefPath       = null // set after app.getPath('userData') available
+
+function loadSavePref() {
+  try { return JSON.parse(fs.readFileSync(savePrefPath, 'utf8')) } catch { return null }
+}
+
+function saveSavePref(pref) {
+  try { fs.writeFileSync(savePrefPath, JSON.stringify(pref)) } catch {}
+}
+
+function resolveDefaultSaveDir() {
+  const pref = loadSavePref()
+  if (pref?.lastDir && fs.existsSync(pref.lastDir)) return pref.lastDir
+  const candidates = ['pictures', 'downloads', 'desktop']
+  for (const key of candidates) {
+    try {
+      const dir = app.getPath(key)
+      if (dir && fs.existsSync(dir)) return dir
+    } catch {}
+  }
+  return app.getPath('home')
+}
 
 // ─── Position persistence ─────────────────────────────────────────────────────
 
@@ -157,21 +179,26 @@ function isoFilename(ext) {
 ipcMain.handle('save-image-as', async (event, { dataURL, format }) => {
   const win = BrowserWindow.fromWebContents(event.sender)
   const ext = { png: 'png', jpg: 'jpg', webp: 'webp', gif: 'gif' }[format] ?? 'png'
+  const defaultDir = resolveDefaultSaveDir()
   const result = await dialog.showSaveDialog(win, {
-    defaultPath: path.join(app.getPath('pictures'), isoFilename(ext)),
+    defaultPath: path.join(defaultDir, isoFilename(ext)),
     filters: [{ name: 'Image', extensions: [ext] }]
   })
   if (result.canceled) return { canceled: true }
-
-  const base64 = dataURL.replace(/^data:image\/[^;]+;base64,/, '')
-  const buffer = Buffer.from(base64, 'base64')
-  let s = sharp(buffer).withMetadata()
-  if      (format === 'jpg')  s = s.jpeg({ quality: 90 })
-  else if (format === 'webp') s = s.webp({ quality: 90 })
-  else if (format === 'gif')  s = s.gif()
-  else                        s = s.png()
-  await s.toFile(result.filePath)
-  return { success: true, path: result.filePath }
+  try {
+    const base64 = dataURL.replace(/^data:image\/[^;]+;base64,/, '')
+    const buffer = Buffer.from(base64, 'base64')
+    let s = sharp(buffer).withMetadata()
+    if      (format === 'jpg')  s = s.jpeg({ quality: 90 })
+    else if (format === 'webp') s = s.webp({ quality: 90 })
+    else if (format === 'gif')  s = s.gif()
+    else                        s = s.png()
+    await s.toFile(result.filePath)
+    saveSavePref({ lastDir: path.dirname(result.filePath) })
+    return { success: true, path: result.filePath }
+  } catch (err) {
+    return { success: false, error: err?.message || 'Failed to save image' }
+  }
 })
 
 // ─── Open image file (from toolbar "開啟圖片" button) ─────────────────────────
@@ -279,15 +306,62 @@ function mainWindowDisplay() {
   })
 }
 
+function formatExecError(err, command) {
+  const parts = []
+  if (err?.message) parts.push(err.message)
+  if (err?.stderr) {
+    const stderr = String(err.stderr).trim()
+    if (stderr) parts.push(stderr)
+  }
+  if (typeof err?.code !== 'undefined') parts.push(`exit=${err.code}`)
+  if (command) parts.push(`cmd=${command}`)
+  return parts.join(' | ')
+}
+
+async function getScreenImageForDisplay(display) {
+  const width = Math.max(1, Math.round(display.bounds.width * (display.scaleFactor || 1)))
+  const height = Math.max(1, Math.round(display.bounds.height * (display.scaleFactor || 1)))
+  const sources = await desktopCapturer.getSources({
+    types: ['screen'],
+    thumbnailSize: { width, height }
+  })
+  const source = sources.find(s => String(s.display_id) === String(display.id)) || sources[0]
+  if (!source || source.thumbnail.isEmpty()) throw new Error('Capture source unavailable')
+  return source.thumbnail
+}
+
 async function captureGlobalRect(x, y, w, h) {
   const tmpPath = path.join(os.tmpdir(), `screenshot-${Date.now()}.png`)
-  await execAsync(`/usr/sbin/screencapture -R ${x},${y},${w},${h} -x "${tmpPath}"`)
-  const image = nativeImage.createFromPath(tmpPath)
-  if (!image || image.isEmpty()) {
-    fs.unlink(tmpPath, () => {})
-    throw new Error('PERMISSION')
+  if (process.platform === 'darwin') {
+    const cmd = `/usr/sbin/screencapture -R ${x},${y},${w},${h} -x "${tmpPath}"`
+    try {
+      await execAsync(cmd)
+    } catch (err) {
+      throw new Error(formatExecError(err, cmd))
+    }
+    const image = nativeImage.createFromPath(tmpPath)
+    if (!image || image.isEmpty()) {
+      fs.unlink(tmpPath, () => {})
+      throw new Error('PERMISSION')
+    }
+    return { image, tmpPath }
   }
-  return { image, tmpPath }
+  // Windows/Linux fallback: capture display via desktopCapturer and crop in-memory.
+  const display = screen.getDisplayNearestPoint({
+    x: Math.round(x + w / 2),
+    y: Math.round(y + h / 2)
+  })
+  const displayImage = await getScreenImageForDisplay(display)
+  const dx = Math.max(0, Math.round(x - display.bounds.x))
+  const dy = Math.max(0, Math.round(y - display.bounds.y))
+  const dw = Math.min(Math.round(w), Math.max(0, displayImage.getSize().width - dx))
+  const dh = Math.min(Math.round(h), Math.max(0, displayImage.getSize().height - dy))
+  if (dw <= 0 || dh <= 0) {
+    throw new Error('Invalid capture area')
+  }
+  const cropped = displayImage.crop({ x: dx, y: dy, width: dw, height: dh })
+  fs.writeFileSync(tmpPath, cropped.toPNG())
+  return { image: cropped, tmpPath }
 }
 
 // ─── IPC: full-screen capture ─────────────────────────────────────────────────
@@ -557,11 +631,30 @@ ipcMain.handle('capture-window', async (_, sourceId) => {
 
   const tmpPath = path.join(os.tmpdir(), `screenshot-${Date.now()}.png`)
   try {
-    await execAsync(`/usr/sbin/screencapture -l ${windowId} -o -x "${tmpPath}"`)
-    const image = nativeImage.createFromPath(tmpPath)
-    if (!image || image.isEmpty()) {
-      fs.unlink(tmpPath, () => {})
-      throw new Error('PERMISSION')
+    let image
+    if (process.platform === 'darwin') {
+      const cmd = `/usr/sbin/screencapture -l ${windowId} -o -x "${tmpPath}"`
+      try {
+        await execAsync(cmd)
+      } catch (err) {
+        throw new Error(formatExecError(err, cmd))
+      }
+      image = nativeImage.createFromPath(tmpPath)
+      if (!image || image.isEmpty()) {
+        fs.unlink(tmpPath, () => {})
+        throw new Error('PERMISSION')
+      }
+    } else {
+      const sources = await desktopCapturer.getSources({
+        types: ['window'],
+        thumbnailSize: { width: 4096, height: 4096 }
+      })
+      const src = sources.find(s => s.id === sourceId)
+      if (!src || src.thumbnail.isEmpty()) {
+        throw new Error('無法取得視窗影像，請重試')
+      }
+      image = src.thumbnail
+      fs.writeFileSync(tmpPath, image.toPNG())
     }
     clipboard.writeImage(image)
     const { width, height } = image.getSize()
@@ -666,7 +759,8 @@ ipcMain.on('start-drag-export', (event, { dataURL }) => {
 // ─── App lifecycle ────────────────────────────────────────────────────────────
 
 app.whenReady().then(() => {
-  posFilePath = path.join(app.getPath('userData'), 'toolbar-pos.json')
+  posFilePath  = path.join(app.getPath('userData'), 'toolbar-pos.json')
+  savePrefPath = path.join(app.getPath('userData'), 'save-pref.json')
   createWindow()
 
   globalShortcut.register('CommandOrControl+Ctrl+1', () => {
