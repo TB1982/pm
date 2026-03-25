@@ -905,8 +905,8 @@ let regexes = [
   "(?<=寄件人[：:])\\\\S+",
   "(?<=負責人[：:])\\\\S+",
   "(?<=承辦人[：:])\\\\S+",
-  "(?<=密碼[：:])\\\\S+",
-  "(?<=通行碼[：:])\\\\S+",
+  "(?<=密碼[：:])\\\\S+",  "(?<=密碼[：:] )\\\\S+",
+  "(?<=通行碼[：:])\\\\S+","(?<=通行碼[：:] )\\\\S+",
   // Label-context — English names & passwords
   // Two patterns per label: [A] \S+ → single-word, [B] First Last with negative lookahead
   "(?<=Name: )\\\\S+",       "(?<=Name: )[A-Za-z]+\\\\s[A-Z][a-z]+(?![：:])",
