@@ -1775,6 +1775,8 @@ function _applyCanvasSize() {
   canvasWrapper.style.height = dh + 'px'
   // Re-apply scale after resize (resizing resets the transform)
   baseCtx.setTransform(DPR, 0, 0, DPR, 0, 0)
+  baseCtx.imageSmoothingEnabled = true
+  baseCtx.imageSmoothingQuality = 'high'   // Lanczos — reduces upscale blur on Retina screenshots
   annotCtx.setTransform(DPR, 0, 0, DPR, 0, 0)
   document.getElementById('zoomLabel').textContent = Math.round(viewScale * 100) + '%'
   syncZoomSelect()
