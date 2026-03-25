@@ -144,6 +144,18 @@
             <p class="mt-5 text-xs text-white/30" data-lang-key="sysReq">
                 需要 macOS · Apple Silicon (arm64) · 113 MB
             </p>
+
+            <!-- Gatekeeper Notice -->
+            <div class="mt-8 mx-auto max-w-lg rounded-2xl px-6 py-5 text-left" style="background: rgba(196,113,245,0.08); border: 1px solid rgba(196,113,245,0.2);">
+                <p class="text-sm font-semibold text-white/70 mb-3" data-lang-key="gkTitle">⚠️ 第一次開啟 VAS</p>
+                <p class="text-xs text-white/45 mb-3" data-lang-key="gkDesc">
+                    macOS 可能顯示「無法開啟」。這是正常的安全機制，不代表檔案有問題。按照以下任一方式即可解決：
+                </p>
+                <ol class="text-xs text-white/55 space-y-1.5 list-decimal list-inside" data-lang-key="gkSteps">
+                    <li><strong class="text-white/70">右鍵開啟：</strong>在 Finder 找到 Vas.app → 按住 Control 點一下 → 選「開啟」→ 再點「開啟」確認</li>
+                    <li><strong class="text-white/70">終端機指令：</strong>執行 <code class="bg-white/10 px-1.5 py-0.5 rounded text-white/80">xattr -cr /Applications/Vas.app</code></li>
+                </ol>
+            </div>
         </section>
 
         <!-- About -->
@@ -272,7 +284,10 @@
                 toolbarLabel: '截圖工具列',
                 storyTitle: 'Origin',
                 storyBody: '來自一位<strong class="text-white">一行程式碼都不會寫的 PM</strong>，以及 Claude Code 的 Claude，<br>人機協作 <strong class="gradient-text text-2xl font-bold">36 小時</strong>內迭代至 v3.26 而誕生的作品。',
-                storyByline: '— Nova & Claude，2026'
+                storyByline: '— Nova & Claude，2026',
+                gkTitle: '⚠️ 第一次開啟 VAS',
+                gkDesc: 'macOS 可能顯示「無法開啟」。這是正常的安全機制，不代表檔案有問題。按照以下任一方式即可解決：',
+                gkSteps: '<li><strong class="text-white/70">右鍵開啟：</strong>在 Finder 找到 Vas.app → 按住 Control 點一下 → 選「開啟」→ 再點「開啟」確認</li><li><strong class="text-white/70">終端機指令：</strong>執行 <code class="bg-white/10 px-1.5 py-0.5 rounded text-white/80">xattr -cr /Applications/Vas.app</code></li>'
             },
             en: {
                 backLabel: 'Deep Holding Project',
@@ -302,7 +317,10 @@
                 toolbarLabel: 'Capture Toolbar',
                 storyTitle: 'Origin',
                 storyBody: 'Born from a collaboration between <strong class="text-white">a PM who can\'t write a single line of code</strong> and Claude from Claude Code —<br>iterated together to v3.26 in <strong class="gradient-text text-2xl font-bold">36 hours</strong>.',
-                storyByline: '— Nova & Claude, 2026'
+                storyByline: '— Nova & Claude, 2026',
+                gkTitle: '⚠️ First time opening VAS',
+                gkDesc: 'macOS may show "cannot be opened". This is a normal security check — not a problem with the file. Fix it with either method below:',
+                gkSteps: '<li><strong class="text-white/70">Right-click to open:</strong> Find Vas.app in Finder → Control-click → select "Open" → click "Open" to confirm</li><li><strong class="text-white/70">Terminal command:</strong> Run <code class="bg-white/10 px-1.5 py-0.5 rounded text-white/80">xattr -cr /Applications/Vas.app</code></li>'
             }
         };
 
