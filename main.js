@@ -712,6 +712,20 @@ print(lines.joined(separator: "\\n"))
 `
 
 ipcMain.handle('ocr-recognize', (event, { dataURL }) => {
+  // 非 macOS：使用 Tesseract.js fallback
+  if (process.platform !== 'darwin') {
+    return new Promise((resolve) => {
+      const { Worker } = require('worker_threads')
+      const cachePath = path.join(app.getPath('userData'), 'tesseract-cache')
+      const w = new Worker(path.join(__dirname, 'src', 'ocr-worker.js'), {
+        workerData: { dataURL, cachePath }
+      })
+      w.on('message', msg => { if (msg.type === 'result') resolve(msg) })
+      w.on('error', err => resolve({ success: false, error: err.message }))
+    })
+  }
+
+  // macOS：使用 Vision 框架（Swift）
   return new Promise((resolve) => {
     // 將 dataURL 寫入暫存 PNG
     const tmpDir   = os.tmpdir()
