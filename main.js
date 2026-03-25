@@ -887,11 +887,14 @@ func toBox(_ r: VNRectangleObservation) -> Box {
 let detectorTypes: NSTextCheckingResult.CheckingType = [.phoneNumber, .link, .address]
 let detector = try? NSDataDetector(types: detectorTypes.rawValue)
 
-// 3. Regex — TW ID, TW business registration no., credit card
+// 3. Regex — TW ID, TW business reg no., credit card, IPv4, IPv6, API token
 let regexes = [
-  "[A-Z][12]\\\\d{8}",
-  "\\\\d{8}",
-  "\\\\d{4}[\\\\s\\\\-]?\\\\d{4}[\\\\s\\\\-]?\\\\d{4}[\\\\s\\\\-]?\\\\d{4}"
+  "[A-Z][12]\\\\d{8}",                                                          // TW national ID
+  "\\\\b\\\\d{8}\\\\b",                                                         // TW biz reg no. (word-bounded)
+  "\\\\d{4}[\\\\s\\\\-]?\\\\d{4}[\\\\s\\\\-]?\\\\d{4}[\\\\s\\\\-]?\\\\d{4}", // credit card
+  "\\\\b(?:\\\\d{1,3}\\\\.){3}\\\\d{1,3}\\\\b",                               // IPv4
+  "[0-9a-fA-F]{1,4}(?::[0-9a-fA-F]{1,4}){7}",                                 // IPv6 full form
+  "[A-Za-z0-9_\\\\-]{20,}"                                                      // API key / token (no spaces)
 ]
 
 // 4. Process each observation: extract matched *ranges*, return precise sub-boxes
