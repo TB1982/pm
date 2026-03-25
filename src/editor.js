@@ -207,6 +207,13 @@ let isOcrSelecting = false  // currently drawing OCR selection rect
 let ocrRect        = null   // { x, y, w, h } in image coordinates
 let ocrStart       = null   // drag start pos
 
+// Privacy mask
+let isPrivacySelecting = false
+let privacySelRect     = null   // { x, y, w, h } in image coordinates
+let privacySelStart    = null
+let privacyBlockSize   = 16
+let privacyBlurRadius  = 8
+
 // Box select
 let isBoxSelecting  = false  // currently drawing selection rect
 let boxSelRect      = null   // { x, y, w, h } in image coordinates (normalised after mouseup)
@@ -256,6 +263,7 @@ const baseCtx       = baseCanvas.getContext('2d')
 const annotCtx      = annotCanvas.getContext('2d')
 const canvasArea    = document.getElementById('canvasArea')
 const canvasWrapper = document.getElementById('canvasWrapper')
+const DPR           = window.devicePixelRatio || 1   // Retina support
 const textInputWrap = document.getElementById('textInputWrap')
 const textInputEl   = document.getElementById('textInput')
 const textMirrorEl  = document.getElementById('textMirror')
@@ -313,7 +321,7 @@ function hideAllOptions() {
    'grpLineStyle','grpPenBorder','grpStrokeBorder','grpDashStyle',
    'grpCaps','grpRadius','grpFont','grpNumber','grpStrokeOpacity',
    'grpShadow','grpZoom','grpCrop','grpOcr','grpBoxSelect',
-   'grpMosaic','grpSymbol'].forEach(id => {
+   'grpMosaic','grpSymbol','grpPrivacyMask'].forEach(id => {
     const el = document.getElementById(id)
     if (el) el.classList.add('hidden')
   })
@@ -345,6 +353,11 @@ function showOptionsForTool(t) {
   if (t === 'mosaic') {
     document.getElementById('grpMosaic').classList.remove('hidden')
     syncMosaicUI()
+    return
+  }
+  if (t === 'privacymask') {
+    document.getElementById('grpPrivacyMask').classList.remove('hidden')
+    syncPrivacyUI()
     return
   }
   if (t === 'symbol') {
@@ -1680,6 +1693,7 @@ document.querySelectorAll('.tool-btn[data-tool]').forEach(btn =>
     setTool(t)
     if (t === 'zoom-in')  zoomIn()
     if (t === 'zoom-out') zoomOut()
+    if (t === 'privacymask') activatePrivacyMask()
   })
 )
 document.getElementById('btnFitZoom').addEventListener('click', fitToWindow)
@@ -1692,9 +1706,10 @@ function setTool(t) {
   commitText(false)
   hideColorPanel()
   if (t !== 'crop')      { cropRect = null; isCropping = false; cropMoving = false; cropResizeH = null; cropMoveStart = null }
-  if (t !== 'ocr')       { ocrRect = null; isOcrSelecting = false; ocrStart = null }
-  if (t !== 'boxselect') { boxSelRect = null; isBoxSelecting = false; boxSelStart = null }
-  if (t !== 'mosaic')   { isMosaicDrawing = false; mosaicDrawStart = null; mosaicPreviewRect = null }
+  if (t !== 'ocr')          { ocrRect = null; isOcrSelecting = false; ocrStart = null }
+  if (t !== 'boxselect')    { boxSelRect = null; isBoxSelecting = false; boxSelStart = null }
+  if (t !== 'mosaic')       { isMosaicDrawing = false; mosaicDrawStart = null; mosaicPreviewRect = null }
+  if (t !== 'privacymask')  { privacySelRect = null; isPrivacySelecting = false; privacySelStart = null }
   if (t !== 'pen')       { isPenDrawing = false; penPoints = [] }
   _cancelPolyline()   // 切換工具時取消任何進行中的折線
   tool       = t
@@ -1751,10 +1766,16 @@ function fitCanvas() {
 function _applyCanvasSize() {
   const dw = Math.round(imgWidth  * viewScale)
   const dh = Math.round(imgHeight * viewScale)
-  baseCanvas.width  = annotCanvas.width  = dw
-  baseCanvas.height = annotCanvas.height = dh
+  // Physical canvas = CSS size × DPR (crisp on Retina/HiDPI)
+  baseCanvas.width  = annotCanvas.width  = Math.round(dw * DPR)
+  baseCanvas.height = annotCanvas.height = Math.round(dh * DPR)
+  baseCanvas.style.width  = annotCanvas.style.width  = dw + 'px'
+  baseCanvas.style.height = annotCanvas.style.height = dh + 'px'
   canvasWrapper.style.width  = dw + 'px'
   canvasWrapper.style.height = dh + 'px'
+  // Re-apply scale after resize (resizing resets the transform)
+  baseCtx.setTransform(DPR, 0, 0, DPR, 0, 0)
+  annotCtx.setTransform(DPR, 0, 0, DPR, 0, 0)
   document.getElementById('zoomLabel').textContent = Math.round(viewScale * 100) + '%'
   syncZoomSelect()
 }
@@ -1838,8 +1859,10 @@ canvasArea.addEventListener('wheel', e => {
 
 function drawBase() {
   if (!imgElement) return
-  baseCtx.clearRect(0, 0, baseCanvas.width, baseCanvas.height)
-  baseCtx.drawImage(imgElement, 0, 0, imgWidth * viewScale, imgHeight * viewScale)
+  const dw = Math.round(imgWidth  * viewScale)
+  const dh = Math.round(imgHeight * viewScale)
+  baseCtx.clearRect(0, 0, dw, dh)
+  baseCtx.drawImage(imgElement, 0, 0, dw, dh)
 }
 
 new ResizeObserver(() => {
@@ -1880,7 +1903,9 @@ function getImg(a) {
 // ─── Rendering ────────────────────────────────────────────────────────────────
 
 function renderAnnotations() {
-  annotCtx.clearRect(0, 0, annotCanvas.width, annotCanvas.height)
+  const dw = Math.round(imgWidth  * viewScale)
+  const dh = Math.round(imgHeight * viewScale)
+  annotCtx.clearRect(0, 0, dw, dh)
   annotations.forEach(a => drawOne(annotCtx, a))
   if (isDrawing && drawStart && drawCurrent) {
     const preview = buildPreview()
@@ -1956,6 +1981,20 @@ function renderAnnotations() {
     annotCtx.setLineDash([5, 3])
     annotCtx.strokeRect(c(r.x), c(r.y), c(r.w), c(r.h))
     annotCtx.fillStyle = 'rgba(59,130,246,0.08)'
+    annotCtx.fillRect(c(r.x), c(r.y), c(r.w), c(r.h))
+    annotCtx.setLineDash([])
+    annotCtx.restore()
+  }
+
+  // Privacy mask region select: orange dashed rect
+  if (tool === 'privacymask' && privacySelRect && privacySelRect.w > 1 && privacySelRect.h > 1) {
+    const r = privacySelRect
+    annotCtx.save()
+    annotCtx.strokeStyle = '#f97316'
+    annotCtx.lineWidth   = 1.5
+    annotCtx.setLineDash([5, 3])
+    annotCtx.strokeRect(c(r.x), c(r.y), c(r.w), c(r.h))
+    annotCtx.fillStyle = 'rgba(249,115,22,0.08)'
     annotCtx.fillRect(c(r.x), c(r.y), c(r.w), c(r.h))
     annotCtx.setLineDash([])
     annotCtx.restore()
@@ -2046,13 +2085,14 @@ function drawMosaic(ctx, a) {
   if (a.mode === 'blur') {
     const r   = Math.max(1, (a.blurRadius ?? 8) * viewScale)
     const pad = Math.ceil(r * 2.5)
-    // Draw a padded region so blur doesn't darken edges
+    // Source coords in physical canvas pixels (baseCanvas is DPR-scaled)
     octx.filter = `blur(${r}px)`
     octx.drawImage(baseCanvas,
-      vx - pad, vy - pad, vw + pad * 2, vh + pad * 2,
+      (vx - pad) * DPR, (vy - pad) * DPR, (vw + pad * 2) * DPR, (vh + pad * 2) * DPR,
       -pad, -pad, vw + pad * 2, vh + pad * 2)
   } else {
-    octx.drawImage(baseCanvas, vx, vy, vw, vh, 0, 0, vw, vh)
+    // Source coords in physical canvas pixels
+    octx.drawImage(baseCanvas, vx * DPR, vy * DPR, vw * DPR, vh * DPR, 0, 0, vw, vh)
     const bs       = Math.max(2, Math.round((a.blockSize ?? 16) * viewScale))
     const imgData  = octx.getImageData(0, 0, vw, vh)
     const data     = imgData.data
@@ -2144,9 +2184,12 @@ function drawOne(ctx, a) {
   // caps and border don't X-ray through the main stroke
   const strokeOpacity = a.type === 'pen' ? (a.penOpacity ?? 100) : (a.opacity ?? 100)
   if (strokeOpacity < 100 && ['line','polyline','pen'].includes(a.type)) {
-    const off  = _getOffCanvas(ctx.canvas.width, ctx.canvas.height)
+    const dw = Math.round(imgWidth  * viewScale)
+    const dh = Math.round(imgHeight * viewScale)
+    const off  = _getOffCanvas(Math.round(dw * DPR), Math.round(dh * DPR))  // physical dims
     const octx = off.getContext('2d')
-    octx.clearRect(0, 0, off.width, off.height)
+    octx.setTransform(DPR, 0, 0, DPR, 0, 0)   // DPR scale — draw with CSS coords
+    octx.clearRect(0, 0, dw, dh)
     octx.strokeStyle = a.color
     octx.fillStyle   = a.color
     octx.lineWidth   = a.thickness * viewScale
@@ -2160,7 +2203,7 @@ function drawOne(ctx, a) {
     }
     ctx.save()
     ctx.globalAlpha = strokeOpacity / 100
-    ctx.drawImage(off, 0, 0)
+    ctx.drawImage(off, 0, 0, dw, dh)   // explicit CSS destination size
     ctx.restore()
     return
   }
@@ -3221,6 +3264,13 @@ annotCanvas.addEventListener('mousedown', e => {
     return
   }
 
+  if (tool === 'privacymask') {
+    isPrivacySelecting = true
+    privacySelStart    = pos
+    privacySelRect     = { x: pos.x, y: pos.y, w: 0, h: 0 }
+    return
+  }
+
   if (tool === 'boxselect') {
     isBoxSelecting = true
     boxSelStart    = pos
@@ -3395,6 +3445,17 @@ annotCanvas.addEventListener('mousemove', e => {
     return
   }
 
+  if (isPrivacySelecting && privacySelStart) {
+    privacySelRect = {
+      x: Math.min(privacySelStart.x, pos.x),
+      y: Math.min(privacySelStart.y, pos.y),
+      w: Math.abs(pos.x - privacySelStart.x),
+      h: Math.abs(pos.y - privacySelStart.y)
+    }
+    renderAnnotations()
+    return
+  }
+
   if (isBoxSelecting && boxSelStart) {
     boxSelRect = {
       x: Math.min(boxSelStart.x, pos.x),
@@ -3554,6 +3615,17 @@ document.addEventListener('mouseup', e => {
     }
     renderAnnotations()
     triggerOcr()
+    return
+  }
+
+  if (isPrivacySelecting) {
+    isPrivacySelecting = false
+    const r = privacySelRect
+    privacySelRect = null
+    if (r && r.w >= 4 && r.h >= 4) {
+      runPrivacyScan(r)
+    }
+    renderAnnotations()
     return
   }
 
@@ -3941,7 +4013,7 @@ document.addEventListener('keydown', e => {
     case 'e': case 'E': document.getElementById('btnExtend').click();     break
     case 'c': case 'C': setTool('crop');   break
     case 'g': case 'G': setTool('ocr');    break
-    case 'k': case 'K': triggerRemoveBg(); break
+    case 'k': case 'K': runPrivacyScan(null); break  // null = full-image global scan
     case 'x': case 'X': setTool('mosaic'); break
     case 'u': case 'U': {
       setTool('symbol')
@@ -3955,6 +4027,7 @@ document.addEventListener('keydown', e => {
       if (polylineActive) { _cancelPolyline(); renderAnnotations(); break }
       if (tool === 'crop') { cancelCrop(); break }
       if (tool === 'ocr')  { ocrRect = null; isOcrSelecting = false; document.getElementById('ocrStatusLabel').textContent = t('ocr_drag'); renderAnnotations(); break }
+      if (tool === 'privacymask') { privacySelRect = null; isPrivacySelecting = false; renderAnnotations(); break }
       if (tool === 'boxselect') { boxSelRect = null; isBoxSelecting = false; syncBoxSelUI(); renderAnnotations(); break }
       if (tool === 'mosaic')    { mosaicPreviewRect = null; isMosaicDrawing = false; renderAnnotations(); break }
       selectedId = null
@@ -4186,7 +4259,8 @@ function startOcrRecognition() {
   off.width  = Math.max(1, Math.round(r.w))
   off.height = Math.max(1, Math.round(r.h))
   const offCtx = off.getContext('2d')
-  offCtx.drawImage(baseCanvas, c(r.x), c(r.y), c(r.w), c(r.h), 0, 0, off.width, off.height)
+  // Source coords must be in physical pixels (baseCanvas is DPR-scaled)
+  offCtx.drawImage(baseCanvas, c(r.x) * DPR, c(r.y) * DPR, c(r.w) * DPR, c(r.h) * DPR, 0, 0, off.width, off.height)
   const dataURL = off.toDataURL('image/png')
 
   ipcRenderer.invoke('ocr-recognize', { dataURL }).then(result => {
@@ -4251,6 +4325,31 @@ document.getElementById('btnOcrDownloadCancel').addEventListener('click', () => 
 
 
 // ─── Mosaic tool controls ─────────────────────────────────────────────────────
+
+// Privacy mask mode toggle + precision rows
+function syncPrivacyUI() {
+  const mode = _privacyMosaicMode()
+  document.getElementById('grpPrivacyBlock').classList.toggle('hidden', mode === 'blur')
+  document.getElementById('grpPrivacyBlur').classList.toggle('hidden', mode === 'mosaic')
+  document.querySelectorAll('#grpPrivacyBlock [data-pmblock]').forEach(b =>
+    b.classList.toggle('active', parseInt(b.dataset.pmblock) === privacyBlockSize))
+  document.querySelectorAll('#grpPrivacyBlur [data-pmblur]').forEach(b =>
+    b.classList.toggle('active', parseInt(b.dataset.pmblur) === privacyBlurRadius))
+}
+
+document.querySelectorAll('#grpPrivacyMode .pmmode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#grpPrivacyMode .pmmode-btn').forEach(b => b.classList.remove('active'))
+    btn.classList.add('active')
+    syncPrivacyUI()
+  })
+})
+document.querySelectorAll('#grpPrivacyBlock [data-pmblock]').forEach(btn => {
+  btn.addEventListener('click', () => { privacyBlockSize = parseInt(btn.dataset.pmblock); syncPrivacyUI() })
+})
+document.querySelectorAll('#grpPrivacyBlur [data-pmblur]').forEach(btn => {
+  btn.addEventListener('click', () => { privacyBlurRadius = parseInt(btn.dataset.pmblur); syncPrivacyUI() })
+})
 
 document.getElementById('btnMosaicModeMosaic').addEventListener('click', () => {
   mosaicMode = 'mosaic'; syncMosaicUI()
@@ -4980,10 +5079,10 @@ async function addHistoryEntry({ path: filePath, label, dataURL }) {
 }
 
 ;(function initHistoryPanel() {
-  const panel   = document.getElementById('historyPanel')
-  const listEl  = document.getElementById('historyList')
+  const panel    = document.getElementById('historyPanel')
+  const tab      = document.getElementById('historyTab')
+  const listEl   = document.getElementById('historyList')
   const closeBtn = document.getElementById('historyClose')
-  const openBtn  = document.getElementById('btnHistory')
 
   async function renderHistory() {
     listEl.innerHTML = ''
@@ -5020,58 +5119,97 @@ async function addHistoryEntry({ path: filePath, label, dataURL }) {
     })
   }
 
-  openBtn.addEventListener('click', async () => {
-    const isHidden = panel.classList.contains('hidden')
-    if (isHidden) {
-      await renderHistory()
-      panel.classList.remove('hidden')
-    } else {
-      panel.classList.add('hidden')
-    }
+  function openHistory() {
+    panel.classList.add('open')
+    tab.classList.add('open')
+  }
+
+  function closeHistory() {
+    panel.classList.remove('open')
+    tab.classList.remove('open')
+  }
+
+  tab.addEventListener('click', async () => {
+    if (panel.classList.contains('open')) { closeHistory(); return }
+    await renderHistory()
+    openHistory()
   })
 
-  closeBtn.addEventListener('click', () => panel.classList.add('hidden'))
+  closeBtn.addEventListener('click', closeHistory)
 })()
 
-// ─── Remove Background ───────────────────────────────────────────────────────
+// ─── Privacy Mask ─────────────────────────────────────────────────────────────
+// 兩種入口：
+//   K 鍵              → runPrivacyScan(null)   全圖掃描
+//   工具按鈕 + 拖框   → activatePrivacyMask()  拖框後呼叫 runPrivacyScan(region)
 
-document.getElementById('btnRemoveBg').addEventListener('click', () => triggerRemoveBg())
+let privacyRegion    = null  // { x, y, w, h } in image coords, set by drag
+let isPrivacyDrawing = false
 
-async function triggerRemoveBg() {
-  // 將目前畫面（底圖 + 標注）攤平為 dataURL
-  const flat = document.createElement('canvas')
-  flat.width  = baseCanvas.width
-  flat.height = baseCanvas.height
-  const flatCtx = flat.getContext('2d')
-  flatCtx.drawImage(baseCanvas, 0, 0)
-  flatCtx.drawImage(canvas, 0, 0)
-  const dataURL = flat.toDataURL('image/png')
+function activatePrivacyMask() {
+  // 進入拖框等待模式（互動邏輯由 mousedown/up handler 偵測 tool === 'privacymask' 觸發）
+  setTool('privacymask')
+}
 
-  showToast(t('toast_rmbg_processing'))
+function _privacyMosaicMode() {
+  // 從選項列讀取使用者選擇的馬賽克或模糊模式
+  const btn = document.querySelector('#grpPrivacyMode .pmmode-btn.active')
+  return btn ? btn.dataset.mode : 'mosaic'
+}
 
-  const result = await ipcRenderer.invoke('remove-background', { dataURL })
+async function runPrivacyScan(region) {
+  // region: null = full image; { x, y, w, h } in image coords = restricted area
+  if (!imgElement) { showToast(t('toast_no_image'), true); return }
+
+  showToast(t('toast_privacy_scanning'))
+
+  // 送原始解析度底圖（不含標注）給 Swift
+  const off = document.createElement('canvas')
+  off.width = imgWidth; off.height = imgHeight
+  off.getContext('2d').drawImage(imgElement, 0, 0, imgWidth, imgHeight)
+  const dataURL = off.toDataURL('image/png')
+
+  const result = await ipcRenderer.invoke('privacy-scan', { dataURL })
 
   if (!result.success) {
-    showToast(t('toast_rmbg_fail') + '：' + result.error, true)
+    showToast(t('toast_privacy_fail') + '：' + result.error, true)
     return
   }
 
-  // 將結果載入為新底圖，清空標注
-  const img = new Image()
-  img.onload = () => {
-    baseCanvas.width  = img.width
-    baseCanvas.height = img.height
-    canvas.width      = img.width
-    canvas.height     = img.height
-    baseCtx.clearRect(0, 0, img.width, img.height)
-    baseCtx.drawImage(img, 0, 0)
-    annotations = []
-    history     = [[]]
-    historyIdx  = 0
-    renderAnnotations()
-    showToast(t('toast_rmbg_done'))
+  let boxes = result.boxes || []
+
+  // 區域掃描：過濾出在框選範圍內的偵測結果
+  if (region) {
+    boxes = boxes.filter(b =>
+      b.x >= region.x && b.y >= region.y &&
+      b.x + b.w <= region.x + region.w &&
+      b.y + b.h <= region.y + region.h
+    )
   }
-  img.src = result.dataURL
+
+  if (boxes.length === 0) {
+    showToast(t('toast_privacy_none'))
+    return
+  }
+
+  const mode = _privacyMosaicMode()
+  pushHistory()
+  boxes.forEach(b => {
+    annotations.push({
+      id:         newId(),
+      type:       'mosaic',
+      x:          Math.round(b.x),
+      y:          Math.round(b.y),
+      w:          Math.max(4, Math.round(b.w)),
+      h:          Math.max(4, Math.round(b.h)),
+      mode,
+      blockSize:  privacyBlockSize,
+      blurRadius: privacyBlurRadius,
+    })
+  })
+  renderAnnotations()
+  showToast(t('toast_privacy_done', boxes.length))
+  setTool('select')  // auto-switch so user can immediately drag resize handles on any generated mosaic
 }
 
 // ─── Toast ────────────────────────────────────────────────────────────────────

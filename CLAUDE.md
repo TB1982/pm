@@ -367,6 +367,51 @@ document.documentElement.lang = isEnglish ? 'en' : 'zh-Hant';
 - When working on the Electron tool, follow the **Document Sync Rules** section above.
 - **Discuss before developing:** If there is any ambiguity about requirements, expected behaviour, or implementation approach, raise all questions and reach agreement with the user *before* writing or modifying code. Do not start implementation until the approach is confirmed.
 
+### Code Removal Policy
+When a feature is removed or replaced:
+- **Delete completely and cleanly.** No commented-out blocks, no graveyard files, no `_old` suffixes.
+- **Git history is the archive.** Any committed code is permanently recoverable via `git log`. A separate MD file adds maintenance burden without benefit.
+- **If design decisions or technical context are worth preserving** (beyond the code itself), record them in `SDD-mac-screenshot-tool.md` under `變更紀錄`, not as dead code in the repository.
+
+### Ready-to-run Commands
+Whenever asking the user to pull, test, or verify changes, always provide the exact commands as a ready-to-copy block. Do not make the user look up commands elsewhere. Standard sequence for the Electron tool:
+```bash
+git pull origin claude/research-mac-tools-JcSgl && npm start
+```
+Adjust branch name or add steps (e.g. `rm -rf node_modules && npm install`) only when the situation actually requires it.
+
+### OCR / Privacy Mask Test Script
+When asking the user to test the OCR detection or privacy mask feature, always provide a ready-to-screenshot **test target** — a block of plaintext containing one example of every currently supported detection pattern. The user screenshots this text directly and runs the scan. No need to hunt for real sensitive data.
+
+**Standard test target (update whenever detection rules change):**
+
+```
+【隱私遮蔽功能測試靶紙】
+
+姓名：王小明　聯絡電話：0912-345-678
+名字：陳小花　Email：wang.ming@example-corp.com
+身分證：A123456789　統一編號：12345678
+信用卡：4111 1111 1111 1111
+負責人：林志偉　承辦人：黃美玲
+聯絡人：吳建宏　收件人：張雅琪　寄件人：李明德
+密碼：P@ssw0rd123　通行碼：secret99
+Name: Alice　Contact: Bob Chen　Recipient: Carol Wang
+Password: hunter2　PIN: 8842
+地址：台北市信義區松壽路12號3樓　新北市板橋區文化路一段5巷8號
+統一編號：12345678　（應遮）　日期：20260326　（不應遮）
+
+伺服器 IPv4：192.168.1.100　備援：10.0.0.254
+IPv6：2001:0db8:85a3:0000:0000:8a2e:0370:7334
+API Token：ghp_AbCdEfGhIjKlMnOpQrStUvWxYz9999
+
+以下不應被遮蔽：
+今天天氣很好。版本號 v1.2.3。編號 A-007。日期：20260326。
+```
+
+- Each line tests one or more detection rules.
+- The "不應遮蔽" block validates that normal text is not over-detected.
+- When detection rules are added or removed, update this test target to match.
+
 ---
 
 ## Interaction Language

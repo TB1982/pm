@@ -688,6 +688,31 @@
       <span class="opt-label" id="ocrStatusLabel" data-i18n="ocr_drag">請拖曳選取辨識區域</span>
     </div>
 
+    <!-- 隱私遮蔽工具 -->
+    <div class="opt-group hidden" id="grpPrivacyMask">
+      <span class="opt-label" data-i18n="privacy_mode_label">遮蔽方式：</span>
+      <div class="mosaic-mode-group" id="grpPrivacyMode">
+        <button class="style-btn pmmode-btn active" data-mode="mosaic" data-i18n="mosaic">馬賽克</button>
+        <button class="style-btn pmmode-btn"        data-mode="blur"   data-i18n="mosaic_blur">模糊</button>
+      </div>
+      <div class="opt-sep"></div>
+      <div class="opt-group" id="grpPrivacyBlock">
+        <span class="opt-label" data-i18n="mosaic_block">區塊：</span>
+        <button class="style-btn"        data-pmblock="4" >4</button>
+        <button class="style-btn"        data-pmblock="8" >8</button>
+        <button class="style-btn active" data-pmblock="16">16</button>
+        <button class="style-btn"        data-pmblock="32">32</button>
+      </div>
+      <div class="opt-group hidden" id="grpPrivacyBlur">
+        <button class="style-btn"        data-pmblur="4" >4px</button>
+        <button class="style-btn active" data-pmblur="8" >8px</button>
+        <button class="style-btn"        data-pmblur="16">16px</button>
+        <button class="style-btn"        data-pmblur="24">24px</button>
+      </div>
+      <div class="opt-sep"></div>
+      <span class="opt-label" data-i18n="privacy_hint">K = 全圖　拖曳 = 指定區域</span>
+    </div>
+
     <div class="opt-group hidden" id="grpBoxSelect">
       <span class="opt-label" id="boxSelSizeLabel" data-i18n="box_drag">請拖曳選取區域</span>
     </div>
@@ -746,11 +771,11 @@
       <button class="tool-btn active" data-tool="rect"         title="矩形框 (R)" data-i18n-title="tool_rect">□</button>
       <button class="tool-btn"        data-tool="fillrect"     title="色塊 (B)" data-i18n-title="tool_fillrect">■</button>
       <button class="tool-btn"        data-tool="text"         title="文字 (T)" data-i18n-title="tool_text">T</button>
-      <button class="tool-btn"        id="btnRemoveBg" data-tool="removebg" title="主體去背 (K)" data-i18n-title="tool_removebg">⬜</button>
       <button class="tool-btn"        data-tool="number"       title="編號 (N)" data-i18n-title="tool_number">①</button>
       <button class="tool-btn"        data-tool="symbol"       title="符號印章 (U)" data-i18n-title="tool_symbol">☺</button>
-      <button class="tool-btn"        data-tool="ocr"          title="OCR 文字辨識 (G)" data-i18n-title="tool_ocr">文</button>
       <button class="tool-btn"        data-tool="mosaic"       title="馬賽克/模糊 (X)" data-i18n-title="tool_mosaic">▦</button>
+      <button class="tool-btn"        data-tool="ocr"          title="OCR 文字辨識 (G)" data-i18n-title="tool_ocr">文</button>
+      <button class="tool-btn"        data-tool="privacymask"  title="隱私遮蔽 (K)" data-i18n-title="tool_privacymask"><s>文</s></button>
       <!-- 縮放群 -->
       <div class="tool-sep"></div>
       <button class="tool-btn"        data-tool="zoom-in"      title="放大 (⌘=)" data-i18n-title="tool_zoom_in">⊕</button>
@@ -787,23 +812,14 @@
 
   </div>
 
-  <!-- History panel (slides up from bottom bar) -->
-  <div id="historyPanel" class="history-panel hidden">
-    <div class="history-header">
-      <span data-i18n="history_title">歷史截圖</span>
-      <button class="history-close" id="historyClose">✕</button>
-    </div>
-    <div class="history-list" id="historyList"></div>
-  </div>
-
   <!-- Bottom bar -->
   <div class="editor-bottombar">
     <span class="zoom-label" id="zoomLabel">100%</span>
     <div class="flex-spacer"></div>
-    <button class="history-btn"     id="btnHistory" title="歷史截圖" data-i18n-title="btn_history_title" data-i18n="btn_history">歷史</button>
-    <button class="copy-btn"        id="btnCopyImage"  title="複製最終圖片到剪貼簿 (⌘⇧C)" data-i18n="btn_copy" data-i18n-title="btn_copy_title">複製</button>
-    <button class="save-btn"        id="btnSave" data-i18n="btn_save">完成並儲存</button>
+    <button class="copy-btn" id="btnCopyImage" title="複製最終圖片到剪貼簿 (⌘⇧C)" data-i18n="btn_copy" data-i18n-title="btn_copy_title">複製</button>
+    <button class="save-btn" id="btnSave" data-i18n="btn_save">完成並儲存</button>
   </div>
+
 
 </div>
 
@@ -1078,6 +1094,18 @@
 <div id="floatDragExport" class="float-drag-export" title="拖曳匯出到 Line / Slack / Finder 等" data-i18n-title="float_drag_export_title">
   <span class="float-drag-move" id="floatDragMove" title="拖曳移動按鈕位置" data-i18n-title="float_drag_move_title">⠿</span>
   <span class="float-drag-label" data-i18n="float_drag_label">⬆ 拖曳匯出</span>
+</div>
+
+<!-- History drawer — 右側書籤抽屜（掛在 body 最底層，確保 position:fixed 正確定位） -->
+<div id="historyDrawer" class="history-drawer">
+  <button id="historyTab" class="history-tab" data-i18n="btn_history">歷史截圖</button>
+  <div id="historyPanel" class="history-panel-inner">
+    <div class="history-panel-header">
+      <span class="history-panel-title" data-i18n="btn_history">歷史截圖</span>
+      <button id="historyClose" class="history-panel-close" title="關閉">✕</button>
+    </div>
+    <div id="historyList" class="history-list"></div>
+  </div>
 </div>
 
 <script src="editor.js"></script>

@@ -840,17 +840,17 @@ ipcMain.handle('ocr-recognize', (event, { dataURL }) => {
   })
 })
 
-// ─── Remove Background (macOS 12+ Vision framework via Swift) ────────────────
+// ─── Privacy Scan (macOS — Vision + NSDataDetector + NLTagger) ───────────────
 
-const SWIFT_REMOVE_BG = `
+const SWIFT_PRIVACY_SCAN = `
 import Vision
 import AppKit
+import NaturalLanguage
 
-guard CommandLine.arguments.count >= 3 else {
-  fputs("ERROR: usage: swift script.swift <input> <output>\\n", stderr); exit(1)
+guard CommandLine.arguments.count >= 2 else {
+  fputs("ERROR: usage: swift script.swift <input_image>\\n", stderr); exit(1)
 }
 let imgPath = CommandLine.arguments[1]
-let outPath = CommandLine.arguments[2]
 
 guard let nsImg = NSImage(contentsOfFile: imgPath),
       let tiff  = nsImg.tiffRepresentation,
@@ -859,76 +859,168 @@ guard let nsImg = NSImage(contentsOfFile: imgPath),
   fputs("ERROR: Cannot load image\\n", stderr); exit(1)
 }
 
-if #available(macOS 12.0, *) {
-  let handler = VNImageRequestHandler(cgImage: cg, options: [:])
-  let request = VNGenerateForegroundInstanceMaskRequest()
-  do {
-    try handler.perform([request])
-  } catch {
-    fputs("ERROR: \\(error.localizedDescription)\\n", stderr); exit(1)
-  }
-  guard let result = request.results?.first else {
-    fputs("ERROR: No foreground detected\\n", stderr); exit(1)
-  }
-  do {
-    let masked = try result.generateMaskedImage(
-      ofInstances: result.allInstances,
-      from: handler,
-      croppedToInstancesExtent: false
-    )
-    let ci  = CIImage(cvPixelBuffer: masked)
-    let ctx = CIContext()
-    guard let out = ctx.createCGImage(ci, from: ci.extent) else {
-      fputs("ERROR: Cannot create output image\\n", stderr); exit(1)
-    }
-    let outRep = NSBitmapImageRep(cgImage: out)
-    guard let png = outRep.representation(using: .png, properties: [:]) else {
-      fputs("ERROR: Cannot encode PNG\\n", stderr); exit(1)
-    }
-    try png.write(to: URL(fileURLWithPath: outPath))
-    print("OK")
-  } catch {
-    fputs("ERROR: \\(error.localizedDescription)\\n", stderr); exit(1)
-  }
-} else {
-  fputs("ERROR: Requires macOS 12 or later\\n", stderr); exit(1)
+let imgW = Double(cg.width)
+let imgH = Double(cg.height)
+
+struct Box: Codable { let x, y, w, h: Double }
+var results: [Box] = []
+
+// 1. OCR
+let handler = VNImageRequestHandler(cgImage: cg, options: [:])
+let ocrReq  = VNRecognizeTextRequest()
+ocrReq.recognitionLevel = .accurate
+ocrReq.usesLanguageCorrection = true
+ocrReq.recognitionLanguages = ["zh-Hant", "zh-Hans", "en-US"]
+do { try handler.perform([ocrReq]) } catch {
+  fputs("ERROR: OCR failed: \\(error)\\n", stderr); exit(1)
 }
+guard let observations = ocrReq.results else { print("[]"); exit(0) }
+
+// Convert VNRectangleObservation (bottom-left, normalised) → image pixel Box
+func toBox(_ r: VNRectangleObservation) -> Box {
+  let vb = r.boundingBox
+  return Box(x: vb.minX * imgW, y: (1.0 - vb.maxY) * imgH,
+             w: vb.width * imgW, h: vb.height * imgH)
+}
+
+// 2. NSDataDetector — phone, URL/email, address (skip dates: too many false positives)
+let detectorTypes: NSTextCheckingResult.CheckingType = [.phoneNumber, .link, .address]
+let detector = try? NSDataDetector(types: detectorTypes.rawValue)
+
+// 3. Regex — structured patterns + label-context lookbehind
+// NOTE: \d{8} (TW biz reg no.) is handled separately below with date-exclusion logic
+let regexes = [
+  "[A-Z][12]\\\\d{8}",                                                          // TW national ID
+  "\\\\d{4}[\\\\s\\\\-]?\\\\d{4}[\\\\s\\\\-]?\\\\d{4}[\\\\s\\\\-]?\\\\d{4}", // credit card
+  "\\\\b(?:\\\\d{1,3}\\\\.){3}\\\\d{1,3}\\\\b",                               // IPv4
+  "[0-9a-fA-F]{1,4}(?::[0-9a-fA-F]{1,4}){7}",                                 // IPv6 full form
+  "[A-Za-z0-9_\\\\-]{20,}",                                                     // API key / token
+  // Taiwan address: 市/縣 → 區/鄉/鎮 → 路/街/道 → 數字+號 (all must appear in sequence)
+  "[^，。,\\\\n\\\\s]{1,5}(?:縣|市)[^，。,\\\\n\\\\s]*(?:區|鄉|鎮)[^，。,\\\\n\\\\s]*(?:路|街|道)[^，。,\\\\n\\\\s]*\\\\d+號[^，。,\\\\n\\\\s]*",
+  // Label-context — Chinese names & passwords
+  "(?<=姓名[：:])\\\\S+",
+  "(?<=名字[：:])\\\\S+",
+  "(?<=聯絡人[：:])\\\\S+",
+  "(?<=收件人[：:])\\\\S+",
+  "(?<=寄件人[：:])\\\\S+",
+  "(?<=負責人[：:])\\\\S+",
+  "(?<=承辦人[：:])\\\\S+",
+  "(?<=密碼[：:])\\\\S+",  "(?<=密碼[：:] )\\\\S+",
+  "(?<=通行碼[：:])\\\\S+","(?<=通行碼[：:] )\\\\S+",
+  // Label-context — English names & passwords
+  // Two patterns per label: [A] \S+ → single-word, [B] First Last with negative lookahead
+  "(?<=Name: )\\\\S+",       "(?<=Name: )[A-Za-z]+\\\\s[A-Z][a-z]+(?![：:])",
+  "(?<=Contact: )\\\\S+",    "(?<=Contact: )[A-Za-z]+\\\\s[A-Z][a-z]+(?![：:])",
+  "(?<=Recipient: )\\\\S+",  "(?<=Recipient: )[A-Za-z]+\\\\s[A-Z][a-z]+(?![：:])",
+  "(?<=Sender: )\\\\S+",     "(?<=Sender: )[A-Za-z]+\\\\s[A-Z][a-z]+(?![：:])",
+  "(?<=Manager: )\\\\S+",    "(?<=Manager: )[A-Za-z]+\\\\s[A-Z][a-z]+(?![：:])",
+  "(?<=Handler: )\\\\S+",    "(?<=Handler: )[A-Za-z]+\\\\s[A-Z][a-z]+(?![：:])",
+  "(?<=Password: )\\\\S+",
+  "(?<=Passcode: )\\\\S+",
+  "(?<=PIN: )\\\\S+"
+]
+
+// 4. Process each observation: extract matched *ranges*, return precise sub-boxes
+for obs in observations {
+  guard let candidate = obs.topCandidates(1).first else { continue }
+  let text = candidate.string
+  guard !text.trimmingCharacters(in: .whitespaces).isEmpty else { continue }
+
+  var matchedRanges: [Range<String.Index>] = []
+
+  // NSDataDetector ranges
+  if let d = detector {
+    let nsMatches = d.matches(in: text, range: NSRange(text.startIndex..., in: text))
+    for m in nsMatches {
+      if let r = Range(m.range, in: text) { matchedRanges.append(r) }
+    }
+  }
+
+  // NLTagger ranges — person + org names only (place names removed: too noisy)
+  let tagger = NLTagger(tagSchemes: [.nameType])
+  tagger.string = text
+  tagger.enumerateTags(in: text.startIndex..<text.endIndex, unit: .word,
+                       scheme: .nameType,
+                       options: [.omitWhitespace, .omitPunctuation, .joinNames]) { tag, tokenRange in
+    if tag == .personalName || tag == .organizationName {
+      matchedRanges.append(tokenRange)
+    }
+    return true
+  }
+
+  // Regex ranges
+  for pat in regexes {
+    var searchStart = text.startIndex
+    while searchStart < text.endIndex,
+          let r = text.range(of: pat, options: .regularExpression,
+                             range: searchStart..<text.endIndex) {
+      matchedRanges.append(r)
+      searchStart = r.upperBound
+    }
+  }
+
+  // Special: TW biz reg no. — 8 consecutive digits, excluding valid YYYYMMDD dates
+  // e.g. "12345678" → mask; "20260326" → skip (valid date)
+  var d8start = text.startIndex
+  while d8start < text.endIndex,
+        let r = text.range(of: "\\\\b\\\\d{8}\\\\b", options: .regularExpression,
+                           range: d8start..<text.endIndex) {
+    let s = String(text[r])
+    let y = Int(s.prefix(4)) ?? 0
+    let m = Int(s.dropFirst(4).prefix(2)) ?? 0
+    let d = Int(s.suffix(2)) ?? 0
+    let isDate = (1900...2100).contains(y) && (1...12).contains(m) && (1...31).contains(d)
+    if !isDate { matchedRanges.append(r) }
+    d8start = r.upperBound
+  }
+
+  // Deduplicate overlapping ranges, then get precise bounding box for each
+  let sorted = matchedRanges.sorted { $0.lowerBound < $1.lowerBound }
+  var merged: [Range<String.Index>] = []
+  for r in sorted {
+    if let last = merged.last, last.overlaps(r) || last.upperBound == r.lowerBound {
+      merged[merged.count - 1] = last.lowerBound..<max(last.upperBound, r.upperBound)
+    } else {
+      merged.append(r)
+    }
+  }
+
+  for r in merged {
+    if let rectObs = try? candidate.boundingBox(for: r) {
+      results.append(toBox(rectObs))
+    }
+  }
+}
+
+// 5. Output JSON
+if let data = try? JSONEncoder().encode(results),
+   let json = String(data: data, encoding: .utf8) { print(json) }
+else { print("[]") }
 `
 
-ipcMain.handle('remove-background', (event, { dataURL }) => {
+ipcMain.handle('privacy-scan', (_, { dataURL }) => {
   if (process.platform !== 'darwin') {
-    return { success: false, error: '此功能僅支援 macOS 12 以上' }
+    return { success: false, error: '此功能目前僅支援 macOS' }
   }
   return new Promise((resolve) => {
-    const tmpDir    = os.tmpdir()
-    const tmpImg    = path.join(tmpDir, `rmbg_in_${Date.now()}.png`)
-    const tmpOut    = path.join(tmpDir, `rmbg_out_${Date.now()}.png`)
-    const tmpSwift  = path.join(tmpDir, `rmbg_${Date.now()}.swift`)
+    const tmpDir   = os.tmpdir()
+    const tmpImg   = path.join(tmpDir, `pscan_${Date.now()}.png`)
+    const tmpSwift = path.join(tmpDir, `pscan_${Date.now()}.swift`)
     try {
-      const b64 = dataURL.replace(/^data:image\/\w+;base64,/, '')
-      fs.writeFileSync(tmpImg, Buffer.from(b64, 'base64'))
-      fs.writeFileSync(tmpSwift, SWIFT_REMOVE_BG)
+      fs.writeFileSync(tmpImg, Buffer.from(dataURL.replace(/^data:image\/\w+;base64,/, ''), 'base64'))
+      fs.writeFileSync(tmpSwift, SWIFT_PRIVACY_SCAN)
     } catch (err) {
-      resolve({ success: false, error: '暫存檔寫入失敗：' + err.message })
-      return
+      return resolve({ success: false, error: err.message })
     }
-    const cleanup = () => {
-      try { fs.unlinkSync(tmpImg)   } catch {}
-      try { fs.unlinkSync(tmpSwift) } catch {}
-    }
-    exec(`swift "${tmpSwift}" "${tmpImg}" "${tmpOut}"`, { timeout: 60000 }, (err, stdout, stderr) => {
+    const cleanup = () => { try { fs.unlinkSync(tmpImg) } catch {} try { fs.unlinkSync(tmpSwift) } catch {} }
+    exec(`swift "${tmpSwift}" "${tmpImg}"`, { timeout: 60000 }, (err, stdout, stderr) => {
       cleanup()
-      if (err) {
-        try { fs.unlinkSync(tmpOut) } catch {}
-        resolve({ success: false, error: stderr.trim() || err.message })
-        return
-      }
+      if (err) return resolve({ success: false, error: stderr.trim() || err.message })
       try {
-        const outBuf = fs.readFileSync(tmpOut)
-        fs.unlinkSync(tmpOut)
-        resolve({ success: true, dataURL: 'data:image/png;base64,' + outBuf.toString('base64') })
-      } catch (readErr) {
-        resolve({ success: false, error: readErr.message })
+        const boxes = JSON.parse(stdout.trim())
+        resolve({ success: true, boxes })
+      } catch {
+        resolve({ success: false, error: 'JSON parse failed: ' + stdout.trim() })
       }
     })
   })
