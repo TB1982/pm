@@ -865,7 +865,7 @@ let imgH = Double(cg.height)
 struct Box: Codable { let x, y, w, h: Double }
 var results: [Box] = []
 
-// 1. OCR — get text observations with bounding boxes
+// 1. OCR
 let handler = VNImageRequestHandler(cgImage: cg, options: [:])
 let ocrReq  = VNRecognizeTextRequest()
 ocrReq.recognitionLevel = .accurate
@@ -876,59 +876,82 @@ do { try handler.perform([ocrReq]) } catch {
 }
 guard let observations = ocrReq.results else { print("[]"); exit(0) }
 
-// 2. NSDataDetector — phone, URL/email, address, date
-let detectorTypes: NSTextCheckingResult.CheckingType = [.phoneNumber, .link, .address, .date]
-let detector = try? NSDataDetector(types: detectorTypes.rawValue)
-func matchesDetector(_ s: String) -> Bool {
-  guard let d = detector else { return false }
-  return d.firstMatch(in: s, range: NSRange(s.startIndex..., in: s)) != nil
+// Convert VNRectangleObservation (bottom-left, normalised) → image pixel Box
+func toBox(_ r: VNRectangleObservation) -> Box {
+  let vb = r.boundingBox
+  return Box(x: vb.minX * imgW, y: (1.0 - vb.maxY) * imgH,
+             w: vb.width * imgW, h: vb.height * imgH)
 }
 
-// 3. NLTagger — person / org / place names
-func matchesTagger(_ s: String) -> Bool {
+// 2. NSDataDetector — phone, URL/email, address (skip dates: too many false positives)
+let detectorTypes: NSTextCheckingResult.CheckingType = [.phoneNumber, .link, .address]
+let detector = try? NSDataDetector(types: detectorTypes.rawValue)
+
+// 3. Regex — TW ID, TW business registration no., credit card
+let regexes = [
+  "[A-Z][12]\\\\d{8}",
+  "\\\\d{8}",
+  "\\\\d{4}[\\\\s\\\\-]?\\\\d{4}[\\\\s\\\\-]?\\\\d{4}[\\\\s\\\\-]?\\\\d{4}"
+]
+
+// 4. Process each observation: extract matched *ranges*, return precise sub-boxes
+for obs in observations {
+  guard let candidate = obs.topCandidates(1).first else { continue }
+  let text = candidate.string
+  guard !text.trimmingCharacters(in: .whitespaces).isEmpty else { continue }
+
+  var matchedRanges: [Range<String.Index>] = []
+
+  // NSDataDetector ranges
+  if let d = detector {
+    let nsMatches = d.matches(in: text, range: NSRange(text.startIndex..., in: text))
+    for m in nsMatches {
+      if let r = Range(m.range, in: text) { matchedRanges.append(r) }
+    }
+  }
+
+  // NLTagger ranges — person + org names only (place names removed: too noisy)
   let tagger = NLTagger(tagSchemes: [.nameType])
-  tagger.string = s
-  var found = false
-  tagger.enumerateTags(in: s.startIndex..<s.endIndex, unit: .word,
+  tagger.string = text
+  tagger.enumerateTags(in: text.startIndex..<text.endIndex, unit: .word,
                        scheme: .nameType,
-                       options: [.omitWhitespace, .omitPunctuation, .joinNames]) { tag, _ in
-    if tag == .personalName || tag == .organizationName || tag == .placeName {
-      found = true; return false
+                       options: [.omitWhitespace, .omitPunctuation, .joinNames]) { tag, tokenRange in
+    if tag == .personalName || tag == .organizationName {
+      matchedRanges.append(tokenRange)
     }
     return true
   }
-  return found
-}
 
-// 4. Regex — TW ID, credit card, generic API token
-let regexes = [
-  "[A-Z][12]\\\\d{8}",
-  "\\\\d{4}[\\\\s\\\\-]?\\\\d{4}[\\\\s\\\\-]?\\\\d{4}[\\\\s\\\\-]?\\\\d{4}",
-  "[A-Za-z0-9_\\\\-]{20,}"
-]
-func matchesRegex(_ s: String) -> Bool {
+  // Regex ranges
   for pat in regexes {
-    if s.range(of: pat, options: .regularExpression) != nil { return true }
+    var searchStart = text.startIndex
+    while searchStart < text.endIndex,
+          let r = text.range(of: pat, options: .regularExpression,
+                             range: searchStart..<text.endIndex) {
+      matchedRanges.append(r)
+      searchStart = r.upperBound
+    }
   }
-  return false
+
+  // Deduplicate overlapping ranges, then get precise bounding box for each
+  let sorted = matchedRanges.sorted { $0.lowerBound < $1.lowerBound }
+  var merged: [Range<String.Index>] = []
+  for r in sorted {
+    if let last = merged.last, last.overlaps(r) || last.upperBound == r.lowerBound {
+      merged[merged.count - 1] = last.lowerBound..<max(last.upperBound, r.upperBound)
+    } else {
+      merged.append(r)
+    }
+  }
+
+  for r in merged {
+    if let rectObs = try? candidate.boundingBox(for: r) {
+      results.append(toBox(rectObs))
+    }
+  }
 }
 
-// 5. Process observations
-for obs in observations {
-  guard let text = obs.topCandidates(1).first?.string,
-        !text.trimmingCharacters(in: .whitespaces).isEmpty else { continue }
-  guard matchesDetector(text) || matchesTagger(text) || matchesRegex(text) else { continue }
-  // Vision bbox: bottom-left origin, normalised → flip to top-left image pixels
-  let vb = obs.boundingBox
-  results.append(Box(
-    x: vb.minX * imgW,
-    y: (1.0 - vb.maxY) * imgH,
-    w: vb.width  * imgW,
-    h: vb.height * imgH
-  ))
-}
-
-// 6. Output JSON
+// 5. Output JSON
 if let data = try? JSONEncoder().encode(results),
    let json = String(data: data, encoding: .utf8) { print(json) }
 else { print("[]") }
