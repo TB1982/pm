@@ -380,6 +380,31 @@ git pull origin claude/research-mac-tools-JcSgl && npm start
 ```
 Adjust branch name or add steps (e.g. `rm -rf node_modules && npm install`) only when the situation actually requires it.
 
+### OCR / Privacy Mask Test Script
+When asking the user to test the OCR detection or privacy mask feature, always provide a ready-to-screenshot **test target** — a block of plaintext containing one example of every currently supported detection pattern. The user screenshots this text directly and runs the scan. No need to hunt for real sensitive data.
+
+**Standard test target (update whenever detection rules change):**
+
+```
+【隱私遮蔽功能測試靶紙】
+
+姓名：王小明　聯絡電話：0912-345-678
+Email：wang.ming@example-corp.com
+身分證：A123456789　統一編號：12345678
+信用卡：4111 1111 1111 1111
+
+伺服器 IPv4：192.168.1.100　備援：10.0.0.254
+IPv6：2001:0db8:85a3:0000:0000:8a2e:0370:7334
+API Token：ghp_AbCdEfGhIjKlMnOpQrStUvWxYz9999
+
+以下不應被遮蔽：
+今天天氣很好。版本號 v1.2.3。編號 A-007。
+```
+
+- Each line tests one or more detection rules.
+- The "不應遮蔽" block validates that normal text is not over-detected.
+- When detection rules are added or removed, update this test target to match.
+
 ---
 
 ## Interaction Language
