@@ -787,6 +787,15 @@
 
   </div>
 
+  <!-- History panel -->
+  <div id="historyPanel" class="history-panel hidden">
+    <div class="history-header">
+      <span data-i18n="history_title">歷史截圖</span>
+      <button class="history-close" id="historyClose">✕</button>
+    </div>
+    <div class="history-list" id="historyList"></div>
+  </div>
+
   <!-- Bottom bar -->
   <div class="editor-bottombar">
     <span class="zoom-label" id="zoomLabel">100%</span>
@@ -1072,15 +1081,5 @@
 </div>
 
 <script src="editor.js"></script>
-
-<!-- History panel — body 最外層，跳脫 canvas stacking context -->
-<div id="historyPanel" class="history-panel hidden">
-  <div class="history-header">
-    <span data-i18n="history_title">歷史截圖</span>
-    <button class="history-close" id="historyClose">✕</button>
-  </div>
-  <div class="history-list" id="historyList"></div>
-</div>
-
 </body>
 </html>

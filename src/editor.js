@@ -5021,30 +5021,30 @@ async function addHistoryEntry({ path: filePath, label, dataURL }) {
     })
   }
 
+  function openHistory()  { panel.classList.remove('hidden'); annotCanvas.style.pointerEvents = 'none' }
+  function closeHistory() { panel.classList.add('hidden');    annotCanvas.style.pointerEvents = '' }
+
   openBtn.addEventListener('click', async () => {
-    const isHidden = panel.classList.contains('hidden')
-    if (isHidden) {
-      await renderHistory()
-      panel.classList.remove('hidden')
-    } else {
-      panel.classList.add('hidden')
-    }
+    if (!panel.classList.contains('hidden')) { closeHistory(); return }
+    await renderHistory()
+    openHistory()
   })
 
-  closeBtn.addEventListener('click', (e) => { e.stopPropagation(); panel.classList.add('hidden') })
+  closeBtn.addEventListener('click', closeHistory)
 })()
 
 // ─── Remove Background ───────────────────────────────────────────────────────
 
 async function triggerRemoveBg() {
-  // 將目前畫面（底圖 + 標注）攤平為 dataURL
-  const flat = document.createElement('canvas')
-  flat.width  = baseCanvas.width
-  flat.height = baseCanvas.height
-  const flatCtx = flat.getContext('2d')
-  flatCtx.drawImage(baseCanvas, 0, 0)
-  flatCtx.drawImage(annotCanvas, 0, 0)
-  const dataURL = flat.toDataURL('image/png')
+  if (!imgElement) { showToast(t('toast_no_image'), true); return }
+
+  // 送原始解析度的圖給 Vision（不帶標注）
+  const off = document.createElement('canvas')
+  off.width  = imgWidth
+  off.height = imgHeight
+  const offCtx = off.getContext('2d')
+  offCtx.drawImage(imgElement, 0, 0, imgWidth, imgHeight)
+  const dataURL = off.toDataURL('image/png')
 
   showToast(t('toast_rmbg_processing'))
 
@@ -5055,16 +5055,16 @@ async function triggerRemoveBg() {
     return
   }
 
-  // 將結果載入為新底圖，清空標注
+  // 結果存回 imgElement，burnIn 存檔才會用到去背後的圖
   const img = new Image()
   img.onload = () => {
-    baseCanvas.width  = annotCanvas.width  = img.width
-    baseCanvas.height = annotCanvas.height = img.height
-    baseCtx.clearRect(0, 0, img.width, img.height)
-    baseCtx.drawImage(img, 0, 0)
+    imgElement = img
+    imgWidth   = img.naturalWidth
+    imgHeight  = img.naturalHeight
     annotations = []
     history     = [[]]
     historyIdx  = 0
+    drawBase()
     renderAnnotations()
     showToast(t('toast_rmbg_done'))
   }
