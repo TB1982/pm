@@ -688,6 +688,17 @@
       <span class="opt-label" id="ocrStatusLabel" data-i18n="ocr_drag">請拖曳選取辨識區域</span>
     </div>
 
+    <!-- 隱私遮蔽工具 -->
+    <div class="opt-group hidden" id="grpPrivacyMask">
+      <span class="opt-label" data-i18n="privacy_mode_label">遮蔽方式：</span>
+      <div class="mosaic-mode-group" id="grpPrivacyMode">
+        <button class="style-btn pmmode-btn active" data-mode="mosaic" data-i18n="mosaic">馬賽克</button>
+        <button class="style-btn pmmode-btn"        data-mode="blur"   data-i18n="mosaic_blur">模糊</button>
+      </div>
+      <div class="opt-sep"></div>
+      <span class="opt-label" data-i18n="privacy_hint">K = 全圖掃描　拖曳 = 指定區域</span>
+    </div>
+
     <div class="opt-group hidden" id="grpBoxSelect">
       <span class="opt-label" id="boxSelSizeLabel" data-i18n="box_drag">請拖曳選取區域</span>
     </div>
@@ -746,10 +757,10 @@
       <button class="tool-btn active" data-tool="rect"         title="矩形框 (R)" data-i18n-title="tool_rect">□</button>
       <button class="tool-btn"        data-tool="fillrect"     title="色塊 (B)" data-i18n-title="tool_fillrect">■</button>
       <button class="tool-btn"        data-tool="text"         title="文字 (T)" data-i18n-title="tool_text">T</button>
-      <button class="tool-btn"        id="btnRemoveBg" data-tool="removebg" title="主體去背 (K)" data-i18n-title="tool_removebg">⬜</button>
       <button class="tool-btn"        data-tool="number"       title="編號 (N)" data-i18n-title="tool_number">①</button>
       <button class="tool-btn"        data-tool="symbol"       title="符號印章 (U)" data-i18n-title="tool_symbol">☺</button>
       <button class="tool-btn"        data-tool="ocr"          title="OCR 文字辨識 (G)" data-i18n-title="tool_ocr">文</button>
+      <button class="tool-btn"        data-tool="privacymask"  title="隱私遮蔽 (K)" data-i18n-title="tool_privacymask"><s>文</s></button>
       <button class="tool-btn"        data-tool="mosaic"       title="馬賽克/模糊 (X)" data-i18n-title="tool_mosaic">▦</button>
       <!-- 縮放群 -->
       <div class="tool-sep"></div>

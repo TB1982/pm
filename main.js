@@ -840,17 +840,17 @@ ipcMain.handle('ocr-recognize', (event, { dataURL }) => {
   })
 })
 
-// ─── Remove Background (macOS 12+ Vision framework via Swift) ────────────────
+// ─── Privacy Scan (macOS — Vision + NSDataDetector + NLTagger) ───────────────
 
-const SWIFT_REMOVE_BG = `
+const SWIFT_PRIVACY_SCAN = `
 import Vision
 import AppKit
+import NaturalLanguage
 
-guard CommandLine.arguments.count >= 3 else {
-  fputs("ERROR: usage: swift script.swift <input> <output>\\n", stderr); exit(1)
+guard CommandLine.arguments.count >= 2 else {
+  fputs("ERROR: usage: swift script.swift <input_image>\\n", stderr); exit(1)
 }
 let imgPath = CommandLine.arguments[1]
-let outPath = CommandLine.arguments[2]
 
 guard let nsImg = NSImage(contentsOfFile: imgPath),
       let tiff  = nsImg.tiffRepresentation,
@@ -859,76 +859,104 @@ guard let nsImg = NSImage(contentsOfFile: imgPath),
   fputs("ERROR: Cannot load image\\n", stderr); exit(1)
 }
 
-if #available(macOS 12.0, *) {
-  let handler = VNImageRequestHandler(cgImage: cg, options: [:])
-  let request = VNGenerateForegroundInstanceMaskRequest()
-  do {
-    try handler.perform([request])
-  } catch {
-    fputs("ERROR: \\(error.localizedDescription)\\n", stderr); exit(1)
-  }
-  guard let result = request.results?.first else {
-    fputs("ERROR: No foreground detected\\n", stderr); exit(1)
-  }
-  do {
-    let masked = try result.generateMaskedImage(
-      ofInstances: result.allInstances,
-      from: handler,
-      croppedToInstancesExtent: false
-    )
-    let ci  = CIImage(cvPixelBuffer: masked)
-    let ctx = CIContext()
-    guard let out = ctx.createCGImage(ci, from: ci.extent) else {
-      fputs("ERROR: Cannot create output image\\n", stderr); exit(1)
-    }
-    let outRep = NSBitmapImageRep(cgImage: out)
-    guard let png = outRep.representation(using: .png, properties: [:]) else {
-      fputs("ERROR: Cannot encode PNG\\n", stderr); exit(1)
-    }
-    try png.write(to: URL(fileURLWithPath: outPath))
-    print("OK")
-  } catch {
-    fputs("ERROR: \\(error.localizedDescription)\\n", stderr); exit(1)
-  }
-} else {
-  fputs("ERROR: Requires macOS 12 or later\\n", stderr); exit(1)
+let imgW = Double(cg.width)
+let imgH = Double(cg.height)
+
+struct Box: Codable { let x, y, w, h: Double }
+var results: [Box] = []
+
+// 1. OCR — get text observations with bounding boxes
+let handler = VNImageRequestHandler(cgImage: cg, options: [:])
+let ocrReq  = VNRecognizeTextRequest()
+ocrReq.recognitionLevel = .accurate
+ocrReq.usesLanguageCorrection = true
+ocrReq.recognitionLanguages = ["zh-Hant", "zh-Hans", "en-US"]
+do { try handler.perform([ocrReq]) } catch {
+  fputs("ERROR: OCR failed: \\(error)\\n", stderr); exit(1)
 }
+guard let observations = ocrReq.results else { print("[]"); exit(0) }
+
+// 2. NSDataDetector — phone, URL/email, address, date
+let detectorTypes: NSTextCheckingResult.CheckingType = [.phoneNumber, .link, .address, .date]
+let detector = try? NSDataDetector(types: detectorTypes.rawValue)
+func matchesDetector(_ s: String) -> Bool {
+  guard let d = detector else { return false }
+  return d.firstMatch(in: s, range: NSRange(s.startIndex..., in: s)) != nil
+}
+
+// 3. NLTagger — person / org / place names
+func matchesTagger(_ s: String) -> Bool {
+  let tagger = NLTagger(tagSchemes: [.nameType])
+  tagger.string = s
+  var found = false
+  tagger.enumerateTags(in: s.startIndex..<s.endIndex, unit: .word,
+                       scheme: .nameType,
+                       options: [.omitWhitespace, .omitPunctuation, .joinNames]) { tag, _ in
+    if tag == .personalName || tag == .organizationName || tag == .placeName {
+      found = true; return false
+    }
+    return true
+  }
+  return found
+}
+
+// 4. Regex — TW ID, credit card, generic API token
+let regexes = [
+  "[A-Z][12]\\\\d{8}",
+  "\\\\d{4}[\\\\s\\\\-]?\\\\d{4}[\\\\s\\\\-]?\\\\d{4}[\\\\s\\\\-]?\\\\d{4}",
+  "[A-Za-z0-9_\\\\-]{20,}"
+]
+func matchesRegex(_ s: String) -> Bool {
+  for pat in regexes {
+    if s.range(of: pat, options: .regularExpression) != nil { return true }
+  }
+  return false
+}
+
+// 5. Process observations
+for obs in observations {
+  guard let text = obs.topCandidates(1).first?.string,
+        !text.trimmingCharacters(in: .whitespaces).isEmpty else { continue }
+  guard matchesDetector(text) || matchesTagger(text) || matchesRegex(text) else { continue }
+  // Vision bbox: bottom-left origin, normalised → flip to top-left image pixels
+  let vb = obs.boundingBox
+  results.append(Box(
+    x: vb.minX * imgW,
+    y: (1.0 - vb.maxY) * imgH,
+    w: vb.width  * imgW,
+    h: vb.height * imgH
+  ))
+}
+
+// 6. Output JSON
+if let data = try? JSONEncoder().encode(results),
+   let json = String(data: data, encoding: .utf8) { print(json) }
+else { print("[]") }
 `
 
-ipcMain.handle('remove-background', (event, { dataURL }) => {
+ipcMain.handle('privacy-scan', (_, { dataURL }) => {
   if (process.platform !== 'darwin') {
-    return { success: false, error: '此功能僅支援 macOS 12 以上' }
+    return { success: false, error: '此功能目前僅支援 macOS' }
   }
   return new Promise((resolve) => {
-    const tmpDir    = os.tmpdir()
-    const tmpImg    = path.join(tmpDir, `rmbg_in_${Date.now()}.png`)
-    const tmpOut    = path.join(tmpDir, `rmbg_out_${Date.now()}.png`)
-    const tmpSwift  = path.join(tmpDir, `rmbg_${Date.now()}.swift`)
+    const tmpDir   = os.tmpdir()
+    const tmpImg   = path.join(tmpDir, `pscan_${Date.now()}.png`)
+    const tmpSwift = path.join(tmpDir, `pscan_${Date.now()}.swift`)
     try {
-      const b64 = dataURL.replace(/^data:image\/\w+;base64,/, '')
-      fs.writeFileSync(tmpImg, Buffer.from(b64, 'base64'))
-      fs.writeFileSync(tmpSwift, SWIFT_REMOVE_BG)
+      fs.writeFileSync(tmpImg, Buffer.from(dataURL.replace(/^data:image\/\w+;base64,/, ''), 'base64'))
+      fs.writeFileSync(tmpSwift, SWIFT_PRIVACY_SCAN)
     } catch (err) {
-      resolve({ success: false, error: '暫存檔寫入失敗：' + err.message })
-      return
+      return resolve({ success: false, error: err.message })
     }
-    const cleanup = () => {
-      try { fs.unlinkSync(tmpImg)   } catch {}
-      try { fs.unlinkSync(tmpSwift) } catch {}
-    }
-    exec(`swift "${tmpSwift}" "${tmpImg}" "${tmpOut}"`, { timeout: 60000 }, (err, stdout, stderr) => {
+    const cleanup = () => { try { fs.unlinkSync(tmpImg) } catch {} try { fs.unlinkSync(tmpSwift) } catch {} }
+    exec(`swift "${tmpSwift}" "${tmpImg}"`, { timeout: 60000 }, (err, stdout, stderr) => {
       cleanup()
-      if (err) {
-        try { fs.unlinkSync(tmpOut) } catch {}
-        resolve({ success: false, error: stderr.trim() || err.message })
-        return
-      }
+      if (err) return resolve({ success: false, error: stderr.trim() || err.message })
       try {
-        const outBuf = fs.readFileSync(tmpOut)
-        fs.unlinkSync(tmpOut)
-        resolve({ success: true, dataURL: 'data:image/png;base64,' + outBuf.toString('base64') })
-      } catch (readErr) {
-        resolve({ success: false, error: readErr.message })
+        const boxes = JSON.parse(stdout.trim())
+        resolve({ success: true, boxes })
+      } catch {
+        resolve({ success: false, error: 'JSON parse failed: ' + stdout.trim() })
       }
     })
   })
