@@ -2159,8 +2159,9 @@ function drawOne(ctx, a) {
   if (strokeOpacity < 100 && ['line','polyline','pen'].includes(a.type)) {
     const dw = Math.round(imgWidth  * viewScale)
     const dh = Math.round(imgHeight * viewScale)
-    const off  = _getOffCanvas(dw, dh)   // CSS dimensions (context has no DPR scale)
+    const off  = _getOffCanvas(Math.round(dw * DPR), Math.round(dh * DPR))  // physical dims
     const octx = off.getContext('2d')
+    octx.setTransform(DPR, 0, 0, DPR, 0, 0)   // DPR scale — draw with CSS coords
     octx.clearRect(0, 0, dw, dh)
     octx.strokeStyle = a.color
     octx.fillStyle   = a.color
