@@ -1,8 +1,121 @@
 # SDD：Mac 截圖與圖片編輯工具
-**版本：** 3.27
+**版本：** 3.28
 **日期：** 2026-03-25
 **狀態：** 待審閱
 **變更紀錄：**
+
+### v3.28 — 隱私遮蔽工具 + 歷史 Drawer 重設計 + Retina DPR 修正
+
+#### 隱私遮蔽工具（Privacy Mask）— 取代去背功能
+
+**概述**
+以 K 鍵全圖掃描或滑鼠拖框指定區域掃描，自動偵測截圖中的敏感資訊並覆蓋非破壞性馬賽克/模糊標注。掃描完成後自動切換至選取工具，可直接拖曳八方向把手精修遮蔽範圍。
+
+**操作方式**
+- `K` 鍵：全圖掃描
+- 點擊工具列「文̶」→ 拖曳矩形框：限定區域掃描
+- 掃描結果為複數獨立 mosaic annotation，可個別 Delete 刪除
+
+**遮蔽方式**
+工具列上方選項列可切換：
+- 馬賽克（Block size：8 / 16 / 24 / 32 px）
+- 模糊（Blur radius：4 / 8 / 16 / 24 px）
+
+**掃描引擎（macOS only — Swift + Vision Framework）**
+底層呼叫 Swift 一次性腳本，逐 OCR observation 取得字元範圍精準 bounding box（`VNRecognizedText.boundingBox(for: range)`），非整行遮蔽。
+
+偵測層次（由上至下）：
+
+| 層次 | 技術 | 偵測項目 |
+|------|------|---------|
+| 1 | NSDataDetector | 電話號碼、Email/URL、實體地址（英文） |
+| 2 | NLTagger `.nameType` | 人名、組織名（中英） |
+| 3 | Regex — 結構化格式 | TW 身分證、統一編號（排除日期）、信用卡、IPv4、IPv6（完整 8 組）、API Token ≥20 碼 |
+| 4 | Regex — 台灣地址 | 縣/市 → 區/鄉/鎮 → 路/街/道 → 數字+號 依序出現 |
+| 5 | Regex — 中文標籤感知 | 姓名/名字/聯絡人/收件人/寄件人/負責人/承辦人/密碼/通行碼 後方值 |
+| 6 | Regex — 英文標籤感知 | Name/Contact/Recipient/Sender/Manager/Handler/Password/Passcode/PIN 後方值（含 First Last 雙字姓名）|
+
+**統一編號日期排除邏輯**
+`\d{8}` 匹配後額外驗證：年 1900–2100、月 01–12、日 01–31 → 判定為日期，跳過不遮。
+
+**已知限制**
+- IPv6 被 OCR 斷行時尾端可能漏出（八把手可補）
+- 信用卡首字元偶有 bounding box 偏移（八把手可補）
+- 英文三字以上人名只遮前兩字（八把手可補）
+- 全大寫姓氏（SMITH）只遮名（八把手可補）
+- 組織名稱 NLTagger 中文識別率低（不穩定，不列為保證功能）
+- 中文地址需符合台灣行政區格式才偵測（英文地址由 NSDataDetector 處理）
+- 非 macOS 平台顯示「此功能僅支援 macOS」toast
+
+**工具列位置**
+文（OCR）工具右側，快捷鍵：`K`（全圖）/ 工具按鈕拖框（指定區域）
+
+---
+
+#### 歷史截圖面板重設計 — 右側書籤式 Drawer
+
+**改版原因**
+原底部 bar 形式因 `.editor-layout` 的 CSS `transform` 屬性導致 `position: fixed` 被鎖在 layout 容器內，面板無法正確定位。
+
+**新設計**
+- `#historyDrawer` 移至 `<body>` 直接子層（`</body>` 前、`<script>` 前）
+- 垂直置中固定於視窗右緣：`position: fixed; top: 50%; right: 0; transform: translateY(-50%)`
+- 書籤 tab（文字直排 `writing-mode: vertical-rl`）點擊展開/收起
+- 面板以 `transform: translateX(100%) → translateX(0)` 動畫滑入
+- z-index：400（低於 toast 500、高於 modal 200）
+
+---
+
+#### Retina / HiDPI DPR 修正
+
+**問題**：所有 canvas 操作使用 CSS pixel 座標，Retina 螢幕（DPR=2）實際 canvas 解析度未補償，導致筆劃模糊。
+
+**修正**
+- `const DPR = window.devicePixelRatio || 1` 於 canvas 初始化時讀取
+- `_applyCanvasSize()`：canvas `.width/.height` 設為 `CSS size × DPR`，`style.width/height` 保持 CSS 尺寸
+- `baseCtx` / `annotCtx` 套用 `setTransform(DPR, 0, 0, DPR, 0, 0)`，所有繪圖繼續以 CSS px 座標操作
+- `drawMosaic()`：讀取 baseCanvas 像素時來源座標乘以 DPR
+- 半透明筆劃 off-screen canvas（`_getOffCanvas`）：使用物理尺寸建立、套用 DPR transform、以 CSS 尺寸寫回
+
+---
+
+#### 工具列順序調整
+
+調整前後對比（左→右）：
+- 舊：矩形、橢圓、線條、箭頭、鉛筆、文字、編號、符號、去背、馬賽克、OCR...
+- 新：…符號、馬賽克、OCR（文）、隱私遮蔽（文̶）— 相關工具相鄰，繼承關係清晰
+
+---
+
+#### TDD v3.28
+
+**隱私遮蔽工具**
+- [ ] 按 K 鍵，顯示「掃描中…」toast，完成後顯示「已遮蔽 N 處」
+- [ ] 掃描完成後工具列自動切換為選取工具（箭頭）
+- [ ] 選取工具狀態下點擊 mosaic annotation → 顯示 8 方向白色圓形把手
+- [ ] 拖曳任意把手 → mosaic 範圍即時更新
+- [ ] 對掃描出的 mosaic 按 Delete → 單筆刪除，不影響其他 mosaic
+- [ ] Ctrl/Cmd+Z 還原一次掃描的全部結果
+- [ ] 無圖片時按 K → 顯示「請先載入圖片」toast
+- [ ] 非 macOS 平台按 K → 顯示「此功能僅支援 macOS」toast
+- [ ] 工具列選項列：點擊「馬賽克」→ 顯示 block size 選項；點擊「模糊」→ 顯示 blur radius 選項
+- [ ] 拖曳框選 → 放開後僅掃描框選範圍內的文字
+- [ ] 靶紙測試（截圖後掃描）：電話/Email/身分證/統編/信用卡/IPv4/API Token 均被遮蔽
+- [ ] 靶紙測試：日期 `20260326` **不**被遮蔽（統編日期排除邏輯）
+- [ ] 靶紙測試：密碼欄位值被遮蔽（中文「密碼：」與英文「Password:」）
+- [ ] 靶紙測試：台灣地址（縣市區路號格式）被遮蔽
+- [ ] 靶紙測試：「不應被遮蔽」段落（純中文說明文字）完全乾淨
+
+**歷史 Drawer**
+- [ ] 點擊右側書籤 tab → 面板從右側滑入
+- [ ] 再次點擊 tab 或點擊 ✕ → 面板滑出
+- [ ] 面板在各種縮放比例下均固定於視窗右緣、垂直居中
+
+**Retina 渲染**
+- [ ] Retina 螢幕下標注筆劃清晰、無模糊（對比修正前截圖）
+- [ ] 100% 縮放下圖片與標注像素對齊
+
+---
 
 ### v3.27 — 批次 WebP 恢復 + 浮水印 + 去背 + 品牌色庫 + 歷史截圖面板
 
