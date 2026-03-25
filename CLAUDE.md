@@ -373,6 +373,13 @@ When a feature is removed or replaced:
 - **Git history is the archive.** Any committed code is permanently recoverable via `git log`. A separate MD file adds maintenance burden without benefit.
 - **If design decisions or technical context are worth preserving** (beyond the code itself), record them in `SDD-mac-screenshot-tool.md` under `變更紀錄`, not as dead code in the repository.
 
+### Ready-to-run Commands
+Whenever asking the user to pull, test, or verify changes, always provide the exact commands as a ready-to-copy block. Do not make the user look up commands elsewhere. Standard sequence for the Electron tool:
+```bash
+git pull origin claude/research-mac-tools-JcSgl && npm start
+```
+Adjust branch name or add steps (e.g. `rm -rf node_modules && npm install`) only when the situation actually requires it.
+
 ---
 
 ## Interaction Language
