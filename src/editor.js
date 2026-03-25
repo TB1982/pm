@@ -1206,6 +1206,53 @@ function hideColorPanel() {
     })
   }
 
+  // Brand colors
+  let brandColors = []
+  const brandEl = document.getElementById('cppBrand')
+
+  function rebuildBrandRow() {
+    brandEl.innerHTML = ''
+    if (brandColors.length === 0) {
+      const empty = document.createElement('span')
+      empty.className = 'cpp-brand-empty'
+      empty.textContent = t('cpp_brand_empty')
+      brandEl.appendChild(empty)
+      return
+    }
+    brandColors.forEach((hex, idx) => {
+      const btn = document.createElement('button')
+      btn.className   = 'cpp-swatch'
+      btn.dataset.hex = hex
+      btn.style.background = hex
+      const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16)
+      if (r + g + b > 500) btn.style.boxShadow = 'inset 0 0 0 1px rgba(0,0,0,0.15)'
+      btn.title = hex
+      btn.addEventListener('click', () => { if (_cppApplyFn) { _cppApplyFn(hex); cppSyncDisplay(hex) } })
+      btn.addEventListener('contextmenu', (e) => {
+        e.preventDefault()
+        brandColors.splice(idx, 1)
+        ipcRenderer.invoke('save-brand-colors', brandColors)
+        rebuildBrandRow()
+      })
+      brandEl.appendChild(btn)
+    })
+  }
+
+  // Load brand colors from disk
+  ipcRenderer.invoke('get-brand-colors').then(colors => {
+    brandColors = Array.isArray(colors) ? colors : []
+    rebuildBrandRow()
+  })
+
+  // "+" button: add current color to brand library
+  document.getElementById('cppBrandAdd').addEventListener('click', () => {
+    const hex = _cppGetCurrent ? _cppGetCurrent() : null
+    if (!hex || hex === 'transparent' || brandColors.includes(hex)) return
+    brandColors.push(hex)
+    ipcRenderer.invoke('save-brand-colors', brandColors)
+    rebuildBrandRow()
+  })
+
   // Panel closes ONLY when user clicks the colour preview again (toggle in openColorPanel).
   // No auto-close on outside click — avoids conflicts with canvas editing actions.
 })()
@@ -3894,6 +3941,7 @@ document.addEventListener('keydown', e => {
     case 'e': case 'E': document.getElementById('btnExtend').click();     break
     case 'c': case 'C': setTool('crop');   break
     case 'g': case 'G': setTool('ocr');    break
+    case 'k': case 'K': triggerRemoveBg(); break
     case 'x': case 'X': setTool('mosaic'); break
     case 'u': case 'U': {
       setTool('symbol')
@@ -3947,6 +3995,7 @@ document.getElementById('btnSaveConfirm').addEventListener('click', async () => 
   const result  = await ipcRenderer.invoke('save-image-as', { dataURL, format })
   if (result?.success) {
     const fileName = String(result.path).split(/[/\\]/).pop()
+    addHistoryEntry({ path: result.path, label: fileName, dataURL })
     showToast(t('toast_saved', fileName))
     setTimeout(() => window.close(), 800)
     return
@@ -4803,6 +4852,7 @@ function copyFinalImage() {
   const dataURL = burnIn('png')
   const { clipboard, nativeImage } = require('electron')
   clipboard.writeImage(nativeImage.createFromDataURL(dataURL))
+  addHistoryEntry({ label: t('history_copied_label'), dataURL })
   showToast(t('toast_img_copied'))
 }
 
@@ -4905,6 +4955,124 @@ document.addEventListener('keydown', e => {
     e.preventDefault(); copyFinalImage()
   }
 }, true)  // capture phase so it fires before other listeners
+
+// ─── History Panel ────────────────────────────────────────────────────────────
+
+function makeThumb(dataURL, maxW = 150) {
+  return new Promise(resolve => {
+    const img = new Image()
+    img.onload = () => {
+      const scale = Math.min(1, maxW / img.width)
+      const c = document.createElement('canvas')
+      c.width  = Math.round(img.width  * scale)
+      c.height = Math.round(img.height * scale)
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height)
+      resolve(c.toDataURL('image/jpeg', 0.7))
+    }
+    img.src = dataURL
+  })
+}
+
+async function addHistoryEntry({ path: filePath, label, dataURL }) {
+  const thumb = await makeThumb(dataURL)
+  const entry = { id: Date.now(), timestamp: Date.now(), label: label || '', path: filePath || null, thumb }
+  await ipcRenderer.invoke('add-history-entry', entry)
+}
+
+;(function initHistoryPanel() {
+  const panel   = document.getElementById('historyPanel')
+  const listEl  = document.getElementById('historyList')
+  const closeBtn = document.getElementById('historyClose')
+  const openBtn  = document.getElementById('btnHistory')
+
+  async function renderHistory() {
+    listEl.innerHTML = ''
+    const history = await ipcRenderer.invoke('get-history')
+    if (!history || history.length === 0) {
+      const empty = document.createElement('span')
+      empty.className = 'history-empty'
+      empty.textContent = t('history_empty')
+      listEl.appendChild(empty)
+      return
+    }
+    history.forEach(entry => {
+      const item = document.createElement('div')
+      item.className = 'history-item'
+      item.title = entry.path || entry.label || ''
+
+      const img = document.createElement('img')
+      img.src = entry.thumb
+      img.alt = entry.label || ''
+
+      const label = document.createElement('div')
+      label.className = 'history-item-label'
+      label.textContent = entry.label || new Date(entry.timestamp).toLocaleTimeString()
+
+      item.appendChild(img)
+      item.appendChild(label)
+      item.addEventListener('click', async () => {
+        if (entry.path) {
+          const result = await ipcRenderer.invoke('open-history-file', entry.path)
+          if (!result?.success) showToast(t('history_file_not_found'), true)
+        }
+      })
+      listEl.appendChild(item)
+    })
+  }
+
+  openBtn.addEventListener('click', async () => {
+    const isHidden = panel.classList.contains('hidden')
+    if (isHidden) {
+      await renderHistory()
+      panel.classList.remove('hidden')
+    } else {
+      panel.classList.add('hidden')
+    }
+  })
+
+  closeBtn.addEventListener('click', () => panel.classList.add('hidden'))
+})()
+
+// ─── Remove Background ───────────────────────────────────────────────────────
+
+document.getElementById('btnRemoveBg').addEventListener('click', () => triggerRemoveBg())
+
+async function triggerRemoveBg() {
+  // 將目前畫面（底圖 + 標注）攤平為 dataURL
+  const flat = document.createElement('canvas')
+  flat.width  = baseCanvas.width
+  flat.height = baseCanvas.height
+  const flatCtx = flat.getContext('2d')
+  flatCtx.drawImage(baseCanvas, 0, 0)
+  flatCtx.drawImage(canvas, 0, 0)
+  const dataURL = flat.toDataURL('image/png')
+
+  showToast(t('toast_rmbg_processing'))
+
+  const result = await ipcRenderer.invoke('remove-background', { dataURL })
+
+  if (!result.success) {
+    showToast(t('toast_rmbg_fail') + '：' + result.error, true)
+    return
+  }
+
+  // 將結果載入為新底圖，清空標注
+  const img = new Image()
+  img.onload = () => {
+    baseCanvas.width  = img.width
+    baseCanvas.height = img.height
+    canvas.width      = img.width
+    canvas.height     = img.height
+    baseCtx.clearRect(0, 0, img.width, img.height)
+    baseCtx.drawImage(img, 0, 0)
+    annotations = []
+    history     = [[]]
+    historyIdx  = 0
+    renderAnnotations()
+    showToast(t('toast_rmbg_done'))
+  }
+  img.src = result.dataURL
+}
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
 
