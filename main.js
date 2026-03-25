@@ -903,14 +903,18 @@ let regexes = [
   "(?<=寄件人[：:])\\\\S+",
   "(?<=負責人[：:])\\\\S+",
   "(?<=承辦人[：:])\\\\S+",
-  // Label-context — English: two variants per label (with and without space after colon)
-  // "Name:John" and "Name: John" — standard form format
-  "(?<=Name:)\\\\S+",   "(?<=Name: )\\\\S+",
-  "(?<=Contact:)\\\\S+","(?<=Contact: )\\\\S+",
-  "(?<=Recipient:)\\\\S+","(?<=Recipient: )\\\\S+",
-  "(?<=Sender:)\\\\S+", "(?<=Sender: )\\\\S+",
-  "(?<=Manager:)\\\\S+","(?<=Manager: )\\\\S+",
-  "(?<=Handler:)\\\\S+","(?<=Handler: )\\\\S+"
+  // Label-context — English (with space after colon — standard form format)
+  // Two patterns per label:
+  //   [A]  \S+                              → catches single-word name  "Alice"
+  //   [B]  [A-Za-z]+\s[A-Z][a-z]+(?![：:]) → catches "First Last"; negative lookahead
+  //                                            prevents matching "Alice Contact:" as a name
+  // merge logic in step 4 unions overlapping ranges → single box covers "Carol Wang"
+  "(?<=Name: )\\\\S+",       "(?<=Name: )[A-Za-z]+\\\\s[A-Z][a-z]+(?![：:])",
+  "(?<=Contact: )\\\\S+",    "(?<=Contact: )[A-Za-z]+\\\\s[A-Z][a-z]+(?![：:])",
+  "(?<=Recipient: )\\\\S+",  "(?<=Recipient: )[A-Za-z]+\\\\s[A-Z][a-z]+(?![：:])",
+  "(?<=Sender: )\\\\S+",     "(?<=Sender: )[A-Za-z]+\\\\s[A-Z][a-z]+(?![：:])",
+  "(?<=Manager: )\\\\S+",    "(?<=Manager: )[A-Za-z]+\\\\s[A-Z][a-z]+(?![：:])",
+  "(?<=Handler: )\\\\S+",    "(?<=Handler: )[A-Za-z]+\\\\s[A-Z][a-z]+(?![：:])"
 ]
 
 // 4. Process each observation: extract matched *ranges*, return precise sub-boxes
