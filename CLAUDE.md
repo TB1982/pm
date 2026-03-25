@@ -394,6 +394,7 @@ When asking the user to test the OCR detection or privacy mask feature, always p
 信用卡：4111 1111 1111 1111
 負責人：林志偉　承辦人：黃美玲
 聯絡人：吳建宏　收件人：張雅琪　寄件人：李明德
+Name: Alice　Contact: Bob Chen　Recipient: Carol Wang
 
 伺服器 IPv4：192.168.1.100　備援：10.0.0.254
 IPv6：2001:0db8:85a3:0000:0000:8a2e:0370:7334

@@ -895,7 +895,7 @@ let regexes = [
   "\\\\b(?:\\\\d{1,3}\\\\.){3}\\\\d{1,3}\\\\b",                               // IPv4
   "[0-9a-fA-F]{1,4}(?::[0-9a-fA-F]{1,4}){7}",                                 // IPv6 full form
   "[A-Za-z0-9_\\\\-]{20,}",                                                     // API key / token (no spaces)
-  // Label-context: mask the value after known field labels (lookbehind = don't mask the label itself)
+  // Label-context — Chinese: mask value after label, don't mask label itself
   "(?<=姓名[：:])\\\\S+",
   "(?<=名字[：:])\\\\S+",
   "(?<=聯絡人[：:])\\\\S+",
@@ -903,7 +903,14 @@ let regexes = [
   "(?<=寄件人[：:])\\\\S+",
   "(?<=負責人[：:])\\\\S+",
   "(?<=承辦人[：:])\\\\S+",
-  "(?<=Name[：: ])\\\\S+"
+  // Label-context — English: two variants per label (with and without space after colon)
+  // "Name:John" and "Name: John" — standard form format
+  "(?<=Name:)\\\\S+",   "(?<=Name: )\\\\S+",
+  "(?<=Contact:)\\\\S+","(?<=Contact: )\\\\S+",
+  "(?<=Recipient:)\\\\S+","(?<=Recipient: )\\\\S+",
+  "(?<=Sender:)\\\\S+", "(?<=Sender: )\\\\S+",
+  "(?<=Manager:)\\\\S+","(?<=Manager: )\\\\S+",
+  "(?<=Handler:)\\\\S+","(?<=Handler: )\\\\S+"
 ]
 
 // 4. Process each observation: extract matched *ranges*, return precise sub-boxes
