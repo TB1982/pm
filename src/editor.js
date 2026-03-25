@@ -3946,8 +3946,14 @@ document.getElementById('btnSaveConfirm').addEventListener('click', async () => 
   const dataURL = burnIn(format)
   const result  = await ipcRenderer.invoke('save-image-as', { dataURL, format })
   if (result?.success) {
-    showToast(t('toast_saved', result.path.split('/').pop()))
+    const fileName = String(result.path).split(/[/\\]/).pop()
+    showToast(t('toast_saved', fileName))
     setTimeout(() => window.close(), 800)
+    return
+  }
+  if (!result?.canceled) {
+    const msg = result?.error || t('toast_save_fail')
+    showToast(t('toast_save_fail_detail', msg))
   }
 })
 
