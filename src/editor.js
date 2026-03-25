@@ -5058,10 +5058,8 @@ async function triggerRemoveBg() {
   // 將結果載入為新底圖，清空標注
   const img = new Image()
   img.onload = () => {
-    baseCanvas.width  = img.width
-    baseCanvas.height = img.height
-    canvas.width      = img.width
-    canvas.height     = img.height
+    baseCanvas.width  = annotCanvas.width  = img.width
+    baseCanvas.height = annotCanvas.height = img.height
     baseCtx.clearRect(0, 0, img.width, img.height)
     baseCtx.drawImage(img, 0, 0)
     annotations = []
