@@ -509,13 +509,13 @@ body {
 
 /* History panel */
 .history-panel {
-  position: absolute;
+  position: fixed;
   bottom: 48px;
   left: 0;
   right: 0;
   background: #1a1a2e;
   border-top: 1px solid #2e2e4e;
-  z-index: 80;
+  z-index: 9999;
   padding: 10px 14px;
   display: flex;
   flex-direction: column;
