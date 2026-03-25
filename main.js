@@ -158,7 +158,7 @@ ipcMain.handle('save-image-as', async (event, { dataURL, format }) => {
   const win = BrowserWindow.fromWebContents(event.sender)
   const ext = { png: 'png', jpg: 'jpg', webp: 'webp', gif: 'gif' }[format] ?? 'png'
   const result = await dialog.showSaveDialog(win, {
-    defaultPath: isoFilename(ext),
+    defaultPath: path.join(app.getPath('pictures'), isoFilename(ext)),
     filters: [{ name: 'Image', extensions: [ext] }]
   })
   if (result.canceled) return { canceled: true }
