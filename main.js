@@ -888,14 +888,16 @@ let detectorTypes: NSTextCheckingResult.CheckingType = [.phoneNumber, .link, .ad
 let detector = try? NSDataDetector(types: detectorTypes.rawValue)
 
 // 3. Regex — structured patterns + label-context lookbehind
+// NOTE: \d{8} (TW biz reg no.) is handled separately below with date-exclusion logic
 let regexes = [
   "[A-Z][12]\\\\d{8}",                                                          // TW national ID
-  "\\\\b\\\\d{8}\\\\b",                                                         // TW biz reg no. (word-bounded)
   "\\\\d{4}[\\\\s\\\\-]?\\\\d{4}[\\\\s\\\\-]?\\\\d{4}[\\\\s\\\\-]?\\\\d{4}", // credit card
   "\\\\b(?:\\\\d{1,3}\\\\.){3}\\\\d{1,3}\\\\b",                               // IPv4
   "[0-9a-fA-F]{1,4}(?::[0-9a-fA-F]{1,4}){7}",                                 // IPv6 full form
-  "[A-Za-z0-9_\\\\-]{20,}",                                                     // API key / token (no spaces)
-  // Label-context — Chinese: mask value after label, don't mask label itself
+  "[A-Za-z0-9_\\\\-]{20,}",                                                     // API key / token
+  // Taiwan address: 市/縣 → 區/鄉/鎮 → 路/街/道 → 數字+號 (all must appear in sequence)
+  "[^，。,\\\\n\\\\s]{1,5}(?:縣|市)[^，。,\\\\n\\\\s]*(?:區|鄉|鎮)[^，。,\\\\n\\\\s]*(?:路|街|道)[^，。,\\\\n\\\\s]*\\\\d+號[^，。,\\\\n\\\\s]*",
+  // Label-context — Chinese names & passwords
   "(?<=姓名[：:])\\\\S+",
   "(?<=名字[：:])\\\\S+",
   "(?<=聯絡人[：:])\\\\S+",
@@ -903,18 +905,19 @@ let regexes = [
   "(?<=寄件人[：:])\\\\S+",
   "(?<=負責人[：:])\\\\S+",
   "(?<=承辦人[：:])\\\\S+",
-  // Label-context — English (with space after colon — standard form format)
-  // Two patterns per label:
-  //   [A]  \S+                              → catches single-word name  "Alice"
-  //   [B]  [A-Za-z]+\s[A-Z][a-z]+(?![：:]) → catches "First Last"; negative lookahead
-  //                                            prevents matching "Alice Contact:" as a name
-  // merge logic in step 4 unions overlapping ranges → single box covers "Carol Wang"
+  "(?<=密碼[：:])\\\\S+",
+  "(?<=通行碼[：:])\\\\S+",
+  // Label-context — English names & passwords
+  // Two patterns per label: [A] \S+ → single-word, [B] First Last with negative lookahead
   "(?<=Name: )\\\\S+",       "(?<=Name: )[A-Za-z]+\\\\s[A-Z][a-z]+(?![：:])",
   "(?<=Contact: )\\\\S+",    "(?<=Contact: )[A-Za-z]+\\\\s[A-Z][a-z]+(?![：:])",
   "(?<=Recipient: )\\\\S+",  "(?<=Recipient: )[A-Za-z]+\\\\s[A-Z][a-z]+(?![：:])",
   "(?<=Sender: )\\\\S+",     "(?<=Sender: )[A-Za-z]+\\\\s[A-Z][a-z]+(?![：:])",
   "(?<=Manager: )\\\\S+",    "(?<=Manager: )[A-Za-z]+\\\\s[A-Z][a-z]+(?![：:])",
-  "(?<=Handler: )\\\\S+",    "(?<=Handler: )[A-Za-z]+\\\\s[A-Z][a-z]+(?![：:])"
+  "(?<=Handler: )\\\\S+",    "(?<=Handler: )[A-Za-z]+\\\\s[A-Z][a-z]+(?![：:])",
+  "(?<=Password: )\\\\S+",
+  "(?<=Passcode: )\\\\S+",
+  "(?<=PIN: )\\\\S+"
 ]
 
 // 4. Process each observation: extract matched *ranges*, return precise sub-boxes
@@ -954,6 +957,21 @@ for obs in observations {
       matchedRanges.append(r)
       searchStart = r.upperBound
     }
+  }
+
+  // Special: TW biz reg no. — 8 consecutive digits, excluding valid YYYYMMDD dates
+  // e.g. "12345678" → mask; "20260326" → skip (valid date)
+  var d8start = text.startIndex
+  while d8start < text.endIndex,
+        let r = text.range(of: "\\b\\d{8}\\b", options: .regularExpression,
+                           range: d8start..<text.endIndex) {
+    let s = String(text[r])
+    let y = Int(s.prefix(4)) ?? 0
+    let m = Int(s.dropFirst(4).prefix(2)) ?? 0
+    let d = Int(s.suffix(2)) ?? 0
+    let isDate = (1900...2100).contains(y) && (1...12).contains(m) && (1...31).contains(d)
+    if !isDate { matchedRanges.append(r) }
+    d8start = r.upperBound
   }
 
   // Deduplicate overlapping ranges, then get precise bounding box for each

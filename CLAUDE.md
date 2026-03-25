@@ -394,14 +394,18 @@ When asking the user to test the OCR detection or privacy mask feature, always p
 信用卡：4111 1111 1111 1111
 負責人：林志偉　承辦人：黃美玲
 聯絡人：吳建宏　收件人：張雅琪　寄件人：李明德
+密碼：P@ssw0rd123　通行碼：secret99
 Name: Alice　Contact: Bob Chen　Recipient: Carol Wang
+Password: hunter2　PIN: 8842
+地址：台北市信義區松壽路12號3樓　新北市板橋區文化路一段5巷8號
+統一編號：12345678　（應遮）　日期：20260326　（不應遮）
 
 伺服器 IPv4：192.168.1.100　備援：10.0.0.254
 IPv6：2001:0db8:85a3:0000:0000:8a2e:0370:7334
 API Token：ghp_AbCdEfGhIjKlMnOpQrStUvWxYz9999
 
 以下不應被遮蔽：
-今天天氣很好。版本號 v1.2.3。編號 A-007。
+今天天氣很好。版本號 v1.2.3。編號 A-007。日期：20260326。
 ```
 
 - Each line tests one or more detection rules.
