@@ -963,7 +963,7 @@ for obs in observations {
   // e.g. "12345678" → mask; "20260326" → skip (valid date)
   var d8start = text.startIndex
   while d8start < text.endIndex,
-        let r = text.range(of: "\\b\\d{8}\\b", options: .regularExpression,
+        let r = text.range(of: "\\\\b\\\\d{8}\\\\b", options: .regularExpression,
                            range: d8start..<text.endIndex) {
     let s = String(text[r])
     let y = Int(s.prefix(4)) ?? 0
