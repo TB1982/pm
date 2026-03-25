@@ -795,17 +795,6 @@
     <button class="save-btn" id="btnSave" data-i18n="btn_save">完成並儲存</button>
   </div>
 
-  <!-- History drawer — 右側書籤抽屜 -->
-  <div id="historyDrawer" class="history-drawer">
-    <button id="historyTab" class="history-tab" data-i18n="btn_history">歷史截圖</button>
-    <div id="historyPanel" class="history-panel-inner">
-      <div class="history-panel-header">
-        <span class="history-panel-title" data-i18n="btn_history">歷史截圖</span>
-        <button id="historyClose" class="history-panel-close" title="關閉">✕</button>
-      </div>
-      <div id="historyList" class="history-list"></div>
-    </div>
-  </div>
 
 </div>
 
@@ -1080,6 +1069,18 @@
 <div id="floatDragExport" class="float-drag-export" title="拖曳匯出到 Line / Slack / Finder 等" data-i18n-title="float_drag_export_title">
   <span class="float-drag-move" id="floatDragMove" title="拖曳移動按鈕位置" data-i18n-title="float_drag_move_title">⠿</span>
   <span class="float-drag-label" data-i18n="float_drag_label">⬆ 拖曳匯出</span>
+</div>
+
+<!-- History drawer — 右側書籤抽屜（掛在 body 最底層，確保 position:fixed 正確定位） -->
+<div id="historyDrawer" class="history-drawer">
+  <button id="historyTab" class="history-tab" data-i18n="btn_history">歷史截圖</button>
+  <div id="historyPanel" class="history-panel-inner">
+    <div class="history-panel-header">
+      <span class="history-panel-title" data-i18n="btn_history">歷史截圖</span>
+      <button id="historyClose" class="history-panel-close" title="關閉">✕</button>
+    </div>
+    <div id="historyList" class="history-list"></div>
+  </div>
 </div>
 
 <script src="editor.js"></script>

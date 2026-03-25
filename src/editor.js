@@ -256,6 +256,7 @@ const baseCtx       = baseCanvas.getContext('2d')
 const annotCtx      = annotCanvas.getContext('2d')
 const canvasArea    = document.getElementById('canvasArea')
 const canvasWrapper = document.getElementById('canvasWrapper')
+const DPR           = window.devicePixelRatio || 1   // Retina support
 const textInputWrap = document.getElementById('textInputWrap')
 const textInputEl   = document.getElementById('textInput')
 const textMirrorEl  = document.getElementById('textMirror')
@@ -1752,10 +1753,16 @@ function fitCanvas() {
 function _applyCanvasSize() {
   const dw = Math.round(imgWidth  * viewScale)
   const dh = Math.round(imgHeight * viewScale)
-  baseCanvas.width  = annotCanvas.width  = dw
-  baseCanvas.height = annotCanvas.height = dh
+  // Physical canvas = CSS size × DPR (crisp on Retina/HiDPI)
+  baseCanvas.width  = annotCanvas.width  = Math.round(dw * DPR)
+  baseCanvas.height = annotCanvas.height = Math.round(dh * DPR)
+  baseCanvas.style.width  = annotCanvas.style.width  = dw + 'px'
+  baseCanvas.style.height = annotCanvas.style.height = dh + 'px'
   canvasWrapper.style.width  = dw + 'px'
   canvasWrapper.style.height = dh + 'px'
+  // Re-apply scale after resize (resizing resets the transform)
+  baseCtx.setTransform(DPR, 0, 0, DPR, 0, 0)
+  annotCtx.setTransform(DPR, 0, 0, DPR, 0, 0)
   document.getElementById('zoomLabel').textContent = Math.round(viewScale * 100) + '%'
   syncZoomSelect()
 }
@@ -1839,8 +1846,10 @@ canvasArea.addEventListener('wheel', e => {
 
 function drawBase() {
   if (!imgElement) return
-  baseCtx.clearRect(0, 0, baseCanvas.width, baseCanvas.height)
-  baseCtx.drawImage(imgElement, 0, 0, imgWidth * viewScale, imgHeight * viewScale)
+  const dw = Math.round(imgWidth  * viewScale)
+  const dh = Math.round(imgHeight * viewScale)
+  baseCtx.clearRect(0, 0, dw, dh)
+  baseCtx.drawImage(imgElement, 0, 0, dw, dh)
 }
 
 new ResizeObserver(() => {
@@ -1881,7 +1890,9 @@ function getImg(a) {
 // ─── Rendering ────────────────────────────────────────────────────────────────
 
 function renderAnnotations() {
-  annotCtx.clearRect(0, 0, annotCanvas.width, annotCanvas.height)
+  const dw = Math.round(imgWidth  * viewScale)
+  const dh = Math.round(imgHeight * viewScale)
+  annotCtx.clearRect(0, 0, dw, dh)
   annotations.forEach(a => drawOne(annotCtx, a))
   if (isDrawing && drawStart && drawCurrent) {
     const preview = buildPreview()
@@ -2047,13 +2058,14 @@ function drawMosaic(ctx, a) {
   if (a.mode === 'blur') {
     const r   = Math.max(1, (a.blurRadius ?? 8) * viewScale)
     const pad = Math.ceil(r * 2.5)
-    // Draw a padded region so blur doesn't darken edges
+    // Source coords in physical canvas pixels (baseCanvas is DPR-scaled)
     octx.filter = `blur(${r}px)`
     octx.drawImage(baseCanvas,
-      vx - pad, vy - pad, vw + pad * 2, vh + pad * 2,
+      (vx - pad) * DPR, (vy - pad) * DPR, (vw + pad * 2) * DPR, (vh + pad * 2) * DPR,
       -pad, -pad, vw + pad * 2, vh + pad * 2)
   } else {
-    octx.drawImage(baseCanvas, vx, vy, vw, vh, 0, 0, vw, vh)
+    // Source coords in physical canvas pixels
+    octx.drawImage(baseCanvas, vx * DPR, vy * DPR, vw * DPR, vh * DPR, 0, 0, vw, vh)
     const bs       = Math.max(2, Math.round((a.blockSize ?? 16) * viewScale))
     const imgData  = octx.getImageData(0, 0, vw, vh)
     const data     = imgData.data
@@ -2145,9 +2157,11 @@ function drawOne(ctx, a) {
   // caps and border don't X-ray through the main stroke
   const strokeOpacity = a.type === 'pen' ? (a.penOpacity ?? 100) : (a.opacity ?? 100)
   if (strokeOpacity < 100 && ['line','polyline','pen'].includes(a.type)) {
-    const off  = _getOffCanvas(ctx.canvas.width, ctx.canvas.height)
+    const dw = Math.round(imgWidth  * viewScale)
+    const dh = Math.round(imgHeight * viewScale)
+    const off  = _getOffCanvas(dw, dh)   // CSS dimensions (context has no DPR scale)
     const octx = off.getContext('2d')
-    octx.clearRect(0, 0, off.width, off.height)
+    octx.clearRect(0, 0, dw, dh)
     octx.strokeStyle = a.color
     octx.fillStyle   = a.color
     octx.lineWidth   = a.thickness * viewScale
@@ -2161,7 +2175,7 @@ function drawOne(ctx, a) {
     }
     ctx.save()
     ctx.globalAlpha = strokeOpacity / 100
-    ctx.drawImage(off, 0, 0)
+    ctx.drawImage(off, 0, 0, dw, dh)   // explicit CSS destination size
     ctx.restore()
     return
   }
@@ -4187,7 +4201,8 @@ function startOcrRecognition() {
   off.width  = Math.max(1, Math.round(r.w))
   off.height = Math.max(1, Math.round(r.h))
   const offCtx = off.getContext('2d')
-  offCtx.drawImage(baseCanvas, c(r.x), c(r.y), c(r.w), c(r.h), 0, 0, off.width, off.height)
+  // Source coords must be in physical pixels (baseCanvas is DPR-scaled)
+  offCtx.drawImage(baseCanvas, c(r.x) * DPR, c(r.y) * DPR, c(r.w) * DPR, c(r.h) * DPR, 0, 0, off.width, off.height)
   const dataURL = off.toDataURL('image/png')
 
   ipcRenderer.invoke('ocr-recognize', { dataURL }).then(result => {

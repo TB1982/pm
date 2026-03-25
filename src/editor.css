@@ -1,3 +1,13 @@
+/*
+ * ─── Z-Index Scale ───────────────────────────────────────────────────────────
+ *  100  floating panels  (color picker, symbol picker, OCR panel)
+ *  200  modal overlays   (resize, extend, template modals)
+ *  300  context menus    (right-click)
+ *  400  persistent drawers (history)
+ *  500  toast            (always on top)
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 /* Reset macOS native button rendering so custom active/inactive styles work */
@@ -503,7 +513,7 @@ body {
   display: flex;
   flex-direction: row-reverse;
   align-items: flex-start;
-  z-index: 10000;
+  z-index: 400; /* drawer */
   pointer-events: none; /* drawer wrapper non-blocking; children re-enable */
 }
 
@@ -720,7 +730,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 200;
+  z-index: 200; /* modal */
 }
 
 .modal-overlay.hidden { display: none; }
@@ -831,7 +841,7 @@ body {
   opacity: 0;
   transition: opacity 0.2s, transform 0.2s;
   white-space: nowrap;
-  z-index: 300;
+  z-index: 500; /* toast — always on top */
 }
 
 .toast.visible {
@@ -850,7 +860,7 @@ body {
   border-radius: 6px;
   padding: 4px 0;
   box-shadow: 0 4px 16px rgba(0,0,0,.55);
-  z-index: 9999;
+  z-index: 300; /* ctxmenu */
   min-width: 130px;
   user-select: none;
 }
@@ -926,7 +936,7 @@ body {
 
 #colorPickerPanel {
   position: fixed;
-  z-index: 9999;
+  z-index: 100; /* floating panel */
   background: #252525;
   border: 1px solid rgba(255,255,255,0.14);
   border-radius: 10px;
