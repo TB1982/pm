@@ -158,7 +158,8 @@ async function openEditorWindow(imagePath) {
 
   win.loadFile('src/editor.html')
   win.webContents.once('did-finish-load', () => {
-    win.webContents.send('load-image', imagePath)
+    const sourceDPR = screen.getPrimaryDisplay().scaleFactor
+    win.webContents.send('load-image', { path: imagePath, sourceDPR })
   })
 }
 

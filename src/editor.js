@@ -263,7 +263,8 @@ const baseCtx       = baseCanvas.getContext('2d')
 const annotCtx      = annotCanvas.getContext('2d')
 const canvasArea    = document.getElementById('canvasArea')
 const canvasWrapper = document.getElementById('canvasWrapper')
-const DPR           = window.devicePixelRatio || 1   // Retina support
+const DPR           = window.devicePixelRatio || 1   // display Retina factor
+let imgSourceDPR    = 1                              // source image DPR (2 for Retina screenshots)
 const textInputWrap = document.getElementById('textInputWrap')
 const textInputEl   = document.getElementById('textInput')
 const textMirrorEl  = document.getElementById('textMirror')
@@ -1508,7 +1509,7 @@ document.getElementById('fontSizeInput').addEventListener('input', e => {
   fontSize = Math.max(8, Math.min(400, parseInt(e.target.value) || 48))
   if (selectedId) updateSelectedAnnot({ fontSize })
   if (textActive) {
-    textInputEl.style.fontSize = Math.max(fontSize * viewScale, 14) + 'px'
+    textInputEl.style.fontSize = Math.max(fontSize * viewScale * imgSourceDPR, 14) + 'px'
     resizeTextInput()
   }
 })
@@ -1521,7 +1522,7 @@ document.getElementById('fontSizePreset').addEventListener('change', e => {
   e.target.value = ''   // reset to "—" placeholder
   if (selectedId) updateSelectedAnnot({ fontSize })
   if (textActive) {
-    textInputEl.style.fontSize = Math.max(fontSize * viewScale, 14) + 'px'
+    textInputEl.style.fontSize = Math.max(fontSize * viewScale * imgSourceDPR, 14) + 'px'
     resizeTextInput()
   }
 })
@@ -1738,7 +1739,10 @@ function setTool(t) {
 
 // ─── Image loading ────────────────────────────────────────────────────────────
 
-ipcRenderer.on('load-image', (_, path) => {
+ipcRenderer.on('load-image', (_, data) => {
+  // Accept both legacy string and new {path, sourceDPR} object
+  const filePath = typeof data === 'object' ? data.path : data
+  imgSourceDPR   = typeof data === 'object' ? (data.sourceDPR ?? 1) : 1
   const img = new Image()
   img.onload = () => {
     imgElement = img
@@ -1750,7 +1754,7 @@ ipcRenderer.on('load-image', (_, path) => {
     drawBase()
     setTool('rect')
   }
-  img.src = `file://${path}`
+  img.src = `file://${filePath}`
 })
 
 function fitCanvas() {
@@ -1758,7 +1762,7 @@ function fitCanvas() {
   const ah = canvasArea.clientHeight - 64
   fitScale = Math.min(aw / imgWidth, ah / imgHeight)   // true fit, uncapped
   if (!userZoomed) {
-    viewScale = Math.min(fitScale, 1 / DPR)            // default: 1:1 physical pixels (sharp)
+    viewScale = Math.min(fitScale, 1 / imgSourceDPR)   // default: 1:1 physical pixels (sharp)
     _applyCanvasSize()
   }
 }
@@ -1776,14 +1780,14 @@ function _applyCanvasSize() {
   // Re-apply scale after resize (resizing resets the transform)
   baseCtx.setTransform(DPR, 0, 0, DPR, 0, 0)
   annotCtx.setTransform(DPR, 0, 0, DPR, 0, 0)
-  document.getElementById('zoomLabel').textContent = Math.round(viewScale * DPR * 100) + '%'
+  document.getElementById('zoomLabel').textContent = Math.round(viewScale * imgSourceDPR * 100) + '%'
   syncZoomSelect()
 }
 
 // ─── Zoom helpers ─────────────────────────────────────────────────────────────
 
 function applyZoom(newScale, pivotClientX, pivotClientY) {
-  const minScale = Math.min(fitScale, 1 / DPR)
+  const minScale = Math.min(fitScale, 1 / imgSourceDPR)
   const clamped = Math.max(minScale, Math.min(MAX_SCALE, newScale))
   if (Math.abs(clamped - viewScale) < 0.0001) return
 
@@ -1831,7 +1835,7 @@ function syncZoomSelect() {
   const sel    = document.getElementById('zoomSelect')
   const custom = document.getElementById('zoomCustom')
   if (!sel) return
-  const pct = Math.round(viewScale * DPR * 100)
+  const pct = Math.round(viewScale * imgSourceDPR * 100)
   for (const opt of sel.options) {
     if (opt.id === 'zoomCustom') continue
     if (Math.round(parseFloat(opt.value) * 100) === pct) { sel.value = opt.value; return }
@@ -1847,7 +1851,7 @@ function syncZoomSelect() {
 // Zoom dropdown — ignore the dynamic 'custom' placeholder
 document.getElementById('zoomSelect').addEventListener('change', e => {
   if (e.target.value === 'custom') return
-  applyZoom(parseFloat(e.target.value) / DPR)
+  applyZoom(parseFloat(e.target.value) / imgSourceDPR)
 })
 
 // Wheel / trackpad pinch — ctrlKey is set by macOS for pinch gestures
@@ -2158,7 +2162,7 @@ function measureSymbol(char, size) {
 }
 
 function drawSymbol(ctx, a) {
-  const sz = Math.max(8, (a.size ?? 64) * viewScale)
+  const sz = Math.max(8, (a.size ?? 64) * viewScale * imgSourceDPR)
   ctx.save()
   ctx.font          = `${sz}px 'Apple Color Emoji', 'Noto Sans Symbols 2', 'Segoe UI Symbol', sans-serif`
   ctx.fillStyle     = a.color ?? '#ff3b30'
@@ -2462,7 +2466,7 @@ function drawCap(ctx, type, fx, fy, tx, ty, col, sz, borderCol, borderW) {
 }
 
 function drawText(ctx, a, { previewOnly = false } = {}) {
-  const fs      = a.fontSize * viewScale
+  const fs      = a.fontSize * viewScale * imgSourceDPR
   const lines   = a.content.split('\n')
   const fontMod = [a.italic ? 'italic' : '', a.bold ? 'bold' : ''].filter(Boolean).join(' ')
   const align   = a.textAlign ?? 'left'
@@ -2757,7 +2761,7 @@ function drawNumber(ctx, a) {
 
   if (glyph) {
     // Unicode glyph 直接渲染 — Zero Overhead
-    const fs  = (a.size ?? 48) * 2 * viewScale
+    const fs  = (a.size ?? 48) * 2 * viewScale * imgSourceDPR
     const sw  = (a.thickness ?? 0) * viewScale
     if (a.shadow) setShadow(ctx)
     ctx.font         = `${Math.round(fs)}px -apple-system, 'Noto Sans TC', sans-serif`
@@ -2776,7 +2780,7 @@ function drawNumber(ctx, a) {
     ctx.fillText(glyph, cx, cy)
   } else {
     // dot 樣式（預設或超出 Unicode 範圍 fallback）
-    const r  = (a.size ?? 48) * viewScale
+    const r  = (a.size ?? 48) * viewScale * imgSourceDPR
     const sw = (a.thickness ?? 0) * viewScale
     const strokeCol = a.numStrokeColor ?? getTextColor(a.color)
     if (a.shadow) setShadow(ctx)
@@ -3794,7 +3798,7 @@ function _repositionTextInput() {
 function showTextInput(pos) {
   textActive = true
   textPos    = pos
-  const fs      = Math.max(fontSize * viewScale, 14)
+  const fs      = Math.max(fontSize * viewScale * imgSourceDPR, 14)
   const lineH   = 1.25
   // half-leading: CSS line-height pushes text down by (lineH-1)*fs/2 within each line box.
   // Subtract it from the top so the visual glyph top aligns with canvas textBaseline='top'.
@@ -5025,6 +5029,7 @@ function _loadFileIntoEditor(file) {
     showToast(t('toast_drop_images'), true)
     return
   }
+  imgSourceDPR = 1   // dropped files are user photos, not Retina screenshots
 
   function _applyImg(src) {
     const newImg = new Image()

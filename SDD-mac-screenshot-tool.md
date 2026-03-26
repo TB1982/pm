@@ -1,8 +1,103 @@
 # SDD：Mac 截圖與圖片編輯工具
-**版本：** 3.29
+**版本：** 3.30
 **日期：** 2026-03-26
 **狀態：** 待審閱
 **變更紀錄：**
+
+### v3.30 — imgSourceDPR：文字 / 符號 / 數字工具字級比例修正
+
+#### 問題根因
+
+v3.29 剝除 pHYs chunk 後，`imgWidth` = 物理像素（2560px）；`viewScale` 預設 `= 1/DPR = 0.5`。
+
+`drawText` 原本使用：
+```
+fs = a.fontSize * viewScale   →  48 * 0.5 = 24 CSS pt
+```
+使用者看到的字只有約 24pt，但工具列顯示「48」，視覺不符。
+
+同樣問題存在於 `drawSymbol`、`drawNumber`、`showTextInput`、字級變更事件。
+
+#### 修正方案：`imgSourceDPR` 狀態變數
+
+**`main.js`**：`openEditorWindow` 改以物件形式傳送 IPC 訊息：
+```javascript
+const sourceDPR = screen.getPrimaryDisplay().scaleFactor
+win.webContents.send('load-image', { path: imagePath, sourceDPR })
+```
+
+**`editor.js`**：新增狀態變數 `let imgSourceDPR = 1`。
+
+`load-image` handler 同時支援舊版字串格式（向下相容）：
+```javascript
+ipcRenderer.on('load-image', (_, data) => {
+  const filePath = typeof data === 'object' ? data.path : data
+  imgSourceDPR   = typeof data === 'object' ? (data.sourceDPR ?? 1) : 1
+  ...
+})
+```
+
+`_loadFileIntoEditor`（拖放路徑）開頭設 `imgSourceDPR = 1`，因為使用者拖入的通常是一般照片，非 Retina 截圖。
+
+**縮放系統**：所有原本使用 `DPR` 的縮放公式改為 `imgSourceDPR`：
+
+| 位置 | 公式 |
+|------|------|
+| `fitCanvas` 預設 | `min(fitScale, 1/imgSourceDPR)` |
+| `applyZoom` 最小縮放 | `min(fitScale, 1/imgSourceDPR)` |
+| 縮放標籤 | `viewScale × imgSourceDPR × 100` |
+| `syncZoomSelect` 比對 | `viewScale × imgSourceDPR × 100` |
+| 縮放選單 handler | `parseFloat(value) / imgSourceDPR` |
+
+**繪圖函數**：
+
+| 函數 | 修正前 | 修正後 |
+|------|--------|--------|
+| `drawText` | `a.fontSize * viewScale` | `a.fontSize * viewScale * imgSourceDPR` |
+| `drawSymbol` | `a.size * viewScale` | `a.size * viewScale * imgSourceDPR` |
+| `drawNumber`（glyph） | `a.size * 2 * viewScale` | `a.size * 2 * viewScale * imgSourceDPR` |
+| `drawNumber`（dot） | `a.size * viewScale` | `a.size * viewScale * imgSourceDPR` |
+| `showTextInput` | `fontSize * viewScale` | `fontSize * viewScale * imgSourceDPR` |
+| 字級輸入 onChange | `fontSize * viewScale` | `fontSize * viewScale * imgSourceDPR` |
+
+#### 數學保證
+
+**編輯器顯示（Retina 截圖，imgSourceDPR=2，viewScale=0.5）：**
+```
+fs = 48 × 0.5 × 2 = 48 CSS pt  ← 視覺所見即設定值 ✓
+```
+
+**輸出（burnIn：viewScale=1，imgSourceDPR=2）：**
+```
+fs = 48 × 1 × 2 = 96px 於 2560px 畫布
+邏輯視角（1280px）= 96/2 = 48pt  ← 輸出比例正確 ✓
+```
+
+**一般照片（imgSourceDPR=1，viewScale=1.0）：**
+```
+fs = 48 × 1.0 × 1 = 48 CSS pt  ← 與舊行為完全一致 ✓
+```
+
+#### TDD v3.30 — 文字字級比例修正
+
+**Retina 截圖路徑**
+- [ ] 截圖載入後，工具列設 48pt，畫布上的文字視覺約為 48pt（WYSIWYG）
+- [ ] 工具列設 24pt，畫布文字視覺約為 24pt
+- [ ] 縮放至 50%，文字視覺縮為一半（正比縮放）
+
+**燒錄輸出路徑**
+- [ ] 輸出 PNG，以圖片檢視器開啟，文字字級與標注時設定值視覺一致
+- [ ] 多行文字在輸出圖中行距正確，不過大或過小
+
+**拖放路徑（一般照片，imgSourceDPR=1）**
+- [ ] 拖放 JPG 載入，字級行為與 v3.29 前完全一致（無回退）
+- [ ] 拖放 PNG 截圖（已含 pHYs）載入後 imgSourceDPR=1，字級正常
+
+**符號 / 數字工具**
+- [ ] 符號工具預設大小，Retina 截圖上視覺尺寸合理（不過小）
+- [ ] 數字工具 Dot 樣式，半徑與設定值視覺一致
+
+---
 
 ### v3.29 — Retina 截圖畫質根本修正（PNG pHYs 剝除 + DPR-aware 縮放）
 
@@ -35,15 +130,15 @@ macOS `screencapture` 對 Retina 螢幕捕獲 2× 物理像素的 PNG，並在 P
 
 `_loadFileIntoEditor`：PNG 檔案改用 `FileReader.readAsArrayBuffer`，以 `_stripPNGPhysChunk(buf)` 移除 pHYs chunk，建立 `Blob URL` 載入，確保拖放進入的 Retina PNG 與截圖路徑行為一致。非 PNG 格式（JPG/WebP 等）維持 `readAsDataURL` 原路徑不變。
 
-**`editor.js`：DPR-aware 縮放系統（復原正確版）**
+**`editor.js`：DPR-aware 縮放系統（v3.30 起改用 imgSourceDPR）**
 
 | 元件 | 公式 | 語義 |
 |------|------|------|
-| 縮放標籤 | `viewScale × DPR × 100` | 100% = 1:1 物理像素（清晰）= 原截圖視覺尺寸 |
-| 縮放選單 handler | `parseFloat(value) / DPR` | 下拉「100%」= viewScale = 1/DPR = 清晰 |
-| `syncZoomSelect` 比對 | `viewScale × DPR × 100` | 與標籤一致 |
-| `fitCanvas` 預設 | `min(fitScale, 1/DPR)` | 不放大超過 1:1 物理像素 |
-| `applyZoom` 最小縮放 | `min(fitScale, 1/DPR)` | 允許縮到「適合視窗」 |
+| 縮放標籤 | `viewScale × imgSourceDPR × 100` | 100% = 1:1 物理像素（清晰）= 原截圖視覺尺寸 |
+| 縮放選單 handler | `parseFloat(value) / imgSourceDPR` | 下拉「100%」= viewScale = 1/imgSourceDPR = 清晰 |
+| `syncZoomSelect` 比對 | `viewScale × imgSourceDPR × 100` | 與標籤一致 |
+| `fitCanvas` 預設 | `min(fitScale, 1/imgSourceDPR)` | 不放大超過 1:1 物理像素 |
+| `applyZoom` 最小縮放 | `min(fitScale, 1/imgSourceDPR)` | 允許縮到「適合視窗」 |
 
 **DPR-aware 縮放的數學保證（Retina 截圖 2560×1600 為例，DPR=2）**
 
