@@ -267,11 +267,13 @@ dropzone.addEventListener('drop', (e) => {
   dropzone.classList.remove('drag-over')
   const paths = Array.from(e.dataTransfer.files)
     .filter(f => /\.(png|jpe?g|webp|gif|svg)$/i.test(f.name))
-    .map(f => f.path)
+    .map(f => window.electronAPI.getPathForFile(f))
+    .filter(Boolean)
   addBatchFiles(paths)
 })
 
 function addBatchFiles(newPaths) {
+  if (!newPaths || newPaths.length === 0) return
   const existing = new Set(batchFiles)
   for (const p of newPaths) {
     if (!existing.has(p)) batchFiles.push(p)

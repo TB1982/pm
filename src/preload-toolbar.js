@@ -1,5 +1,5 @@
 'use strict'
-const { contextBridge, ipcRenderer } = require('electron')
+const { contextBridge, ipcRenderer, webUtils } = require('electron')
 
 const INVOKE_CH = new Set([
   'resize-for-modal', 'resize-to-toolbar', 'open-permission-settings',
@@ -35,4 +35,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
       listenerMap.delete(callback)
     }
   },
+
+  getPathForFile: (file) => webUtils.getPathForFile(file),
 })

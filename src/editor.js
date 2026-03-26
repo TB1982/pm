@@ -333,37 +333,37 @@ function hideAllOptions() {
   hideSymbolPanel()
 }
 
-function showOptionsForTool(t) {
+function showOptionsForTool(tool) {
   hideAllOptions()
-  if (t === 'zoom-in' || t === 'zoom-out') {
+  if (tool === 'zoom-in' || tool === 'zoom-out') {
     document.getElementById('grpZoom').classList.remove('hidden')
     return
   }
-  if (t === 'crop') {
+  if (tool === 'crop') {
     document.getElementById('grpCrop').classList.remove('hidden')
     return
   }
-  if (t === 'ocr') {
+  if (tool === 'ocr') {
     document.getElementById('grpOcr').classList.remove('hidden')
     document.getElementById('ocrStatusLabel').textContent = t('ocr_drag')
     return
   }
-  if (t === 'boxselect') {
+  if (tool === 'boxselect') {
     document.getElementById('grpBoxSelect').classList.remove('hidden')
     syncBoxSelUI()
     return
   }
-  if (t === 'mosaic') {
+  if (tool === 'mosaic') {
     document.getElementById('grpMosaic').classList.remove('hidden')
     syncMosaicUI()
     return
   }
-  if (t === 'privacymask') {
+  if (tool === 'privacymask') {
     document.getElementById('grpPrivacyMask').classList.remove('hidden')
     syncPrivacyUI()
     return
   }
-  if (t === 'symbol') {
+  if (tool === 'symbol') {
     document.getElementById('grpColor').classList.remove('hidden')
     document.getElementById('grpSymbol').classList.remove('hidden')
     document.getElementById('grpShadow').classList.remove('hidden')
@@ -372,7 +372,7 @@ function showOptionsForTool(t) {
     return
   }
   const sh  = id => document.getElementById(id).classList.remove('hidden')
-  if (t === 'pen') {
+  if (tool === 'pen') {
     sh('grpColor'); sh('grpThickness'); sh('grpPenBorder'); sh('grpDashStyle')
     sh('grpCaps'); sh('grpStrokeOpacity'); sh('grpShadow')
     syncNumStrokeUI(false)
@@ -385,51 +385,51 @@ function showOptionsForTool(t) {
     syncShadowCheck(penShadow)
     return
   }
-  if (!['rect','ellipse','fillrect','fillellipse','line','text','number'].includes(t)) return
+  if (!['rect','ellipse','fillrect','fillellipse','line','text','number'].includes(tool)) return
   // (polyline 由 line tool 雙擊切換，此處不需獨立 tool id)
-  const isFill = t === 'fillrect' || t === 'fillellipse'
+  const isFill = tool === 'fillrect' || tool === 'fillellipse'
   if (!isFill) sh('grpColor')
   if (isFill) {
     sh('grpFillColor')
     syncFillMode(fillMode); syncFillColorA(fillColorA); syncFillColorB(fillColorB)
     syncFillGradientDir(fillGradientDir); syncFillOpacity(fillOpacity); syncFillBorderColor(fillBorderColor)
   }
-  if (['rect','ellipse','fillrect','fillellipse','line','number'].includes(t)) sh('grpThickness')
-  syncNumStrokeUI(t === 'number')
-  if (t === 'line') {
+  if (['rect','ellipse','fillrect','fillellipse','line','number'].includes(tool)) sh('grpThickness')
+  syncNumStrokeUI(tool === 'number')
+  if (tool === 'line') {
     sh('grpLineStyle'); sh('grpDashStyle'); sh('grpCaps'); sh('grpStrokeOpacity'); sh('grpShadow')
     syncLineOrtho(lineOrtho); syncLineBorderColor(lineBorderColor)
     syncLineBorderThickness(lineBorderThickness); syncLineBorderDash(lineBorderDashStyle)
     syncDashStyle(lineStyle); syncCaps(startCap, endCap)
     syncStrokeOpacity(lineOpacity); syncShadowCheck(lineShadow)
   }
-  if (t === 'rect') {
+  if (tool === 'rect') {
     sh('grpRectShape'); sh('grpStrokeBorder'); sh('grpDashStyle')
     sh('grpRadius'); sh('grpStrokeOpacity'); sh('grpShadow')
-    syncRectShape(t)
+    syncRectShape(tool)
     syncStrokeBorderColor(rectBorderColor); syncStrokeBorderThickness(rectBorderThickness); syncStrokeBorderDash(rectBorderDashStyle)
     syncStrokeBorderOffset(rectBorderOffsetX, rectBorderOffsetY)
     syncDashStyle(rectLineStyle); syncCornerRadius(cornerRadius)
     syncStrokeOpacity(rectOpacity); syncShadowCheck(rectShadow)
   }
-  if (t === 'ellipse') {
+  if (tool === 'ellipse') {
     sh('grpRectShape'); sh('grpStrokeBorder'); sh('grpDashStyle')
     sh('grpStrokeOpacity'); sh('grpShadow')
-    syncRectShape(t)
+    syncRectShape(tool)
     syncStrokeBorderColor(ellipseBorderColor); syncStrokeBorderThickness(ellipseBorderThickness); syncStrokeBorderDash(ellipseBorderDashStyle)
     syncStrokeBorderOffset(ellipseBorderOffsetX, ellipseBorderOffsetY)
     syncDashStyle(ellipseLineStyle)
     syncStrokeOpacity(ellipseOpacity); syncShadowCheck(ellipseShadow)
   }
-  if (t === 'fillrect') {
+  if (tool === 'fillrect') {
     sh('grpFillShape'); sh('grpDashStyle'); sh('grpRadius'); sh('grpShadow')
-    syncFillShape(t); syncDashStyle(fillrectLineStyle); syncCornerRadius(cornerRadius); syncShadowCheck(fillrectShadow)
+    syncFillShape(tool); syncDashStyle(fillrectLineStyle); syncCornerRadius(cornerRadius); syncShadowCheck(fillrectShadow)
   }
-  if (t === 'fillellipse') {
+  if (tool === 'fillellipse') {
     sh('grpFillShape'); sh('grpDashStyle'); sh('grpShadow')
-    syncFillShape(t); syncDashStyle(fillellipseLineStyle); syncShadowCheck(fillellipseShadow)
+    syncFillShape(tool); syncDashStyle(fillellipseLineStyle); syncShadowCheck(fillellipseShadow)
   }
-  if (t === 'text') {
+  if (tool === 'text') {
     sh('grpFont')
     syncTextShadowCheck(textShadow)
     syncTextBold(textBold); syncTextItalic(textItalic); syncTextUnderline(textUnderline); syncTextStrikethrough(textStrikethrough)
@@ -438,7 +438,7 @@ function showOptionsForTool(t) {
     syncTextBgOpacity(textBgOpacity); syncTextBgPreview()
     syncFontFamily(fontFamily)
   }
-  if (t === 'number') { sh('grpNumber'); sh('grpShadow'); syncShadowCheck(numShadow); syncNumStyle(numberStyle) }
+  if (tool === 'number') { sh('grpNumber'); sh('grpShadow'); syncShadowCheck(numShadow); syncNumStyle(numberStyle) }
 }
 
 function syncMosaicUI() {
@@ -618,7 +618,6 @@ function applyColor(hex) {
   if (selectedId) updateSelectedAnnot({ color: hex })
   if (textActive) { textInputEl.style.color = hex; renderAnnotations() }
   pushRecentColor(hex)
-  hideColorPanel()
 }
 function syncThickness(t) {
   document.getElementById('strokeWidthInput').value = t
@@ -803,19 +802,19 @@ function applyFillMode(mode) {
 function applyFillColor(hex) {
   fillColor = hex; syncFillColor(hex)
   if (selectedId) updateSelectedAnnot({ fillColor: hex })
-  pushRecentColor(hex); hideColorPanel()
+  pushRecentColor(hex)
 }
 function applyFillColorA(hex) {
   if (hex !== 'transparent') fillPrevColorA = hex
   fillColorA = hex; syncFillColorA(hex)
   if (selectedId) updateSelectedAnnot({ fillColorA: hex })
-  pushRecentColor(hex); hideColorPanel()
+  pushRecentColor(hex)
 }
 function applyFillColorB(hex) {
   if (hex !== 'transparent') fillPrevColorB = hex
   fillColorB = hex; syncFillColorB(hex)
   if (selectedId) updateSelectedAnnot({ fillColorB: hex })
-  pushRecentColor(hex); hideColorPanel()
+  pushRecentColor(hex)
 }
 function applyFillGradientDir(dir) {
   fillGradientDir = dir; syncFillGradientDir(dir)
@@ -828,13 +827,13 @@ function applyFillOpacity(val) {
 function applyFillBorderColor(hex) {
   fillBorderColor = hex; syncFillBorderColor(hex)
   if (selectedId) updateSelectedAnnot({ fillBorderColor: hex })
-  pushRecentColor(hex); hideColorPanel()
+  pushRecentColor(hex)
 }
 function applyTextStrokeColor(hex) {
   textStrokeColor = hex; syncTextStrokeColor(hex)
   if (selectedId) updateSelectedAnnot({ textStrokeColor: hex })
   if (textActive) renderAnnotations()
-  pushRecentColor(hex); hideColorPanel()
+  pushRecentColor(hex)
 }
 function applyTextBgColor(hex) {
   if (hex === 'transparent') {
@@ -850,7 +849,7 @@ function applyTextBgColor(hex) {
   syncTextBgPreview()   // opacity 已確定後再更新色塊
   if (selectedId) updateSelectedAnnot({ textBgColor: hex, textBgOpacity: textBgOpacity })
   if (textActive) renderAnnotations()
-  pushRecentColor(hex); hideColorPanel()
+  pushRecentColor(hex)
 }
 
 // Update selected annotation's properties + push history
@@ -1110,6 +1109,15 @@ function hideColorPanel() {
   _cppApplyFn = _cppGetCurrent = _cppAnchorEl = null
 }
 
+// Close color panel when clicking outside of it or its anchor button
+document.addEventListener('click', (e) => {
+  const panel = document.getElementById('colorPickerPanel')
+  if (panel.classList.contains('hidden')) return
+  if (panel.contains(e.target)) return
+  if (_cppAnchorEl && _cppAnchorEl.contains(e.target)) return
+  hideColorPanel()
+}, true)
+
 ;(function initColorPanel() {
   // Update the panel's active-swatch highlight + hex field after a colour is applied
   function cppSyncDisplay(hex) {
@@ -1305,7 +1313,6 @@ document.getElementById('numStrokeColorPreview').addEventListener('click', funct
     numStrokeColor = hex
     syncNumStrokeColor(hex)
     if (selectedId) { updateSelectedAnnot({ numStrokeColor: hex }); renderAnnotations() }
-    hideColorPanel()   // 選色後自動關閉
   }, () => numStrokeColor)
 })
 
@@ -1315,7 +1322,6 @@ document.getElementById('lineBorderColorPreview').addEventListener('click', func
     lineBorderColor = hex
     syncLineBorderColor(hex)
     if (selectedId) updateSelectedAnnot({ lineBorderColor: hex })
-    hideColorPanel()
   }, () => lineBorderColor)
 })
 
@@ -1325,7 +1331,6 @@ document.getElementById('penBorderColorPreview').addEventListener('click', funct
     penBorderColor = hex
     syncPenBorderColor(hex)
     if (selectedId) updateSelectedAnnot({ penBorderColor: hex })
-    hideColorPanel()
   }, () => penBorderColor)
 })
 
@@ -1431,7 +1436,6 @@ document.getElementById('strokeBorderColorPreview').addEventListener('click', fu
     if (t === 'rect')    { rectBorderColor    = hex; syncStrokeBorderColor(hex) }
     if (t === 'ellipse') { ellipseBorderColor = hex; syncStrokeBorderColor(hex) }
     if (selectedId) updateSelectedAnnot({ borderColor: hex })
-    hideColorPanel()
   }, () => t === 'ellipse' ? ellipseBorderColor : rectBorderColor)
 })
 
@@ -1704,36 +1708,36 @@ document.getElementById('btnRedo').addEventListener('click', redo)
 
 // ─── Tool activation ─────────────────────────────────────────────────────────
 
-function setTool(t) {
+function setTool(newTool) {
   commitText(false)
   hideColorPanel()
-  if (t !== 'crop')      { cropRect = null; isCropping = false; cropMoving = false; cropResizeH = null; cropMoveStart = null }
-  if (t !== 'ocr')          { ocrRect = null; isOcrSelecting = false; ocrStart = null }
-  if (t !== 'boxselect')    { boxSelRect = null; isBoxSelecting = false; boxSelStart = null }
-  if (t !== 'mosaic')       { isMosaicDrawing = false; mosaicDrawStart = null; mosaicPreviewRect = null }
-  if (t !== 'privacymask')  { privacySelRect = null; isPrivacySelecting = false; privacySelStart = null }
-  if (t !== 'pen')       { isPenDrawing = false; penPoints = [] }
+  if (newTool !== 'crop')        { cropRect = null; isCropping = false; cropMoving = false; cropResizeH = null; cropMoveStart = null }
+  if (newTool !== 'ocr')          { ocrRect = null; isOcrSelecting = false; ocrStart = null }
+  if (newTool !== 'boxselect')    { boxSelRect = null; isBoxSelecting = false; boxSelStart = null }
+  if (newTool !== 'mosaic')       { isMosaicDrawing = false; mosaicDrawStart = null; mosaicPreviewRect = null }
+  if (newTool !== 'privacymask')  { privacySelRect = null; isPrivacySelecting = false; privacySelStart = null }
+  if (newTool !== 'pen')          { isPenDrawing = false; penPoints = [] }
   _cancelPolyline()   // 切換工具時取消任何進行中的折線
-  tool       = t
+  tool       = newTool
   selectedId = null
   isDrawing  = false
   isPanning  = false
 
   document.querySelectorAll('.tool-btn[data-tool]').forEach(b => {
     // ellipse 屬於 rect 群組；fillellipse 屬於 fillrect 群組
-    let match = b.dataset.tool === t
-      || (t === 'ellipse'     && b.dataset.tool === 'rect')
-      || (t === 'fillellipse' && b.dataset.tool === 'fillrect')
+    let match = b.dataset.tool === newTool
+      || (newTool === 'ellipse'     && b.dataset.tool === 'rect')
+      || (newTool === 'fillellipse' && b.dataset.tool === 'fillrect')
     b.classList.toggle('active', match)
   })
 
-  if      (t === 'zoom-in')  annotCanvas.style.cursor = 'zoom-in'
-  else if (t === 'zoom-out') annotCanvas.style.cursor = 'zoom-out'
-  else if (t === 'select')   annotCanvas.style.cursor = 'default'
-  else                       annotCanvas.style.cursor = 'crosshair'
+  if      (newTool === 'zoom-in')  annotCanvas.style.cursor = 'zoom-in'
+  else if (newTool === 'zoom-out') annotCanvas.style.cursor = 'zoom-out'
+  else if (newTool === 'select')   annotCanvas.style.cursor = 'default'
+  else                             annotCanvas.style.cursor = 'crosshair'
 
-  if (t === 'select') hideAllOptions()
-  else                showOptionsForTool(t)
+  if (newTool === 'select') hideAllOptions()
+  else                      showOptionsForTool(newTool)
 
   renderAnnotations()
 }
@@ -4335,14 +4339,12 @@ document.getElementById('ocrPanelClose').addEventListener('click', () => {
 
 document.getElementById('btnOcrCopy').addEventListener('click', () => {
   const text = document.getElementById('ocrResultText').value
-  window.electronAPI.clipboard.clear()
   window.electronAPI.clipboard.writeText(text)
   showToast(t('toast_text_copied'))
 })
 
 document.getElementById('btnOcrCopyClose').addEventListener('click', () => {
   const text = document.getElementById('ocrResultText').value
-  window.electronAPI.clipboard.clear()
   window.electronAPI.clipboard.writeText(text)
   showToast(t('toast_text_copied'))
   document.getElementById('ocrPanel').classList.add('hidden')
