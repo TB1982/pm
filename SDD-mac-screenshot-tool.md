@@ -1,8 +1,77 @@
 # SDD：Mac 截圖與圖片編輯工具
-**版本：** 3.28
-**日期：** 2026-03-25
+**版本：** 3.29
+**日期：** 2026-03-26
 **狀態：** 待審閱
 **變更紀錄：**
+
+### v3.29 — Retina 截圖畫質根本修正（PNG pHYs 剝除 + DPR-aware 縮放）
+
+#### 問題根因
+
+macOS `screencapture` 對 Retina 螢幕捕獲 2× 物理像素的 PNG，並在 PNG 檔頭寫入 `pHYs` chunk（144 DPI）。Chromium 載入這類 PNG 時，`img.naturalWidth` 回報的是 **邏輯像素**（1×），而非物理像素（2×）。導致：
+
+- Canvas 繪製時以 1× 像素資料放大至 2× 物理像素 → 模糊
+- 縮放比例語義混亂（「100%」實際只有一半視覺尺寸）
+
+#### 修正方案
+
+**`main.js`：`stripPNGPhysChunk(buf)` + `stripDPIMetadata(filePath)`**
+
+純位元組操作（不重新編碼）：讀取 PNG 檔案，掃描 chunk 鏈，跳過 `pHYs` chunk 重組緩衝區後寫回。移除後 Chromium 將以 72 DPI（螢幕標準）解讀，`img.naturalWidth` = 實際物理像素數。
+
+`openEditorWindow(imagePath)` 改為 async，在送出 `load-image` IPC 之前 `await stripDPIMetadata(imagePath)`，覆蓋所有進入 Editor 的路徑：
+
+| 來源 | IPC 路徑 |
+|------|---------|
+| 全螢幕截圖 | `capture-fullscreen` → `openEditorWindow` |
+| 矩形截圖 | `capture-rect` → `openEditorWindow` |
+| 視窗截圖 | `capture-window` → `openEditorWindow` |
+| 多螢幕合併 | `capture-all-screens-merged` → `openEditorWindow` |
+| 指定螢幕 | 單螢幕選擇 → `openEditorWindow` |
+| 從工具列開啟圖片 | `open-image-file` → `openEditorWindow` |
+| 歷史記錄重開 | `open-history-file` → `openEditorWindow` |
+
+**`editor.js`：拖放路徑同步處理**
+
+`_loadFileIntoEditor`：PNG 檔案改用 `FileReader.readAsArrayBuffer`，以 `_stripPNGPhysChunk(buf)` 移除 pHYs chunk，建立 `Blob URL` 載入，確保拖放進入的 Retina PNG 與截圖路徑行為一致。非 PNG 格式（JPG/WebP 等）維持 `readAsDataURL` 原路徑不變。
+
+**`editor.js`：DPR-aware 縮放系統（復原正確版）**
+
+| 元件 | 公式 | 語義 |
+|------|------|------|
+| 縮放標籤 | `viewScale × DPR × 100` | 100% = 1:1 物理像素（清晰）= 原截圖視覺尺寸 |
+| 縮放選單 handler | `parseFloat(value) / DPR` | 下拉「100%」= viewScale = 1/DPR = 清晰 |
+| `syncZoomSelect` 比對 | `viewScale × DPR × 100` | 與標籤一致 |
+| `fitCanvas` 預設 | `min(fitScale, 1/DPR)` | 不放大超過 1:1 物理像素 |
+| `applyZoom` 最小縮放 | `min(fitScale, 1/DPR)` | 允許縮到「適合視窗」 |
+
+**DPR-aware 縮放的數學保證（Retina 截圖 2560×1600 為例，DPR=2）**
+
+```
+imgWidth     = 2560 (物理像素，pHYs 剝除後 naturalWidth 正確回報)
+viewScale    = min(fitScale, 1/DPR) = min(…, 0.5) = 0.5
+CSS 畫布寬   = 2560 × 0.5 = 1280 CSS px     ← 與原視窗視覺尺寸一致 ✓
+物理畫布寬   = 1280 × DPR = 2560 physical px
+drawImage    = 2560 source → 2560 physical  ← 1:1，完全清晰 ✓
+縮放標籤     = 0.5 × 2 × 100 = 100%         ← 語義正確 ✓
+```
+
+**`editor.js`：`drawBase` 加入 Lanczos 平滑**
+
+```javascript
+baseCtx.imageSmoothingEnabled = true
+baseCtx.imageSmoothingQuality = 'high'    // Lanczos — 縮圖時最佳品質
+```
+
+縮放至低於 100% 時（大截圖適合視窗），Lanczos 確保縮圖清晰銳利。
+
+#### 已知行為說明
+
+- **非 PNG 圖片**（JPG/WebP）：naturalWidth 本即為物理像素，DPR-aware 縮放同樣有效；無需 pHYs 處理。
+- **舊版已存 PNG（pHYs 未剝除）**：歷史記錄重開也經 `openEditorWindow` → 自動剝除。
+- **「適合視窗」按鈕**：設為 `fitScale`（無上限），對超大截圖可能略低於 100%（視窗放不下），此時為縮小顯示，仍清晰。
+
+---
 
 ### v3.28 — 隱私遮蔽工具 + 歷史 Drawer 重設計 + Retina DPR 修正
 
@@ -114,6 +183,30 @@
 **Retina 渲染**
 - [ ] Retina 螢幕下標注筆劃清晰、無模糊（對比修正前截圖）
 - [ ] 100% 縮放下圖片與標注像素對齊
+
+#### TDD v3.29 — Retina 畫質修正
+
+**截圖路徑（screencapture → openEditorWindow）**
+- [ ] 截取任意視窗後，編輯器縮放標籤預設顯示「100%」
+- [ ] 該「100%」時，圖片視覺尺寸與被截視窗視覺尺寸相同（所見即所得）
+- [ ] 該「100%」時，圖片顯示清晰銳利，無模糊或鋸齒（對比修正前 200% 才清晰的狀況）
+- [ ] `imgInfo` 顯示物理像素尺寸（Retina 截圖應約為視窗邏輯尺寸的 2×）
+- [ ] 縮放選單選擇「100%」：圖片清晰
+- [ ] 縮放選單選擇「200%」：圖片放大（有輕微模糊，符合預期）
+- [ ] 縮放選單選擇「50%」：圖片縮小（清晰）
+- [ ] 「適合視窗」按鈕：大截圖縮放至視窗內，小截圖維持 100%
+
+**拖放路徑（drag & drop PNG）**
+- [ ] 拖放 Retina 截圖 PNG 進入編輯器，縮放標籤預設顯示「100%」
+- [ ] 拖放 PNG 後，`imgInfo` 顯示物理像素尺寸（與截圖路徑一致）
+- [ ] 拖放非 PNG 圖片（JPG/WebP）正常載入，縮放行為與 PNG 一致
+
+**歷史記錄重開**
+- [ ] 點擊歷史縮圖重開舊截圖，縮放行為與首次載入一致（pHYs 自動剝除）
+
+**非 Retina / 一般圖片**
+- [ ] 普通 PNG（72 DPI，無 pHYs 或已剝除）：載入正常，縮放行為正確
+- [ ] 不同尺寸圖片（小至 200px、大至 5000px）：縮放標籤數值合理
 
 ---
 

@@ -1758,7 +1758,7 @@ function fitCanvas() {
   const ah = canvasArea.clientHeight - 64
   fitScale = Math.min(aw / imgWidth, ah / imgHeight)   // true fit, uncapped
   if (!userZoomed) {
-    viewScale = Math.min(fitScale, 1)                  // default: no enlarging beyond 100%
+    viewScale = Math.min(fitScale, 1 / DPR)            // default: 1:1 physical pixels (sharp)
     _applyCanvasSize()
   }
 }
@@ -1776,14 +1776,14 @@ function _applyCanvasSize() {
   // Re-apply scale after resize (resizing resets the transform)
   baseCtx.setTransform(DPR, 0, 0, DPR, 0, 0)
   annotCtx.setTransform(DPR, 0, 0, DPR, 0, 0)
-  document.getElementById('zoomLabel').textContent = Math.round(viewScale * 100) + '%'
+  document.getElementById('zoomLabel').textContent = Math.round(viewScale * DPR * 100) + '%'
   syncZoomSelect()
 }
 
 // ─── Zoom helpers ─────────────────────────────────────────────────────────────
 
 function applyZoom(newScale, pivotClientX, pivotClientY) {
-  const minScale = Math.min(fitScale, 1)
+  const minScale = Math.min(fitScale, 1 / DPR)
   const clamped = Math.max(minScale, Math.min(MAX_SCALE, newScale))
   if (Math.abs(clamped - viewScale) < 0.0001) return
 
@@ -1831,7 +1831,7 @@ function syncZoomSelect() {
   const sel    = document.getElementById('zoomSelect')
   const custom = document.getElementById('zoomCustom')
   if (!sel) return
-  const pct = Math.round(viewScale * 100)
+  const pct = Math.round(viewScale * DPR * 100)
   for (const opt of sel.options) {
     if (opt.id === 'zoomCustom') continue
     if (Math.round(parseFloat(opt.value) * 100) === pct) { sel.value = opt.value; return }
@@ -1847,7 +1847,7 @@ function syncZoomSelect() {
 // Zoom dropdown — ignore the dynamic 'custom' placeholder
 document.getElementById('zoomSelect').addEventListener('change', e => {
   if (e.target.value === 'custom') return
-  applyZoom(parseFloat(e.target.value))
+  applyZoom(parseFloat(e.target.value) / DPR)
 })
 
 // Wheel / trackpad pinch — ctrlKey is set by macOS for pinch gestures
@@ -1863,6 +1863,8 @@ function drawBase() {
   const dw = Math.round(imgWidth  * viewScale)
   const dh = Math.round(imgHeight * viewScale)
   baseCtx.clearRect(0, 0, dw, dh)
+  baseCtx.imageSmoothingEnabled = true
+  baseCtx.imageSmoothingQuality = 'high'    // Lanczos — best for downscaling
   baseCtx.drawImage(imgElement, 0, 0, dw, dh)
 }
 
@@ -4992,6 +4994,27 @@ document.getElementById('btnCopyImage').addEventListener('click', copyFinalImage
   })
 })()
 
+// ─── PNG DPI-metadata strip (renderer-side, for drag & drop) ─────────────────
+// Mirrors the same logic in main.js. Removing the pHYs chunk makes Chromium
+// report img.naturalWidth = physical pixel count (not DPI-normalised logical px).
+
+function _stripPNGPhysChunk(buf) {
+  // buf must be a Node.js Buffer (available because nodeIntegration: true)
+  const PNG_SIG = [137, 80, 78, 71, 13, 10, 26, 10]
+  for (let s = 0; s < 8; s++) if (buf[s] !== PNG_SIG[s]) return buf  // not PNG
+  const parts = [buf.slice(0, 8)]
+  let i = 8
+  while (i + 12 <= buf.length) {
+    const dataLen = buf.readUInt32BE(i)
+    const type    = buf.slice(i + 4, i + 8).toString('ascii')
+    const total   = 4 + 4 + dataLen + 4
+    if (i + total > buf.length) break
+    if (type !== 'pHYs') parts.push(buf.slice(i, i + total))
+    i += total
+  }
+  return parts.length === 1 ? buf : Buffer.concat(parts)
+}
+
 // ─── Drag & Drop import ───────────────────────────────────────────────────────
 
 const _dropOverlay = document.getElementById('dropOverlay')
@@ -5002,8 +5025,8 @@ function _loadFileIntoEditor(file) {
     showToast(t('toast_drop_images'), true)
     return
   }
-  const reader = new FileReader()
-  reader.onload = ev => {
+
+  function _applyImg(src) {
     const newImg = new Image()
     newImg.onload = () => {
       imgElement  = newImg
@@ -5018,9 +5041,23 @@ function _loadFileIntoEditor(file) {
       renderAnnotations()
       showToast(t('toast_imported', file.name))
     }
-    newImg.src = ev.target.result
+    newImg.src = src
   }
-  reader.readAsDataURL(file)
+
+  const reader = new FileReader()
+  if (file.type === 'image/png') {
+    // Strip pHYs chunk so naturalWidth = physical pixels (not DPI-normalised)
+    reader.onload = ev => {
+      const raw     = Buffer.from(ev.target.result)
+      const cleaned = _stripPNGPhysChunk(raw)
+      const blob    = new Blob([cleaned], { type: 'image/png' })
+      _applyImg(URL.createObjectURL(blob))
+    }
+    reader.readAsArrayBuffer(file)
+  } else {
+    reader.onload = ev => _applyImg(ev.target.result)
+    reader.readAsDataURL(file)
+  }
 }
 
 document.addEventListener('dragenter', e => {

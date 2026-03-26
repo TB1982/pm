@@ -12,6 +12,38 @@ const sharp = require('sharp')
 
 const execAsync = promisify(exec)
 
+// ─── PNG DPI-metadata strip ───────────────────────────────────────────────────
+// macOS screencapture writes a pHYs chunk (144 DPI) that causes Chromium to
+// report img.naturalWidth in logical (1×) pixels instead of physical (2×) pixels.
+// Removing the chunk makes naturalWidth equal the true physical pixel count,
+// so the editor's DPR-aware zoom can deliver 1:1 physical pixel rendering.
+
+function stripPNGPhysChunk(buf) {
+  const PNG_SIG = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])
+  if (buf.length < 8 || !buf.slice(0, 8).equals(PNG_SIG)) return buf  // not a PNG
+
+  const parts = [buf.slice(0, 8)]
+  let i = 8
+  while (i + 12 <= buf.length) {             // min chunk size = 4+4+0+4
+    const dataLen = buf.readUInt32BE(i)
+    const type    = buf.slice(i + 4, i + 8).toString('ascii')
+    const total   = 4 + 4 + dataLen + 4      // length-field + type + data + CRC
+    if (i + total > buf.length) break         // malformed chunk, stop
+    if (type !== 'pHYs') parts.push(buf.slice(i, i + total))
+    i += total
+  }
+  return parts.length === 1 ? buf : Buffer.concat(parts)
+}
+
+async function stripDPIMetadata(filePath) {
+  if (path.extname(filePath).toLowerCase() !== '.png') return
+  try {
+    const buf     = await fs.promises.readFile(filePath)
+    const stripped = stripPNGPhysChunk(buf)
+    if (stripped !== buf) await fs.promises.writeFile(filePath, stripped)
+  } catch { /* non-critical — proceed with original file */ }
+}
+
 // ─── Window dimensions ────────────────────────────────────────────────────────
 
 const TOOLBAR_W  = 514   // 6 buttons × 72 + 5 gaps × 2 + divider + help + padding
@@ -97,7 +129,11 @@ function createWindow() {
 
 // ─── Editor window ───────────────────────────────────────────────────────────
 
-function openEditorWindow(imagePath) {
+async function openEditorWindow(imagePath) {
+  // Strip pHYs (DPI) chunk so Chromium reports naturalWidth = physical pixels.
+  // Must complete before the window sends 'load-image' to guarantee correct dims.
+  await stripDPIMetadata(imagePath)
+
   const win = new BrowserWindow({
     width: 1280,
     height: 820,
