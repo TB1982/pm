@@ -1756,7 +1756,7 @@ ipcRenderer.on('load-image', (_, path) => {
 function fitCanvas() {
   const aw = canvasArea.clientWidth  - 64
   const ah = canvasArea.clientHeight - 64
-  fitScale = Math.min(aw / imgWidth, ah / imgHeight, 1 / DPR)
+  fitScale = Math.min(aw / imgWidth, ah / imgHeight, 1)
   if (!userZoomed) {
     viewScale = fitScale
     _applyCanvasSize()
