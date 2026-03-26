@@ -4987,6 +4987,58 @@ function burnIn(format) {
   return off.toDataURL(mime, 0.92)
 }
 
+// Add subtle VAS attribution badge to a canvas context (bottom-right corner)
+// Auto-detects background brightness to choose black or white text.
+function addVasBadge(ctx, w, h) {
+  const scale    = imgDPR || 1
+  const fontSize = Math.round(10 * scale)
+  const margin   = Math.round(8  * scale)
+
+  ctx.save()
+  ctx.font = `600 ${fontSize}px -apple-system, BlinkMacSystemFont, "Inter", sans-serif`
+  const textW = Math.ceil(ctx.measureText('VAS').width)
+  const textH = fontSize
+
+  // Sample the pixels behind the badge area to decide ink colour
+  const sx = Math.max(0, w - margin - textW - 4)
+  const sy = Math.max(0, h - margin - textH - 4)
+  const sw = Math.min(textW + 8, w - sx)
+  const sh = Math.min(textH + 8, h - sy)
+  let brightness = 0.5
+  if (sw > 0 && sh > 0) {
+    const px = ctx.getImageData(sx, sy, sw, sh).data
+    let sum = 0
+    for (let i = 0; i < px.length; i += 4) {
+      sum += 0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2]
+    }
+    brightness = sum / (px.length / 4) / 255
+  }
+
+  ctx.textBaseline = 'alphabetic'
+  ctx.textAlign    = 'right'
+  ctx.fillStyle    = brightness > 0.5
+    ? 'rgba(0,0,0,0.45)'         // dark text on light background
+    : 'rgba(255,255,255,0.60)'   // light text on dark background
+  ctx.fillText('VAS', w - margin, h - margin)
+  ctx.restore()
+}
+
+// Burn annotations + VAS badge (used only for drag export)
+function burnInTagged() {
+  const off = document.createElement('canvas')
+  off.width = imgWidth; off.height = imgHeight
+  const ctx = off.getContext('2d')
+  ctx.drawImage(imgElement, 0, 0, imgWidth, imgHeight)
+
+  const savedScale = viewScale
+  viewScale = 1
+  annotations.forEach(a => drawOne(ctx, a))
+  viewScale = savedScale
+
+  addVasBadge(ctx, imgWidth, imgHeight)
+  return off.toDataURL('image/png')
+}
+
 // ─── Copy final image to clipboard ───────────────────────────────────────────
 
 function copyFinalImage() {
@@ -5023,12 +5075,11 @@ document.getElementById('btnCopyImage').addEventListener('click', copyFinalImage
   })
   document.addEventListener('mouseup', () => { drag = null })
 
-  // Main area — start OS-level drag export
+  // Main area — start OS-level drag export (includes VAS badge)
   btn.addEventListener('mousedown', e => {
     if (e.target === handle || handle.contains(e.target)) return
     if (!imgElement) { showToast(t('toast_no_image'), true); return }
-    const dataURL = burnIn('png')
-    ipcSend('start-drag-export', { dataURL })
+    ipcSend('start-drag-export', { dataURL: burnInTagged() })
   })
 })()
 
