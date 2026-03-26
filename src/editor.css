@@ -381,6 +381,7 @@ body {
   flex: 1;
   overflow: auto;
   background: #111;
+  -webkit-app-region: no-drag;
 }
 
 /* Inner flex container: always fills at least the full canvas-area.
@@ -515,6 +516,7 @@ body {
   align-items: flex-start;
   z-index: 400; /* drawer */
   pointer-events: none; /* drawer wrapper non-blocking; children re-enable */
+  -webkit-app-region: no-drag;
 }
 
 /* Vertical tab label — always visible on right edge */

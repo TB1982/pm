@@ -60,8 +60,10 @@ const MAX_SCALE = 4.0
 const ZOOM_STEP = 1.25
 
 // Annotation history
+// Each entry: { annots: Annotation[], imgSnap: null | { src: string, w: number, h: number } }
+// imgSnap is non-null for crop steps; restoring such an entry also restores the image.
 let annotations = []
-let history     = [[]]
+let history     = [{ annots: [], imgSnap: null }]
 let historyIdx  = 0
 
 // Tool settings (persist across selections)
@@ -73,9 +75,9 @@ let lineOrtho   = false   // 正交折線：true = 水平/垂直吸附
 let startCap    = 'none'
 let endCap      = 'arrow'
 let cornerRadius = 0      // 0–100%，套用於 rect / fillrect 的圓角半徑
-let fontSize  = 48
+let fontSize  = 24
 let numCount  = 1
-let numSize   = 48    // radius, image pixels
+let numSize   = 24    // radius, image pixels
 let numberStyle   = 'dot'   // dot | circle | circle-fill | roman | cjk-paren | cjk-circle
 let numThickness  = 0       // 描邊粗細，獨立於全域 thickness
 let numStrokeColor = '#ffffff'  // 描邊顏色
@@ -574,7 +576,7 @@ function showOptionsForAnnot(a) {
     sh('grpFont')
   }
   if (t === 'number') {
-    numSize        = a.size ?? 48;             syncNumSize(numSize)
+    numSize        = a.size ?? 24;             syncNumSize(numSize)
     numShadow      = a.shadow ?? false;        syncShadowCheck(numShadow)
     numberStyle    = a.numberStyle ?? 'dot';   syncNumStyle(numberStyle)
     numThickness   = a.thickness ?? 0;         syncThickness(numThickness)
@@ -1029,10 +1031,6 @@ syncFillBorderColor(fillBorderColor)
   document.body.appendChild(fileInput)
 
   document.getElementById('btnOverlayImg').addEventListener('click', () => {
-    if (annotations.some(a => a.type === 'img')) {
-      showToast(t('toast_overlay_exists'), true)
-      return
-    }
     fileInput.click()
   })
 
@@ -1505,7 +1503,7 @@ document.getElementById('strokeBorderDashSelect').addEventListener('change', e =
 
 // Font size — manual input
 document.getElementById('fontSizeInput').addEventListener('input', e => {
-  fontSize = Math.max(8, Math.min(400, parseInt(e.target.value) || 48))
+  fontSize = Math.max(8, Math.min(400, parseInt(e.target.value) || 24))
   if (selectedId) updateSelectedAnnot({ fontSize })
   if (textActive) {
     textInputEl.style.fontSize = Math.max(fontSize * viewScale, 14) + 'px'
@@ -3147,27 +3145,44 @@ function commitShape(start, end) {
 
 function pushHistory() {
   history = history.slice(0, historyIdx + 1)
-  history.push(JSON.parse(JSON.stringify(annotations)))
+  history.push({ annots: JSON.parse(JSON.stringify(annotations)), imgSnap: null })
   historyIdx = history.length - 1
+}
+
+function _applyHistoryEntry(entry) {
+  annotations = JSON.parse(JSON.stringify(entry.annots))
+  selectedId  = null
+  if (entry.imgSnap) {
+    const img = new Image()
+    img.onload = () => {
+      imgElement = img
+      imgWidth   = entry.imgSnap.w
+      imgHeight  = entry.imgSnap.h
+      document.getElementById('imgInfo').textContent = `${imgWidth} × ${imgHeight} px`
+      userZoomed = false
+      fitCanvas()
+      drawBase()
+      recalcNumCount()
+      renderAnnotations()
+    }
+    img.src = entry.imgSnap.src
+  } else {
+    recalcNumCount()
+    renderAnnotations()
+  }
 }
 
 function undo() {
   if (historyIdx > 0) {
     historyIdx--
-    annotations = JSON.parse(JSON.stringify(history[historyIdx]))
-    selectedId  = null
-    recalcNumCount()
-    renderAnnotations()
+    _applyHistoryEntry(history[historyIdx])
   }
 }
 
 function redo() {
   if (historyIdx < history.length - 1) {
     historyIdx++
-    annotations = JSON.parse(JSON.stringify(history[historyIdx]))
-    selectedId  = null
-    recalcNumCount()
-    renderAnnotations()
+    _applyHistoryEntry(history[historyIdx])
   }
 }
 
@@ -4151,9 +4166,20 @@ function confirmCrop() {
   const ch = Math.min(Math.round(cropRect.h), imgHeight - cy)
   if (cw < 1 || ch < 1) { showToast(t('toast_crop_oob'), true); return }
 
+  // Snapshot pre-crop image so Ctrl+Z can restore it
+  const preSnap = document.createElement('canvas')
+  preSnap.width = imgWidth; preSnap.height = imgHeight
+  preSnap.getContext('2d').drawImage(imgElement, 0, 0)
+  const preSrc = preSnap.toDataURL()
+
+  // Update current history slot to carry the pre-crop image snapshot
+  history = history.slice(0, historyIdx + 1)
+  history[historyIdx] = { annots: JSON.parse(JSON.stringify(annotations)), imgSnap: { src: preSrc, w: imgWidth, h: imgHeight } }
+
   const off = document.createElement('canvas')
   off.width = cw; off.height = ch
   off.getContext('2d').drawImage(imgElement, cx, cy, cw, ch, 0, 0, cw, ch)
+  const postSrc = off.toDataURL()
 
   const newImg = new Image()
   newImg.onload = () => {
@@ -4169,8 +4195,9 @@ function confirmCrop() {
       }
       return a
     })
-    history    = [JSON.parse(JSON.stringify(annotations))]
-    historyIdx = 0
+    // Push post-crop state (imgSnap stored so redo can restore cropped image)
+    history.push({ annots: JSON.parse(JSON.stringify(annotations)), imgSnap: { src: postSrc, w: cw, h: ch } })
+    historyIdx = history.length - 1
     cropRect   = null
     userZoomed = false
     document.getElementById('imgInfo').textContent = `${imgWidth} × ${imgHeight} px`
@@ -4179,7 +4206,7 @@ function confirmCrop() {
     setTool('rect')
     showToast(t('toast_cropped', cw, ch))
   }
-  newImg.src = off.toDataURL()
+  newImg.src = postSrc
 }
 
 function cancelCrop() {
