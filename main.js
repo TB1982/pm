@@ -196,6 +196,13 @@ ipcMain.on('close-editor-window', (event) => {
   if (win) win.close()
 })
 
+// Clipboard (handled in main process to avoid contextBridge serialisation issues)
+ipcMain.handle('clipboard-write-text', (_, text) => { clipboard.writeText(text) })
+ipcMain.handle('clipboard-write-image', (_, dataURL) => {
+  clipboard.writeImage(nativeImage.createFromDataURL(dataURL))
+})
+ipcMain.handle('clipboard-clear', () => { clipboard.clear() })
+
 ipcMain.handle('save-image-as', async (event, { dataURL, format }) => {
   const win = BrowserWindow.fromWebContents(event.sender)
   const ext = { png: 'png', jpg: 'jpg', webp: 'webp', gif: 'gif' }[format] ?? 'png'

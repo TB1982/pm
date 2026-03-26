@@ -1,9 +1,10 @@
 'use strict'
-const { contextBridge, ipcRenderer, clipboard, nativeImage } = require('electron')
+const { contextBridge, ipcRenderer } = require('electron')
 
 const INVOKE_CH = new Set([
   'save-image-as', 'get-brand-colors', 'save-brand-colors',
   'ocr-recognize', 'privacy-scan',
+  'clipboard-write-text', 'clipboard-write-image', 'clipboard-clear',
 ])
 const ON_CH = new Set(['load-image', 'ocr-progress'])
 const SEND_CH = new Set(['close-editor-window', 'start-drag-export'])
@@ -38,8 +39,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
 
   clipboard: {
-    writeText:  (text)    => clipboard.writeText(text),
-    writeImage: (dataURL) => clipboard.writeImage(nativeImage.createFromDataURL(dataURL)),
-    clear:      ()        => clipboard.clear(),
+    writeText:  (text)    => ipcRenderer.invoke('clipboard-write-text', text),
+    writeImage: (dataURL) => ipcRenderer.invoke('clipboard-write-image', dataURL),
+    clear:      ()        => ipcRenderer.invoke('clipboard-clear'),
   },
 })
