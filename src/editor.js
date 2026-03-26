@@ -2763,7 +2763,7 @@ function drawNumber(ctx, a) {
 
   if (glyph) {
     // Unicode glyph 直接渲染 — Zero Overhead
-    const fs  = (a.size ?? 48) * 2 * viewScale
+    const fs  = (a.size ?? 48) * 2 * viewScale * imgDPR
     const sw  = (a.thickness ?? 0) * viewScale
     if (a.shadow) setShadow(ctx)
     ctx.font         = `${Math.round(fs)}px -apple-system, 'Noto Sans TC', sans-serif`
@@ -2782,7 +2782,7 @@ function drawNumber(ctx, a) {
     ctx.fillText(glyph, cx, cy)
   } else {
     // dot 樣式（預設或超出 Unicode 範圍 fallback）
-    const r  = (a.size ?? 48) * viewScale
+    const r  = (a.size ?? 48) * viewScale * imgDPR
     const sw = (a.thickness ?? 0) * viewScale
     const strokeCol = a.numStrokeColor ?? getTextColor(a.color)
     if (a.shadow) setShadow(ctx)
