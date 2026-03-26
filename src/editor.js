@@ -326,7 +326,7 @@ function hideAllOptions() {
    'grpLineStyle','grpPenBorder','grpStrokeBorder','grpDashStyle',
    'grpCaps','grpRadius','grpFont','grpNumber','grpStrokeOpacity',
    'grpShadow','grpZoom','grpCrop','grpOcr','grpBoxSelect',
-   'grpMosaic','grpSymbol','grpPrivacyMask'].forEach(id => {
+   'grpMosaic','grpSymbol','grpPrivacyMask','grpAlign'].forEach(id => {
     const el = document.getElementById(id)
     if (el) el.classList.add('hidden')
   })
@@ -334,6 +334,106 @@ function hideAllOptions() {
   document.getElementById('btnLineOrtho')?.classList.remove('hidden')  // reset to visible by default
   hideSymbolPanel()
 }
+
+function showAlignOptions() {
+  hideAllOptions()
+  document.getElementById('grpAlign').classList.remove('hidden')
+  const n = selectedIds.size
+  document.getElementById('btnDistributeH').disabled = n < 3
+  document.getElementById('btnDistributeV').disabled = n < 3
+}
+
+// ─── Alignment helpers ────────────────────────────────────────────────────────
+
+function _alignSelectedAnnots(mode) {
+  const annots = annotations.filter(a => selectedIds.has(a.id))
+  if (annots.length < 2) return
+  const toCanvas = document.getElementById('chkAlignToCanvas').checked
+
+  pushHistory()
+
+  // Compute group bounding box
+  let gx0 = Infinity, gy0 = Infinity, gx1 = -Infinity, gy1 = -Infinity
+  annots.forEach(a => {
+    const b = bounds(a)
+    if (!b) return
+    gx0 = Math.min(gx0, b.x);        gy0 = Math.min(gy0, b.y)
+    gx1 = Math.max(gx1, b.x + b.w);  gy1 = Math.max(gy1, b.y + b.h)
+  })
+  const gCx = (gx0 + gx1) / 2
+  const gCy = (gy0 + gy1) / 2
+
+  switch (mode) {
+    case 'left': {
+      const anchor = toCanvas ? 0 : gx0
+      annots.forEach(a => { const b = bounds(a); if (b) moveAnnot(a, anchor - b.x, 0) })
+      break
+    }
+    case 'hcenter': {
+      const anchor = toCanvas ? imgWidth / 2 : gCx
+      annots.forEach(a => { const b = bounds(a); if (b) moveAnnot(a, anchor - (b.x + b.w / 2), 0) })
+      break
+    }
+    case 'right': {
+      const anchor = toCanvas ? imgWidth : gx1
+      annots.forEach(a => { const b = bounds(a); if (b) moveAnnot(a, anchor - (b.x + b.w), 0) })
+      break
+    }
+    case 'top': {
+      const anchor = toCanvas ? 0 : gy0
+      annots.forEach(a => { const b = bounds(a); if (b) moveAnnot(a, 0, anchor - b.y) })
+      break
+    }
+    case 'vcenter': {
+      const anchor = toCanvas ? imgHeight / 2 : gCy
+      annots.forEach(a => { const b = bounds(a); if (b) moveAnnot(a, 0, anchor - (b.y + b.h / 2)) })
+      break
+    }
+    case 'bottom': {
+      const anchor = toCanvas ? imgHeight : gy1
+      annots.forEach(a => { const b = bounds(a); if (b) moveAnnot(a, 0, anchor - (b.y + b.h)) })
+      break
+    }
+    case 'distributeH': {
+      if (annots.length < 3) return
+      const sorted = [...annots].sort((a, b) => bounds(a).x - bounds(b).x)
+      const totalSpan = bounds(sorted[sorted.length - 1]).x + bounds(sorted[sorted.length - 1]).w - bounds(sorted[0]).x
+      const sumW = sorted.reduce((s, a) => s + bounds(a).w, 0)
+      const gap = (totalSpan - sumW) / (sorted.length - 1)
+      let curX = bounds(sorted[0]).x + bounds(sorted[0]).w
+      for (let i = 1; i < sorted.length - 1; i++) {
+        const b = bounds(sorted[i])
+        moveAnnot(sorted[i], curX + gap - b.x, 0)
+        curX += gap + b.w
+      }
+      break
+    }
+    case 'distributeV': {
+      if (annots.length < 3) return
+      const sorted = [...annots].sort((a, b) => bounds(a).y - bounds(b).y)
+      const totalSpan = bounds(sorted[sorted.length - 1]).y + bounds(sorted[sorted.length - 1]).h - bounds(sorted[0]).y
+      const sumH = sorted.reduce((s, a) => s + bounds(a).h, 0)
+      const gap = (totalSpan - sumH) / (sorted.length - 1)
+      let curY = bounds(sorted[0]).y + bounds(sorted[0]).h
+      for (let i = 1; i < sorted.length - 1; i++) {
+        const b = bounds(sorted[i])
+        moveAnnot(sorted[i], 0, curY + gap - b.y)
+        curY += gap + b.h
+      }
+      break
+    }
+  }
+  renderAnnotations()
+}
+
+// ─── Alignment button listeners ───────────────────────────────────────────────
+
+;['left','hcenter','right','top','vcenter','bottom'].forEach(mode => {
+  const id = 'btnAlign' + mode.charAt(0).toUpperCase() + mode.slice(1)
+  document.getElementById(id)?.addEventListener('click', () => _alignSelectedAnnots(mode))
+})
+document.getElementById('btnDistributeH')?.addEventListener('click', () => _alignSelectedAnnots('distributeH'))
+document.getElementById('btnDistributeV')?.addEventListener('click', () => _alignSelectedAnnots('distributeV'))
 
 function showOptionsForTool(tool) {
   hideAllOptions()
@@ -3386,6 +3486,9 @@ annotCanvas.addEventListener('mousedown', e => {
           selectedId = [...selectedIds][0]
           const ann = annotations.find(x => x.id === selectedId)
           if (ann) showOptionsForAnnot(ann)
+        } else if (selectedIds.size > 1) {
+          selectedId = null
+          showAlignOptions()
         } else {
           selectedId = null
           hideAllOptions()
@@ -3832,6 +3935,8 @@ document.addEventListener('mouseup', e => {
         if (selectedId) {
           const ann = annotations.find(x => x.id === selectedId)
           if (ann) showOptionsForAnnot(ann)
+        } else {
+          showAlignOptions()
         }
       }
     }

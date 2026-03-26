@@ -1,8 +1,104 @@
 # SDD：Mac 截圖與圖片編輯工具
-**版本：** 3.31
+**版本：** 3.32
 **日期：** 2026-03-27
 **狀態：** 待審閱
 **變更紀錄：**
+
+### v3.32 — 對齊工具列（多選子功能）
+
+#### 功能概述
+
+多選狀態下，options bar 空白區域顯示 8 個對齊按鈕 + 1 個 checkbox，操作完成後一次 pushHistory，支援 Cmd+Z 還原。
+
+#### UI 位置
+
+options bar（`#optionsBar`）內，多選時顯示 `#grpAlign` 區塊；單選或無選取時隱藏。
+
+#### 按鈕與行為
+
+| 按鈕 ID | 圖示 | unchecked（對齊物件） | checked（對齊中線） |
+|---------|------|----------------------|-------------------|
+| `btnAlignLeft`    | ⬛← | 所有左邊緣 → 最左物件左邊緣 | 所有左邊緣 → x = 0 |
+| `btnAlignHCenter` | ⬛↔ | 所有中心 x → 群組 bounding box 水平中線 | 所有中心 x → imgWidth / 2 |
+| `btnAlignRight`   | →⬛ | 所有右邊緣 → 最右物件右邊緣 | 所有右邊緣 → imgWidth |
+| `btnAlignTop`     | ⬛↑ | 所有上邊緣 → 最上物件上邊緣 | 所有上邊緣 → y = 0 |
+| `btnAlignVCenter` | ⬛↕ | 所有中心 y → 群組 bounding box 垂直中線 | 所有中心 y → imgHeight / 2 |
+| `btnAlignBottom`  | ↓⬛ | 所有下邊緣 → 最下物件下邊緣 | 所有下邊緣 → imgHeight |
+| `btnDistributeH`  | ↔均 | 水平間距相等（需 ≥ 3 個標注） | 同左（均分不參照圖片） |
+| `btnDistributeV`  | ↕均 | 垂直間距相等（需 ≥ 3 個標注） | 同左 |
+
+#### Checkbox
+
+```
+☐ 對齊中線   （id: chkAlignToCanvas）
+```
+- 未勾：所有對齊以選取群組中的物件為參照
+- 勾選：對齊以圖片邊緣 / 中線為參照
+- 均分（水平/垂直均分）不受 checkbox 影響
+
+#### 對齊邏輯（unchecked）
+
+```javascript
+// 靠左
+const anchor = Math.min(...annots.map(a => bounds(a).x))
+annots.forEach(a => { const b = bounds(a); moveAnnot(a, anchor - b.x, 0) })
+
+// 水平置中
+const cx = (groupBounds.x + groupBounds.x + groupBounds.w) / 2
+annots.forEach(a => { const b = bounds(a); moveAnnot(a, cx - (b.x + b.w/2), 0) })
+
+// 水平均分（≥3）
+// 按 left 排序 → 第一個與最後一個固定，中間的 x 均分
+```
+
+#### 均分演算法
+
+```
+水平均分：
+  1. 按 bounds.x 由左至右排序
+  2. totalSpan = rightmost.right - leftmost.left
+  3. sumWidths  = Σ bounds(a).w
+  4. gap = (totalSpan - sumWidths) / (n - 1)
+  5. 從第二個開始：a.left = prev.right + gap
+```
+
+垂直均分同理，改為 y 軸。
+
+#### History
+
+對齊操作前呼叫 `pushHistory()`，一次操作一次還原點。
+
+---
+
+#### TDD v3.32
+
+**靠左 / 靠右 / 靠上 / 靠下（unchecked）**
+- [ ] 選取 3 個 x 位置不同的矩形 → 按靠左 → 三個左邊緣對齊最左那個
+- [ ] 按靠右 → 三個右邊緣對齊最右那個
+- [ ] 按靠上 → 三個上邊緣對齊最上那個
+- [ ] 按靠下 → 三個下邊緣對齊最下那個
+- [ ] Cmd+Z → 還原至對齊前位置
+
+**水平/垂直置中（unchecked）**
+- [ ] 3 個位置不同的標注 → 按水平置中 → 三個中心 x 對齊群組 bounding box 水平中線
+- [ ] 按垂直置中 → 三個中心 y 對齊群組 bounding box 垂直中線
+
+**對齊中線（checked）**
+- [ ] 勾選 checkbox → 按靠左 → 所有標注左邊緣貼圖片左緣（x=0）
+- [ ] 按水平置中 → 所有標注中心 x 對齊 imgWidth/2
+- [ ] 按靠右 → 所有標注右邊緣貼圖片右緣
+- [ ] 靠上 / 垂直置中 / 靠下 同理
+
+**均分（≥3 個）**
+- [ ] 3 個水平位置不均等的標注 → 按水平均分 → 三個間距目視相等
+- [ ] 3 個垂直位置不均等的標注 → 按垂直均分 → 三個間距目視相等
+- [ ] 只選 2 個 → 均分按鈕 disabled（灰色不可點）
+
+**整體**
+- [ ] 單選時 grpAlign 隱藏，不干擾現有 options bar
+- [ ] 多選時 grpAlign 顯示於 options bar
+
+---
 
 ### v3.31 — 複數選取（框選 + Shift 加選）
 
