@@ -350,75 +350,73 @@ function _alignSelectedAnnots(mode) {
   if (annots.length < 2) return
   const toCanvas = document.getElementById('chkAlignToCanvas').checked
 
-  pushHistory()
+  // Snapshot all bounds BEFORE any moveAnnot calls
+  const bbs = annots.map(a => bounds(a))
+  if (bbs.some(b => !b)) return
 
-  // Compute group bounding box
-  let gx0 = Infinity, gy0 = Infinity, gx1 = -Infinity, gy1 = -Infinity
-  annots.forEach(a => {
-    const b = bounds(a)
-    if (!b) return
-    gx0 = Math.min(gx0, b.x);        gy0 = Math.min(gy0, b.y)
-    gx1 = Math.max(gx1, b.x + b.w);  gy1 = Math.max(gy1, b.y + b.h)
-  })
+  const gx0 = Math.min(...bbs.map(b => b.x))
+  const gy0 = Math.min(...bbs.map(b => b.y))
+  const gx1 = Math.max(...bbs.map(b => b.x + b.w))
+  const gy1 = Math.max(...bbs.map(b => b.y + b.h))
   const gCx = (gx0 + gx1) / 2
   const gCy = (gy0 + gy1) / 2
 
+  pushHistory()
+
   switch (mode) {
     case 'left': {
-      const anchor = toCanvas ? 0 : gx0
-      annots.forEach(a => { const b = bounds(a); if (b) moveAnnot(a, anchor - b.x, 0) })
+      const dx = toCanvas ? -gx0 : 0
+      annots.forEach((a, i) => moveAnnot(a, toCanvas ? dx : gx0 - bbs[i].x, 0))
       break
     }
     case 'hcenter': {
-      const anchor = toCanvas ? imgWidth / 2 : gCx
-      annots.forEach(a => { const b = bounds(a); if (b) moveAnnot(a, anchor - (b.x + b.w / 2), 0) })
+      const dx = toCanvas ? imgWidth / 2 - gCx : 0
+      annots.forEach((a, i) => moveAnnot(a, toCanvas ? dx : gCx - (bbs[i].x + bbs[i].w / 2), 0))
       break
     }
     case 'right': {
-      const anchor = toCanvas ? imgWidth : gx1
-      annots.forEach(a => { const b = bounds(a); if (b) moveAnnot(a, anchor - (b.x + b.w), 0) })
+      const dx = toCanvas ? imgWidth - gx1 : 0
+      annots.forEach((a, i) => moveAnnot(a, toCanvas ? dx : gx1 - (bbs[i].x + bbs[i].w), 0))
       break
     }
     case 'top': {
-      const anchor = toCanvas ? 0 : gy0
-      annots.forEach(a => { const b = bounds(a); if (b) moveAnnot(a, 0, anchor - b.y) })
+      const dy = toCanvas ? -gy0 : 0
+      annots.forEach((a, i) => moveAnnot(a, 0, toCanvas ? dy : gy0 - bbs[i].y))
       break
     }
     case 'vcenter': {
-      const anchor = toCanvas ? imgHeight / 2 : gCy
-      annots.forEach(a => { const b = bounds(a); if (b) moveAnnot(a, 0, anchor - (b.y + b.h / 2)) })
+      const dy = toCanvas ? imgHeight / 2 - gCy : 0
+      annots.forEach((a, i) => moveAnnot(a, 0, toCanvas ? dy : gCy - (bbs[i].y + bbs[i].h / 2)))
       break
     }
     case 'bottom': {
-      const anchor = toCanvas ? imgHeight : gy1
-      annots.forEach(a => { const b = bounds(a); if (b) moveAnnot(a, 0, anchor - (b.y + b.h)) })
+      const dy = toCanvas ? imgHeight - gy1 : 0
+      annots.forEach((a, i) => moveAnnot(a, 0, toCanvas ? dy : gy1 - (bbs[i].y + bbs[i].h)))
       break
     }
     case 'distributeH': {
       if (annots.length < 3) return
-      const sorted = [...annots].sort((a, b) => bounds(a).x - bounds(b).x)
-      const totalSpan = bounds(sorted[sorted.length - 1]).x + bounds(sorted[sorted.length - 1]).w - bounds(sorted[0]).x
-      const sumW = sorted.reduce((s, a) => s + bounds(a).w, 0)
-      const gap = (totalSpan - sumW) / (sorted.length - 1)
-      let curX = bounds(sorted[0]).x + bounds(sorted[0]).w
-      for (let i = 1; i < sorted.length - 1; i++) {
-        const b = bounds(sorted[i])
-        moveAnnot(sorted[i], curX + gap - b.x, 0)
-        curX += gap + b.w
+      const order = annots.map((a, i) => ({ a, b: bbs[i] })).sort((p, q) => p.b.x - q.b.x)
+      const span = order[order.length - 1].b.x + order[order.length - 1].b.w - order[0].b.x
+      const sumW = order.reduce((s, p) => s + p.b.w, 0)
+      const gap  = (span - sumW) / (order.length - 1)
+      let curX = order[0].b.x + order[0].b.w
+      for (let i = 1; i < order.length - 1; i++) {
+        moveAnnot(order[i].a, curX + gap - order[i].b.x, 0)
+        curX += gap + order[i].b.w
       }
       break
     }
     case 'distributeV': {
       if (annots.length < 3) return
-      const sorted = [...annots].sort((a, b) => bounds(a).y - bounds(b).y)
-      const totalSpan = bounds(sorted[sorted.length - 1]).y + bounds(sorted[sorted.length - 1]).h - bounds(sorted[0]).y
-      const sumH = sorted.reduce((s, a) => s + bounds(a).h, 0)
-      const gap = (totalSpan - sumH) / (sorted.length - 1)
-      let curY = bounds(sorted[0]).y + bounds(sorted[0]).h
-      for (let i = 1; i < sorted.length - 1; i++) {
-        const b = bounds(sorted[i])
-        moveAnnot(sorted[i], 0, curY + gap - b.y)
-        curY += gap + b.h
+      const order = annots.map((a, i) => ({ a, b: bbs[i] })).sort((p, q) => p.b.y - q.b.y)
+      const span = order[order.length - 1].b.y + order[order.length - 1].b.h - order[0].b.y
+      const sumH = order.reduce((s, p) => s + p.b.h, 0)
+      const gap  = (span - sumH) / (order.length - 1)
+      let curY = order[0].b.y + order[0].b.h
+      for (let i = 1; i < order.length - 1; i++) {
+        moveAnnot(order[i].a, 0, curY + gap - order[i].b.y)
+        curY += gap + order[i].b.h
       }
       break
     }
@@ -428,12 +426,14 @@ function _alignSelectedAnnots(mode) {
 
 // ─── Alignment button listeners ───────────────────────────────────────────────
 
-;['left','hcenter','right','top','vcenter','bottom'].forEach(mode => {
-  const id = 'btnAlign' + mode.charAt(0).toUpperCase() + mode.slice(1)
-  document.getElementById(id)?.addEventListener('click', () => _alignSelectedAnnots(mode))
-})
-document.getElementById('btnDistributeH')?.addEventListener('click', () => _alignSelectedAnnots('distributeH'))
-document.getElementById('btnDistributeV')?.addEventListener('click', () => _alignSelectedAnnots('distributeV'))
+document.getElementById('btnAlignLeft')?.addEventListener('click',    () => _alignSelectedAnnots('left'))
+document.getElementById('btnAlignHCenter')?.addEventListener('click', () => _alignSelectedAnnots('hcenter'))
+document.getElementById('btnAlignRight')?.addEventListener('click',   () => _alignSelectedAnnots('right'))
+document.getElementById('btnAlignTop')?.addEventListener('click',     () => _alignSelectedAnnots('top'))
+document.getElementById('btnAlignVCenter')?.addEventListener('click', () => _alignSelectedAnnots('vcenter'))
+document.getElementById('btnAlignBottom')?.addEventListener('click',  () => _alignSelectedAnnots('bottom'))
+document.getElementById('btnDistributeH')?.addEventListener('click',  () => _alignSelectedAnnots('distributeH'))
+document.getElementById('btnDistributeV')?.addEventListener('click',  () => _alignSelectedAnnots('distributeV'))
 
 function showOptionsForTool(tool) {
   hideAllOptions()
