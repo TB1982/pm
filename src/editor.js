@@ -183,6 +183,8 @@ let drawCurrent = null
 
 // Select / drag
 let selectedId   = null
+let selectedIds  = new Set()  // multi-select id set
+let rubberBand   = null       // { x0, y0, x1, y1 } in image coords during rubber-band drag
 let isDragging   = false
 let hasDragged   = false
 let lastMousePos = null
@@ -1950,9 +1952,39 @@ function renderAnnotations() {
     })
     annotCtx.restore()
   }
-  if (selectedId) {
+  if (selectedIds.size > 1) {
+    // Multi-select: dashed box around each, no resize handles
+    selectedIds.forEach(id => {
+      const a = annotations.find(x => x.id === id)
+      if (!a) return
+      const b = bounds(a)
+      if (!b) return
+      annotCtx.save()
+      annotCtx.strokeStyle = '#4a9eff'
+      annotCtx.lineWidth   = 1.5
+      annotCtx.setLineDash([5, 3])
+      annotCtx.strokeRect(c(b.x) - 5, c(b.y) - 5, c(b.w) + 10, c(b.h) + 10)
+      annotCtx.restore()
+    })
+  } else if (selectedId) {
     const a = annotations.find(x => x.id === selectedId)
     if (a) drawSelection(annotCtx, a)
+  }
+
+  // Rubber band selection (select tool drag on empty space)
+  if (rubberBand) {
+    const x0 = Math.min(rubberBand.x0, rubberBand.x1)
+    const y0 = Math.min(rubberBand.y0, rubberBand.y1)
+    const w  = Math.abs(rubberBand.x1 - rubberBand.x0)
+    const h  = Math.abs(rubberBand.y1 - rubberBand.y0)
+    annotCtx.save()
+    annotCtx.strokeStyle = '#007AFF'
+    annotCtx.lineWidth   = 1
+    annotCtx.setLineDash([])
+    annotCtx.strokeRect(c(x0), c(y0), c(w), c(h))
+    annotCtx.fillStyle = 'rgba(0,122,255,0.12)'
+    annotCtx.fillRect(c(x0), c(y0), c(w), c(h))
+    annotCtx.restore()
   }
 
   // Crop overlay: dim outside selection, dashed border + resize handles
@@ -3340,27 +3372,60 @@ annotCanvas.addEventListener('mousedown', e => {
   }
 
   if (tool === 'select') {
-    // 1. Check resize handles on selected annotation
-    if (selectedId) {
+    // 1. Shift+click: toggle annotation in/out of multi-select
+    if (e.shiftKey) {
+      const hit = findAt(pos)
+      if (hit) {
+        if (selectedIds.has(hit.id)) {
+          selectedIds.delete(hit.id)
+        } else {
+          selectedIds.add(hit.id)
+        }
+        // Sync selectedId: use last added when single, null when multi
+        if (selectedIds.size === 1) {
+          selectedId = [...selectedIds][0]
+          const ann = annotations.find(x => x.id === selectedId)
+          if (ann) showOptionsForAnnot(ann)
+        } else {
+          selectedId = null
+          hideAllOptions()
+        }
+        renderAnnotations()
+        return
+      }
+    }
+    // 2. Check resize handles (single-select only, no handles in multi)
+    if (selectedId && selectedIds.size <= 1) {
       const a = annotations.find(x => x.id === selectedId)
       if (a) {
         const h = findHandle(pos, a)
         if (h) { startResize(h.id, a); return }
-        // Body hit → drag
         if (hits(pos, a)) {
           isDragging = true; hasDragged = false; lastMousePos = pos
           renderAnnotations(); return
         }
       }
     }
-    // 2. Try to select a different annotation
+    // 3. Click on a selected annotation in multi-select → start group drag
+    if (selectedIds.size > 1) {
+      const hit = findAt(pos)
+      if (hit && selectedIds.has(hit.id)) {
+        isDragging = true; hasDragged = false; lastMousePos = pos
+        renderAnnotations(); return
+      }
+    }
+    // 4. Click on any annotation → single-select + drag
     const hit = findAt(pos)
     if (hit) {
       selectedId = hit.id
+      selectedIds = new Set([hit.id])
       isDragging = true; hasDragged = false; lastMousePos = pos
       showOptionsForAnnot(hit)
     } else {
+      // 5. Click on empty space → clear selection, start rubber band
       selectedId = null
+      selectedIds = new Set()
+      rubberBand = { x0: pos.x, y0: pos.y, x1: pos.x, y1: pos.y }
       hideAllOptions()
     }
     renderAnnotations()
@@ -3503,6 +3568,14 @@ annotCanvas.addEventListener('mousemove', e => {
     return
   }
 
+  // Rubber-band selection drag (select tool, empty-space drag)
+  if (rubberBand) {
+    rubberBand.x1 = pos.x
+    rubberBand.y1 = pos.y
+    renderAnnotations()
+    return
+  }
+
   if (isMosaicDrawing && mosaicDrawStart) {
     mosaicPreviewRect = {
       x: Math.min(mosaicDrawStart.x, pos.x),
@@ -3544,9 +3617,13 @@ annotCanvas.addEventListener('mousemove', e => {
     return
   }
 
-  if (isDragging && selectedId) {
-    if (lastMousePos) {
-      const dx = pos.x - lastMousePos.x, dy = pos.y - lastMousePos.y
+  if (isDragging && lastMousePos) {
+    const dx = pos.x - lastMousePos.x, dy = pos.y - lastMousePos.y
+    if (selectedIds.size > 1) {
+      // Group move: apply delta to every selected annotation
+      annotations.forEach(a => { if (selectedIds.has(a.id)) moveAnnot(a, dx, dy) })
+      hasDragged = true
+    } else if (selectedId) {
       const a = annotations.find(x => x.id === selectedId)
       if (a) { moveAnnot(a, dx, dy); hasDragged = true }
     }
@@ -3585,7 +3662,11 @@ annotCanvas.addEventListener('mousemove', e => {
   // Update cursor for select tool
   if (tool === 'select') {
     let cur = 'default'
-    if (selectedId) {
+    if (selectedIds.size > 1) {
+      const hit = findAt(pos)
+      if (hit && selectedIds.has(hit.id)) cur = 'move'
+      else if (hit) cur = 'move'
+    } else if (selectedId) {
       const a = annotations.find(x => x.id === selectedId)
       if (a) {
         const h = findHandle(pos, a)
@@ -3730,6 +3811,34 @@ document.addEventListener('mouseup', e => {
     }
     return
   }
+  // Rubber-band: finalise selection
+  if (rubberBand) {
+    const x0 = Math.min(rubberBand.x0, rubberBand.x1)
+    const y0 = Math.min(rubberBand.y0, rubberBand.y1)
+    const x1 = Math.max(rubberBand.x0, rubberBand.x1)
+    const y1 = Math.max(rubberBand.y0, rubberBand.y1)
+    rubberBand = null
+    if (x1 - x0 > 2 && y1 - y0 > 2) {
+      const caught = new Set()
+      annotations.forEach(a => {
+        const b = bounds(a)
+        if (b && b.x >= x0 && b.y >= y0 && b.x + b.w <= x1 && b.y + b.h <= y1) {
+          caught.add(a.id)
+        }
+      })
+      if (caught.size > 0) {
+        selectedIds = caught
+        selectedId  = caught.size === 1 ? [...caught][0] : null
+        if (selectedId) {
+          const ann = annotations.find(x => x.id === selectedId)
+          if (ann) showOptionsForAnnot(ann)
+        }
+      }
+    }
+    renderAnnotations()
+    return
+  }
+
   if (isDragging) {
     isDragging = false
     if (hasDragged) pushHistory()
@@ -4066,15 +4175,25 @@ document.addEventListener('keydown', e => {
       if (tool === 'boxselect') { boxSelRect = null; isBoxSelecting = false; syncBoxSelUI(); renderAnnotations(); break }
       if (tool === 'mosaic')    { mosaicPreviewRect = null; isMosaicDrawing = false; renderAnnotations(); break }
       selectedId = null
+      selectedIds = new Set()
+      rubberBand = null
       isDrawing  = false
       if (tool === 'select') hideAllOptions()
       renderAnnotations()
       break
     case 'Delete': case 'Backspace':
-      if (selectedId) {
+      if (selectedIds.size > 1) {
+        pushHistory()
+        annotations = annotations.filter(a => !selectedIds.has(a.id))
+        selectedIds = new Set()
+        selectedId  = null
+        hideAllOptions()
+        renderAnnotations()
+      } else if (selectedId) {
         pushHistory()
         annotations = annotations.filter(a => a.id !== selectedId)
         selectedId  = null
+        selectedIds = new Set()
         hideAllOptions()
         renderAnnotations()
       }
