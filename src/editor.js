@@ -77,7 +77,7 @@ let endCap      = 'arrow'
 let cornerRadius = 0      // 0–100%，套用於 rect / fillrect 的圓角半徑
 let fontSize  = 24
 let numCount  = 1
-let numSize   = 24    // radius, image pixels
+let numSize   = 30    // radius, image pixels
 let numberStyle   = 'dot'   // dot | circle | circle-fill | roman | cjk-paren | cjk-circle
 let numThickness  = 0       // 描邊粗細，獨立於全域 thickness
 let numStrokeColor = '#ffffff'  // 描邊顏色
@@ -576,7 +576,7 @@ function showOptionsForAnnot(a) {
     sh('grpFont')
   }
   if (t === 'number') {
-    numSize        = a.size ?? 24;             syncNumSize(numSize)
+    numSize        = a.size ?? 30;             syncNumSize(numSize)
     numShadow      = a.shadow ?? false;        syncShadowCheck(numShadow)
     numberStyle    = a.numberStyle ?? 'dot';   syncNumStyle(numberStyle)
     numThickness   = a.thickness ?? 0;         syncThickness(numThickness)
@@ -667,6 +667,9 @@ function syncPenBorderDash(v)       { const el = document.getElementById('penBor
 function syncStrokeBorderThickness(v) { const el = document.getElementById('strokeBorderThicknessInput'); if (el) el.value = v }
 function syncStrokeBorderDash(v)      { const el = document.getElementById('strokeBorderDashSelect');     if (el) el.value = v }
 function syncFontSize(fs) { document.getElementById('fontSizeInput').value = fs }
+// Initialise inputs to match JS defaults (in case HTML attribute drifts)
+syncFontSize(fontSize)
+
 function syncNumSize(ns) {
   document.querySelectorAll('.ns-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.ns) === ns))
 }
@@ -4085,7 +4088,6 @@ document.getElementById('btnSaveConfirm').addEventListener('click', async () => 
   const result  = await ipcRenderer.invoke('save-image-as', { dataURL, format })
   if (result?.success) {
     const fileName = String(result.path).split(/[/\\]/).pop()
-    addHistoryEntry({ path: result.path, label: fileName, dataURL })
     showToast(t('toast_saved', fileName))
     setTimeout(() => ipcRenderer.send('close-editor-window'), 1200)
     return
@@ -4982,7 +4984,6 @@ function copyFinalImage() {
   const dataURL = burnIn('png')
   const { clipboard, nativeImage } = require('electron')
   clipboard.writeImage(nativeImage.createFromDataURL(dataURL))
-  addHistoryEntry({ label: t('history_copied_label'), dataURL })
   showToast(t('toast_img_copied'))
 }
 
@@ -5085,89 +5086,6 @@ document.addEventListener('keydown', e => {
     e.preventDefault(); copyFinalImage()
   }
 }, true)  // capture phase so it fires before other listeners
-
-// ─── History Panel ────────────────────────────────────────────────────────────
-
-function makeThumb(dataURL, maxW = 150) {
-  return new Promise(resolve => {
-    const img = new Image()
-    img.onload = () => {
-      const scale = Math.min(1, maxW / img.width)
-      const c = document.createElement('canvas')
-      c.width  = Math.round(img.width  * scale)
-      c.height = Math.round(img.height * scale)
-      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height)
-      resolve(c.toDataURL('image/jpeg', 0.7))
-    }
-    img.src = dataURL
-  })
-}
-
-async function addHistoryEntry({ path: filePath, label, dataURL }) {
-  const thumb = await makeThumb(dataURL)
-  const entry = { id: Date.now(), timestamp: Date.now(), label: label || '', path: filePath || null, thumb }
-  await ipcRenderer.invoke('add-history-entry', entry)
-}
-
-;(function initHistoryPanel() {
-  const panel    = document.getElementById('historyPanel')
-  const tab      = document.getElementById('historyTab')
-  const listEl   = document.getElementById('historyList')
-  const closeBtn = document.getElementById('historyClose')
-
-  async function renderHistory() {
-    listEl.innerHTML = ''
-    const history = await ipcRenderer.invoke('get-history')
-    if (!history || history.length === 0) {
-      const empty = document.createElement('span')
-      empty.className = 'history-empty'
-      empty.textContent = t('history_empty')
-      listEl.appendChild(empty)
-      return
-    }
-    history.forEach(entry => {
-      const item = document.createElement('div')
-      item.className = 'history-item'
-      item.title = entry.path || entry.label || ''
-
-      const img = document.createElement('img')
-      img.src = entry.thumb
-      img.alt = entry.label || ''
-
-      const label = document.createElement('div')
-      label.className = 'history-item-label'
-      label.textContent = entry.label || new Date(entry.timestamp).toLocaleTimeString()
-
-      item.appendChild(img)
-      item.appendChild(label)
-      item.addEventListener('click', async () => {
-        if (entry.path) {
-          const result = await ipcRenderer.invoke('open-history-file', entry.path)
-          if (!result?.success) showToast(t('history_file_not_found'), true)
-        }
-      })
-      listEl.appendChild(item)
-    })
-  }
-
-  function openHistory() {
-    panel.classList.add('open')
-    tab.classList.add('open')
-  }
-
-  function closeHistory() {
-    panel.classList.remove('open')
-    tab.classList.remove('open')
-  }
-
-  tab.addEventListener('click', async () => {
-    if (panel.classList.contains('open')) { closeHistory(); return }
-    await renderHistory()
-    openHistory()
-  })
-
-  closeBtn.addEventListener('click', closeHistory)
-})()
 
 // ─── Privacy Mask ─────────────────────────────────────────────────────────────
 // 兩種入口：

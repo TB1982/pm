@@ -1047,40 +1047,6 @@ ipcMain.on('start-drag-export', (event, { dataURL }) => {
   }
 })
 
-// ─── Screenshot History ───────────────────────────────────────────────────────
-
-function getHistoryPath() {
-  return path.join(app.getPath('userData'), 'history.json')
-}
-
-ipcMain.handle('get-history', () => {
-  try {
-    return JSON.parse(fs.readFileSync(getHistoryPath(), 'utf8'))
-  } catch {
-    return []
-  }
-})
-
-ipcMain.handle('add-history-entry', (_, entry) => {
-  try {
-    let history = []
-    try { history = JSON.parse(fs.readFileSync(getHistoryPath(), 'utf8')) } catch {}
-    history.unshift(entry)
-    if (history.length > 20) history = history.slice(0, 20)
-    fs.writeFileSync(getHistoryPath(), JSON.stringify(history))
-    return true
-  } catch {
-    return false
-  }
-})
-
-ipcMain.handle('open-history-file', (_, filePath) => {
-  if (!fs.existsSync(filePath)) return { success: false, error: 'File not found' }
-  mainWindow.hide()
-  openEditorWindow(filePath)
-  return { success: true }
-})
-
 // ─── Brand Colors ─────────────────────────────────────────────────────────────
 
 function getBrandColorsPath() {
