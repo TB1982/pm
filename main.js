@@ -176,6 +176,13 @@ function isoFilename(ext) {
   return `${n.getFullYear()}-${p(n.getMonth()+1)}-${p(n.getDate())}-${p(n.getHours())}-${p(n.getMinutes())}-${p(n.getSeconds())}.${ext}`
 }
 
+// Let renderer request a clean window close through main process
+// (avoids white-flash and restores native macOS zoom-out close animation)
+ipcMain.on('close-editor-window', (event) => {
+  const win = BrowserWindow.fromWebContents(event.sender)
+  if (win) win.close()
+})
+
 ipcMain.handle('save-image-as', async (event, { dataURL, format }) => {
   const win = BrowserWindow.fromWebContents(event.sender)
   const ext = { png: 'png', jpg: 'jpg', webp: 'webp', gif: 'gif' }[format] ?? 'png'

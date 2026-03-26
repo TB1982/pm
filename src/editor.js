@@ -4087,7 +4087,7 @@ document.getElementById('btnSaveConfirm').addEventListener('click', async () => 
     const fileName = String(result.path).split(/[/\\]/).pop()
     addHistoryEntry({ path: result.path, label: fileName, dataURL })
     showToast(t('toast_saved', fileName))
-    setTimeout(() => window.close(), 800)
+    setTimeout(() => ipcRenderer.send('close-editor-window'), 1200)
     return
   }
   if (!result?.canceled) {
@@ -4324,6 +4324,7 @@ document.getElementById('ocrPanelClose').addEventListener('click', () => {
 document.getElementById('btnOcrCopy').addEventListener('click', () => {
   const text = document.getElementById('ocrResultText').value
   const { clipboard } = require('electron')
+  clipboard.clear()           // wipe image/other types so only text lands in pasteboard
   clipboard.writeText(text)
   showToast(t('toast_text_copied'))
 })
@@ -4331,6 +4332,7 @@ document.getElementById('btnOcrCopy').addEventListener('click', () => {
 document.getElementById('btnOcrCopyClose').addEventListener('click', () => {
   const text = document.getElementById('ocrResultText').value
   const { clipboard } = require('electron')
+  clipboard.clear()
   clipboard.writeText(text)
   showToast(t('toast_text_copied'))
   document.getElementById('ocrPanel').classList.add('hidden')
