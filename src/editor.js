@@ -1756,9 +1756,9 @@ ipcRenderer.on('load-image', (_, path) => {
 function fitCanvas() {
   const aw = canvasArea.clientWidth  - 64
   const ah = canvasArea.clientHeight - 64
-  fitScale = Math.min(aw / imgWidth, ah / imgHeight, 1)
+  fitScale = Math.min(aw / imgWidth, ah / imgHeight)   // true fit, uncapped
   if (!userZoomed) {
-    viewScale = fitScale
+    viewScale = Math.min(fitScale, 1 / DPR)            // no upscaling on load
     _applyCanvasSize()
   }
 }
@@ -1783,7 +1783,8 @@ function _applyCanvasSize() {
 // ─── Zoom helpers ─────────────────────────────────────────────────────────────
 
 function applyZoom(newScale, pivotClientX, pivotClientY) {
-  const clamped = Math.max(fitScale, Math.min(MAX_SCALE, newScale))
+  const minScale = Math.min(fitScale, 1 / DPR)
+  const clamped = Math.max(minScale, Math.min(MAX_SCALE, newScale))
   if (Math.abs(clamped - viewScale) < 0.0001) return
 
   // Capture image coordinate at pivot before scale change
