@@ -97,7 +97,10 @@ function createWindow() {
 
 // ─── Editor window ───────────────────────────────────────────────────────────
 
-function openEditorWindow(imagePath) {
+// scaleFactor: the display's scaleFactor at capture time (1 = normal, 2 = Retina).
+// Pass it explicitly when known (avoids unreliable metadata reads).
+// When null, fall back to Sharp density metadata.
+function openEditorWindow(imagePath, scaleFactor = null) {
   const win = new BrowserWindow({
     width: 1280,
     height: 820,
@@ -122,12 +125,14 @@ function openEditorWindow(imagePath) {
 
   win.loadFile('src/editor.html')
   win.webContents.once('did-finish-load', async () => {
-    let imgDPR = 1
-    try {
-      const meta = await sharp(imagePath).metadata()
-      // macOS Retina screenshots are saved at 144 DPI (2×); normal = 72 DPI (1×)
-      if (meta.density && meta.density > 90) imgDPR = Math.round(meta.density / 72)
-    } catch (_) {}
+    let imgDPR = scaleFactor || 1
+    if (!scaleFactor) {
+      // Fallback: read DPI from file metadata (e.g. user-opened files)
+      try {
+        const meta = await sharp(imagePath).metadata()
+        if (meta.density && meta.density > 90) imgDPR = Math.round(meta.density / 72)
+      } catch (_) {}
+    }
     win.webContents.send('load-image', { path: imagePath, imgDPR })
   })
 }
@@ -476,7 +481,7 @@ ipcMain.handle('capture-fullscreen', async () => {
       )
       clipboard.writeImage(image)
       const { width, height } = image.getSize()
-      openEditorWindow(tmpPath)
+      openEditorWindow(tmpPath, displays[0].scaleFactor)
       return { success: true, path: tmpPath, width, height }
     } catch (err) {
       mainWindow.show()
@@ -551,7 +556,7 @@ ipcMain.handle('capture-selected-screen', async (event) => {
     )
     clipboard.writeImage(image)
     const { width, height } = image.getSize()
-    openEditorWindow(tmpPath)
+    openEditorWindow(tmpPath, activeEntry.display.scaleFactor)
     mainWindow.webContents.send('capture-result', { success: true, path: tmpPath, width, height })
   } catch (err) {
     mainWindow.show()
@@ -616,8 +621,8 @@ ipcMain.handle('capture-all-screens-merged', async () => {
     const finalImage = nativeImage.createFromPath(stitchedPath)
     clipboard.writeImage(finalImage)
     const { width, height } = finalImage.getSize()
-
-    openEditorWindow(stitchedPath)
+    // Merged multi-display image: scaleFactor=1 (displays may differ; render at face value)
+    openEditorWindow(stitchedPath, 1)
     mainWindow.webContents.send('capture-result', { success: true, path: stitchedPath, width, height })
   } catch (err) {
     mainWindow.show()
@@ -686,8 +691,8 @@ ipcMain.handle('capture-rect', async (event, rect) => {
     const { image, tmpPath } = await captureGlobalRect(gx, gy, gw, gh)
     clipboard.writeImage(image)
     const { width, height } = image.getSize()
-
-    openEditorWindow(tmpPath)
+    const captureDisplay = screen.getDisplayNearestPoint({ x: gx + gw / 2, y: gy + gh / 2 })
+    openEditorWindow(tmpPath, captureDisplay.scaleFactor)
     mainWindow.webContents.send('capture-result', { success: true, path: tmpPath, width, height })
   } catch (err) {
     mainWindow.show()
