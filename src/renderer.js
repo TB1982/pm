@@ -1,16 +1,15 @@
-const { ipcRenderer } = require('electron')
-const { t, applyI18n } = require('./i18n')
+const { invoke, send, on, removeListener } = window.electronAPI
 
 applyI18n()
 
 // ─── Modal resize helpers ──────────────────────────────────────────────────────
 
 async function expandForModal(width, height) {
-  await ipcRenderer.invoke('resize-for-modal', { width, height })
+  await invoke('resize-for-modal', { width, height })
 }
 
 function collapseToToolbar() {
-  ipcRenderer.invoke('resize-to-toolbar')
+  invoke('resize-to-toolbar')
 }
 
 // ─── Help modal ───────────────────────────────────────────────────────────────
@@ -68,7 +67,7 @@ function showPermissionToast() {
   btn.textContent = t('toast_open_settings')
   btn.className = 'toast-btn'
   btn.addEventListener('click', () => {
-    ipcRenderer.invoke('open-permission-settings')
+    invoke('open-permission-settings')
     toast.classList.remove('visible')
   })
 
@@ -92,7 +91,7 @@ function handleCaptureResult(result) {
 // ─── Capture: full screen ─────────────────────────────────────────────────────
 
 async function doFullscreen() {
-  const result = await ipcRenderer.invoke('capture-fullscreen')
+  const result = await invoke('capture-fullscreen')
   if (!result.awaitingSelection) handleCaptureResult(result)
 }
 
@@ -113,7 +112,7 @@ function hideWindowPicker() {
 }
 
 async function doWindow() {
-  const sources = await ipcRenderer.invoke('get-window-sources')
+  const sources = await invoke('get-window-sources')
   if (!sources || sources.length === 0) {
     showToast(t('toast_no_windows'), true)
     return
@@ -129,7 +128,7 @@ async function doWindow() {
     `
     card.addEventListener('click', async () => {
       hideWindowPicker()
-      const result = await ipcRenderer.invoke('capture-window', source.id)
+      const result = await invoke('capture-window', source.id)
       handleCaptureResult(result)
     })
     windowPickerGrid.appendChild(card)
@@ -142,19 +141,19 @@ async function doWindow() {
 // ─── Capture: rectangle ───────────────────────────────────────────────────────
 
 async function doRect() {
-  const result = await ipcRenderer.invoke('open-overlay')
+  const result = await invoke('open-overlay')
   if (result?.needsPermission) showPermissionToast()
 }
 
 // ─── Shortcut events from main process ───────────────────────────────────────
 
-ipcRenderer.on('shortcut-fullscreen', () => delayedAction(doFullscreen))
-ipcRenderer.on('shortcut-window',     doWindow)
-ipcRenderer.on('shortcut-rect',       () => delayedAction(doRect))
+on('shortcut-fullscreen', () => delayedAction(doFullscreen))
+on('shortcut-window',     doWindow)
+on('shortcut-rect',       () => delayedAction(doRect))
 
 // ─── Capture result callbacks ─────────────────────────────────────────────────
 
-ipcRenderer.on('capture-result', (_, result) => handleCaptureResult(result))
+on('capture-result', (result) => handleCaptureResult(result))
 
 // ─── Button wiring ────────────────────────────────────────────────────────────
 
@@ -212,7 +211,7 @@ function delayedAction(fn) {
 
 document.getElementById('btnOpenImage').addEventListener('click', e => {
   setToolbarActive(e.currentTarget)
-  ipcRenderer.invoke('open-image-file')
+  invoke('open-image-file')
 })
 
 // ─── Batch conversion ─────────────────────────────────────────────────────────
@@ -248,7 +247,7 @@ batchModal.addEventListener('click', (e) => {
 // ── File selection ──────────────────────────────────────────────────────────
 
 async function pickBatchFiles() {
-  const files = await ipcRenderer.invoke('select-batch-files')
+  const files = await invoke('select-batch-files')
   addBatchFiles(files)
 }
 
@@ -350,7 +349,7 @@ document.querySelectorAll('input[name="outputMode"]').forEach(radio => {
 })
 
 document.getElementById('batchDirBtn').addEventListener('click', async () => {
-  const dir = await ipcRenderer.invoke('select-output-dir')
+  const dir = await invoke('select-output-dir')
   if (dir) {
     selectedOutputDir = dir
     const pathEl = document.getElementById('batchDirPath')
@@ -374,7 +373,7 @@ document.getElementById('wmImgCheck').addEventListener('change', (e) => {
 })
 
 document.getElementById('wmImgSelectBtn').addEventListener('click', async () => {
-  const filePath = await ipcRenderer.invoke('select-watermark-image')
+  const filePath = await invoke('select-watermark-image')
   if (filePath) {
     wmImgFilePath = filePath
     const el = document.getElementById('wmImgPath')
@@ -526,7 +525,7 @@ async function runConversion(files) {
     progressLog.scrollTop = progressLog.scrollHeight
   }
 
-  ipcRenderer.on('batch-progress', onProgress)
+  on('batch-progress', onProgress)
 
   const fmt        = document.getElementById('batchFormat').value
   const quality    = parseInt(document.getElementById('batchQuality').value, 10) || 90
@@ -558,13 +557,13 @@ async function runConversion(files) {
     margin:   parseInt(document.getElementById('wmMargin').value, 10) || 20
   } : null
 
-  const results = await ipcRenderer.invoke('batch-convert', {
+  const results = await invoke('batch-convert', {
     files, format: fmt, quality, svgWidth, resize,
     outputMode, outputDir: selectedOutputDir, deleteOriginals,
     watermark
   })
 
-  ipcRenderer.removeListener('batch-progress', onProgress)
+  removeListener('batch-progress', onProgress)
 
   batchRunning = false
   startBtn.disabled = false

@@ -1,5 +1,6 @@
-const { ipcRenderer } = require('electron')
-const { t, applyI18n } = require('./i18n')
+const { invoke, send, on, removeListener,
+        copyImageToClipboard, copyText,
+        stripPNGPhysChunk: _stripPNGPhysChunkBridge } = window.electronAPI
 
 // ─── Colour palette ──────────────────────────────────────────────────────────
 
@@ -1245,7 +1246,7 @@ function hideColorPanel() {
       btn.addEventListener('contextmenu', (e) => {
         e.preventDefault()
         brandColors.splice(idx, 1)
-        ipcRenderer.invoke('save-brand-colors', brandColors)
+        invoke('save-brand-colors', brandColors)
         rebuildBrandRow()
       })
       brandEl.appendChild(btn)
@@ -1253,7 +1254,7 @@ function hideColorPanel() {
   }
 
   // Load brand colors from disk
-  ipcRenderer.invoke('get-brand-colors').then(colors => {
+  invoke('get-brand-colors').then(colors => {
     brandColors = Array.isArray(colors) ? colors : []
     rebuildBrandRow()
   })
@@ -1263,7 +1264,7 @@ function hideColorPanel() {
     const hex = _cppGetCurrent ? _cppGetCurrent() : null
     if (!hex || hex === 'transparent' || brandColors.includes(hex)) return
     brandColors.push(hex)
-    ipcRenderer.invoke('save-brand-colors', brandColors)
+    invoke('save-brand-colors', brandColors)
     rebuildBrandRow()
   })
 
@@ -1739,7 +1740,7 @@ function setTool(t) {
 
 // ─── Image loading ────────────────────────────────────────────────────────────
 
-ipcRenderer.on('load-image', (_, data) => {
+on('load-image', (data) => {
   // Accept both legacy string and new {path, sourceDPR} object
   const filePath = typeof data === 'object' ? data.path : data
   imgSourceDPR   = typeof data === 'object' ? (data.sourceDPR ?? 1) : 1
@@ -4072,7 +4073,7 @@ document.getElementById('btnSaveConfirm').addEventListener('click', async () => 
   saveModal.classList.add('hidden')
   const format  = document.querySelector('input[name="fmt"]:checked').value
   const dataURL = burnIn(format)
-  const result  = await ipcRenderer.invoke('save-image-as', { dataURL, format })
+  const result  = await invoke('save-image-as', { dataURL, format })
   if (result?.success) {
     const fileName = String(result.path).split(/[/\\]/).pop()
     addHistoryEntry({ path: result.path, label: fileName, dataURL })
@@ -4222,8 +4223,7 @@ function copyBoxSelection() {
 
   pixelClipboard = { dataURL, w: sw, h: sh }
 
-  const { nativeImage, clipboard } = require('electron')
-  clipboard.writeImage(nativeImage.createFromDataURL(dataURL))
+  copyImageToClipboard(dataURL)
 
   showToast(t('toast_box_copied', sw, sh))
 }
@@ -4270,7 +4270,7 @@ function startOcrRecognition() {
   offCtx.drawImage(baseCanvas, c(r.x) * DPR, c(r.y) * DPR, c(r.w) * DPR, c(r.h) * DPR, 0, 0, off.width, off.height)
   const dataURL = off.toDataURL('image/png')
 
-  ipcRenderer.invoke('ocr-recognize', { dataURL }).then(result => {
+  invoke('ocr-recognize', { dataURL }).then(result => {
     const wrap = document.getElementById('ocrProgressWrap')
     wrap.classList.add('hidden')
     wrap.style.display = 'none'
@@ -4286,7 +4286,7 @@ function startOcrRecognition() {
   })
 }
 
-ipcRenderer.on('ocr-progress', (_, { status, progress }) => {
+on('ocr-progress', ({ status, progress }) => {
   _updateOcrProgress({ status, progress })
 })
 
@@ -4301,15 +4301,13 @@ document.getElementById('ocrPanelClose').addEventListener('click', () => {
 
 document.getElementById('btnOcrCopy').addEventListener('click', () => {
   const text = document.getElementById('ocrResultText').value
-  const { clipboard } = require('electron')
-  clipboard.writeText(text)
+  copyText(text)
   showToast(t('toast_text_copied'))
 })
 
 document.getElementById('btnOcrCopyClose').addEventListener('click', () => {
   const text = document.getElementById('ocrResultText').value
-  const { clipboard } = require('electron')
-  clipboard.writeText(text)
+  copyText(text)
   showToast(t('toast_text_copied'))
   document.getElementById('ocrPanel').classList.add('hidden')
   ocrRect = null
@@ -4956,8 +4954,7 @@ function burnIn(format) {
 function copyFinalImage() {
   if (!imgElement) { showToast(t('toast_no_image'), true); return }
   const dataURL = burnIn('png')
-  const { clipboard, nativeImage } = require('electron')
-  clipboard.writeImage(nativeImage.createFromDataURL(dataURL))
+  copyImageToClipboard(dataURL)
   addHistoryEntry({ label: t('history_copied_label'), dataURL })
   showToast(t('toast_img_copied'))
 }
@@ -4994,30 +4991,9 @@ document.getElementById('btnCopyImage').addEventListener('click', copyFinalImage
     if (e.target === handle || handle.contains(e.target)) return
     if (!imgElement) { showToast(t('toast_no_image'), true); return }
     const dataURL = burnIn('png')
-    ipcRenderer.send('start-drag-export', { dataURL })
+    send('start-drag-export', { dataURL })
   })
 })()
-
-// ─── PNG DPI-metadata strip (renderer-side, for drag & drop) ─────────────────
-// Mirrors the same logic in main.js. Removing the pHYs chunk makes Chromium
-// report img.naturalWidth = physical pixel count (not DPI-normalised logical px).
-
-function _stripPNGPhysChunk(buf) {
-  // buf must be a Node.js Buffer (available because nodeIntegration: true)
-  const PNG_SIG = [137, 80, 78, 71, 13, 10, 26, 10]
-  for (let s = 0; s < 8; s++) if (buf[s] !== PNG_SIG[s]) return buf  // not PNG
-  const parts = [buf.slice(0, 8)]
-  let i = 8
-  while (i + 12 <= buf.length) {
-    const dataLen = buf.readUInt32BE(i)
-    const type    = buf.slice(i + 4, i + 8).toString('ascii')
-    const total   = 4 + 4 + dataLen + 4
-    if (i + total > buf.length) break
-    if (type !== 'pHYs') parts.push(buf.slice(i, i + total))
-    i += total
-  }
-  return parts.length === 1 ? buf : Buffer.concat(parts)
-}
 
 // ─── Drag & Drop import ───────────────────────────────────────────────────────
 
@@ -5051,10 +5027,9 @@ function _loadFileIntoEditor(file) {
 
   const reader = new FileReader()
   if (file.type === 'image/png') {
-    // Strip pHYs chunk so naturalWidth = physical pixels (not DPI-normalised)
+    // Strip pHYs chunk via preload (Buffer ops in Node context)
     reader.onload = ev => {
-      const raw     = Buffer.from(ev.target.result)
-      const cleaned = _stripPNGPhysChunk(raw)
+      const cleaned = _stripPNGPhysChunkBridge(ev.target.result)
       const blob    = new Blob([cleaned], { type: 'image/png' })
       _applyImg(URL.createObjectURL(blob))
     }
@@ -5118,7 +5093,7 @@ function makeThumb(dataURL, maxW = 150) {
 async function addHistoryEntry({ path: filePath, label, dataURL }) {
   const thumb = await makeThumb(dataURL)
   const entry = { id: Date.now(), timestamp: Date.now(), label: label || '', path: filePath || null, thumb }
-  await ipcRenderer.invoke('add-history-entry', entry)
+  await invoke('add-history-entry', entry)
 }
 
 ;(function initHistoryPanel() {
@@ -5129,7 +5104,7 @@ async function addHistoryEntry({ path: filePath, label, dataURL }) {
 
   async function renderHistory() {
     listEl.innerHTML = ''
-    const history = await ipcRenderer.invoke('get-history')
+    const history = await invoke('get-history')
     if (!history || history.length === 0) {
       const empty = document.createElement('span')
       empty.className = 'history-empty'
@@ -5154,7 +5129,7 @@ async function addHistoryEntry({ path: filePath, label, dataURL }) {
       item.appendChild(label)
       item.addEventListener('click', async () => {
         if (entry.path) {
-          const result = await ipcRenderer.invoke('open-history-file', entry.path)
+          const result = await invoke('open-history-file', entry.path)
           if (!result?.success) showToast(t('history_file_not_found'), true)
         }
       })
@@ -5212,7 +5187,7 @@ async function runPrivacyScan(region) {
   off.getContext('2d').drawImage(imgElement, 0, 0, imgWidth, imgHeight)
   const dataURL = off.toDataURL('image/png')
 
-  const result = await ipcRenderer.invoke('privacy-scan', { dataURL })
+  const result = await invoke('privacy-scan', { dataURL })
 
   if (!result.success) {
     showToast(t('toast_privacy_fail') + '：' + result.error, true)

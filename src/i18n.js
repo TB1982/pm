@@ -670,4 +670,10 @@ function applyI18n() {
   })
 }
 
-module.exports = { t, applyI18n, lang }
+if (typeof module !== 'undefined') {
+  module.exports = { t, applyI18n, lang }
+} else {
+  window.t = t
+  window.applyI18n = applyI18n
+  window.lang = lang
+}
