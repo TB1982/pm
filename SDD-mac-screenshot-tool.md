@@ -1,8 +1,140 @@
 # SDD：Mac 截圖與圖片編輯工具
-**版本：** 3.29
-**日期：** 2026-03-26
+**版本：** 3.30
+**日期：** 2026-03-27
 **狀態：** 待審閱
 **變更紀錄：**
+
+### v3.30 — 資安升級 + Retina WYSIWYG + 數字工具修正 + contextBridge 後置修補
+
+#### 資安升級：contextIsolation + Preload 橋接
+
+**動機**
+移除 `nodeIntegration: true` / `contextIsolation: false`，消除 XSS 攻擊可直接呼叫 Node.js API 的風險。
+
+**四個視窗全面改為：**
+```
+nodeIntegration: false
+contextIsolation: true
+preload: path.join(__dirname, 'src/preload-X.js')
+```
+
+**Preload 設計原則**
+- 以 `contextBridge.exposeInMainWorld('electronAPI', {...})` 暴露最小必要介面
+- IPC 頻道採 `Set` allowlist，呼叫不在名單內的頻道直接拋出 `Error`
+- `ipcRenderer.on` 回呼以 `WeakMap` 記錄包裝函式，支援 `removeListener`
+
+| Preload 檔案 | 對應視窗 | 暴露的 API |
+|---|---|---|
+| `preload-editor.js` | 圖片編輯器 | invoke / send / on / removeListener / clipboard |
+| `preload-toolbar.js` | 工具列 | invoke / on / removeListener / getPathForFile |
+| `preload-overlay.js` | 擷取遮罩 | invoke |
+| `preload-screen-select.js` | 螢幕選擇 | invoke / on |
+
+**Renderer 端改動**
+- `editor.js`、`overlay.js`、`renderer.js`、`screen-select.js` 全部移除 `require('electron')` / `require('./i18n')`
+- 改用 `window.electronAPI.*` 呼叫 IPC
+- `i18n.js` 改為雙模式：Node.js 環境用 `module.exports`，瀏覽器環境掛到 `window.t / window.applyI18n / window.lang`
+- `editor.html` / `src/index.html` 加入 `<script src="i18n.js">` 載入順序置於 app script 之前
+
+**Clipboard 架構調整**
+原設計於 preload 直接呼叫 `clipboard.writeImage(nativeImage.createFromDataURL(dataURL))`。Electron 41 序列化大型 dataURL 後 contextBridge sub-object 會失效，導致後續 `writeText` 出現 `Cannot read properties of undefined` 錯誤。
+
+改為由 main process 統一處理：
+- `ipcMain.handle('clipboard-write-text')`
+- `ipcMain.handle('clipboard-write-image')`
+- `ipcMain.handle('clipboard-clear')`
+
+Preload 的 `clipboard` 物件改為 `ipcRenderer.invoke(...)` 橋接，API surface 對 editor.js 不變。
+
+---
+
+#### Retina WYSIWYG：imgDPR 狀態變數 + fitScale 校正
+
+**問題**
+Retina 螢幕截圖（DPR=2）在編輯器內顯示為 200%，導致標注圓圈在視覺上只有 ViewSonic 延伸螢幕的一半大。
+
+**解法**
+
+| 機制 | 說明 |
+|---|---|
+| `imgDPR` 狀態變數 | 追蹤來源圖片的像素密度（ViewSonic=1，Retina=2） |
+| `scaleFactor` 截圖時傳入 | `screen.getDisplayNearestPoint({x,y}).scaleFactor` 於截圖當下取得，作為第一優先；fallback 為 Sharp metadata `density > 90 → Math.round(density/72)` |
+| `fitScale` 上限 `1/imgDPR` | `Math.min(aw/imgWidth, ah/imgHeight, 1/imgDPR)` — Retina 圖片最多縮放到邏輯 100%，確保所見即所得 |
+| 標注渲染乘以 `imgDPR` | `r = size * viewScale * imgDPR` — ViewSonic: `size * 1 * 1 = size`；Retina: `size * 0.5 * 2 = size`（CSS pixel 一致） |
+| burnIn 匯出 | 設 `viewScale=1`，標注以 `size * imgDPR` 渲染，與圖片像素比例一致 |
+
+---
+
+#### 數字工具修正
+
+**圓圈大小三段（修正自 v3.29）**
+
+| 標籤 | 值 |
+|---|---|
+| 小 | 18 |
+| 中（預設） | 24 |
+| 大 | 30 |
+
+v3.29 的「大=32」在 DPR 修正後視覺偏大，調整為 30。
+
+**數字字符垂直置中修正**
+舊版以 `textBaseline = 'middle'` 對齊 em-box 中線，字形視覺中心偏上。改用：
+```javascript
+ctx.textBaseline = 'alphabetic'
+const m = ctx.measureText(str)
+const yOff = (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2
+ctx.fillText(str, cx, cy + yOff)
+```
+
+---
+
+#### contextBridge 後置修補
+
+| # | 問題 | 修正 |
+|---|------|------|
+| 1 | `showOptionsForTool(t)` 參數名 `t` 遮蔽全域 `window.t()` → OCR 工具切換時 `t('ocr_drag')` TypeError | 函數參數改名：`showOptionsForTool(tool)`、`setTool(newTool)` |
+| 2 | Electron 41 廢棄 `file.path`，批次拖曳檔案列表空白 | `preload-toolbar.js` 暴露 `webUtils.getPathForFile`；renderer.js drop handler 改用 `window.electronAPI.getPathForFile(f)` |
+| 3 | `select-batch-files` 對話框取消時回傳 `null`，`addBatchFiles(null)` 崩潰 | 函數頂部加 `if (!newPaths \|\| newPaths.length === 0) return` |
+| 4 | 選色後色彩面板立即關閉，無法連續新增品牌色 | 移除 `applyColor*` 系列函數內的 `hideColorPanel()`；改加 document capture-phase click-outside handler，點色板外才收起 |
+| 5 | OCR 複製前的 `clipboard.clear()` 有時造成剪貼簿短暫空白被其他事件插隊 | 移除 `clear()`；`writeText()` 本身即替換剪貼簿內容 |
+
+---
+
+#### TDD v3.30
+
+**資安 — Preload 橋接**
+- [ ] 工具列：全螢幕截圖、視窗截圖、矩形截圖、延遲截圖均可正常觸發
+- [ ] 編輯器：Cmd+S 儲存、Cmd+Shift+C 複製圖片、OCR 辨識均正常
+- [ ] 批次：拖曳 PNG 進批次視窗 → 檔案名稱出現；按「新增檔案」也正常
+- [ ] 多螢幕選取：點擊目標螢幕 → 截到正確螢幕
+
+**Retina WYSIWYG**
+- [ ] 於 Retina 螢幕截圖後開啟編輯器：右下角縮放顯示 47%（或接近 `1/DPR` 值），圖片物理尺寸與 ViewSonic 延伸螢幕一致
+- [ ] 於 ViewSonic 延伸螢幕截圖後開啟編輯器：右下角縮放顯示 100%
+- [ ] 兩種螢幕的數字圓圈視覺大小一致（中=24 時目視相同）
+
+**數字工具**
+- [ ] 小/中/大 按鈕對應 18/24/30；預設為「中」（active 狀態）
+- [ ] 數字字符目視垂直置中於圓圈內（測試單位數 1、雙位數 10、三位數 100）
+- [ ] Retina 與 ViewSonic 截圖匯出後，數字大小比例一致
+
+**Clipboard（OCR × 圖片複製 互動）**
+- [ ] 先「複製圖片」（Cmd+Shift+C）→ 再 OCR「複製文字」→ 貼入文字編輯器得純文字
+- [ ] 先 OCR「複製文字」→ 再「複製圖片」→ 貼入 Preview/Finder 得圖片
+- [ ] 反覆交替複製 5 次：無崩潰、無 `Cannot read properties of undefined` 錯誤
+
+**色彩面板 click-outside**
+- [ ] 點擊顏色按鈕：面板開啟
+- [ ] 點擊面板內色票：顏色套用，面板保持開啟
+- [ ] 點擊面板外任意位置：面板收起
+- [ ] 連續點「+」加入多個品牌色：面板全程不關閉
+- [ ] 切換工具：面板自動收起
+
+**批次拖曳（Electron 41）**
+- [ ] 從 Finder 拖曳 PNG / JPG / WebP 至批次視窗：檔案名稱正確顯示
+- [ ] 拖曳後按「開始轉換」：轉換正常完成
+
+---
 
 ### v3.29 — 測試修正批次：歷史按鈕、字型預設、數字大小、裁切復原、疊圖限制、OCR 複製、關閉動畫
 
