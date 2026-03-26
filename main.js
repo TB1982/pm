@@ -121,8 +121,14 @@ function openEditorWindow(imagePath) {
   })
 
   win.loadFile('src/editor.html')
-  win.webContents.once('did-finish-load', () => {
-    win.webContents.send('load-image', imagePath)
+  win.webContents.once('did-finish-load', async () => {
+    let imgDPR = 1
+    try {
+      const meta = await sharp(imagePath).metadata()
+      // macOS Retina screenshots are saved at 144 DPI (2×); normal = 72 DPI (1×)
+      if (meta.density && meta.density > 90) imgDPR = Math.round(meta.density / 72)
+    } catch (_) {}
+    win.webContents.send('load-image', { path: imagePath, imgDPR })
   })
 }
 

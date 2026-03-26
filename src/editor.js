@@ -47,6 +47,7 @@ function getFontCss(id) {
 let imgElement = null
 let imgWidth   = 0
 let imgHeight  = 0
+let imgDPR     = 1    // pixel density of the source image (1 = normal, 2 = Retina 2×)
 let viewScale  = 1    // display pixels per image pixel
 let fitScale   = 1    // scale at which image fits the window
 let userZoomed = false
@@ -1739,7 +1740,10 @@ function setTool(t) {
 
 // ─── Image loading ────────────────────────────────────────────────────────────
 
-ipcRenderer.on('load-image', (_, path) => {
+ipcRenderer.on('load-image', (_, payload) => {
+  // payload may be a plain string (legacy) or { path, imgDPR }
+  const filePath = typeof payload === 'string' ? payload : payload.path
+  imgDPR = (typeof payload === 'object' && payload.imgDPR) ? payload.imgDPR : 1
   const img = new Image()
   img.onload = () => {
     imgElement = img
@@ -1751,13 +1755,15 @@ ipcRenderer.on('load-image', (_, path) => {
     drawBase()
     setTool('rect')
   }
-  img.src = `file://${path}`
+  img.src = `file://${filePath}`
 })
 
 function fitCanvas() {
   const aw = canvasArea.clientWidth  - 64
   const ah = canvasArea.clientHeight - 64
-  fitScale = Math.min(aw / imgWidth, ah / imgHeight, 1)
+  // Cap at 1/imgDPR so Retina screenshots (144 DPI, imgDPR=2) display at
+  // their logical CSS size rather than appearing 2× zoomed.
+  fitScale = Math.min(aw / imgWidth, ah / imgHeight, 1 / imgDPR)
   if (!userZoomed) {
     viewScale = fitScale
     _applyCanvasSize()
