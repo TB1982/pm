@@ -1756,7 +1756,7 @@ ipcRenderer.on('load-image', (_, path) => {
 function fitCanvas() {
   const aw = canvasArea.clientWidth  - 64
   const ah = canvasArea.clientHeight - 64
-  fitScale = Math.min(aw / imgWidth, ah / imgHeight, 1)
+  fitScale = Math.min(aw / imgWidth, ah / imgHeight, 1 / DPR)
   if (!userZoomed) {
     viewScale = fitScale
     _applyCanvasSize()
@@ -1776,7 +1776,7 @@ function _applyCanvasSize() {
   // Re-apply scale after resize (resizing resets the transform)
   baseCtx.setTransform(DPR, 0, 0, DPR, 0, 0)
   annotCtx.setTransform(DPR, 0, 0, DPR, 0, 0)
-  document.getElementById('zoomLabel').textContent = Math.round(viewScale * 100) + '%'
+  document.getElementById('zoomLabel').textContent = Math.round(viewScale * DPR * 100) + '%'
   syncZoomSelect()
 }
 
@@ -1830,7 +1830,7 @@ function syncZoomSelect() {
   const sel    = document.getElementById('zoomSelect')
   const custom = document.getElementById('zoomCustom')
   if (!sel) return
-  const pct = Math.round(viewScale * 100)
+  const pct = Math.round(viewScale * DPR * 100)
   for (const opt of sel.options) {
     if (opt.id === 'zoomCustom') continue
     if (Math.round(parseFloat(opt.value) * 100) === pct) { sel.value = opt.value; return }
@@ -1846,7 +1846,7 @@ function syncZoomSelect() {
 // Zoom dropdown — ignore the dynamic 'custom' placeholder
 document.getElementById('zoomSelect').addEventListener('change', e => {
   if (e.target.value === 'custom') return
-  applyZoom(parseFloat(e.target.value))
+  applyZoom(parseFloat(e.target.value) / DPR)
 })
 
 // Wheel / trackpad pinch — ctrlKey is set by macOS for pinch gestures
