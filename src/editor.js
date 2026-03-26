@@ -2788,11 +2788,16 @@ function drawNumber(ctx, a) {
       ctx.stroke()
     }
     ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0
-    ctx.fillStyle    = getTextColor(a.color)
-    ctx.font         = `bold ${Math.round(r * 0.9)}px -apple-system`
-    ctx.textAlign    = 'center'
-    ctx.textBaseline = 'middle'
-    ctx.fillText(String(a.value), cx, cy)
+    ctx.fillStyle   = getTextColor(a.color)
+    ctx.font        = `bold ${Math.round(r * 0.9)}px -apple-system`
+    ctx.textAlign   = 'center'
+    ctx.textBaseline = 'alphabetic'
+    const str = String(a.value)
+    const m   = ctx.measureText(str)
+    // Use actual ink bounds to visually centre the digit (textBaseline 'middle'
+    // aligns to em-box centre which is above the visual glyph centre for digits)
+    const yOff = (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2
+    ctx.fillText(str, cx, cy + yOff)
   }
 }
 
