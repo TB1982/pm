@@ -54,6 +54,7 @@
   user-select: none; z-index: 300;
   box-shadow: 0 2px 12px rgba(0,0,0,0.45);
   transition: background 0.1s, border-color 0.1s;
+  -webkit-app-region: no-drag;
 }
 .float-drag-export:hover { background: #2a2a48; border-color: #6b6baa; color: #d0d8f0; }
 .float-drag-move {
@@ -89,6 +90,7 @@
   z-index: 1400;
   width: 260px;
   overflow: hidden;
+  -webkit-app-region: no-drag;
 }
 .symbol-picker-panel.hidden { display: none; }
 .sym-tabs {
@@ -151,6 +153,7 @@
   z-index: 1400;
   padding: 0 12px 12px;
   width: 282px;
+  -webkit-app-region: no-drag;
 }
 .template-panel.hidden { display: none; }
 /* 拖拉把手標題列 */
@@ -295,6 +298,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  -webkit-app-region: no-drag;
 }
 .ocr-panel.hidden { display: none; }
 .ocr-panel-header {
@@ -465,9 +469,9 @@
       <div class="opt-sep"></div>
       <span class="opt-label" data-i18n="opt_size">大小</span>
       <div class="sz-group">
-        <button class="ns-btn"        data-ns="36" data-i18n="opt_small">小</button>
-        <button class="ns-btn active" data-ns="48" data-i18n="opt_medium">標準</button>
-        <button class="ns-btn"        data-ns="56" data-i18n="opt_large">大</button>
+        <button class="ns-btn"        data-ns="18" data-i18n="opt_small">小</button>
+        <button class="ns-btn active" data-ns="24" data-i18n="opt_medium">中</button>
+        <button class="ns-btn"        data-ns="30" data-i18n="opt_large">大</button>
       </div>
       <div class="opt-sep"></div>
       <span class="opt-label" data-i18n="opt_next">下一個</span>
@@ -615,15 +619,16 @@
       </select>
       <div class="opt-sep"></div>
       <span class="opt-label" data-i18n="opt_size">大小</span>
-      <input type="number" id="fontSizeInput" value="48" min="8" max="400">
+      <input type="number" id="fontSizeInput" value="24" min="8" max="400">
       <select id="fontSizePreset" class="fs-preset" title="快速選擇大小">
         <option value="">—</option>
+        <option value="12">12</option>
+        <option value="18">18</option>
+        <option value="24">24</option>
         <option value="36">36</option>
         <option value="48">48</option>
         <option value="64">64</option>
-        <option value="96">96</option>
-        <option value="128">128</option>
-        <option value="192">192</option>
+
       </select>
       <span class="opt-label">px</span>
       <div class="opt-sep"></div>
@@ -1096,18 +1101,8 @@
   <span class="float-drag-label" data-i18n="float_drag_label">⬆ 拖曳匯出</span>
 </div>
 
-<!-- History drawer — 右側書籤抽屜（掛在 body 最底層，確保 position:fixed 正確定位） -->
-<div id="historyDrawer" class="history-drawer">
-  <button id="historyTab" class="history-tab" data-i18n="btn_history">歷史截圖</button>
-  <div id="historyPanel" class="history-panel-inner">
-    <div class="history-panel-header">
-      <span class="history-panel-title" data-i18n="btn_history">歷史截圖</span>
-      <button id="historyClose" class="history-panel-close" title="關閉">✕</button>
-    </div>
-    <div id="historyList" class="history-list"></div>
-  </div>
-</div>
 
+<script src="i18n.js"></script>
 <script src="editor.js"></script>
 </body>
 </html>

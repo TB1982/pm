@@ -83,8 +83,9 @@ function createWindow() {
     alwaysOnTop: true,
     resizable:   false,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, 'src/preload-toolbar.js')
     }
   })
   mainWindow.loadFile('src/index.html')
@@ -97,7 +98,10 @@ function createWindow() {
 
 // ─── Editor window ───────────────────────────────────────────────────────────
 
-function openEditorWindow(imagePath) {
+// scaleFactor: the display's scaleFactor at capture time (1 = normal, 2 = Retina).
+// Pass it explicitly when known (avoids unreliable metadata reads).
+// When null, fall back to Sharp density metadata.
+function openEditorWindow(imagePath, scaleFactor = null) {
   const win = new BrowserWindow({
     width: 1280,
     height: 820,
@@ -105,8 +109,9 @@ function openEditorWindow(imagePath) {
     minHeight: 600,
     titleBarStyle: 'hiddenInset',
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, 'src/preload-editor.js')
     }
   })
 
@@ -121,8 +126,16 @@ function openEditorWindow(imagePath) {
   })
 
   win.loadFile('src/editor.html')
-  win.webContents.once('did-finish-load', () => {
-    win.webContents.send('load-image', imagePath)
+  win.webContents.once('did-finish-load', async () => {
+    let imgDPR = scaleFactor || 1
+    if (!scaleFactor) {
+      // Fallback: read DPI from file metadata (e.g. user-opened files)
+      try {
+        const meta = await sharp(imagePath).metadata()
+        if (meta.density && meta.density > 90) imgDPR = Math.round(meta.density / 72)
+      } catch (_) {}
+    }
+    win.webContents.send('load-image', { path: imagePath, imgDPR })
   })
 }
 
@@ -175,6 +188,20 @@ function isoFilename(ext) {
   const p = v => String(v).padStart(2, '0')
   return `${n.getFullYear()}-${p(n.getMonth()+1)}-${p(n.getDate())}-${p(n.getHours())}-${p(n.getMinutes())}-${p(n.getSeconds())}.${ext}`
 }
+
+// Let renderer request a clean window close through main process
+// (avoids white-flash and restores native macOS zoom-out close animation)
+ipcMain.on('close-editor-window', (event) => {
+  const win = BrowserWindow.fromWebContents(event.sender)
+  if (win) win.close()
+})
+
+// Clipboard (handled in main process to avoid contextBridge serialisation issues)
+ipcMain.handle('clipboard-write-text', (_, text) => { clipboard.writeText(text) })
+ipcMain.handle('clipboard-write-image', (_, dataURL) => {
+  clipboard.writeImage(nativeImage.createFromDataURL(dataURL))
+})
+ipcMain.handle('clipboard-clear', () => { clipboard.clear() })
 
 ipcMain.handle('save-image-as', async (event, { dataURL, format }) => {
   const win = BrowserWindow.fromWebContents(event.sender)
@@ -463,7 +490,7 @@ ipcMain.handle('capture-fullscreen', async () => {
       )
       clipboard.writeImage(image)
       const { width, height } = image.getSize()
-      openEditorWindow(tmpPath)
+      openEditorWindow(tmpPath, displays[0].scaleFactor)
       return { success: true, path: tmpPath, width, height }
     } catch (err) {
       mainWindow.show()
@@ -494,8 +521,9 @@ function openScreenSelectOverlays(displays) {
       resizable:   false,
       movable:     false,
       webPreferences: {
-        nodeIntegration: true,
-        contextIsolation: false
+        nodeIntegration: false,
+        contextIsolation: true,
+        preload: path.join(__dirname, 'src/preload-screen-select.js')
       }
     })
     win.setAlwaysOnTop(true, 'screen-saver')
@@ -538,7 +566,7 @@ ipcMain.handle('capture-selected-screen', async (event) => {
     )
     clipboard.writeImage(image)
     const { width, height } = image.getSize()
-    openEditorWindow(tmpPath)
+    openEditorWindow(tmpPath, activeEntry.display.scaleFactor)
     mainWindow.webContents.send('capture-result', { success: true, path: tmpPath, width, height })
   } catch (err) {
     mainWindow.show()
@@ -603,8 +631,8 @@ ipcMain.handle('capture-all-screens-merged', async () => {
     const finalImage = nativeImage.createFromPath(stitchedPath)
     clipboard.writeImage(finalImage)
     const { width, height } = finalImage.getSize()
-
-    openEditorWindow(stitchedPath)
+    // Merged multi-display image: scaleFactor=1 (displays may differ; render at face value)
+    openEditorWindow(stitchedPath, 1)
     mainWindow.webContents.send('capture-result', { success: true, path: stitchedPath, width, height })
   } catch (err) {
     mainWindow.show()
@@ -641,8 +669,9 @@ ipcMain.handle('open-overlay', async () => {
       resizable:   false,
       movable:     false,
       webPreferences: {
-        nodeIntegration: true,
-        contextIsolation: false
+        nodeIntegration: false,
+        contextIsolation: true,
+        preload: path.join(__dirname, 'src/preload-overlay.js')
       }
     })
     win.setAlwaysOnTop(true, 'screen-saver')
@@ -673,8 +702,8 @@ ipcMain.handle('capture-rect', async (event, rect) => {
     const { image, tmpPath } = await captureGlobalRect(gx, gy, gw, gh)
     clipboard.writeImage(image)
     const { width, height } = image.getSize()
-
-    openEditorWindow(tmpPath)
+    const captureDisplay = screen.getDisplayNearestPoint({ x: gx + gw / 2, y: gy + gh / 2 })
+    openEditorWindow(tmpPath, captureDisplay.scaleFactor)
     mainWindow.webContents.send('capture-result', { success: true, path: tmpPath, width, height })
   } catch (err) {
     mainWindow.show()
@@ -1038,40 +1067,6 @@ ipcMain.on('start-drag-export', (event, { dataURL }) => {
   } catch (err) {
     console.error('start-drag-export failed:', err.message)
   }
-})
-
-// ─── Screenshot History ───────────────────────────────────────────────────────
-
-function getHistoryPath() {
-  return path.join(app.getPath('userData'), 'history.json')
-}
-
-ipcMain.handle('get-history', () => {
-  try {
-    return JSON.parse(fs.readFileSync(getHistoryPath(), 'utf8'))
-  } catch {
-    return []
-  }
-})
-
-ipcMain.handle('add-history-entry', (_, entry) => {
-  try {
-    let history = []
-    try { history = JSON.parse(fs.readFileSync(getHistoryPath(), 'utf8')) } catch {}
-    history.unshift(entry)
-    if (history.length > 20) history = history.slice(0, 20)
-    fs.writeFileSync(getHistoryPath(), JSON.stringify(history))
-    return true
-  } catch {
-    return false
-  }
-})
-
-ipcMain.handle('open-history-file', (_, filePath) => {
-  if (!fs.existsSync(filePath)) return { success: false, error: 'File not found' }
-  mainWindow.hide()
-  openEditorWindow(filePath)
-  return { success: true }
 })
 
 // ─── Brand Colors ─────────────────────────────────────────────────────────────

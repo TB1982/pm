@@ -1,4 +1,4 @@
-const { ipcRenderer } = require('electron')
+const { invoke: ipcInvoke, on: ipcOn } = window.electronAPI
 
 const canvas = document.getElementById('canvas')
 const ctx    = canvas.getContext('2d')
@@ -12,7 +12,7 @@ let totalDisplays = 1
 
 // ─── Init data from main process ─────────────────────────────────────────────
 
-ipcRenderer.on('screen-select-init', (_, data) => {
+ipcOn('screen-select-init', (data) => {
   displayIndex  = data.index
   totalDisplays = data.total
   draw()
@@ -67,14 +67,14 @@ canvas.addEventListener('mouseenter', () => { hovered = true;  draw() })
 canvas.addEventListener('mouseleave', () => { hovered = false; draw() })
 
 canvas.addEventListener('click', () => {
-  ipcRenderer.invoke('capture-selected-screen')
+  ipcInvoke('capture-selected-screen')
 })
 
 // ─── Keyboard events ──────────────────────────────────────────────────────────
 
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter')  ipcRenderer.invoke('capture-all-screens-merged')
-  if (e.key === 'Escape') ipcRenderer.invoke('cancel-screen-select')
+  if (e.key === 'Enter')  ipcInvoke('capture-all-screens-merged')
+  if (e.key === 'Escape') ipcInvoke('cancel-screen-select')
 })
 
 // Initial draw

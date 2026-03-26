@@ -1,5 +1,5 @@
-const { ipcRenderer } = require('electron')
-const { t, applyI18n } = require('./i18n')
+// electronAPI and t/applyI18n are injected by preload-editor.js and i18n.js (loaded via <script>)
+const { invoke: ipcInvoke, send: ipcSend, on: ipcOn } = window.electronAPI
 
 // ─── Colour palette ──────────────────────────────────────────────────────────
 
@@ -47,6 +47,7 @@ function getFontCss(id) {
 let imgElement = null
 let imgWidth   = 0
 let imgHeight  = 0
+let imgDPR     = 1    // pixel density of the source image (1 = normal, 2 = Retina 2×)
 let viewScale  = 1    // display pixels per image pixel
 let fitScale   = 1    // scale at which image fits the window
 let userZoomed = false
@@ -60,8 +61,10 @@ const MAX_SCALE = 4.0
 const ZOOM_STEP = 1.25
 
 // Annotation history
+// Each entry: { annots: Annotation[], imgSnap: null | { src: string, w: number, h: number } }
+// imgSnap is non-null for crop steps; restoring such an entry also restores the image.
 let annotations = []
-let history     = [[]]
+let history     = [{ annots: [], imgSnap: null }]
 let historyIdx  = 0
 
 // Tool settings (persist across selections)
@@ -73,9 +76,9 @@ let lineOrtho   = false   // 正交折線：true = 水平/垂直吸附
 let startCap    = 'none'
 let endCap      = 'arrow'
 let cornerRadius = 0      // 0–100%，套用於 rect / fillrect 的圓角半徑
-let fontSize  = 48
+let fontSize  = 24
 let numCount  = 1
-let numSize   = 48    // radius, image pixels
+let numSize   = 24    // radius, image pixels
 let numberStyle   = 'dot'   // dot | circle | circle-fill | roman | cjk-paren | cjk-circle
 let numThickness  = 0       // 描邊粗細，獨立於全域 thickness
 let numStrokeColor = '#ffffff'  // 描邊顏色
@@ -330,37 +333,37 @@ function hideAllOptions() {
   hideSymbolPanel()
 }
 
-function showOptionsForTool(t) {
+function showOptionsForTool(tool) {
   hideAllOptions()
-  if (t === 'zoom-in' || t === 'zoom-out') {
+  if (tool === 'zoom-in' || tool === 'zoom-out') {
     document.getElementById('grpZoom').classList.remove('hidden')
     return
   }
-  if (t === 'crop') {
+  if (tool === 'crop') {
     document.getElementById('grpCrop').classList.remove('hidden')
     return
   }
-  if (t === 'ocr') {
+  if (tool === 'ocr') {
     document.getElementById('grpOcr').classList.remove('hidden')
     document.getElementById('ocrStatusLabel').textContent = t('ocr_drag')
     return
   }
-  if (t === 'boxselect') {
+  if (tool === 'boxselect') {
     document.getElementById('grpBoxSelect').classList.remove('hidden')
     syncBoxSelUI()
     return
   }
-  if (t === 'mosaic') {
+  if (tool === 'mosaic') {
     document.getElementById('grpMosaic').classList.remove('hidden')
     syncMosaicUI()
     return
   }
-  if (t === 'privacymask') {
+  if (tool === 'privacymask') {
     document.getElementById('grpPrivacyMask').classList.remove('hidden')
     syncPrivacyUI()
     return
   }
-  if (t === 'symbol') {
+  if (tool === 'symbol') {
     document.getElementById('grpColor').classList.remove('hidden')
     document.getElementById('grpSymbol').classList.remove('hidden')
     document.getElementById('grpShadow').classList.remove('hidden')
@@ -369,7 +372,7 @@ function showOptionsForTool(t) {
     return
   }
   const sh  = id => document.getElementById(id).classList.remove('hidden')
-  if (t === 'pen') {
+  if (tool === 'pen') {
     sh('grpColor'); sh('grpThickness'); sh('grpPenBorder'); sh('grpDashStyle')
     sh('grpCaps'); sh('grpStrokeOpacity'); sh('grpShadow')
     syncNumStrokeUI(false)
@@ -382,51 +385,51 @@ function showOptionsForTool(t) {
     syncShadowCheck(penShadow)
     return
   }
-  if (!['rect','ellipse','fillrect','fillellipse','line','text','number'].includes(t)) return
+  if (!['rect','ellipse','fillrect','fillellipse','line','text','number'].includes(tool)) return
   // (polyline 由 line tool 雙擊切換，此處不需獨立 tool id)
-  const isFill = t === 'fillrect' || t === 'fillellipse'
+  const isFill = tool === 'fillrect' || tool === 'fillellipse'
   if (!isFill) sh('grpColor')
   if (isFill) {
     sh('grpFillColor')
     syncFillMode(fillMode); syncFillColorA(fillColorA); syncFillColorB(fillColorB)
     syncFillGradientDir(fillGradientDir); syncFillOpacity(fillOpacity); syncFillBorderColor(fillBorderColor)
   }
-  if (['rect','ellipse','fillrect','fillellipse','line','number'].includes(t)) sh('grpThickness')
-  syncNumStrokeUI(t === 'number')
-  if (t === 'line') {
+  if (['rect','ellipse','fillrect','fillellipse','line','number'].includes(tool)) sh('grpThickness')
+  syncNumStrokeUI(tool === 'number')
+  if (tool === 'line') {
     sh('grpLineStyle'); sh('grpDashStyle'); sh('grpCaps'); sh('grpStrokeOpacity'); sh('grpShadow')
     syncLineOrtho(lineOrtho); syncLineBorderColor(lineBorderColor)
     syncLineBorderThickness(lineBorderThickness); syncLineBorderDash(lineBorderDashStyle)
     syncDashStyle(lineStyle); syncCaps(startCap, endCap)
     syncStrokeOpacity(lineOpacity); syncShadowCheck(lineShadow)
   }
-  if (t === 'rect') {
+  if (tool === 'rect') {
     sh('grpRectShape'); sh('grpStrokeBorder'); sh('grpDashStyle')
     sh('grpRadius'); sh('grpStrokeOpacity'); sh('grpShadow')
-    syncRectShape(t)
+    syncRectShape(tool)
     syncStrokeBorderColor(rectBorderColor); syncStrokeBorderThickness(rectBorderThickness); syncStrokeBorderDash(rectBorderDashStyle)
     syncStrokeBorderOffset(rectBorderOffsetX, rectBorderOffsetY)
     syncDashStyle(rectLineStyle); syncCornerRadius(cornerRadius)
     syncStrokeOpacity(rectOpacity); syncShadowCheck(rectShadow)
   }
-  if (t === 'ellipse') {
+  if (tool === 'ellipse') {
     sh('grpRectShape'); sh('grpStrokeBorder'); sh('grpDashStyle')
     sh('grpStrokeOpacity'); sh('grpShadow')
-    syncRectShape(t)
+    syncRectShape(tool)
     syncStrokeBorderColor(ellipseBorderColor); syncStrokeBorderThickness(ellipseBorderThickness); syncStrokeBorderDash(ellipseBorderDashStyle)
     syncStrokeBorderOffset(ellipseBorderOffsetX, ellipseBorderOffsetY)
     syncDashStyle(ellipseLineStyle)
     syncStrokeOpacity(ellipseOpacity); syncShadowCheck(ellipseShadow)
   }
-  if (t === 'fillrect') {
+  if (tool === 'fillrect') {
     sh('grpFillShape'); sh('grpDashStyle'); sh('grpRadius'); sh('grpShadow')
-    syncFillShape(t); syncDashStyle(fillrectLineStyle); syncCornerRadius(cornerRadius); syncShadowCheck(fillrectShadow)
+    syncFillShape(tool); syncDashStyle(fillrectLineStyle); syncCornerRadius(cornerRadius); syncShadowCheck(fillrectShadow)
   }
-  if (t === 'fillellipse') {
+  if (tool === 'fillellipse') {
     sh('grpFillShape'); sh('grpDashStyle'); sh('grpShadow')
-    syncFillShape(t); syncDashStyle(fillellipseLineStyle); syncShadowCheck(fillellipseShadow)
+    syncFillShape(tool); syncDashStyle(fillellipseLineStyle); syncShadowCheck(fillellipseShadow)
   }
-  if (t === 'text') {
+  if (tool === 'text') {
     sh('grpFont')
     syncTextShadowCheck(textShadow)
     syncTextBold(textBold); syncTextItalic(textItalic); syncTextUnderline(textUnderline); syncTextStrikethrough(textStrikethrough)
@@ -435,7 +438,7 @@ function showOptionsForTool(t) {
     syncTextBgOpacity(textBgOpacity); syncTextBgPreview()
     syncFontFamily(fontFamily)
   }
-  if (t === 'number') { sh('grpNumber'); sh('grpShadow'); syncShadowCheck(numShadow); syncNumStyle(numberStyle) }
+  if (tool === 'number') { sh('grpNumber'); sh('grpShadow'); syncShadowCheck(numShadow); syncNumStyle(numberStyle) }
 }
 
 function syncMosaicUI() {
@@ -574,7 +577,7 @@ function showOptionsForAnnot(a) {
     sh('grpFont')
   }
   if (t === 'number') {
-    numSize        = a.size ?? 48;             syncNumSize(numSize)
+    numSize        = a.size ?? 30;             syncNumSize(numSize)
     numShadow      = a.shadow ?? false;        syncShadowCheck(numShadow)
     numberStyle    = a.numberStyle ?? 'dot';   syncNumStyle(numberStyle)
     numThickness   = a.thickness ?? 0;         syncThickness(numThickness)
@@ -615,7 +618,6 @@ function applyColor(hex) {
   if (selectedId) updateSelectedAnnot({ color: hex })
   if (textActive) { textInputEl.style.color = hex; renderAnnotations() }
   pushRecentColor(hex)
-  hideColorPanel()
 }
 function syncThickness(t) {
   document.getElementById('strokeWidthInput').value = t
@@ -665,6 +667,9 @@ function syncPenBorderDash(v)       { const el = document.getElementById('penBor
 function syncStrokeBorderThickness(v) { const el = document.getElementById('strokeBorderThicknessInput'); if (el) el.value = v }
 function syncStrokeBorderDash(v)      { const el = document.getElementById('strokeBorderDashSelect');     if (el) el.value = v }
 function syncFontSize(fs) { document.getElementById('fontSizeInput').value = fs }
+// Initialise inputs to match JS defaults (in case HTML attribute drifts)
+syncFontSize(fontSize)
+
 function syncNumSize(ns) {
   document.querySelectorAll('.ns-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.ns) === ns))
 }
@@ -797,19 +802,19 @@ function applyFillMode(mode) {
 function applyFillColor(hex) {
   fillColor = hex; syncFillColor(hex)
   if (selectedId) updateSelectedAnnot({ fillColor: hex })
-  pushRecentColor(hex); hideColorPanel()
+  pushRecentColor(hex)
 }
 function applyFillColorA(hex) {
   if (hex !== 'transparent') fillPrevColorA = hex
   fillColorA = hex; syncFillColorA(hex)
   if (selectedId) updateSelectedAnnot({ fillColorA: hex })
-  pushRecentColor(hex); hideColorPanel()
+  pushRecentColor(hex)
 }
 function applyFillColorB(hex) {
   if (hex !== 'transparent') fillPrevColorB = hex
   fillColorB = hex; syncFillColorB(hex)
   if (selectedId) updateSelectedAnnot({ fillColorB: hex })
-  pushRecentColor(hex); hideColorPanel()
+  pushRecentColor(hex)
 }
 function applyFillGradientDir(dir) {
   fillGradientDir = dir; syncFillGradientDir(dir)
@@ -822,13 +827,13 @@ function applyFillOpacity(val) {
 function applyFillBorderColor(hex) {
   fillBorderColor = hex; syncFillBorderColor(hex)
   if (selectedId) updateSelectedAnnot({ fillBorderColor: hex })
-  pushRecentColor(hex); hideColorPanel()
+  pushRecentColor(hex)
 }
 function applyTextStrokeColor(hex) {
   textStrokeColor = hex; syncTextStrokeColor(hex)
   if (selectedId) updateSelectedAnnot({ textStrokeColor: hex })
   if (textActive) renderAnnotations()
-  pushRecentColor(hex); hideColorPanel()
+  pushRecentColor(hex)
 }
 function applyTextBgColor(hex) {
   if (hex === 'transparent') {
@@ -844,7 +849,7 @@ function applyTextBgColor(hex) {
   syncTextBgPreview()   // opacity 已確定後再更新色塊
   if (selectedId) updateSelectedAnnot({ textBgColor: hex, textBgOpacity: textBgOpacity })
   if (textActive) renderAnnotations()
-  pushRecentColor(hex); hideColorPanel()
+  pushRecentColor(hex)
 }
 
 // Update selected annotation's properties + push history
@@ -1029,10 +1034,6 @@ syncFillBorderColor(fillBorderColor)
   document.body.appendChild(fileInput)
 
   document.getElementById('btnOverlayImg').addEventListener('click', () => {
-    if (annotations.some(a => a.type === 'img')) {
-      showToast(t('toast_overlay_exists'), true)
-      return
-    }
     fileInput.click()
   })
 
@@ -1107,6 +1108,15 @@ function hideColorPanel() {
   document.getElementById('colorPickerPanel').classList.add('hidden')
   _cppApplyFn = _cppGetCurrent = _cppAnchorEl = null
 }
+
+// Close color panel when clicking outside of it or its anchor button
+document.addEventListener('click', (e) => {
+  const panel = document.getElementById('colorPickerPanel')
+  if (panel.classList.contains('hidden')) return
+  if (panel.contains(e.target)) return
+  if (_cppAnchorEl && _cppAnchorEl.contains(e.target)) return
+  hideColorPanel()
+}, true)
 
 ;(function initColorPanel() {
   // Update the panel's active-swatch highlight + hex field after a colour is applied
@@ -1244,7 +1254,7 @@ function hideColorPanel() {
       btn.addEventListener('contextmenu', (e) => {
         e.preventDefault()
         brandColors.splice(idx, 1)
-        ipcRenderer.invoke('save-brand-colors', brandColors)
+        ipcInvoke('save-brand-colors', brandColors)
         rebuildBrandRow()
       })
       brandEl.appendChild(btn)
@@ -1252,7 +1262,7 @@ function hideColorPanel() {
   }
 
   // Load brand colors from disk
-  ipcRenderer.invoke('get-brand-colors').then(colors => {
+  ipcInvoke('get-brand-colors').then(colors => {
     brandColors = Array.isArray(colors) ? colors : []
     rebuildBrandRow()
   })
@@ -1262,7 +1272,7 @@ function hideColorPanel() {
     const hex = _cppGetCurrent ? _cppGetCurrent() : null
     if (!hex || hex === 'transparent' || brandColors.includes(hex)) return
     brandColors.push(hex)
-    ipcRenderer.invoke('save-brand-colors', brandColors)
+    ipcInvoke('save-brand-colors', brandColors)
     rebuildBrandRow()
   })
 
@@ -1303,7 +1313,6 @@ document.getElementById('numStrokeColorPreview').addEventListener('click', funct
     numStrokeColor = hex
     syncNumStrokeColor(hex)
     if (selectedId) { updateSelectedAnnot({ numStrokeColor: hex }); renderAnnotations() }
-    hideColorPanel()   // 選色後自動關閉
   }, () => numStrokeColor)
 })
 
@@ -1313,7 +1322,6 @@ document.getElementById('lineBorderColorPreview').addEventListener('click', func
     lineBorderColor = hex
     syncLineBorderColor(hex)
     if (selectedId) updateSelectedAnnot({ lineBorderColor: hex })
-    hideColorPanel()
   }, () => lineBorderColor)
 })
 
@@ -1323,7 +1331,6 @@ document.getElementById('penBorderColorPreview').addEventListener('click', funct
     penBorderColor = hex
     syncPenBorderColor(hex)
     if (selectedId) updateSelectedAnnot({ penBorderColor: hex })
-    hideColorPanel()
   }, () => penBorderColor)
 })
 
@@ -1429,7 +1436,6 @@ document.getElementById('strokeBorderColorPreview').addEventListener('click', fu
     if (t === 'rect')    { rectBorderColor    = hex; syncStrokeBorderColor(hex) }
     if (t === 'ellipse') { ellipseBorderColor = hex; syncStrokeBorderColor(hex) }
     if (selectedId) updateSelectedAnnot({ borderColor: hex })
-    hideColorPanel()
   }, () => t === 'ellipse' ? ellipseBorderColor : rectBorderColor)
 })
 
@@ -1505,7 +1511,7 @@ document.getElementById('strokeBorderDashSelect').addEventListener('change', e =
 
 // Font size — manual input
 document.getElementById('fontSizeInput').addEventListener('input', e => {
-  fontSize = Math.max(8, Math.min(400, parseInt(e.target.value) || 48))
+  fontSize = Math.max(8, Math.min(400, parseInt(e.target.value) || 24))
   if (selectedId) updateSelectedAnnot({ fontSize })
   if (textActive) {
     textInputEl.style.fontSize = Math.max(fontSize * viewScale, 14) + 'px'
@@ -1702,43 +1708,46 @@ document.getElementById('btnRedo').addEventListener('click', redo)
 
 // ─── Tool activation ─────────────────────────────────────────────────────────
 
-function setTool(t) {
+function setTool(newTool) {
   commitText(false)
   hideColorPanel()
-  if (t !== 'crop')      { cropRect = null; isCropping = false; cropMoving = false; cropResizeH = null; cropMoveStart = null }
-  if (t !== 'ocr')          { ocrRect = null; isOcrSelecting = false; ocrStart = null }
-  if (t !== 'boxselect')    { boxSelRect = null; isBoxSelecting = false; boxSelStart = null }
-  if (t !== 'mosaic')       { isMosaicDrawing = false; mosaicDrawStart = null; mosaicPreviewRect = null }
-  if (t !== 'privacymask')  { privacySelRect = null; isPrivacySelecting = false; privacySelStart = null }
-  if (t !== 'pen')       { isPenDrawing = false; penPoints = [] }
+  if (newTool !== 'crop')        { cropRect = null; isCropping = false; cropMoving = false; cropResizeH = null; cropMoveStart = null }
+  if (newTool !== 'ocr')          { ocrRect = null; isOcrSelecting = false; ocrStart = null }
+  if (newTool !== 'boxselect')    { boxSelRect = null; isBoxSelecting = false; boxSelStart = null }
+  if (newTool !== 'mosaic')       { isMosaicDrawing = false; mosaicDrawStart = null; mosaicPreviewRect = null }
+  if (newTool !== 'privacymask')  { privacySelRect = null; isPrivacySelecting = false; privacySelStart = null }
+  if (newTool !== 'pen')          { isPenDrawing = false; penPoints = [] }
   _cancelPolyline()   // 切換工具時取消任何進行中的折線
-  tool       = t
+  tool       = newTool
   selectedId = null
   isDrawing  = false
   isPanning  = false
 
   document.querySelectorAll('.tool-btn[data-tool]').forEach(b => {
     // ellipse 屬於 rect 群組；fillellipse 屬於 fillrect 群組
-    let match = b.dataset.tool === t
-      || (t === 'ellipse'     && b.dataset.tool === 'rect')
-      || (t === 'fillellipse' && b.dataset.tool === 'fillrect')
+    let match = b.dataset.tool === newTool
+      || (newTool === 'ellipse'     && b.dataset.tool === 'rect')
+      || (newTool === 'fillellipse' && b.dataset.tool === 'fillrect')
     b.classList.toggle('active', match)
   })
 
-  if      (t === 'zoom-in')  annotCanvas.style.cursor = 'zoom-in'
-  else if (t === 'zoom-out') annotCanvas.style.cursor = 'zoom-out'
-  else if (t === 'select')   annotCanvas.style.cursor = 'default'
-  else                       annotCanvas.style.cursor = 'crosshair'
+  if      (newTool === 'zoom-in')  annotCanvas.style.cursor = 'zoom-in'
+  else if (newTool === 'zoom-out') annotCanvas.style.cursor = 'zoom-out'
+  else if (newTool === 'select')   annotCanvas.style.cursor = 'default'
+  else                             annotCanvas.style.cursor = 'crosshair'
 
-  if (t === 'select') hideAllOptions()
-  else                showOptionsForTool(t)
+  if (newTool === 'select') hideAllOptions()
+  else                      showOptionsForTool(newTool)
 
   renderAnnotations()
 }
 
 // ─── Image loading ────────────────────────────────────────────────────────────
 
-ipcRenderer.on('load-image', (_, path) => {
+ipcOn('load-image', (payload) => {
+  // payload may be a plain string (legacy) or { path, imgDPR }
+  const filePath = typeof payload === 'string' ? payload : payload.path
+  imgDPR = (typeof payload === 'object' && payload.imgDPR) ? payload.imgDPR : 1
   const img = new Image()
   img.onload = () => {
     imgElement = img
@@ -1750,13 +1759,15 @@ ipcRenderer.on('load-image', (_, path) => {
     drawBase()
     setTool('rect')
   }
-  img.src = `file://${path}`
+  img.src = `file://${filePath}`
 })
 
 function fitCanvas() {
   const aw = canvasArea.clientWidth  - 64
   const ah = canvasArea.clientHeight - 64
-  fitScale = Math.min(aw / imgWidth, ah / imgHeight, 1)
+  // Cap at 1/imgDPR so Retina screenshots (144 DPI, imgDPR=2) display at
+  // their logical CSS size rather than appearing 2× zoomed.
+  fitScale = Math.min(aw / imgWidth, ah / imgHeight, 1 / imgDPR)
   if (!userZoomed) {
     viewScale = fitScale
     _applyCanvasSize()
@@ -1775,6 +1786,8 @@ function _applyCanvasSize() {
   canvasWrapper.style.height = dh + 'px'
   // Re-apply scale after resize (resizing resets the transform)
   baseCtx.setTransform(DPR, 0, 0, DPR, 0, 0)
+  baseCtx.imageSmoothingEnabled = true
+  baseCtx.imageSmoothingQuality = 'high'   // Lanczos — reduces upscale blur on Retina screenshots
   annotCtx.setTransform(DPR, 0, 0, DPR, 0, 0)
   document.getElementById('zoomLabel').textContent = Math.round(viewScale * 100) + '%'
   syncZoomSelect()
@@ -2754,7 +2767,7 @@ function drawNumber(ctx, a) {
 
   if (glyph) {
     // Unicode glyph 直接渲染 — Zero Overhead
-    const fs  = (a.size ?? 48) * 2 * viewScale
+    const fs  = (a.size ?? 48) * 2 * viewScale * imgDPR
     const sw  = (a.thickness ?? 0) * viewScale
     if (a.shadow) setShadow(ctx)
     ctx.font         = `${Math.round(fs)}px -apple-system, 'Noto Sans TC', sans-serif`
@@ -2773,7 +2786,7 @@ function drawNumber(ctx, a) {
     ctx.fillText(glyph, cx, cy)
   } else {
     // dot 樣式（預設或超出 Unicode 範圍 fallback）
-    const r  = (a.size ?? 48) * viewScale
+    const r  = (a.size ?? 48) * viewScale * imgDPR
     const sw = (a.thickness ?? 0) * viewScale
     const strokeCol = a.numStrokeColor ?? getTextColor(a.color)
     if (a.shadow) setShadow(ctx)
@@ -2785,11 +2798,16 @@ function drawNumber(ctx, a) {
       ctx.stroke()
     }
     ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0
-    ctx.fillStyle    = getTextColor(a.color)
-    ctx.font         = `bold ${Math.round(r * 0.9)}px -apple-system`
-    ctx.textAlign    = 'center'
-    ctx.textBaseline = 'middle'
-    ctx.fillText(String(a.value), cx, cy)
+    ctx.fillStyle   = getTextColor(a.color)
+    ctx.font        = `bold ${Math.round(r * 0.9)}px -apple-system`
+    ctx.textAlign   = 'center'
+    ctx.textBaseline = 'alphabetic'
+    const str = String(a.value)
+    const m   = ctx.measureText(str)
+    // Use actual ink bounds to visually centre the digit (textBaseline 'middle'
+    // aligns to em-box centre which is above the visual glyph centre for digits)
+    const yOff = (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2
+    ctx.fillText(str, cx, cy + yOff)
   }
 }
 
@@ -3145,27 +3163,44 @@ function commitShape(start, end) {
 
 function pushHistory() {
   history = history.slice(0, historyIdx + 1)
-  history.push(JSON.parse(JSON.stringify(annotations)))
+  history.push({ annots: JSON.parse(JSON.stringify(annotations)), imgSnap: null })
   historyIdx = history.length - 1
+}
+
+function _applyHistoryEntry(entry) {
+  annotations = JSON.parse(JSON.stringify(entry.annots))
+  selectedId  = null
+  if (entry.imgSnap) {
+    const img = new Image()
+    img.onload = () => {
+      imgElement = img
+      imgWidth   = entry.imgSnap.w
+      imgHeight  = entry.imgSnap.h
+      document.getElementById('imgInfo').textContent = `${imgWidth} × ${imgHeight} px`
+      userZoomed = false
+      fitCanvas()
+      drawBase()
+      recalcNumCount()
+      renderAnnotations()
+    }
+    img.src = entry.imgSnap.src
+  } else {
+    recalcNumCount()
+    renderAnnotations()
+  }
 }
 
 function undo() {
   if (historyIdx > 0) {
     historyIdx--
-    annotations = JSON.parse(JSON.stringify(history[historyIdx]))
-    selectedId  = null
-    recalcNumCount()
-    renderAnnotations()
+    _applyHistoryEntry(history[historyIdx])
   }
 }
 
 function redo() {
   if (historyIdx < history.length - 1) {
     historyIdx++
-    annotations = JSON.parse(JSON.stringify(history[historyIdx]))
-    selectedId  = null
-    recalcNumCount()
-    renderAnnotations()
+    _applyHistoryEntry(history[historyIdx])
   }
 }
 
@@ -4065,12 +4100,11 @@ document.getElementById('btnSaveConfirm').addEventListener('click', async () => 
   saveModal.classList.add('hidden')
   const format  = document.querySelector('input[name="fmt"]:checked').value
   const dataURL = burnIn(format)
-  const result  = await ipcRenderer.invoke('save-image-as', { dataURL, format })
+  const result  = await ipcInvoke('save-image-as', { dataURL, format })
   if (result?.success) {
     const fileName = String(result.path).split(/[/\\]/).pop()
-    addHistoryEntry({ path: result.path, label: fileName, dataURL })
     showToast(t('toast_saved', fileName))
-    setTimeout(() => window.close(), 800)
+    setTimeout(() => ipcSend('close-editor-window'), 1200)
     return
   }
   if (!result?.canceled) {
@@ -4149,9 +4183,20 @@ function confirmCrop() {
   const ch = Math.min(Math.round(cropRect.h), imgHeight - cy)
   if (cw < 1 || ch < 1) { showToast(t('toast_crop_oob'), true); return }
 
+  // Snapshot pre-crop image so Ctrl+Z can restore it
+  const preSnap = document.createElement('canvas')
+  preSnap.width = imgWidth; preSnap.height = imgHeight
+  preSnap.getContext('2d').drawImage(imgElement, 0, 0)
+  const preSrc = preSnap.toDataURL()
+
+  // Update current history slot to carry the pre-crop image snapshot
+  history = history.slice(0, historyIdx + 1)
+  history[historyIdx] = { annots: JSON.parse(JSON.stringify(annotations)), imgSnap: { src: preSrc, w: imgWidth, h: imgHeight } }
+
   const off = document.createElement('canvas')
   off.width = cw; off.height = ch
   off.getContext('2d').drawImage(imgElement, cx, cy, cw, ch, 0, 0, cw, ch)
+  const postSrc = off.toDataURL()
 
   const newImg = new Image()
   newImg.onload = () => {
@@ -4167,8 +4212,9 @@ function confirmCrop() {
       }
       return a
     })
-    history    = [JSON.parse(JSON.stringify(annotations))]
-    historyIdx = 0
+    // Push post-crop state (imgSnap stored so redo can restore cropped image)
+    history.push({ annots: JSON.parse(JSON.stringify(annotations)), imgSnap: { src: postSrc, w: cw, h: ch } })
+    historyIdx = history.length - 1
     cropRect   = null
     userZoomed = false
     document.getElementById('imgInfo').textContent = `${imgWidth} × ${imgHeight} px`
@@ -4177,7 +4223,7 @@ function confirmCrop() {
     setTool('rect')
     showToast(t('toast_cropped', cw, ch))
   }
-  newImg.src = off.toDataURL()
+  newImg.src = postSrc
 }
 
 function cancelCrop() {
@@ -4215,8 +4261,7 @@ function copyBoxSelection() {
 
   pixelClipboard = { dataURL, w: sw, h: sh }
 
-  const { nativeImage, clipboard } = require('electron')
-  clipboard.writeImage(nativeImage.createFromDataURL(dataURL))
+  window.electronAPI.clipboard.writeImage(dataURL)
 
   showToast(t('toast_box_copied', sw, sh))
 }
@@ -4263,7 +4308,7 @@ function startOcrRecognition() {
   offCtx.drawImage(baseCanvas, c(r.x) * DPR, c(r.y) * DPR, c(r.w) * DPR, c(r.h) * DPR, 0, 0, off.width, off.height)
   const dataURL = off.toDataURL('image/png')
 
-  ipcRenderer.invoke('ocr-recognize', { dataURL }).then(result => {
+  ipcInvoke('ocr-recognize', { dataURL }).then(result => {
     const wrap = document.getElementById('ocrProgressWrap')
     wrap.classList.add('hidden')
     wrap.style.display = 'none'
@@ -4279,7 +4324,7 @@ function startOcrRecognition() {
   })
 }
 
-ipcRenderer.on('ocr-progress', (_, { status, progress }) => {
+ipcOn('ocr-progress', ({ status, progress }) => {
   _updateOcrProgress({ status, progress })
 })
 
@@ -4294,15 +4339,13 @@ document.getElementById('ocrPanelClose').addEventListener('click', () => {
 
 document.getElementById('btnOcrCopy').addEventListener('click', () => {
   const text = document.getElementById('ocrResultText').value
-  const { clipboard } = require('electron')
-  clipboard.writeText(text)
+  window.electronAPI.clipboard.writeText(text)
   showToast(t('toast_text_copied'))
 })
 
 document.getElementById('btnOcrCopyClose').addEventListener('click', () => {
   const text = document.getElementById('ocrResultText').value
-  const { clipboard } = require('electron')
-  clipboard.writeText(text)
+  window.electronAPI.clipboard.writeText(text)
   showToast(t('toast_text_copied'))
   document.getElementById('ocrPanel').classList.add('hidden')
   ocrRect = null
@@ -4949,9 +4992,7 @@ function burnIn(format) {
 function copyFinalImage() {
   if (!imgElement) { showToast(t('toast_no_image'), true); return }
   const dataURL = burnIn('png')
-  const { clipboard, nativeImage } = require('electron')
-  clipboard.writeImage(nativeImage.createFromDataURL(dataURL))
-  addHistoryEntry({ label: t('history_copied_label'), dataURL })
+  window.electronAPI.clipboard.writeImage(dataURL)
   showToast(t('toast_img_copied'))
 }
 
@@ -4987,7 +5028,7 @@ document.getElementById('btnCopyImage').addEventListener('click', copyFinalImage
     if (e.target === handle || handle.contains(e.target)) return
     if (!imgElement) { showToast(t('toast_no_image'), true); return }
     const dataURL = burnIn('png')
-    ipcRenderer.send('start-drag-export', { dataURL })
+    ipcSend('start-drag-export', { dataURL })
   })
 })()
 
@@ -5055,89 +5096,6 @@ document.addEventListener('keydown', e => {
   }
 }, true)  // capture phase so it fires before other listeners
 
-// ─── History Panel ────────────────────────────────────────────────────────────
-
-function makeThumb(dataURL, maxW = 150) {
-  return new Promise(resolve => {
-    const img = new Image()
-    img.onload = () => {
-      const scale = Math.min(1, maxW / img.width)
-      const c = document.createElement('canvas')
-      c.width  = Math.round(img.width  * scale)
-      c.height = Math.round(img.height * scale)
-      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height)
-      resolve(c.toDataURL('image/jpeg', 0.7))
-    }
-    img.src = dataURL
-  })
-}
-
-async function addHistoryEntry({ path: filePath, label, dataURL }) {
-  const thumb = await makeThumb(dataURL)
-  const entry = { id: Date.now(), timestamp: Date.now(), label: label || '', path: filePath || null, thumb }
-  await ipcRenderer.invoke('add-history-entry', entry)
-}
-
-;(function initHistoryPanel() {
-  const panel    = document.getElementById('historyPanel')
-  const tab      = document.getElementById('historyTab')
-  const listEl   = document.getElementById('historyList')
-  const closeBtn = document.getElementById('historyClose')
-
-  async function renderHistory() {
-    listEl.innerHTML = ''
-    const history = await ipcRenderer.invoke('get-history')
-    if (!history || history.length === 0) {
-      const empty = document.createElement('span')
-      empty.className = 'history-empty'
-      empty.textContent = t('history_empty')
-      listEl.appendChild(empty)
-      return
-    }
-    history.forEach(entry => {
-      const item = document.createElement('div')
-      item.className = 'history-item'
-      item.title = entry.path || entry.label || ''
-
-      const img = document.createElement('img')
-      img.src = entry.thumb
-      img.alt = entry.label || ''
-
-      const label = document.createElement('div')
-      label.className = 'history-item-label'
-      label.textContent = entry.label || new Date(entry.timestamp).toLocaleTimeString()
-
-      item.appendChild(img)
-      item.appendChild(label)
-      item.addEventListener('click', async () => {
-        if (entry.path) {
-          const result = await ipcRenderer.invoke('open-history-file', entry.path)
-          if (!result?.success) showToast(t('history_file_not_found'), true)
-        }
-      })
-      listEl.appendChild(item)
-    })
-  }
-
-  function openHistory() {
-    panel.classList.add('open')
-    tab.classList.add('open')
-  }
-
-  function closeHistory() {
-    panel.classList.remove('open')
-    tab.classList.remove('open')
-  }
-
-  tab.addEventListener('click', async () => {
-    if (panel.classList.contains('open')) { closeHistory(); return }
-    await renderHistory()
-    openHistory()
-  })
-
-  closeBtn.addEventListener('click', closeHistory)
-})()
-
 // ─── Privacy Mask ─────────────────────────────────────────────────────────────
 // 兩種入口：
 //   K 鍵              → runPrivacyScan(null)   全圖掃描
@@ -5169,7 +5127,7 @@ async function runPrivacyScan(region) {
   off.getContext('2d').drawImage(imgElement, 0, 0, imgWidth, imgHeight)
   const dataURL = off.toDataURL('image/png')
 
-  const result = await ipcRenderer.invoke('privacy-scan', { dataURL })
+  const result = await ipcInvoke('privacy-scan', { dataURL })
 
   if (!result.success) {
     showToast(t('toast_privacy_fail') + '：' + result.error, true)
