@@ -83,8 +83,9 @@ function createWindow() {
     alwaysOnTop: true,
     resizable:   false,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, 'src/preload-toolbar.js')
     }
   })
   mainWindow.loadFile('src/index.html')
@@ -108,8 +109,9 @@ function openEditorWindow(imagePath, scaleFactor = null) {
     minHeight: 600,
     titleBarStyle: 'hiddenInset',
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, 'src/preload-editor.js')
     }
   })
 
@@ -512,8 +514,9 @@ function openScreenSelectOverlays(displays) {
       resizable:   false,
       movable:     false,
       webPreferences: {
-        nodeIntegration: true,
-        contextIsolation: false
+        nodeIntegration: false,
+        contextIsolation: true,
+        preload: path.join(__dirname, 'src/preload-screen-select.js')
       }
     })
     win.setAlwaysOnTop(true, 'screen-saver')
@@ -659,8 +662,9 @@ ipcMain.handle('open-overlay', async () => {
       resizable:   false,
       movable:     false,
       webPreferences: {
-        nodeIntegration: true,
-        contextIsolation: false
+        nodeIntegration: false,
+        contextIsolation: true,
+        preload: path.join(__dirname, 'src/preload-overlay.js')
       }
     })
     win.setAlwaysOnTop(true, 'screen-saver')

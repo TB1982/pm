@@ -1,5 +1,5 @@
-const { ipcRenderer } = require('electron')
-const { t, applyI18n } = require('./i18n')
+// electronAPI and t/applyI18n are injected by preload-editor.js and i18n.js (loaded via <script>)
+const { invoke: ipcInvoke, send: ipcSend, on: ipcOn } = window.electronAPI
 
 // ─── Colour palette ──────────────────────────────────────────────────────────
 
@@ -1246,7 +1246,7 @@ function hideColorPanel() {
       btn.addEventListener('contextmenu', (e) => {
         e.preventDefault()
         brandColors.splice(idx, 1)
-        ipcRenderer.invoke('save-brand-colors', brandColors)
+        ipcInvoke('save-brand-colors', brandColors)
         rebuildBrandRow()
       })
       brandEl.appendChild(btn)
@@ -1254,7 +1254,7 @@ function hideColorPanel() {
   }
 
   // Load brand colors from disk
-  ipcRenderer.invoke('get-brand-colors').then(colors => {
+  ipcInvoke('get-brand-colors').then(colors => {
     brandColors = Array.isArray(colors) ? colors : []
     rebuildBrandRow()
   })
@@ -1264,7 +1264,7 @@ function hideColorPanel() {
     const hex = _cppGetCurrent ? _cppGetCurrent() : null
     if (!hex || hex === 'transparent' || brandColors.includes(hex)) return
     brandColors.push(hex)
-    ipcRenderer.invoke('save-brand-colors', brandColors)
+    ipcInvoke('save-brand-colors', brandColors)
     rebuildBrandRow()
   })
 
@@ -1740,7 +1740,7 @@ function setTool(t) {
 
 // ─── Image loading ────────────────────────────────────────────────────────────
 
-ipcRenderer.on('load-image', (_, payload) => {
+ipcOn('load-image', (payload) => {
   // payload may be a plain string (legacy) or { path, imgDPR }
   const filePath = typeof payload === 'string' ? payload : payload.path
   imgDPR = (typeof payload === 'object' && payload.imgDPR) ? payload.imgDPR : 1
@@ -4096,11 +4096,11 @@ document.getElementById('btnSaveConfirm').addEventListener('click', async () => 
   saveModal.classList.add('hidden')
   const format  = document.querySelector('input[name="fmt"]:checked').value
   const dataURL = burnIn(format)
-  const result  = await ipcRenderer.invoke('save-image-as', { dataURL, format })
+  const result  = await ipcInvoke('save-image-as', { dataURL, format })
   if (result?.success) {
     const fileName = String(result.path).split(/[/\\]/).pop()
     showToast(t('toast_saved', fileName))
-    setTimeout(() => ipcRenderer.send('close-editor-window'), 1200)
+    setTimeout(() => ipcSend('close-editor-window'), 1200)
     return
   }
   if (!result?.canceled) {
@@ -4257,8 +4257,7 @@ function copyBoxSelection() {
 
   pixelClipboard = { dataURL, w: sw, h: sh }
 
-  const { nativeImage, clipboard } = require('electron')
-  clipboard.writeImage(nativeImage.createFromDataURL(dataURL))
+  window.electronAPI.clipboard.writeImage(dataURL)
 
   showToast(t('toast_box_copied', sw, sh))
 }
@@ -4305,7 +4304,7 @@ function startOcrRecognition() {
   offCtx.drawImage(baseCanvas, c(r.x) * DPR, c(r.y) * DPR, c(r.w) * DPR, c(r.h) * DPR, 0, 0, off.width, off.height)
   const dataURL = off.toDataURL('image/png')
 
-  ipcRenderer.invoke('ocr-recognize', { dataURL }).then(result => {
+  ipcInvoke('ocr-recognize', { dataURL }).then(result => {
     const wrap = document.getElementById('ocrProgressWrap')
     wrap.classList.add('hidden')
     wrap.style.display = 'none'
@@ -4321,7 +4320,7 @@ function startOcrRecognition() {
   })
 }
 
-ipcRenderer.on('ocr-progress', (_, { status, progress }) => {
+ipcOn('ocr-progress', ({ status, progress }) => {
   _updateOcrProgress({ status, progress })
 })
 
@@ -4336,17 +4335,15 @@ document.getElementById('ocrPanelClose').addEventListener('click', () => {
 
 document.getElementById('btnOcrCopy').addEventListener('click', () => {
   const text = document.getElementById('ocrResultText').value
-  const { clipboard } = require('electron')
-  clipboard.clear()           // wipe image/other types so only text lands in pasteboard
-  clipboard.writeText(text)
+  window.electronAPI.clipboard.clear()
+  window.electronAPI.clipboard.writeText(text)
   showToast(t('toast_text_copied'))
 })
 
 document.getElementById('btnOcrCopyClose').addEventListener('click', () => {
   const text = document.getElementById('ocrResultText').value
-  const { clipboard } = require('electron')
-  clipboard.clear()
-  clipboard.writeText(text)
+  window.electronAPI.clipboard.clear()
+  window.electronAPI.clipboard.writeText(text)
   showToast(t('toast_text_copied'))
   document.getElementById('ocrPanel').classList.add('hidden')
   ocrRect = null
@@ -4993,8 +4990,7 @@ function burnIn(format) {
 function copyFinalImage() {
   if (!imgElement) { showToast(t('toast_no_image'), true); return }
   const dataURL = burnIn('png')
-  const { clipboard, nativeImage } = require('electron')
-  clipboard.writeImage(nativeImage.createFromDataURL(dataURL))
+  window.electronAPI.clipboard.writeImage(dataURL)
   showToast(t('toast_img_copied'))
 }
 
@@ -5030,7 +5026,7 @@ document.getElementById('btnCopyImage').addEventListener('click', copyFinalImage
     if (e.target === handle || handle.contains(e.target)) return
     if (!imgElement) { showToast(t('toast_no_image'), true); return }
     const dataURL = burnIn('png')
-    ipcRenderer.send('start-drag-export', { dataURL })
+    ipcSend('start-drag-export', { dataURL })
   })
 })()
 
@@ -5129,7 +5125,7 @@ async function runPrivacyScan(region) {
   off.getContext('2d').drawImage(imgElement, 0, 0, imgWidth, imgHeight)
   const dataURL = off.toDataURL('image/png')
 
-  const result = await ipcRenderer.invoke('privacy-scan', { dataURL })
+  const result = await ipcInvoke('privacy-scan', { dataURL })
 
   if (!result.success) {
     showToast(t('toast_privacy_fail') + '：' + result.error, true)

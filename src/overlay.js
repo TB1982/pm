@@ -1,4 +1,4 @@
-const { ipcRenderer } = require('electron')
+const { invoke: ipcInvoke } = window.electronAPI
 
 const canvas = document.getElementById('canvas')
 const ctx    = canvas.getContext('2d')
@@ -137,15 +137,15 @@ canvas.addEventListener('mouseup', (e) => {
   const h = Math.abs(endY - startY)
 
   if (w < 5 || h < 5) {
-    ipcRenderer.invoke('cancel-overlay')
+    ipcInvoke('cancel-overlay')
     return
   }
 
-  ipcRenderer.invoke('capture-rect', { x, y, width: w, height: h })
+  ipcInvoke('capture-rect', { x, y, width: w, height: h })
 })
 
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') ipcRenderer.invoke('cancel-overlay')
+  if (e.key === 'Escape') ipcInvoke('cancel-overlay')
 })
 
 // Initial draw
