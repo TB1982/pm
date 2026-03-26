@@ -1758,7 +1758,7 @@ function fitCanvas() {
   const ah = canvasArea.clientHeight - 64
   fitScale = Math.min(aw / imgWidth, ah / imgHeight)   // true fit, uncapped
   if (!userZoomed) {
-    viewScale = Math.min(fitScale, 1 / DPR)            // no upscaling on load
+    viewScale = Math.min(fitScale, 1)                  // default: no enlarging beyond 100%
     _applyCanvasSize()
   }
 }
@@ -1776,14 +1776,14 @@ function _applyCanvasSize() {
   // Re-apply scale after resize (resizing resets the transform)
   baseCtx.setTransform(DPR, 0, 0, DPR, 0, 0)
   annotCtx.setTransform(DPR, 0, 0, DPR, 0, 0)
-  document.getElementById('zoomLabel').textContent = Math.round(viewScale * DPR * 100) + '%'
+  document.getElementById('zoomLabel').textContent = Math.round(viewScale * 100) + '%'
   syncZoomSelect()
 }
 
 // ─── Zoom helpers ─────────────────────────────────────────────────────────────
 
 function applyZoom(newScale, pivotClientX, pivotClientY) {
-  const minScale = Math.min(fitScale, 1 / DPR)
+  const minScale = Math.min(fitScale, 1)
   const clamped = Math.max(minScale, Math.min(MAX_SCALE, newScale))
   if (Math.abs(clamped - viewScale) < 0.0001) return
 
@@ -1831,7 +1831,7 @@ function syncZoomSelect() {
   const sel    = document.getElementById('zoomSelect')
   const custom = document.getElementById('zoomCustom')
   if (!sel) return
-  const pct = Math.round(viewScale * DPR * 100)
+  const pct = Math.round(viewScale * 100)
   for (const opt of sel.options) {
     if (opt.id === 'zoomCustom') continue
     if (Math.round(parseFloat(opt.value) * 100) === pct) { sel.value = opt.value; return }
@@ -1847,7 +1847,7 @@ function syncZoomSelect() {
 // Zoom dropdown — ignore the dynamic 'custom' placeholder
 document.getElementById('zoomSelect').addEventListener('change', e => {
   if (e.target.value === 'custom') return
-  applyZoom(parseFloat(e.target.value) / DPR)
+  applyZoom(parseFloat(e.target.value))
 })
 
 // Wheel / trackpad pinch — ctrlKey is set by macOS for pinch gestures
