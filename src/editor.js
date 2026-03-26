@@ -5149,8 +5149,12 @@ async function addHistoryEntry({ path: filePath, label, dataURL }) {
 
   tab.addEventListener('click', async () => {
     if (panel.classList.contains('open')) { closeHistory(); return }
-    await renderHistory()
-    openHistory()
+    try {
+      await renderHistory()
+      openHistory()
+    } catch (err) {
+      console.error('[history] renderHistory failed:', err)
+    }
   })
 
   closeBtn.addEventListener('click', closeHistory)

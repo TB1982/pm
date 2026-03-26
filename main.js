@@ -130,10 +130,12 @@ function createWindow() {
 
 // ─── Editor window ───────────────────────────────────────────────────────────
 
-async function openEditorWindow(imagePath) {
+async function openEditorWindow(imagePath, sourceDPR) {
   // Strip pHYs (DPI) chunk so Chromium reports naturalWidth = physical pixels.
   // Must complete before the window sends 'load-image' to guarantee correct dims.
   await stripDPIMetadata(imagePath)
+  // sourceDPR: scaleFactor of the display that was captured (default: primary display)
+  const dpr = sourceDPR ?? screen.getPrimaryDisplay().scaleFactor
 
   const win = new BrowserWindow({
     width: 1280,
@@ -160,8 +162,7 @@ async function openEditorWindow(imagePath) {
 
   win.loadFile('src/editor.html')
   win.webContents.once('did-finish-load', () => {
-    const sourceDPR = screen.getPrimaryDisplay().scaleFactor
-    win.webContents.send('load-image', { path: imagePath, sourceDPR })
+    win.webContents.send('load-image', { path: imagePath, sourceDPR: dpr })
   })
 }
 
@@ -502,7 +503,7 @@ ipcMain.handle('capture-fullscreen', async () => {
       )
       clipboard.writeImage(image)
       const { width, height } = image.getSize()
-      openEditorWindow(tmpPath)
+      openEditorWindow(tmpPath, displays[0].scaleFactor)
       return { success: true, path: tmpPath, width, height }
     } catch (err) {
       mainWindow.show()
@@ -578,7 +579,7 @@ ipcMain.handle('capture-selected-screen', async (event) => {
     )
     clipboard.writeImage(image)
     const { width, height } = image.getSize()
-    openEditorWindow(tmpPath)
+    openEditorWindow(tmpPath, activeEntry.display.scaleFactor)
     mainWindow.webContents.send('capture-result', { success: true, path: tmpPath, width, height })
   } catch (err) {
     mainWindow.show()
@@ -714,8 +715,8 @@ ipcMain.handle('capture-rect', async (event, rect) => {
     const { image, tmpPath } = await captureGlobalRect(gx, gy, gw, gh)
     clipboard.writeImage(image)
     const { width, height } = image.getSize()
-
-    openEditorWindow(tmpPath)
+    const rectDisplay = screen.getDisplayNearestPoint({ x: gx, y: gy })
+    openEditorWindow(tmpPath, rectDisplay.scaleFactor)
     mainWindow.webContents.send('capture-result', { success: true, path: tmpPath, width, height })
   } catch (err) {
     mainWindow.show()
