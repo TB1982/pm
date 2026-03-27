@@ -98,6 +98,7 @@
         <section class="stage" id="summary-stage" data-stage="summary">
           <div class="summary-shell">
             <article class="floating-card summary-card">
+              <button class="close-summary-btn" id="close-summary" type="button" aria-label="收起總覽，欣賞背景">×</button>
               <div class="summary-head">
                 <div>
                   <p class="stage-label">完成總覽</p>
@@ -126,6 +127,9 @@
               </section>
             </article>
           </div>
+          <button class="reopen-summary-btn" id="reopen-summary" type="button" aria-label="重新展開總覽">
+            <span aria-hidden="true">◎</span> 重新打開
+          </button>
         </section>
       </section>
     </section>
@@ -135,8 +139,8 @@
 
   <script src="journal.js"></script>
 
-  <footer style="margin-top: 2rem; padding: 2rem; text-align: center; font-size: 0.75rem; color: var(--muted); border-top: 1px solid var(--border);">
-    由 GitHub 部署　｜　Claude Code 傾力打造　｜　<a href="mailto:babelon1882@gmail.com" style="color: inherit; text-decoration: none; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.6'" onmouseout="this.style.opacity='1'">Nova</a> 最後更新於 2026
+  <footer style="margin-top: 2rem; padding: 2rem; text-align: center; font-size: 0.75rem; color: var(--muted); border-top: 1px solid var(--border); line-height: 2;">
+    <span style="white-space: nowrap;">由 GitHub 部署</span>　｜　<span style="white-space: nowrap;">Codex × Claude Code 傾力打造</span>　｜　<span style="white-space: nowrap;"><a href="mailto:babelon1882@gmail.com" style="color: inherit; text-decoration: none; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.6'" onmouseout="this.style.opacity='1'">Nova</a> 最後更新於 2026</span>
   </footer>
 </body>
 </html>

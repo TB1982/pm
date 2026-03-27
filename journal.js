@@ -24,6 +24,9 @@ const startButton = document.getElementById("start-journal");
 const prevButton = document.getElementById("prev-question");
 const nextButton = document.getElementById("next-question");
 const backToQuestionsButton = document.getElementById("back-to-questions");
+const closeSummaryButton = document.getElementById("close-summary");
+const reopenSummaryButton = document.getElementById("reopen-summary");
+const summaryShell = document.querySelector(".summary-shell");
 const activeImageInput = document.getElementById("active-image-input");
 const questionTitle = document.getElementById("question-title");
 const questionProgress = document.getElementById("question-progress");
@@ -244,6 +247,10 @@ function setStage(stageName) {
     element.classList.toggle("is-active", name === stageName);
   });
   exportButton.hidden = stageName !== "summary";
+  if (stageName !== "summary") {
+    summaryShell.classList.remove("is-dismissed");
+    reopenSummaryButton.classList.remove("is-visible");
+  }
 }
 
 async function handleImageInput(event) {
@@ -551,6 +558,14 @@ prevButton.addEventListener("click", previousStep);
 nextButton.addEventListener("click", nextStep);
 activeImageInput.addEventListener("change", handleImageInput);
 backToQuestionsButton.addEventListener("click", () => setStage("question"));
+closeSummaryButton.addEventListener("click", () => {
+  summaryShell.classList.add("is-dismissed");
+  reopenSummaryButton.classList.add("is-visible");
+});
+reopenSummaryButton.addEventListener("click", () => {
+  summaryShell.classList.remove("is-dismissed");
+  reopenSummaryButton.classList.remove("is-visible");
+});
 themeToggle.addEventListener("click", toggleTheme);
 exportButton.addEventListener("click", exportAsPng);
 dateInput.addEventListener("input", renderSummary);
