@@ -320,6 +320,15 @@ document.getElementById('batchSelectBtn').addEventListener('click', pickBatchFil
 document.getElementById('batchAddMoreBtn').addEventListener('click', pickBatchFiles)
 
 // Drag and drop
+function handleDropFiles(e) {
+  e.preventDefault()
+  const paths = Array.from(e.dataTransfer.files)
+    .filter(f => /\.(png|jpe?g|webp|gif|svg)$/i.test(f.name))
+    .map(f => window.electronAPI.getPathForFile(f))
+    .filter(Boolean)
+  addBatchFiles(paths)
+}
+
 const dropzone = document.getElementById('batchDropzone')
 dropzone.addEventListener('dragover', (e) => {
   e.preventDefault()
@@ -327,13 +336,21 @@ dropzone.addEventListener('dragover', (e) => {
 })
 dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'))
 dropzone.addEventListener('drop', (e) => {
-  e.preventDefault()
   dropzone.classList.remove('drag-over')
-  const paths = Array.from(e.dataTransfer.files)
-    .filter(f => /\.(png|jpe?g|webp|gif|svg)$/i.test(f.name))
-    .map(f => window.electronAPI.getPathForFile(f))
-    .filter(Boolean)
-  addBatchFiles(paths)
+  handleDropFiles(e)
+})
+
+const fileListEl2 = document.getElementById('batchFileList')
+fileListEl2.addEventListener('dragover', (e) => {
+  e.preventDefault()
+  fileListEl2.classList.add('drag-over')
+})
+fileListEl2.addEventListener('dragleave', (e) => {
+  if (!fileListEl2.contains(e.relatedTarget)) fileListEl2.classList.remove('drag-over')
+})
+fileListEl2.addEventListener('drop', (e) => {
+  fileListEl2.classList.remove('drag-over')
+  handleDropFiles(e)
 })
 
 const BATCH_MAX = 100
