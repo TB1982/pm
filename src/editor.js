@@ -346,8 +346,8 @@ function showAlignOptions() {
 
 function _syncAlignLRVisibility() {
   const toCanvas = document.getElementById('chkAlignToCanvas').checked
-  document.getElementById('btnAlignLeft') .classList.toggle('hidden', toCanvas)
-  document.getElementById('btnAlignRight').classList.toggle('hidden', toCanvas)
+  document.getElementById('btnGrpAlignLeft') .classList.toggle('hidden', toCanvas)
+  document.getElementById('btnGrpAlignRight').classList.toggle('hidden', toCanvas)
 }
 
 document.getElementById('chkAlignToCanvas')?.addEventListener('change', _syncAlignLRVisibility)
@@ -435,9 +435,9 @@ function _alignSelectedAnnots(mode) {
 
 // ─── Alignment button listeners ───────────────────────────────────────────────
 
-document.getElementById('btnAlignLeft')?.addEventListener('click',    () => _alignSelectedAnnots('left'))
-document.getElementById('btnAlignHCenter')?.addEventListener('click', () => _alignSelectedAnnots('vcenter'))
-document.getElementById('btnAlignRight')?.addEventListener('click',   () => _alignSelectedAnnots('right'))
+document.getElementById('btnGrpAlignLeft')?.addEventListener('click',  () => _alignSelectedAnnots('left'))
+document.getElementById('btnAlignHCenter')?.addEventListener('click',  () => _alignSelectedAnnots('vcenter'))
+document.getElementById('btnGrpAlignRight')?.addEventListener('click', () => _alignSelectedAnnots('right'))
 document.getElementById('btnAlignTop')?.addEventListener('click',     () => _alignSelectedAnnots('top'))
 document.getElementById('btnAlignVCenter')?.addEventListener('click', () => _alignSelectedAnnots('hcenter'))
 document.getElementById('btnAlignBottom')?.addEventListener('click',  () => _alignSelectedAnnots('bottom'))
