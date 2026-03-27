@@ -90,6 +90,12 @@ body {
   white-space: nowrap;
 }
 
+#cropSizeLabel {
+  min-width: 100px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
 /* Color swatches */
 .color-swatches { display: flex; gap: 5px; }
 

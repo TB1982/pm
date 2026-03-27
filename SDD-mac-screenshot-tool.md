@@ -1,8 +1,26 @@
 # SDD：Mac 截圖與圖片編輯工具
-**版本：** 3.40
+**版本：** 3.41
 **日期：** 2026-03-27
 **狀態：** 待審閱
 **變更紀錄：**
+
+### v3.41 — 裁切工具修正：handle 翻轉 + 尺寸穩定 + 雙擊確認 + 按鈕動態顯隱
+
+#### 變更摘要
+
+1. **Handle resize 錨點 Bug 修正**：`applyCropResize` 改用 `cropMoveStart.origRect`（mousedown 快照）作為對邊錨點，解決把手拖過對邊後選取框塌縮消失的問題。同時在 mousedown 捕捉 handle 時補存 `cropMoveStart`，mouseup 時清除。
+2. **尺寸標籤寬度固定**：`#cropSizeLabel` 加 `min-width: 100px; font-variant-numeric: tabular-nums; text-align: right`，消除三位數↔四位數切換時右側確認/取消按鈕的位移抖動。
+3. **雙擊確認裁切**：在 `annotCanvas` 上加 `dblclick` 事件，`tool === 'crop' && cropRect` 時呼叫 `confirmCrop()`。
+4. **確認裁切按鈕動態顯隱**：`updateCropSizeLabel()` 同步更新 `btnCropConfirm.hidden`，無有效選取框時自動隱藏，拖出選取框且 mouseup 後才出現；切換到裁切工具時立即套用初始狀態。
+
+#### TDD 測試案例（v3.41）
+
+- [x] 裁切工具中拖出選取框，把手拖過對邊 → 選取框翻轉，不消失
+- [x] 拖曳選取框大小時，options bar 尺寸數字穩定不推擠右側按鈕
+- [x] 有選取框時雙擊畫布 → 執行裁切（等同按確認裁切）
+- [x] 切換到裁切工具時「確認裁切」按鈕隱藏；拖出選取框後才出現
+
+---
 
 ### v3.40 — 資安修補：XSS 防護 + 畫布尺寸上限
 
