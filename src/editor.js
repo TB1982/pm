@@ -246,6 +246,7 @@ let symbolSize = 64  // image pixels (font-size equivalent)
 // Pen tool
 let isPenDrawing   = false
 let penPoints      = []       // {x,y}[] collected during current stroke
+let returnTool     = null     // tool to return to after transient post-create select
 let penOpacity     = 100      // 0–100，100=fully opaque
 let penBorderColor = 'transparent'
 let penShadow      = false
@@ -1998,6 +1999,7 @@ document.getElementById('btnRedo').addEventListener('click', redo)
 // ─── Tool activation ─────────────────────────────────────────────────────────
 
 function setTool(newTool) {
+  returnTool = null
   commitText(false)
   hideColorPanel()
   if (newTool !== 'crop')        { cropRect = null; isCropping = false; cropMoving = false; cropResizeH = null; cropMoveStart = null }
@@ -3783,12 +3785,19 @@ annotCanvas.addEventListener('mousedown', e => {
     // 4. Click on any annotation → single-select + drag
     const hit = findAt(pos)
     if (hit) {
+      returnTool = null   // user intentionally selected another annotation
       selectedId = hit.id
       selectedIds = new Set([hit.id])
       _startDrag(pos)
       showOptionsForAnnot(hit)
     } else {
-      // 5. Click on empty space → clear selection, start rubber band
+      // 5. Click on empty space → if transient post-create, return to previous tool
+      if (returnTool) {
+        const t = returnTool
+        returnTool = null
+        setTool(t)
+        return
+      }
       selectedId = null
       selectedIds = new Set()
       rubberBand = { x0: pos.x, y0: pos.y, x1: pos.x, y1: pos.y }
@@ -4182,8 +4191,7 @@ document.addEventListener('mouseup', e => {
       }
       pushHistory()
       annotations.push(ann)
-      setTool('select'); selectedId = ann.id
-      showOptionsForAnnot(ann)
+      _autoSelectAfterCreate(ann)
     }
     penPoints = []
     renderAnnotations()
@@ -4249,10 +4257,20 @@ document.addEventListener('mouseup', e => {
   const ann = commitShape(drawStart, end)
   if (ann) {
     annotations.push(ann); pushHistory()
-    setTool('select'); selectedId = ann.id; showOptionsForAnnot(ann)
+    _autoSelectAfterCreate(ann)
   }
   renderAnnotations()
 })
+
+// After creating an annotation: switch to select transiently, remember previous tool.
+// Clicking empty canvas returns to that tool; clicking another annotation stays in select.
+function _autoSelectAfterCreate(ann) {
+  const prev = tool
+  setTool('select')        // clears returnTool (good — setTool always resets it)
+  returnTool = prev        // set AFTER setTool so it survives the clear
+  selectedId = ann.id
+  showOptionsForAnnot(ann)
+}
 
 function moveAnnot(a, dx, dy) {
   switch (a.type) {
@@ -4368,8 +4386,10 @@ function commitText(autoSelect = true) {
                    textAlign, fontFamily }
   annotations.push(txtAnn)
   if (autoSelect) {
+    const prev = tool
     // 直接更新狀態，不呼叫 setTool()，避免 selectedId 被重置
     tool = 'select'
+    returnTool = prev
     selectedId = txtAnn.id
     document.querySelectorAll('.tool-btn[data-tool]').forEach(b =>
       b.classList.toggle('active', b.dataset.tool === 'select')
