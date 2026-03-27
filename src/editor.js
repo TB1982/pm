@@ -371,6 +371,8 @@ function _computeSnap(draggedAnnots) {
   const gy0 = Math.min(...bbs.map(b => b.y))
   const gx1 = Math.max(...bbs.map(b => b.x + b.w))
   const gy1 = Math.max(...bbs.map(b => b.y + b.h))
+  const gw  = gx1 - gx0
+  const gh  = gy1 - gy0
 
   // Snap candidate points on the dragged group
   const dragXs = [gx0, (gx0 + gx1) / 2, gx1]
@@ -380,16 +382,18 @@ function _computeSnap(draggedAnnots) {
   const refXs = [0, imgWidth / 2, imgWidth]
   const refYs = [0, imgHeight / 2, imgHeight]
   const draggedIds = new Set(draggedAnnots.map(a => a.id))
+  const others = []
   annotations.forEach(a => {
     if (draggedIds.has(a.id)) return
     const b = bounds(a)
     if (!b) return
+    others.push(b)
     refXs.push(b.x, b.x + b.w / 2, b.x + b.w)
     refYs.push(b.y, b.y + b.h / 2, b.y + b.h)
   })
 
-  // Find closest snap on X
-  let bestDx = null, snapX = null
+  // Find closest edge/center snap on X
+  let bestDx = null, snapX = null, snapXType = 'edge'
   for (const dv of dragXs) {
     for (const rv of refXs) {
       const delta = rv - dv
@@ -399,8 +403,8 @@ function _computeSnap(draggedAnnots) {
     }
   }
 
-  // Find closest snap on Y
-  let bestDy = null, snapY = null
+  // Find closest edge/center snap on Y
+  let bestDy = null, snapY = null, snapYType = 'edge'
   for (const dv of dragYs) {
     for (const rv of refYs) {
       const delta = rv - dv
@@ -410,9 +414,43 @@ function _computeSnap(draggedAnnots) {
     }
   }
 
+  // Distribute snap: horizontal — find any pair (A, B) where dragged fits with equal gaps
+  for (let i = 0; i < others.length; i++) {
+    for (let j = 0; j < others.length; j++) {
+      if (i === j) continue
+      const A = others[i], B = others[j]
+      if (A.x + A.w >= B.x) continue          // A must be fully left of B
+      const space = B.x - (A.x + A.w)
+      if (space <= gw) continue                // dragged group won't fit
+      const equal_gap = (space - gw) / 2
+      const snap_gx0  = (A.x + A.w) + equal_gap
+      const delta = snap_gx0 - gx0
+      if (Math.abs(delta) < threshold && (bestDx === null || Math.abs(delta) < Math.abs(bestDx))) {
+        bestDx = delta; snapX = snap_gx0; snapXType = 'distribute'
+      }
+    }
+  }
+
+  // Distribute snap: vertical — same logic for Y
+  for (let i = 0; i < others.length; i++) {
+    for (let j = 0; j < others.length; j++) {
+      if (i === j) continue
+      const A = others[i], B = others[j]
+      if (A.y + A.h >= B.y) continue
+      const space = B.y - (A.y + A.h)
+      if (space <= gh) continue
+      const equal_gap = (space - gh) / 2
+      const snap_gy0  = (A.y + A.h) + equal_gap
+      const delta = snap_gy0 - gy0
+      if (Math.abs(delta) < threshold && (bestDy === null || Math.abs(delta) < Math.abs(bestDy))) {
+        bestDy = delta; snapY = snap_gy0; snapYType = 'distribute'
+      }
+    }
+  }
+
   const guides = []
-  if (snapX !== null) guides.push({ axis: 'x', value: snapX })
-  if (snapY !== null) guides.push({ axis: 'y', value: snapY })
+  if (snapX !== null) guides.push({ axis: 'x', value: snapX, type: snapXType })
+  if (snapY !== null) guides.push({ axis: 'y', value: snapY, type: snapYType })
 
   return { dx: bestDx ?? 0, dy: bestDy ?? 0, guides }
 }
@@ -2160,10 +2198,13 @@ function renderAnnotations() {
   // Snap guide lines (visible during drag when snapping)
   if (snapGuides.length) {
     annotCtx.save()
-    annotCtx.strokeStyle = '#FF2D55'
-    annotCtx.lineWidth   = 1
-    annotCtx.setLineDash([])
+    annotCtx.lineWidth = 1
     snapGuides.forEach(g => {
+      // distribute: shorter dash + slightly more transparent; edge/center: longer dash
+      annotCtx.strokeStyle = g.type === 'distribute'
+        ? 'rgba(255, 45, 85, 0.45)'
+        : 'rgba(255, 45, 85, 0.65)'
+      annotCtx.setLineDash(g.type === 'distribute' ? [3, 4] : [6, 4])
       annotCtx.beginPath()
       if (g.axis === 'x') {
         annotCtx.moveTo(c(g.value), 0)
