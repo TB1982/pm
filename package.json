@@ -2,7 +2,7 @@
   "name": "vas",
   "version": "0.1.0",
   "author": "Nova <babelon1882@gmail.com>",
-  "description": "Vas — capture, frame, and share with ease",
+  "description": "VAS — capture, frame, and share with ease",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -21,7 +21,7 @@
   },
   "build": {
     "appId": "com.tb1982.vas",
-    "productName": "Vas",
+    "productName": "VAS",
     "asar": true,
     "compression": "store",
     "asarUnpack": [
