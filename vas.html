@@ -234,7 +234,16 @@
         <!-- App Preview -->
         <section class="container mx-auto px-4 md:px-6 py-8 max-w-5xl" aria-labelledby="preview-heading">
             <h2 id="preview-heading" class="sr-only">VAS 編輯器介面預覽</h2>
-            <div style="filter: drop-shadow(0 32px 80px rgba(0,0,0,0.6));">
+            <div style="
+                transform: perspective(1400px) rotateX(4deg);
+                transform-origin: center bottom;
+                filter:
+                    drop-shadow(0 0 48px rgba(196,113,245,0.22))
+                    drop-shadow(0 0 96px rgba(79,172,254,0.12))
+                    drop-shadow(0 48px 80px rgba(0,0,0,0.75));
+                transition: transform .4s ease, filter .4s ease;
+            " onmouseenter="this.style.transform='perspective(1400px) rotateX(1deg)'; this.style.filter='drop-shadow(0 0 64px rgba(196,113,245,0.35)) drop-shadow(0 0 120px rgba(79,172,254,0.18)) drop-shadow(0 56px 90px rgba(0,0,0,0.8))';"
+               onmouseleave="this.style.transform='perspective(1400px) rotateX(4deg)'; this.style.filter='drop-shadow(0 0 48px rgba(196,113,245,0.22)) drop-shadow(0 0 96px rgba(79,172,254,0.12)) drop-shadow(0 48px 80px rgba(0,0,0,0.75))';">
                 <img src="img/vasframe.png" alt="VAS 編輯器介面：深色工作區，左側工具列，頂部選項列，中央為圖片標注畫布" class="w-full block" loading="lazy">
             </div>
         </section>
