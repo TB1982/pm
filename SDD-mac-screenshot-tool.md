@@ -1,8 +1,58 @@
 # SDD：Mac 截圖與圖片編輯工具
-**版本：** 3.38
+**版本：** 3.39
 **日期：** 2026-03-27
 **狀態：** 待審閱
 **變更紀錄：**
+
+### v3.39 — 批次轉換單檔大小上限
+
+#### 變更摘要
+
+- **單檔大小上限：20 MB**。`batch-convert` main process handler 在 sharp 處理前先 `fs.stat` 檢查，超出者拋出 `檔案過大（X.X MB），單檔上限 20 MB` 錯誤，記入 log（`✗` 樣式）並繼續處理其餘檔案。
+- 設計依據：MacBook Pro Retina 截圖（PNG）最大約 15 MB，20 MB 覆蓋所有合理截圖場景；超過通常為誤丟的相機 RAW 或影片素材。
+
+#### TDD 測試案例（v3.39）
+
+- [x] 批次清單含一個 > 20 MB 的檔案 → log 顯示 `✗ 檔名：檔案過大（X.X MB），單檔上限 20 MB`
+- [x] 超大檔記為失敗後，清單中其餘 < 20 MB 的檔案繼續正常轉換
+- [x] 全部 < 20 MB → 無任何大小相關錯誤，正常轉換
+- [x] 恰好 20 MB（邊界值）→ 正常轉換，不觸發錯誤
+
+#### 壓力測試 script
+
+在 `/home/user/pm` 目錄下執行，生成 100 張 2560×1600 PNG（每張約 8–12 MB，模擬真實 MacBook Pro Retina 截圖）：
+
+```bash
+node -e "
+const sharp = require('./node_modules/sharp');
+const p = [];
+for (let i = 1; i <= 100; i++) {
+  const r = (i * 37) % 256, g = (i * 73) % 256, b = (i * 113) % 256;
+  p.push(
+    sharp({ create: { width: 2560, height: 1600, channels: 3,
+      background: { r, g, b } } })
+      .png()
+      .toFile('/tmp/stress_' + String(i).padStart(3,'0') + '.png')
+  );
+}
+Promise.all(p).then(() => console.log('100 張 2560x1600 PNG 產生完畢：/tmp/stress_*.png'));
+"
+```
+
+再額外生 1 張超大檔測試拒絕邏輯（25 MB 合成圖）：
+
+```bash
+node -e "
+const sharp = require('./node_modules/sharp');
+sharp({ create: { width: 4096, height: 4096, channels: 4,
+  background: { r: 255, g: 0, b: 0, alpha: 1 } } })
+  .png({ compressionLevel: 0 })
+  .toFile('/tmp/stress_oversize.png')
+  .then(() => console.log('超大測試檔產生完畢：/tmp/stress_oversize.png'));
+"
+```
+
+---
 
 ### v3.38 — 批次轉換檔案數上限
 

@@ -344,6 +344,7 @@ function escapeXml(str) {
 ipcMain.handle('batch-convert', async (event, {
   files, format, quality, svgWidth, resize, outputMode, outputDir, deleteOriginals, watermark
 }) => {
+  const BATCH_FILE_MAX_BYTES = 20 * 1024 * 1024  // 20 MB
   const results = []
 
   for (const filePath of files) {
@@ -354,6 +355,12 @@ ipcMain.handle('batch-convert', async (event, {
     const outPath = path.join(destDir, `${base}.${outExt}`)
 
     try {
+      const { size } = await fs.promises.stat(filePath)
+      if (size > BATCH_FILE_MAX_BYTES) {
+        const mb = (size / 1024 / 1024).toFixed(1)
+        throw new Error(`檔案過大（${mb} MB），單檔上限 20 MB`)
+      }
+
       // Build sharp pipeline
       let s
       if (ext === 'svg') {
