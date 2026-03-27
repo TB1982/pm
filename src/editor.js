@@ -189,6 +189,12 @@ let isDragging   = false
 let hasDragged   = false
 let lastMousePos = null
 
+// Smart snap
+const SNAP_PX       = 8        // snap threshold in screen pixels
+let snapGuides      = []       // [{ axis: 'x'|'y', value: number }] active guide lines
+let dragStartPos    = null     // { x, y } mouse position when drag began (image coords)
+let dragStartStates = {}       // { [id]: { x, y, x2?, y2? } } annotation positions at drag start
+
 // Resize
 let isResizing   = false
 let resizeHandle = null   // { id, fixX?, fixY?, fixW?, fixH? }
@@ -351,6 +357,77 @@ function _syncAlignLRVisibility() {
 }
 
 document.getElementById('chkAlignToCanvas')?.addEventListener('change', _syncAlignLRVisibility)
+
+// ─── Smart snap ───────────────────────────────────────────────────────────────
+
+function _computeSnap(draggedAnnots) {
+  const threshold = SNAP_PX / viewScale
+
+  // Group bounding box of dragged objects at current position
+  const bbs = draggedAnnots.map(a => bounds(a)).filter(Boolean)
+  if (!bbs.length) return { dx: 0, dy: 0, guides: [] }
+
+  const gx0 = Math.min(...bbs.map(b => b.x))
+  const gy0 = Math.min(...bbs.map(b => b.y))
+  const gx1 = Math.max(...bbs.map(b => b.x + b.w))
+  const gy1 = Math.max(...bbs.map(b => b.y + b.h))
+
+  // Snap candidate points on the dragged group
+  const dragXs = [gx0, (gx0 + gx1) / 2, gx1]
+  const dragYs = [gy0, (gy0 + gy1) / 2, gy1]
+
+  // Reference snap points: canvas edges/center + all non-dragged annotations
+  const refXs = [0, imgWidth / 2, imgWidth]
+  const refYs = [0, imgHeight / 2, imgHeight]
+  const draggedIds = new Set(draggedAnnots.map(a => a.id))
+  annotations.forEach(a => {
+    if (draggedIds.has(a.id)) return
+    const b = bounds(a)
+    if (!b) return
+    refXs.push(b.x, b.x + b.w / 2, b.x + b.w)
+    refYs.push(b.y, b.y + b.h / 2, b.y + b.h)
+  })
+
+  // Find closest snap on X
+  let bestDx = null, snapX = null
+  for (const dv of dragXs) {
+    for (const rv of refXs) {
+      const delta = rv - dv
+      if (Math.abs(delta) < threshold && (bestDx === null || Math.abs(delta) < Math.abs(bestDx))) {
+        bestDx = delta; snapX = rv
+      }
+    }
+  }
+
+  // Find closest snap on Y
+  let bestDy = null, snapY = null
+  for (const dv of dragYs) {
+    for (const rv of refYs) {
+      const delta = rv - dv
+      if (Math.abs(delta) < threshold && (bestDy === null || Math.abs(delta) < Math.abs(bestDy))) {
+        bestDy = delta; snapY = rv
+      }
+    }
+  }
+
+  const guides = []
+  if (snapX !== null) guides.push({ axis: 'x', value: snapX })
+  if (snapY !== null) guides.push({ axis: 'y', value: snapY })
+
+  return { dx: bestDx ?? 0, dy: bestDy ?? 0, guides }
+}
+
+function _startDrag(pos) {
+  isDragging = true; hasDragged = false; lastMousePos = pos
+  dragStartPos = { x: pos.x, y: pos.y }
+  dragStartStates = {}
+  snapGuides = []
+  const ids = selectedIds.size > 0 ? [...selectedIds] : (selectedId ? [selectedId] : [])
+  ids.forEach(id => {
+    const a = annotations.find(x => x.id === id)
+    if (a) dragStartStates[id] = { x: a.x, y: a.y, x2: a.x2, y2: a.y2 }
+  })
+}
 
 // ─── Alignment helpers ────────────────────────────────────────────────────────
 
@@ -2080,6 +2157,26 @@ function renderAnnotations() {
     if (a) drawSelection(annotCtx, a)
   }
 
+  // Snap guide lines (visible during drag when snapping)
+  if (snapGuides.length) {
+    annotCtx.save()
+    annotCtx.strokeStyle = '#FF2D55'
+    annotCtx.lineWidth   = 1
+    annotCtx.setLineDash([])
+    snapGuides.forEach(g => {
+      annotCtx.beginPath()
+      if (g.axis === 'x') {
+        annotCtx.moveTo(c(g.value), 0)
+        annotCtx.lineTo(c(g.value), annotCanvas.height)
+      } else {
+        annotCtx.moveTo(0, c(g.value))
+        annotCtx.lineTo(annotCanvas.width, c(g.value))
+      }
+      annotCtx.stroke()
+    })
+    annotCtx.restore()
+  }
+
   // Rubber band selection (select tool drag on empty space)
   if (rubberBand) {
     const x0 = Math.min(rubberBand.x0, rubberBand.x1)
@@ -3513,7 +3610,7 @@ annotCanvas.addEventListener('mousedown', e => {
         const h = findHandle(pos, a)
         if (h) { startResize(h.id, a); return }
         if (hits(pos, a)) {
-          isDragging = true; hasDragged = false; lastMousePos = pos
+          _startDrag(pos)
           renderAnnotations(); return
         }
       }
@@ -3522,7 +3619,7 @@ annotCanvas.addEventListener('mousedown', e => {
     if (selectedIds.size > 1) {
       const hit = findAt(pos)
       if (hit && selectedIds.has(hit.id)) {
-        isDragging = true; hasDragged = false; lastMousePos = pos
+        _startDrag(pos)
         renderAnnotations(); return
       }
     }
@@ -3531,7 +3628,7 @@ annotCanvas.addEventListener('mousedown', e => {
     if (hit) {
       selectedId = hit.id
       selectedIds = new Set([hit.id])
-      isDragging = true; hasDragged = false; lastMousePos = pos
+      _startDrag(pos)
       showOptionsForAnnot(hit)
     } else {
       // 5. Click on empty space → clear selection, start rubber band
@@ -3729,16 +3826,33 @@ annotCanvas.addEventListener('mousemove', e => {
     return
   }
 
-  if (isDragging && lastMousePos) {
-    const dx = pos.x - lastMousePos.x, dy = pos.y - lastMousePos.y
-    if (selectedIds.size > 1) {
-      // Group move: apply delta to every selected annotation
-      annotations.forEach(a => { if (selectedIds.has(a.id)) moveAnnot(a, dx, dy) })
-      hasDragged = true
-    } else if (selectedId) {
-      const a = annotations.find(x => x.id === selectedId)
-      if (a) { moveAnnot(a, dx, dy); hasDragged = true }
+  if (isDragging && dragStartPos) {
+    const totalDx = pos.x - dragStartPos.x
+    const totalDy = pos.y - dragStartPos.y
+    const draggedAnnots = selectedIds.size > 1
+      ? annotations.filter(a => selectedIds.has(a.id))
+      : annotations.filter(a => a.id === selectedId)
+
+    // Reset to start position + total delta (avoids snap drift)
+    draggedAnnots.forEach(a => {
+      const s = dragStartStates[a.id]
+      if (!s) return
+      a.x = s.x + totalDx
+      a.y = s.y + totalDy
+      if (s.x2 !== undefined) a.x2 = s.x2 + totalDx
+      if (s.y2 !== undefined) a.y2 = s.y2 + totalDy
+    })
+
+    // Apply snap (skip if Alt held)
+    if (!e.altKey) {
+      const snap = _computeSnap(draggedAnnots)
+      if (snap.dx !== 0 || snap.dy !== 0) draggedAnnots.forEach(a => moveAnnot(a, snap.dx, snap.dy))
+      snapGuides = snap.guides
+    } else {
+      snapGuides = []
     }
+
+    hasDragged = true
     lastMousePos = pos
     renderAnnotations()
     return
@@ -3955,7 +4069,11 @@ document.addEventListener('mouseup', e => {
 
   if (isDragging) {
     isDragging = false
+    snapGuides = []
+    dragStartPos = null
+    dragStartStates = {}
     if (hasDragged) pushHistory()
+    renderAnnotations()
     return
   }
   if (!isDrawing) return
