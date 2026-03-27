@@ -341,7 +341,16 @@ function showAlignOptions() {
   const n = selectedIds.size
   document.getElementById('btnDistributeH').disabled = n < 3
   document.getElementById('btnDistributeV').disabled = n < 3
+  _syncAlignLRVisibility()
 }
+
+function _syncAlignLRVisibility() {
+  const toCanvas = document.getElementById('chkAlignToCanvas').checked
+  document.getElementById('btnAlignLeft') .classList.toggle('hidden', toCanvas)
+  document.getElementById('btnAlignRight').classList.toggle('hidden', toCanvas)
+}
+
+document.getElementById('chkAlignToCanvas')?.addEventListener('change', _syncAlignLRVisibility)
 
 // ─── Alignment helpers ────────────────────────────────────────────────────────
 
@@ -427,10 +436,10 @@ function _alignSelectedAnnots(mode) {
 // ─── Alignment button listeners ───────────────────────────────────────────────
 
 document.getElementById('btnAlignLeft')?.addEventListener('click',    () => _alignSelectedAnnots('left'))
-document.getElementById('btnAlignHCenter')?.addEventListener('click', () => _alignSelectedAnnots('hcenter'))
+document.getElementById('btnAlignHCenter')?.addEventListener('click', () => _alignSelectedAnnots('vcenter'))
 document.getElementById('btnAlignRight')?.addEventListener('click',   () => _alignSelectedAnnots('right'))
 document.getElementById('btnAlignTop')?.addEventListener('click',     () => _alignSelectedAnnots('top'))
-document.getElementById('btnAlignVCenter')?.addEventListener('click', () => _alignSelectedAnnots('vcenter'))
+document.getElementById('btnAlignVCenter')?.addEventListener('click', () => _alignSelectedAnnots('hcenter'))
 document.getElementById('btnAlignBottom')?.addEventListener('click',  () => _alignSelectedAnnots('bottom'))
 document.getElementById('btnDistributeH')?.addEventListener('click',  () => _alignSelectedAnnots('distributeH'))
 document.getElementById('btnDistributeV')?.addEventListener('click',  () => _alignSelectedAnnots('distributeV'))
@@ -3366,7 +3375,7 @@ function bounds(a) {
       const bx    = tal === 'center' ? a.x - maxW / 2 : tal === 'right' ? a.x - maxW : a.x
       return { x:bx, y:a.y, w:maxW, h:lines.length*a.fontSize*1.25 }
     }
-    case 'number': { const r = a.size ?? 14; return { x:a.x-r, y:a.y-r, w:r*2, h:r*2 } }
+    case 'number': { const r = (a.size ?? 14) * imgDPR; return { x:a.x-r, y:a.y-r, w:r*2, h:r*2 } }
     case 'polyline':
     case 'pen': {
       const xs = a.points.map(p => p.x), ys = a.points.map(p => p.y)
