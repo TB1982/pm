@@ -25,8 +25,8 @@ body {
   -webkit-app-region: drag;
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 0 10px;
+  gap: 2px;
+  padding: 0 6px;
   height: 68px;
   background: rgba(28, 28, 30, 0.88);
   backdrop-filter: blur(24px);
@@ -39,7 +39,7 @@ body {
 .toolbar-buttons {
   -webkit-app-region: no-drag;
   display: flex;
-  gap: 2px;
+  gap: 0;
 }
 
 .tb-divider {
@@ -54,7 +54,7 @@ body {
 
 .tb-btn {
   -webkit-app-region: no-drag;
-  width: 72px;
+  width: 62px;
   height: 52px;
   border-radius: 12px;
   border: 1px solid transparent;
@@ -912,3 +912,38 @@ kbd {
 
 .nc-trans-btn:hover  { background: #2a2a48; border-color: #6b6baa; color: #d0d8f0; }
 .nc-trans-btn.active { background: #2a2a48; border-color: #7c7ccc; color: #fff; }
+
+/* ─── Modal action buttons (shared with toolbar modals) ───────────────────── */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.btn-primary {
+  background: #0a84ff;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 18px;
+  transition: background 0.15s;
+}
+
+.btn-primary:hover { background: #0070e0; }
+
+.btn-secondary {
+  background: #333;
+  border: 1px solid #444;
+  border-radius: 8px;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 7px 16px;
+  transition: background 0.15s;
+}
+
+.btn-secondary:hover { background: #3a3a3a; }
