@@ -1,8 +1,198 @@
 # SDD：Mac 截圖與圖片編輯工具
-**版本：** 3.33
+**版本：** 3.37
 **日期：** 2026-03-27
 **狀態：** 待審閱
 **變更紀錄：**
+
+### v3.37 — QR 閾值調整 + 新開畫布移至桌面工具列
+
+#### 變更摘要
+
+1. **QR 自動開啟閾值**：由 ≥ 70% 調整為 ≥ 45%。`jsQR` 偵測的 bounding box 不含 QR quiet zone（白邊），導致視覺上「截滿版」的 QR 實際比例僅約 25–35%，閾值下調後行為更符合使用者預期。
+2. **新開畫布進入點**：從編輯器工具列 ⊞ 下拉選單移至桌面浮動工具列「開啟」按鈕的下拉選單。新流程：工具列「開啟」→ 下拉出現「新開畫布」／「開啟檔案」→ 選「新開畫布」→ 展開 modal 填入尺寸與背景色 → main process 以 `sharp` 建立空白 PNG → 開啟編輯器。
+3. **編輯器 ⊞ 簡化**：移除 ⊞ 的下拉行為，按下後直接觸發開啟檔案對話框。
+
+#### TDD 測試案例（v3.37）
+
+- [ ] 桌面工具列點「開啟」→ 下拉選單出現「新開畫布」與「開啟檔案」
+- [ ] 選「新開畫布」→ 工具列展開 modal，顯示預設尺寸選單、寬高輸入、背景色、透明切換
+- [ ] 選預設尺寸 → 寬高自動填入
+- [ ] 點「建立」→ 編輯器開啟對應尺寸的空白畫布
+- [ ] 透明模式 → 建立後畫布背景透明（棋盤格）
+- [ ] 編輯器 ⊞ 按鈕 → 直接開啟檔案選擇對話框，不出現下拉選單
+- [ ] 截 QR 使 QR 佔畫面 ≥ 45% → 直接開瀏覽器（不開編輯器）
+- [ ] 截 QR 使 QR 佔畫面 21–44% → 開編輯器 + Action Toast 詢問
+
+---
+
+### v3.36 — QR Code 智慧掃描
+
+#### 功能概述
+
+區域截圖完成後，自動使用 `jsQR` 掃描圖片內是否包含 QR code。依 QR code 佔截圖面積比例，觸發三種行為。
+
+#### 比例判斷邏輯
+
+| QR 佔比 | 行為 |
+|---------|------|
+| ≥ 45% | 判定為刻意掃碼。若為 URL 直接呼叫 `shell.openExternal`，**不開編輯器**；若為純文字則複製到剪貼簿 |
+| 21–44% | 判定為模糊意圖。開啟編輯器並顯示 Action Toast，讓使用者決定是否開啟 |
+| ≤ 20% | 判定為截圖順帶包含 QR，靜默開啟編輯器 |
+
+#### 技術實作
+
+- **函式庫**：`jsqr@^1.4.0`（純 JS，無原生依賴）
+- **偵測節點**：`main.js` 的 `capture-rect` IPC handler，於 `captureGlobalRect` 之後執行
+- **像素取得**：`sharp(imagePath).ensureAlpha().raw().toBuffer()` → 傳入 `jsQR(Uint8ClampedArray, w, h)`
+- **面積比例**：QR 四角點 bounding box 面積 ÷ 圖片總面積 × 100
+- **IPC**：新增 `qr-detected`（main → editor renderer）、`open-url`（editor → main）
+
+#### Action Toast
+
+Action Toast 為帶按鈕的互動式提示，不自動消失：
+- 訊息：`偵測到 QR Code：<url>`
+- 按鈕：「開啟」（紫色主要按鈕）／「略過」（次要按鈕）
+- 點「開啟」→ `invoke('open-url', url)` → `shell.openExternal`
+
+#### 非 URL QR code（21–44% 區間）
+
+純文字 QR（名片 vCard、WiFi 設定等）→ 複製到剪貼簿 + 一般 toast 提示。
+
+#### TDD 測試案例（v3.36）
+
+- [ ] QR code 佔比 ≥ 45%，URL 類型 → 直接開瀏覽器，不開編輯器
+- [ ] QR code 佔比 ≥ 45%，純文字類型 → 複製到剪貼簿，不開編輯器
+- [ ] QR code 佔比 21–44% → 開編輯器 + Action Toast 顯示 URL
+- [ ] Action Toast 點「開啟」→ 開啟對應網頁
+- [ ] Action Toast 點「略過」→ toast 消失，編輯器正常使用
+- [ ] QR code 佔比 ≤ 20% → 靜默開編輯器，不顯示任何 QR 提示
+- [ ] 截圖範圍內無 QR code → 正常流程，不影響效能
+- [ ] 非 URL QR（21–44%）→ 複製到剪貼簿 + toast，不顯示 Action Toast URL
+
+---
+
+### v3.35 — 新開畫布 / 開啟檔案
+
+#### 功能概述
+
+左側工具列新增「⊞」按鈕（`btnOpenMenu`）。點擊後彈出浮動選單，提供兩個選項：
+
+1. **新開畫布**：開啟 `newCanvasModal` 對話框，允許使用者指定尺寸與背景顏色，建立空白畫布。
+2. **開啟檔案**：觸發隱藏的 `<input type="file">` 選取本機圖片，取代現有畫布內容（行為等同拖曳匯入）。
+
+#### 新開畫布對話框
+
+| 欄位 | 說明 |
+|------|------|
+| 預設尺寸 | 下拉選單，依類別分組（螢幕 / 紙張 / 社群媒體 / 其他），選取後自動填入寬高 |
+| 寬度 / 高度 | 數字輸入框，可手動覆寫；手動修改後預設選單切換為「自訂」 |
+| 背景顏色 | 色彩選取器（預設白色）；點「透明」切換為全透明背景 |
+
+#### 預設尺寸清單
+
+| 類別 | 名稱 | 尺寸 |
+|------|------|------|
+| 螢幕 | HD | 1280 × 720 |
+| 螢幕 | Full HD | 1920 × 1080 |
+| 螢幕 | 2K | 2560 × 1440 |
+| 螢幕 | 4K | 3840 × 2160 |
+| 紙張（72 dpi）| A4 直 | 595 × 842 |
+| 紙張（72 dpi）| A4 橫 | 842 × 595 |
+| 紙張（72 dpi）| A3 直 | 842 × 1191 |
+| 紙張（72 dpi）| A3 橫 | 1191 × 842 |
+| 社群媒體（建議尺寸）| IG 1:1 | 1080 × 1080 |
+| 社群媒體（建議尺寸）| IG 4:5 | 1080 × 1350 |
+| 社群媒體（建議尺寸）| Story 9:16 | 1080 × 1920 |
+| 社群媒體（建議尺寸）| Facebook | 1200 × 630 |
+| 社群媒體（建議尺寸）| X / Twitter | 1600 × 900 |
+| 社群媒體（建議尺寸）| LinkedIn | 1200 × 627 |
+| 社群媒體（建議尺寸）| YouTube 縮圖 | 1280 × 720 |
+| 其他 | 正方形 | 1000 × 1000 |
+| 其他 | 自訂 | 手動輸入 |
+
+> 社群媒體尺寸為「建議上傳解析度」，不隨平台政策異動；長寬比（1:1、4:5、9:16）多年穩定。
+
+#### 建立邏輯
+
+```javascript
+// 1. 建立 offscreen canvas
+const off = document.createElement('canvas')
+off.width = w; off.height = h
+const octx = off.getContext('2d')
+if (bgColor) { octx.fillStyle = bgColor; octx.fillRect(0, 0, w, h) }
+
+// 2. 載入為 imgElement，清空 annotations、history
+newImg.onload = () => {
+  imgElement = newImg; imgWidth = w; imgHeight = h
+  annotations = []; history = [[]]; historyIdx = 0
+  selectedId = null; selectedIds = new Set(); userZoomed = false
+  fitCanvas(); drawBase(); renderAnnotations()
+}
+```
+
+#### TDD 測試案例（v3.35）
+
+- [ ] 點擊「⊞」按鈕，浮動選單出現（含「新開畫布」與「開啟檔案」）
+- [ ] 點擊選單外任意位置，選單消失
+- [ ] 選取「Full HD」預設，寬高自動填入 1920 × 1080
+- [ ] 手動修改寬度，預設下拉切換為「自訂」
+- [ ] 建立白色背景 800×600 畫布，畫布顯示正確尺寸，標注清空
+- [ ] 建立透明背景畫布，背景呈棋盤格（Canvas 預設透明行為）
+- [ ] 「開啟檔案」選取 PNG，圖片正確載入，取代現有畫布
+- [ ] 選取同一個檔案兩次（重設 `input.value`），可正常重複開啟
+
+---
+
+### v3.34 — 線條曲線控制點（Quadratic Bezier）
+
+#### 功能概述
+
+線條（含箭頭）選取後，顯示三個控制把手：兩端點控制位置，中間的「曲線控制點」控制曲度。拖曳中間把手後線條從直線變為二次貝茲曲線（Quadratic Bezier）。對齊 FastStone UX 模式，不新增額外工具。
+
+#### 資料結構
+
+`line` 類型標注新增可選欄位：
+
+```javascript
+{ type: 'line', x1, y1, x2, y2,
+  cx, cy   // 可選；未設定 = 直線，設定後 = 曲線
+}
+```
+
+向下相容：舊標注無 `cx, cy`，渲染為直線不受影響。
+
+#### 三個把手
+
+| id | 位置 | 顏色 | 功能 |
+|----|------|------|------|
+| `p1` | `(x1, y1)` | 白 | 起點 |
+| `p2` | `(x2, y2)` | 白 | 終點 |
+| `curve` | `(cx,cy)` 或幾何中點 | 白（未移動）／綠（已移動）| 曲度 |
+
+#### 渲染邏輯
+
+- `cx` 未設定 → `lineTo(x2, y2)`（直線）
+- `cx` 已設定 → `quadraticCurveTo(cx, cy, x2, y2)`
+
+#### 箭頭方向修正（曲線模式）
+
+| 箭頭 | 角度計算 |
+|------|---------|
+| 起點 | `atan2(cy−y1, cx−x1)` |
+| 終點 | `atan2(y2−cy, x2−cx)` |
+
+曲線模式不做 arrInset trimming，arrowhead 直接畫在端點。
+
+#### TDD 測試案例（v3.34）
+
+- [ ] 選取直線 → 出現 3 個把手，`curve` 把手白色，位在幾何中點
+- [ ] 拖曳 `curve` 把手 → 把手變綠，線條彎曲為二次貝茲曲線
+- [ ] 拖曳 `p1` / `p2` → 線條端點移動，曲線形狀隨之更新
+- [ ] 有箭頭的曲線 → 箭頭跟隨切線方向，不朝向另一端點
+- [ ] 拖曳整條曲線（move drag）→ 三個控制點一起平移，形狀不變
+- [ ] 舊有直線（無 cx/cy）→ 正常渲染，`curve` 把手顯示白色
+
+---
 
 ### v3.33 — 智慧磁吸對齊（Smart Snap Alignment）
 
@@ -3433,6 +3623,19 @@ Menu.buildFromTemplate([{
 - 截圖邏輯（`screencapture` / `CGWindowID`）改以 Rust command 呼叫，IPC 介面維持相同語意，前端呼叫端改動最小化。
 - Sharp 影像處理改用 Tauri 的 Rust image crate 或保留 Node sidecar，視 bundle 體積評估決定。
 - `localStorage` 用於儲存偏好設定的邏輯不變（Tauri WebView 支援 localStorage）。
+
+#### 遷移後新增功能排程
+
+以下功能刻意保留至 Tauri 版本再實作，避免在遷移前引入額外複雜度：
+
+| 功能 | 原因 |
+|------|------|
+| **物件旋轉（Rotation）** | 點擊偵測需反向旋轉座標系，改動範圍大；Tauri 後 canvas 渲染邏輯更穩定再加 |
+| **截圖歷史（Screenshot History）** | Electron 下 temp 檔生命週期不可靠、縮圖快取與 IPC 有時序問題；Tauri 用 `tauri-plugin-store` + `std::fs` 管理後生命週期可完全控制 |
+| **移除拖曳匯出浮水印** | Tauri 版為付費產品，不需要 VAS 浮水印；移除匯出時的浮水印疊加邏輯 |
+| **工具列拖曳把手 hover 回饋** | Electron 的 `-webkit-app-region: drag` 吃掉所有 pointer events，CSS `:hover` 與 `cursor: grab` 在 drag region 上完全無效；Tauri 使用原生視窗拖曳 API，可對把手元素單獨設定懸停樣式與游標 |
+
+> 旋轉的渲染核心：每個標注新增 `angle` 欄位，選取時顯示旋轉把手，`ctx.save()` → `ctx.translate(cx,cy)` → `ctx.rotate(angle)` → 繪製 → `ctx.restore()`。點擊偵測需將滑鼠座標反向旋轉至物件局部座標系再判斷 hit。
 
 #### 遷移檢查清單（啟動前確認）
 - [ ] Electron 版本所有 TDD 測試案例全部通過

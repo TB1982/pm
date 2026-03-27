@@ -4,7 +4,7 @@ const { contextBridge, ipcRenderer, webUtils } = require('electron')
 const INVOKE_CH = new Set([
   'resize-for-modal', 'resize-to-toolbar', 'open-permission-settings',
   'capture-fullscreen', 'get-window-sources', 'capture-window',
-  'open-overlay', 'open-image-file',
+  'open-overlay', 'open-image-file', 'new-canvas-create',
   'select-batch-files', 'select-output-dir', 'select-watermark-image',
   'batch-convert',
 ])

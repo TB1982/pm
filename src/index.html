@@ -54,6 +54,11 @@
         <span class="tb-label" data-i18n="open">開啟</span>
       </button>
 
+      <button class="tb-btn" id="btnWhiteboard">
+        <span class="tb-icon">⬜</span>
+        <span class="tb-label" data-i18n="whiteboard">白板</span>
+      </button>
+
       <button class="tb-btn" id="btnBatch">
         <span class="tb-icon">🔄</span>
         <span class="tb-label" data-i18n="batch">批次轉</span>
@@ -64,6 +69,11 @@
     <div class="tb-divider"></div>
 
     <button class="tb-help" id="helpBtn" data-i18n-aria="help_title" aria-label="快捷鍵說明">?</button>
+
+    <div class="tb-drag-handle" aria-hidden="true">
+      <span></span><span></span><span></span>
+      <span></span><span></span><span></span>
+    </div>
   </div>
 
   <!-- Keyboard shortcut help modal -->
@@ -323,6 +333,72 @@
   </div>
 
   <div class="toast" id="toast"></div>
+
+  <!-- New canvas modal -->
+  <div class="modal-overlay hidden" id="newCanvasModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 data-i18n="newcanvas_title">新開畫布</h2>
+        <button class="modal-close" id="newCanvasModalClose">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="nc-fields">
+          <div class="nc-row">
+            <span class="nc-lbl" data-i18n="newcanvas_preset">預設尺寸</span>
+            <select id="newCanvasPreset" class="nc-select">
+              <option value="custom" data-i18n="newcanvas_custom">自訂</option>
+              <optgroup label="螢幕">
+                <option value="1280x720">HD（1280 × 720）</option>
+                <option value="1920x1080">Full HD（1920 × 1080）</option>
+                <option value="2560x1440">2K（2560 × 1440）</option>
+                <option value="3840x2160">4K（3840 × 2160）</option>
+              </optgroup>
+              <optgroup label="紙張（72 dpi）">
+                <option value="595x842">A4 直（595 × 842）</option>
+                <option value="842x595">A4 橫（842 × 595）</option>
+                <option value="842x1191">A3 直（842 × 1191）</option>
+                <option value="1191x842">A3 橫（1191 × 842）</option>
+              </optgroup>
+              <optgroup label="社群媒體（建議尺寸）">
+                <option value="1080x1080">IG 貼文 1:1（1080 × 1080）</option>
+                <option value="1080x1350">IG 貼文 4:5（1080 × 1350）</option>
+                <option value="1080x1920">IG / TikTok Story 9:16（1080 × 1920）</option>
+                <option value="1200x630">Facebook 貼文（1200 × 630）</option>
+                <option value="1600x900">X / Twitter（1600 × 900）</option>
+                <option value="1200x627">LinkedIn（1200 × 627）</option>
+                <option value="1280x720">YouTube 縮圖（1280 × 720）</option>
+              </optgroup>
+              <optgroup label="其他">
+                <option value="1000x1000">正方形（1000 × 1000）</option>
+                <option value="800x600">800 × 600</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="nc-row">
+            <span class="nc-lbl" data-i18n="resize_width">寬度</span>
+            <input type="number" id="newCanvasW" min="1" max="99999" value="1920" class="nc-input">
+            <span class="nc-unit">px</span>
+          </div>
+          <div class="nc-row">
+            <span class="nc-lbl" data-i18n="resize_height">高度</span>
+            <input type="number" id="newCanvasH" min="1" max="99999" value="1080" class="nc-input">
+            <span class="nc-unit">px</span>
+          </div>
+          <div class="nc-row">
+            <span class="nc-lbl" data-i18n="newcanvas_bg">背景顏色</span>
+            <div class="nc-bg-row">
+              <input type="color" id="newCanvasBg" value="#ffffff" class="nc-color">
+              <button class="nc-trans-btn" id="newCanvasTrans" data-i18n="newcanvas_transparent">透明</button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" id="btnNewCanvasCancel" data-i18n="resize_cancel">取消</button>
+          <button class="btn-primary" id="btnNewCanvasOk" data-i18n="newcanvas_create">建立</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script src="i18n.js"></script>
   <script src="renderer.js"></script>

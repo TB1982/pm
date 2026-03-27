@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <title>Vas</title>
+  <title>VAS</title>
   <link rel="stylesheet" href="editor.css">
 <style>
 /* ─── Drag & Drop Import Overlay ───────────────────────── */
@@ -386,6 +386,106 @@
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+/* ─── Action Toast ───────────────────────────────────── */
+.action-toast {
+  position: fixed;
+  bottom: 72px; left: 50%; transform: translateX(-50%);
+  z-index: 4000;
+  display: flex; align-items: center; gap: 12px;
+  background: #1e2030;
+  border: 1px solid #4a4a7a;
+  border-radius: 10px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.55);
+  padding: 10px 14px;
+  min-width: 300px; max-width: 520px;
+  animation: actionToastIn 0.2s ease;
+}
+.action-toast.hidden { display: none; }
+@keyframes actionToastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+.action-toast-msg {
+  flex: 1;
+  font-size: 13px; color: #c8d0e8;
+  line-height: 1.4;
+  word-break: break-all;
+}
+.action-toast-btns {
+  display: flex; gap: 6px; flex-shrink: 0;
+}
+.action-toast-btn-primary {
+  font-size: 12px; font-weight: 600;
+  padding: 5px 14px;
+  background: #5b5ef4; border: none;
+  border-radius: 6px; color: #fff; cursor: pointer;
+  transition: background 0.1s;
+}
+.action-toast-btn-primary:hover { background: #6f72ff; }
+.action-toast-btn-secondary {
+  font-size: 12px; padding: 5px 12px;
+  background: #2a2a48; border: 1px solid #3a3a5c;
+  border-radius: 6px; color: #a0a8c0; cursor: pointer;
+  transition: background 0.1s;
+}
+.action-toast-btn-secondary:hover { background: #363658; color: #d0d8f0; }
+
+/* ─── Open Menu dropdown ─────────────────────────────── */
+.open-menu-popup {
+  position: fixed;
+  z-index: 3000;
+  background: #1e2030;
+  border: 1px solid #3a3a5c;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  padding: 4px 0;
+  min-width: 128px;
+}
+.open-menu-popup.hidden { display: none; }
+.open-menu-item {
+  display: block; width: 100%;
+  padding: 8px 16px;
+  font-size: 13px; font-weight: 500;
+  color: #c8d0e8;
+  background: none; border: none;
+  text-align: left; cursor: pointer;
+  transition: background 0.1s;
+}
+.open-menu-item:hover { background: #2a2a48; color: #fff; }
+
+/* ─── New Canvas modal extras ────────────────────────── */
+.newcanvas-select {
+  flex: 1;
+  min-width: 0;
+  max-width: 100%;
+  background: #1a1a2e;
+  border: 1px solid #3a3a5c;
+  border-radius: 6px;
+  color: #c8d0e8;
+  font-size: 13px;
+  padding: 4px 8px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+.newcanvas-select:focus { outline: none; border-color: #6b6baa; }
+.newcanvas-bg-row {
+  display: flex; align-items: center; gap: 8px;
+}
+.newcanvas-color-input {
+  width: 36px; height: 28px;
+  border: 1px solid #3a3a5c; border-radius: 4px;
+  padding: 0 2px; cursor: pointer;
+  background: none;
+}
+.newcanvas-trans-btn {
+  font-size: 12px; padding: 4px 10px;
+  background: #1e2030; border: 1px solid #3a3a5c;
+  border-radius: 5px; color: #a0a8c0; cursor: pointer;
+  transition: background 0.1s, border-color 0.1s;
+}
+.newcanvas-trans-btn:hover  { background: #2a2a48; border-color: #6b6baa; color: #d0d8f0; }
+.newcanvas-trans-btn.active { background: #2a2a48; border-color: #7c7ccc; color: #fff; }
 </style>
 </head>
 <body>
@@ -394,8 +494,7 @@
 
   <!-- Titlebar -->
   <div class="editor-titlebar">
-    <span class="editor-title">Vas</span>
-    <span class="img-info" id="imgInfo"></span>
+    <span class="editor-title">VAS</span>
   </div>
 
   <!-- Options bar -->
@@ -739,6 +838,13 @@
       <label class="shadow-lbl"><input type="checkbox" id="chkAlignToCanvas"> <span>對齊中線</span></label>
     </div>
 
+    <!-- 鏡射工具（選取時顯示） -->
+    <div class="opt-group hidden" id="grpFlip">
+      <div class="opt-sep"></div>
+      <button class="style-btn" id="btnFlipH" title="水平鏡射" data-i18n-title="opt_flip_h">↔</button>
+      <button class="style-btn" id="btnFlipV" title="垂直鏡射" data-i18n-title="opt_flip_v">↕</button>
+    </div>
+
     <!-- 馬賽克工具 -->
     <div class="opt-group hidden" id="grpMosaic">
       <div class="mosaic-mode-group">
@@ -837,6 +943,7 @@
   <!-- Bottom bar -->
   <div class="editor-bottombar">
     <span class="zoom-label" id="zoomLabel">100%</span>
+    <span class="img-info" id="imgInfo"></span>
     <div class="flex-spacer"></div>
     <button class="copy-btn" id="btnCopyImage" title="複製最終圖片到剪貼簿 (⌘⇧C)" data-i18n="btn_copy" data-i18n-title="btn_copy_title">複製</button>
     <button class="save-btn" id="btnSave" data-i18n="btn_save">完成並儲存</button>
@@ -952,6 +1059,15 @@
 
 <!-- Toast -->
 <div class="toast" id="toast"></div>
+
+<!-- Action Toast (QR / interactive) -->
+<div class="action-toast hidden" id="actionToast">
+  <span class="action-toast-msg" id="actionToastMsg"></span>
+  <div class="action-toast-btns">
+    <button class="action-toast-btn-primary" id="actionToastConfirm"></button>
+    <button class="action-toast-btn-secondary" id="actionToastDismiss" data-i18n="action_toast_dismiss">略過</button>
+  </div>
+</div>
 
 <!-- OCR download confirmation modal -->
 <div class="modal-overlay hidden" id="ocrDownloadModal">

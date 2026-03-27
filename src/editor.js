@@ -332,7 +332,7 @@ function hideAllOptions() {
    'grpLineStyle','grpPenBorder','grpStrokeBorder','grpDashStyle',
    'grpCaps','grpRadius','grpFont','grpNumber','grpStrokeOpacity',
    'grpShadow','grpZoom','grpCrop','grpOcr','grpBoxSelect',
-   'grpMosaic','grpSymbol','grpPrivacyMask','grpAlign'].forEach(id => {
+   'grpMosaic','grpSymbol','grpPrivacyMask','grpAlign','grpFlip'].forEach(id => {
     const el = document.getElementById(id)
     if (el) el.classList.add('hidden')
   })
@@ -344,6 +344,7 @@ function hideAllOptions() {
 function showAlignOptions() {
   hideAllOptions()
   document.getElementById('grpAlign').classList.remove('hidden')
+  document.getElementById('grpFlip').classList.remove('hidden')
   const n = selectedIds.size
   document.getElementById('btnDistributeH').disabled = n < 3
   document.getElementById('btnDistributeV').disabled = n < 3
@@ -500,7 +501,12 @@ function _startDrag(pos) {
   const ids = selectedIds.size > 0 ? [...selectedIds] : (selectedId ? [selectedId] : [])
   ids.forEach(id => {
     const a = annotations.find(x => x.id === id)
-    if (a) dragStartStates[id] = { x: a.x, y: a.y, x2: a.x2, y2: a.y2 }
+    if (!a) return
+    if (a.type === 'line') {
+      dragStartStates[id] = { x1: a.x1, y1: a.y1, x2: a.x2, y2: a.y2, cx: a.cx, cy: a.cy }
+    } else {
+      dragStartStates[id] = { x: a.x, y: a.y, x2: a.x2, y2: a.y2 }
+    }
   })
 }
 
@@ -595,6 +601,22 @@ document.getElementById('btnAlignVCenter')?.addEventListener('click', () => _ali
 document.getElementById('btnAlignBottom')?.addEventListener('click',  () => _alignSelectedAnnots('bottom'))
 document.getElementById('btnDistributeH')?.addEventListener('click',  () => _alignSelectedAnnots('distributeH'))
 document.getElementById('btnDistributeV')?.addEventListener('click',  () => _alignSelectedAnnots('distributeV'))
+
+// ── Flip buttons ──────────────────────────────────────────────────────────────
+function _applyFlip(axis) {
+  const targets = selectedIds.size > 0
+    ? [...selectedIds].map(id => annotations.find(a => a.id === id)).filter(Boolean)
+    : selectedId ? [annotations.find(a => a.id === selectedId)].filter(Boolean) : []
+  if (targets.length === 0) return
+  targets.forEach(a => {
+    if (axis === 'h') a.flipX = !a.flipX
+    else              a.flipY = !a.flipY
+  })
+  pushHistory()
+  renderAnnotations()
+}
+document.getElementById('btnFlipH')?.addEventListener('click', () => _applyFlip('h'))
+document.getElementById('btnFlipV')?.addEventListener('click', () => _applyFlip('v'))
 
 function showOptionsForTool(tool) {
   hideAllOptions()
@@ -855,6 +877,7 @@ function showOptionsForAnnot(a) {
     mosaicBlurRadius= a.blurRadius ?? 8
     sh('grpMosaic')
     syncMosaicUI()
+    sh('grpFlip')
     return
   }
   if (t === 'symbol') {
@@ -864,8 +887,10 @@ function showOptionsForAnnot(a) {
     sh('grpColor'); sh('grpSymbol'); sh('grpShadow')
     syncSymbolUI()
     syncShadowCheck(a.shadow ?? false)
+    sh('grpFlip')
     return
   }
+  sh('grpFlip')
 }
 
 // Sync UI controls
@@ -2515,11 +2540,25 @@ function drawSymbol(ctx, a) {
   ctx.restore()
 }
 
+// Apply flipX/flipY transform around annotation bounding-box centre
+function _applyFlipTransform(ctx, a) {
+  if (!a.flipX && !a.flipY) return
+  const b = bounds(a)
+  const fcx = c(b.x + b.w / 2)
+  const fcy = c(b.y + b.h / 2)
+  ctx.translate(fcx, fcy)
+  ctx.scale(a.flipX ? -1 : 1, a.flipY ? -1 : 1)
+  ctx.translate(-fcx, -fcy)
+}
+
 function drawOne(ctx, a) {
   if (a.type === 'img') {
     const img = getImg(a)
     if (img.complete && img.naturalWidth > 0) {
+      ctx.save()
+      _applyFlipTransform(ctx, a)
       ctx.drawImage(img, c(a.x), c(a.y), c(a.w), c(a.h))
+      ctx.restore()
     }
     return
   }
@@ -2537,6 +2576,7 @@ function drawOne(ctx, a) {
     octx.strokeStyle = a.color
     octx.fillStyle   = a.color
     octx.lineWidth   = a.thickness * viewScale
+    _applyFlipTransform(octx, a)
     const fullA = a.type === 'pen'
       ? { ...a, penOpacity: 100 }
       : { ...a, opacity: 100 }
@@ -2556,6 +2596,7 @@ function drawOne(ctx, a) {
   ctx.strokeStyle = a.color
   ctx.fillStyle   = a.color
   ctx.lineWidth   = a.thickness * viewScale
+  _applyFlipTransform(ctx, a)
   switch (a.type) {
     case 'rect':     drawRect(ctx, a);     break
     case 'ellipse':  drawEllipse(ctx, a);  break
@@ -2729,9 +2770,11 @@ function drawFillEllipse(ctx, a) {
 
 function drawLine(ctx, a) {
   const x1 = c(a.x1), y1 = c(a.y1), x2 = c(a.x2), y2 = c(a.y2)
+  const isCurved = (a.cx !== undefined && a.cy !== undefined)
+  const qcx = isCurved ? c((a.x1 + a.x2) / 2 + a.cx) : null
+  const qcy = isCurved ? c((a.y1 + a.y2) / 2 + a.cy) : null
   const sz  = (a.thickness * 4 + 8) * viewScale
   const hasBorder = !!(a.lineBorderColor && a.lineBorderColor !== 'transparent')
-  // capBorderW: full stroke width → outer half acts as the visible border ring
   const capBorderW = hasBorder ? ((a.borderThickness ?? a.thickness + 4) - a.thickness) * viewScale * 2 : 0
   const capBorderCol = hasBorder ? a.lineBorderColor : null
 
@@ -2739,13 +2782,14 @@ function drawLine(ctx, a) {
   ctx.globalAlpha = (a.opacity ?? 100) / 100
   ctx.lineCap = capToLineCap(a.startCap, a.endCap)
 
-  // Trim stroke at arrow endpoints so the line body stops at the arrow base (not the tip),
-  // eliminating the square butt-cap that would otherwise poke through the triangle tip.
   const ang      = Math.atan2(y2 - y1, x2 - x1)
-  const arrInset = sz * 0.8   // ≈ sz × |cos(2.5)|  (distance tip→base of arrow)
+  const arrInset = sz * 0.8
   let sx1 = x1, sy1 = y1, sx2 = x2, sy2 = y2
-  if (a.startCap === 'arrow') { sx1 += Math.cos(ang) * arrInset; sy1 += Math.sin(ang) * arrInset }
-  if (a.endCap   === 'arrow') { sx2 -= Math.cos(ang) * arrInset; sy2 -= Math.sin(ang) * arrInset }
+  if (!isCurved) {
+    // Trim straight line body so it stops at arrow base (not tip)
+    if (a.startCap === 'arrow') { sx1 += Math.cos(ang) * arrInset; sy1 += Math.sin(ang) * arrInset }
+    if (a.endCap   === 'arrow') { sx2 -= Math.cos(ang) * arrInset; sy2 -= Math.sin(ang) * arrInset }
+  }
 
   // Border stroke body
   if (hasBorder) {
@@ -2753,7 +2797,10 @@ function drawLine(ctx, a) {
     ctx.strokeStyle = a.lineBorderColor
     ctx.lineWidth   = (a.borderThickness ?? a.thickness + 4) * viewScale
     ctx.setLineDash(getLineDash(a.borderDashStyle ?? a.lineStyle, sz))
-    ctx.beginPath(); ctx.moveTo(sx1, sy1); ctx.lineTo(sx2, sy2); ctx.stroke()
+    ctx.beginPath(); ctx.moveTo(sx1, sy1)
+    if (isCurved) ctx.quadraticCurveTo(qcx, qcy, x2, y2)
+    else          ctx.lineTo(sx2, sy2)
+    ctx.stroke()
     ctx.setLineDash([])
     ctx.restore()
     ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0
@@ -2762,12 +2809,20 @@ function drawLine(ctx, a) {
   // Main stroke body
   ctx.beginPath()
   ctx.setLineDash(getLineDash(a.lineStyle, sz))
-  ctx.moveTo(sx1, sy1); ctx.lineTo(sx2, sy2); ctx.stroke()
+  ctx.moveTo(sx1, sy1)
+  if (isCurved) ctx.quadraticCurveTo(qcx, qcy, x2, y2)
+  else          ctx.lineTo(sx2, sy2)
+  ctx.stroke()
   ctx.setLineDash([])
 
-  // Caps: single call — strokes border outline first, then fills main colour
-  drawCap(ctx, a.startCap, x2, y2, x1, y1, a.color, sz, capBorderCol, capBorderW)
-  drawCap(ctx, a.endCap,   x1, y1, x2, y2, a.color, sz, capBorderCol, capBorderW)
+  // Caps: curved lines use control point as tangent reference
+  if (isCurved) {
+    drawCap(ctx, a.startCap, qcx, qcy, x1, y1, a.color, sz, capBorderCol, capBorderW)
+    drawCap(ctx, a.endCap,   qcx, qcy, x2, y2, a.color, sz, capBorderCol, capBorderW)
+  } else {
+    drawCap(ctx, a.startCap, x2, y2, x1, y1, a.color, sz, capBorderCol, capBorderW)
+    drawCap(ctx, a.endCap,   x1, y1, x2, y2, a.color, sz, capBorderCol, capBorderW)
+  }
 }
 
 // borderCol / borderW: if set, stroke the cap path in border colour BEFORE filling in col.
@@ -3160,9 +3215,14 @@ function getHandles(a) {
     ]
   }
   if (a.type === 'line') {
+    const midX = (a.x1 + a.x2) / 2
+    const midY = (a.y1 + a.y2) / 2
+    const cx = midX + (a.cx ?? 0)
+    const cy = midY + (a.cy ?? 0)
     return [
-      { id: 'p1', x: a.x1, y: a.y1, cursor: 'crosshair' },
-      { id: 'p2', x: a.x2, y: a.y2, cursor: 'crosshair' },
+      { id: 'p1',    x: a.x1, y: a.y1, cursor: 'crosshair' },
+      { id: 'p2',    x: a.x2, y: a.y2, cursor: 'crosshair' },
+      { id: 'curve', x: cx,   y: cy,   cursor: 'crosshair', curveMoved: a.cx !== undefined },
     ]
   }
   if (a.type === 'number') {
@@ -3327,8 +3387,9 @@ function applyResize(a, pos) {
     a.h = Math.max(Math.abs(y2 - y1), 2)
   }
   if (a.type === 'line') {
-    if (h.id === 'p1') { a.x1 = pos.x; a.y1 = pos.y }
-    if (h.id === 'p2') { a.x2 = pos.x; a.y2 = pos.y }
+    if (h.id === 'p1')    { a.x1 = pos.x; a.y1 = pos.y }
+    if (h.id === 'p2')    { a.x2 = pos.x; a.y2 = pos.y }
+    if (h.id === 'curve') { a.cx = pos.x - (a.x1 + a.x2) / 2; a.cy = pos.y - (a.y1 + a.y2) / 2 }
   }
   if (a.type === 'number') {
     const d = Math.max(Math.abs(pos.x - h.cx), Math.abs(pos.y - h.cy))
@@ -3382,7 +3443,7 @@ function drawSelection(ctx, a) {
   // Handles
   getHandles(a).forEach(h => {
     ctx.save()
-    ctx.fillStyle   = '#ffffff'
+    ctx.fillStyle   = (h.id === 'curve' && h.curveMoved) ? '#00cc44' : '#ffffff'
     ctx.strokeStyle = '#4a9eff'
     ctx.lineWidth   = 1.5
     ctx.setLineDash([])
@@ -3553,8 +3614,10 @@ function bounds(a) {
     case 'img':    return { x: a.x, y: a.y, w: a.w, h: a.h }
     case 'symbol': { const { hw, ascent, descent } = measureSymbol(a.char ?? '★', a.size ?? 64); return { x: a.x - hw, y: a.y - ascent, w: hw * 2, h: ascent + descent } }
     case 'line': {
-      const minX = Math.min(a.x1,a.x2), maxX = Math.max(a.x1,a.x2)
-      const minY = Math.min(a.y1,a.y2), maxY = Math.max(a.y1,a.y2)
+      const xs = [a.x1, a.x2]; if (a.cx !== undefined) xs.push((a.x1 + a.x2) / 2 + a.cx)
+      const ys = [a.y1, a.y2]; if (a.cy !== undefined) ys.push((a.y1 + a.y2) / 2 + a.cy)
+      const minX = Math.min(...xs), maxX = Math.max(...xs)
+      const minY = Math.min(...ys), maxY = Math.max(...ys)
       return { x:minX, y:minY, w:Math.max(maxX-minX,1), h:Math.max(maxY-minY,1) }
     }
     case 'text': {
@@ -3930,10 +3993,16 @@ annotCanvas.addEventListener('mousemove', e => {
     draggedAnnots.forEach(a => {
       const s = dragStartStates[a.id]
       if (!s) return
-      a.x = s.x + totalDx
-      a.y = s.y + totalDy
-      if (s.x2 !== undefined) a.x2 = s.x2 + totalDx
-      if (s.y2 !== undefined) a.y2 = s.y2 + totalDy
+      if (a.type === 'line') {
+        a.x1 = s.x1 + totalDx; a.y1 = s.y1 + totalDy
+        a.x2 = s.x2 + totalDx; a.y2 = s.y2 + totalDy
+        if (s.cx !== undefined) { a.cx = s.cx; a.cy = s.cy }
+      } else {
+        a.x = s.x + totalDx
+        a.y = s.y + totalDy
+        if (s.x2 !== undefined) a.x2 = s.x2 + totalDx
+        if (s.y2 !== undefined) a.y2 = s.y2 + totalDy
+      }
     })
 
     // Apply snap (skip if Alt held)
@@ -4193,7 +4262,9 @@ function moveAnnot(a, dx, dy) {
     case 'text':
     case 'number':
     case 'symbol': a.x += dx; a.y += dy; break
-    case 'line':     a.x1 += dx; a.y1 += dy; a.x2 += dx; a.y2 += dy; break
+    case 'line':
+      a.x1 += dx; a.y1 += dy; a.x2 += dx; a.y2 += dy
+      break
     case 'polyline':
     case 'pen':      a.points.forEach(p => { p.x += dx; p.y += dy }); break
   }
@@ -5664,6 +5735,51 @@ async function runPrivacyScan(region) {
   showToast(t('toast_privacy_done', boxes.length))
   setTool('select')  // auto-switch so user can immediately drag resize handles on any generated mosaic
 }
+
+// ─── Action Toast (QR code prompt) ───────────────────────────────────────────
+
+const _actionToast       = document.getElementById('actionToast')
+const _actionToastMsg    = document.getElementById('actionToastMsg')
+const _actionToastConfirm  = document.getElementById('actionToastConfirm')
+const _actionToastDismiss  = document.getElementById('actionToastDismiss')
+let   _actionToastOnConfirm = null
+
+function showActionToast(msg, confirmLabel, onConfirm) {
+  _actionToastMsg.textContent = msg
+  _actionToastConfirm.textContent = confirmLabel
+  _actionToastOnConfirm = onConfirm
+  _actionToast.classList.remove('hidden')
+}
+
+function hideActionToast() {
+  _actionToast.classList.add('hidden')
+  _actionToastOnConfirm = null
+}
+
+_actionToastConfirm.addEventListener('click', () => {
+  if (_actionToastOnConfirm) _actionToastOnConfirm()
+  hideActionToast()
+})
+_actionToastDismiss.addEventListener('click', hideActionToast)
+
+// Listen for QR code detection from main process (21–69% ratio)
+if (window.electronAPI) {
+  window.electronAPI.on('qr-detected', ({ data, ratio, isUrl }) => {
+    if (isUrl) {
+      showActionToast(
+        t('qr_toast_msg', data),
+        t('qr_toast_open'),
+        () => window.electronAPI.invoke('open-url', data)
+      )
+    } else {
+      // Non-URL QR (text, vCard, etc.) — copy to clipboard + regular toast
+      window.electronAPI.clipboard.writeText(data)
+      showToast(t('qr_toast_copied'))
+    }
+  })
+}
+
+// ─── Open Menu (新開畫布 / 開啟檔案) ────────────────────────────────────────
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
 

@@ -5,8 +5,9 @@ const INVOKE_CH = new Set([
   'save-image-as', 'get-brand-colors', 'save-brand-colors',
   'ocr-recognize', 'privacy-scan',
   'clipboard-write-text', 'clipboard-write-image', 'clipboard-clear',
+  'open-url',
 ])
-const ON_CH = new Set(['load-image', 'ocr-progress'])
+const ON_CH = new Set(['load-image', 'ocr-progress', 'qr-detected'])
 const SEND_CH = new Set(['close-editor-window', 'start-drag-export'])
 
 // Map user-land callbacks → wrapped callbacks (for removeListener)

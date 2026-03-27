@@ -56,6 +56,10 @@ body {
   font-size: 11px;
   color: #555;
   font-family: 'SF Mono', 'Menlo', monospace;
+  margin-left: 10px;
+}
+.editor-bottombar .img-info {
+  color: #555;
 }
 
 /* ─── Options bar ────────────────────────────────────────────────────────── */

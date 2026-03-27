@@ -12,6 +12,7 @@ const STRINGS = {
     region: '矩形',
     delay: '延遲',
     open: '開啟',
+    whiteboard: '白板',
     batch: '批次轉',
     esc_cancel: 'Esc 取消',
 
@@ -205,6 +206,7 @@ const STRINGS = {
     tool_zoom_out: '縮小 (⌘-)',
     tool_fit: '適合視窗 (⌘0)',
     tool_crop: '裁切 (C)',
+    tool_open_menu: '開啟 / 新畫布',
     tool_resize: '調整大小 (S)',
     tool_extend: '延伸畫布 (E)',
     tool_overlay: '疊入圖片 (O)',
@@ -222,6 +224,21 @@ const STRINGS = {
     btn_copy: '複製',
     btn_copy_title: '複製最終圖片到剪貼簿 (⌘⇧C)',
     btn_save: '完成並儲存',
+
+    // ── Flip ─────────────────────────────────────────────────────
+    opt_flip_h: '水平鏡射',
+    opt_flip_v: '垂直鏡射',
+
+    // ── Open menu & New Canvas modal ─────────────────────────────
+    open_menu_new: '新開畫布',
+    open_menu_file: '開啟檔案',
+    newcanvas_title: '新開畫布',
+    newcanvas_preset: '預設尺寸',
+    newcanvas_custom: '自訂',
+    newcanvas_bg: '背景顏色',
+    newcanvas_transparent: '透明',
+    newcanvas_create: '建立',
+    toast_new_canvas: (w, h) => `已建立 ${w} × ${h} 畫布`,
 
     // ── Resize modal ─────────────────────────────────────────────
     resize_title: '調整尺寸',
@@ -324,6 +341,10 @@ const STRINGS = {
     toast_img_copied: '圖片已複製到剪貼簿',
     toast_drop_images: '請拖曳圖片檔案（PNG / JPG / WebP / GIF）',
     toast_imported: (name) => `已匯入：${name}`,
+    qr_toast_msg: (url) => `偵測到 QR Code：${url}`,
+    qr_toast_open: '開啟',
+    qr_toast_copied: 'QR Code 內容已複製到剪貼簿',
+    action_toast_dismiss: '略過',
   },
 
   en: {
@@ -333,6 +354,7 @@ const STRINGS = {
     region: 'Region',
     delay: 'Delay',
     open: 'Open',
+    whiteboard: 'Canvas',
     batch: 'Batch',
     esc_cancel: 'Esc cancel',
 
@@ -526,6 +548,7 @@ const STRINGS = {
     tool_zoom_out: 'Zoom Out (⌘-)',
     tool_fit: 'Fit to Window (⌘0)',
     tool_crop: 'Crop (C)',
+    tool_open_menu: 'Open / New Canvas',
     tool_resize: 'Resize (S)',
     tool_extend: 'Extend Canvas (E)',
     tool_overlay: 'Overlay Image (O)',
@@ -543,6 +566,21 @@ const STRINGS = {
     btn_copy: 'Copy',
     btn_copy_title: 'Copy to Clipboard (⌘⇧C)',
     btn_save: 'Save',
+
+    // ── Flip ─────────────────────────────────────────────────────
+    opt_flip_h: 'Flip Horizontal',
+    opt_flip_v: 'Flip Vertical',
+
+    // ── Open menu & New Canvas modal ─────────────────────────────
+    open_menu_new: 'New Canvas',
+    open_menu_file: 'Open File',
+    newcanvas_title: 'New Canvas',
+    newcanvas_preset: 'Preset',
+    newcanvas_custom: 'Custom',
+    newcanvas_bg: 'Background',
+    newcanvas_transparent: 'Transparent',
+    newcanvas_create: 'Create',
+    toast_new_canvas: (w, h) => `Canvas created: ${w} × ${h}`,
 
     // ── Resize modal ─────────────────────────────────────────────
     resize_title: 'Resize',
@@ -645,6 +683,10 @@ const STRINGS = {
     toast_img_copied: 'Image copied to clipboard',
     toast_drop_images: 'Drop image files here (PNG / JPG / WebP / GIF)',
     toast_imported: (name) => `Imported: ${name}`,
+    qr_toast_msg: (url) => `QR Code detected: ${url}`,
+    qr_toast_open: 'Open',
+    qr_toast_copied: 'QR Code content copied to clipboard',
+    action_toast_dismiss: 'Dismiss',
   }
 }
 
