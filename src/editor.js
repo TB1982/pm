@@ -626,6 +626,7 @@ function showOptionsForTool(tool) {
   }
   if (tool === 'crop') {
     document.getElementById('grpCrop').classList.remove('hidden')
+    updateCropSizeLabel()
     return
   }
   if (tool === 'ocr') {
@@ -3669,7 +3670,7 @@ annotCanvas.addEventListener('mousedown', e => {
   if (tool === 'crop') {
     if (cropRect) {
       const h = findCropHandle(pos)
-      if (h) { cropResizeH = h.id; return }
+      if (h) { cropResizeH = h.id; cropMoveStart = { pos, origRect: { ...cropRect } }; return }
       if (insideCropRect(pos)) {
         cropMoving    = true
         cropMoveStart = { pos, origRect: { ...cropRect } }
@@ -4091,6 +4092,7 @@ document.addEventListener('mouseup', e => {
 
   if (cropResizeH) {
     cropResizeH = null
+    cropMoveStart = null
     renderAnnotations()
     return
   }
@@ -4105,6 +4107,7 @@ document.addEventListener('mouseup', e => {
   if (isCropping) {
     isCropping = false
     if (!cropRect || cropRect.w < 2 || cropRect.h < 2) cropRect = null
+    updateCropSizeLabel()
     renderAnnotations()
     return
   }
@@ -4540,6 +4543,14 @@ document.addEventListener('keydown', e => {
 
   if (e.key === 'Enter' && tool === 'crop') { e.preventDefault(); confirmCrop(); return }
 
+  if (tool === 'crop' && cropRect && !isCropping) {
+    const step = e.shiftKey ? 10 : 1
+    if (e.key === 'ArrowLeft')  { e.preventDefault(); cropRect = { ...cropRect, x: cropRect.x - step }; updateCropSizeLabel(); renderAnnotations(); return }
+    if (e.key === 'ArrowRight') { e.preventDefault(); cropRect = { ...cropRect, x: cropRect.x + step }; updateCropSizeLabel(); renderAnnotations(); return }
+    if (e.key === 'ArrowUp')    { e.preventDefault(); cropRect = { ...cropRect, y: cropRect.y - step }; updateCropSizeLabel(); renderAnnotations(); return }
+    if (e.key === 'ArrowDown')  { e.preventDefault(); cropRect = { ...cropRect, y: cropRect.y + step }; updateCropSizeLabel(); renderAnnotations(); return }
+  }
+
   switch (e.key) {
     case 'v': case 'V': setTool('select');    break
     case 'm': case 'M': setTool('boxselect'); break
@@ -4658,17 +4669,18 @@ function insideCropRect(pos) {
 }
 
 function applyCropResize(pos) {
-  const { x, y, w, h } = cropRect
+  if (!cropMoveStart) return
+  const { x: ox, y: oy, w: ow, h: oh } = cropMoveStart.origRect
   let x1, y1, x2, y2
   switch (cropResizeH) {
-    case 'nw': x1=pos.x; y1=pos.y; x2=x+w;  y2=y+h;  break
-    case 'n':  x1=x;     y1=pos.y; x2=x+w;  y2=y+h;  break
-    case 'ne': x1=x;     y1=pos.y; x2=pos.x;y2=y+h;  break
-    case 'e':  x1=x;     y1=y;     x2=pos.x;y2=y+h;  break
-    case 'se': x1=x;     y1=y;     x2=pos.x;y2=pos.y; break
-    case 's':  x1=x;     y1=y;     x2=x+w;  y2=pos.y; break
-    case 'sw': x1=pos.x; y1=y;     x2=x+w;  y2=pos.y; break
-    case 'w':  x1=pos.x; y1=y;     x2=x+w;  y2=y+h;  break
+    case 'nw': x1=pos.x; y1=pos.y;    x2=ox+ow; y2=oy+oh; break
+    case 'n':  x1=ox;    y1=pos.y;    x2=ox+ow; y2=oy+oh; break
+    case 'ne': x1=ox;    y1=pos.y;    x2=pos.x; y2=oy+oh; break
+    case 'e':  x1=ox;    y1=oy;       x2=pos.x; y2=oy+oh; break
+    case 'se': x1=ox;    y1=oy;       x2=pos.x; y2=pos.y; break
+    case 's':  x1=ox;    y1=oy;       x2=ox+ow; y2=pos.y; break
+    case 'sw': x1=pos.x; y1=oy;       x2=ox+ow; y2=pos.y; break
+    case 'w':  x1=pos.x; y1=oy;       x2=ox+ow; y2=oy+oh; break
     default: return
   }
   cropRect = {
@@ -4682,8 +4694,9 @@ function applyCropResize(pos) {
 
 function updateCropSizeLabel() {
   const pw = Math.round(cropRect?.w ?? 0), ph = Math.round(cropRect?.h ?? 0)
-  document.getElementById('cropSizeLabel').textContent =
-    pw > 0 && ph > 0 ? `${pw} × ${ph} px` : t('crop_drag')
+  const hasRect = pw > 1 && ph > 1
+  document.getElementById('cropSizeLabel').textContent = hasRect ? `${pw} × ${ph} px` : t('crop_drag')
+  document.getElementById('btnCropConfirm').hidden = !hasRect
 }
 
 // ─── Crop ─────────────────────────────────────────────────────────────────────
@@ -4749,6 +4762,7 @@ function cancelCrop() {
 
 document.getElementById('btnCropConfirm').addEventListener('click', confirmCrop)
 document.getElementById('btnCropCancel').addEventListener('click', cancelCrop)
+annotCanvas.addEventListener('dblclick', () => { if (tool === 'crop' && cropRect) confirmCrop() })
 
 // ─── Box select ───────────────────────────────────────────────────────────────
 
