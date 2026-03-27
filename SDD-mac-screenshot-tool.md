@@ -3636,6 +3636,7 @@ Menu.buildFromTemplate([{
 | **工具列拖曳把手 hover 回饋** | Electron 的 `-webkit-app-region: drag` 吃掉所有 pointer events，CSS `:hover` 與 `cursor: grab` 在 drag region 上完全無效；Tauri 使用原生視窗拖曳 API，可對把手元素單獨設定懸停樣式與游標 |
 | **兩點貝茲曲線（Cubic Bezier）** | 升級為兩個控制點，與免費版單點貝茲做功能區隔；需更新資料模型（cp1/cp2 相對偏移）、渲染（`bezierCurveTo`）、handle 顯示（端點連控制點虛線）、箭頭切線角度計算 |
 | **Share Sheet（系統原生分享）** | 刻意不在 Electron 版實作，作為付費版差異化功能；Tauri 版使用 `tauri-plugin-share` 呼叫 `NSSharingServicePicker` |
+| **線條漸層（Line Gradient Stroke）** | 箭頭 / 曲線支援起點→終點雙色漸層；Canvas 原生 `ctx.createLinearGradient` 即可實作，`strokeStyle` 直接吃 gradient object；貝茲曲線以端點連線方向計算漸層向量 |
 
 > 旋轉的渲染核心：每個標注新增 `angle` 欄位，選取時顯示旋轉把手，`ctx.save()` → `ctx.translate(cx,cy)` → `ctx.rotate(angle)` → 繪製 → `ctx.restore()`。點擊偵測需將滑鼠座標反向旋轉至物件局部座標系再判斷 hit。
 
