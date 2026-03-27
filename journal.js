@@ -561,10 +561,12 @@ backToQuestionsButton.addEventListener("click", () => setStage("question"));
 closeSummaryButton.addEventListener("click", () => {
   summaryShell.classList.add("is-dismissed");
   reopenSummaryButton.classList.add("is-visible");
+  exportButton.hidden = true;
 });
 reopenSummaryButton.addEventListener("click", () => {
   summaryShell.classList.remove("is-dismissed");
   reopenSummaryButton.classList.remove("is-visible");
+  exportButton.hidden = false;
 });
 themeToggle.addEventListener("click", toggleTheme);
 exportButton.addEventListener("click", exportAsPng);
