@@ -552,6 +552,8 @@
         langZhBtn.addEventListener('click', () => switchLanguage('zh'));
         langEnBtn.addEventListener('click', () => switchLanguage('en'));
 
+        switchLanguage('zh'); // 初始化：套用 zh i18n key，確保硬寫內容與翻譯一致
+
         // ── Persona Tab switching ──────────────────────────────────────────────
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
