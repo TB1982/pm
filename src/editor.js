@@ -3796,6 +3796,11 @@ annotCanvas.addEventListener('mousedown', e => {
         const t = returnTool
         returnTool = null
         setTool(t)
+        annotCanvas.dispatchEvent(new MouseEvent('mousedown', {
+          clientX: e.clientX, clientY: e.clientY,
+          button: 0, buttons: 1,
+          shiftKey: e.shiftKey, ctrlKey: e.ctrlKey, metaKey: e.metaKey,
+        }))
         return
       }
       selectedId = null
