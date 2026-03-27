@@ -4697,6 +4697,7 @@ function updateCropSizeLabel() {
   const hasRect = pw > 1 && ph > 1
   document.getElementById('cropSizeLabel').textContent = hasRect ? `${pw} × ${ph} px` : t('crop_drag')
   document.getElementById('btnCropConfirm').hidden = !hasRect
+  document.getElementById('cropDblHint').hidden = !hasRect
 }
 
 // ─── Crop ─────────────────────────────────────────────────────────────────────

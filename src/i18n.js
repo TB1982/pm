@@ -145,6 +145,7 @@ const STRINGS = {
     // ── Crop confirm ─────────────────────────────────────────────
     crop_confirm: '確認裁切',
     crop_cancel: '取消',
+    crop_dbl_hint: '或雙擊',
 
     // ── Crop / OCR / BoxSelect labels ────────────────────────────
     crop_drag: '請拖曳選取範圍',
@@ -488,6 +489,7 @@ const STRINGS = {
     // ── Crop confirm ─────────────────────────────────────────────
     crop_confirm: 'Apply Crop',
     crop_cancel: 'Cancel',
+    crop_dbl_hint: 'or double-click',
 
     // ── Crop / OCR / BoxSelect labels ────────────────────────────
     crop_drag: 'Drag to select crop area',
