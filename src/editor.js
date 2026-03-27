@@ -415,6 +415,7 @@ function _computeSnap(draggedAnnots) {
   }
 
   // Distribute snap: horizontal — find any pair (A, B) where dragged fits with equal gaps
+  let distributeXLines = null
   for (let i = 0; i < others.length; i++) {
     for (let j = 0; j < others.length; j++) {
       if (i === j) continue
@@ -426,12 +427,15 @@ function _computeSnap(draggedAnnots) {
       const snap_gx0  = (A.x + A.w) + equal_gap
       const delta = snap_gx0 - gx0
       if (Math.abs(delta) < threshold && (bestDx === null || Math.abs(delta) < Math.abs(bestDx))) {
-        bestDx = delta; snapX = snap_gx0; snapXType = 'distribute'
+        bestDx = delta; snapXType = 'distribute'
+        // four lines: A's right edge, dragged left, dragged right, B's left edge
+        distributeXLines = [A.x + A.w, snap_gx0, snap_gx0 + gw, B.x]
       }
     }
   }
 
   // Distribute snap: vertical — same logic for Y
+  let distributeYLines = null
   for (let i = 0; i < others.length; i++) {
     for (let j = 0; j < others.length; j++) {
       if (i === j) continue
@@ -443,14 +447,23 @@ function _computeSnap(draggedAnnots) {
       const snap_gy0  = (A.y + A.h) + equal_gap
       const delta = snap_gy0 - gy0
       if (Math.abs(delta) < threshold && (bestDy === null || Math.abs(delta) < Math.abs(bestDy))) {
-        bestDy = delta; snapY = snap_gy0; snapYType = 'distribute'
+        bestDy = delta; snapYType = 'distribute'
+        distributeYLines = [A.y + A.h, snap_gy0, snap_gy0 + gh, B.y]
       }
     }
   }
 
   const guides = []
-  if (snapX !== null) guides.push({ axis: 'x', value: snapX, type: snapXType })
-  if (snapY !== null) guides.push({ axis: 'y', value: snapY, type: snapYType })
+  if (snapXType === 'distribute' && distributeXLines) {
+    guides.push({ axis: 'x', type: 'distribute', lines: distributeXLines })
+  } else if (snapX !== null) {
+    guides.push({ axis: 'x', value: snapX, type: snapXType })
+  }
+  if (snapYType === 'distribute' && distributeYLines) {
+    guides.push({ axis: 'y', type: 'distribute', lines: distributeYLines })
+  } else if (snapY !== null) {
+    guides.push({ axis: 'y', value: snapY, type: snapYType })
+  }
 
   return { dx: bestDx ?? 0, dy: bestDy ?? 0, guides }
 }
@@ -2200,20 +2213,35 @@ function renderAnnotations() {
     annotCtx.save()
     annotCtx.lineWidth = 1
     snapGuides.forEach(g => {
-      // distribute: shorter dash + slightly more transparent; edge/center: longer dash
-      annotCtx.strokeStyle = g.type === 'distribute'
-        ? 'rgba(255, 45, 85, 0.45)'
-        : 'rgba(255, 45, 85, 0.65)'
-      annotCtx.setLineDash(g.type === 'distribute' ? [3, 4] : [6, 4])
-      annotCtx.beginPath()
-      if (g.axis === 'x') {
-        annotCtx.moveTo(c(g.value), 0)
-        annotCtx.lineTo(c(g.value), annotCanvas.height)
+      if (g.type === 'distribute') {
+        // Four lines bracketing the two equal gaps
+        annotCtx.strokeStyle = 'rgba(255, 45, 85, 0.45)'
+        annotCtx.setLineDash([3, 4])
+        g.lines.forEach(v => {
+          annotCtx.beginPath()
+          if (g.axis === 'x') {
+            annotCtx.moveTo(c(v), 0)
+            annotCtx.lineTo(c(v), annotCanvas.height)
+          } else {
+            annotCtx.moveTo(0, c(v))
+            annotCtx.lineTo(annotCanvas.width, c(v))
+          }
+          annotCtx.stroke()
+        })
       } else {
-        annotCtx.moveTo(0, c(g.value))
-        annotCtx.lineTo(annotCanvas.width, c(g.value))
+        // Single edge/center guide line
+        annotCtx.strokeStyle = 'rgba(255, 45, 85, 0.65)'
+        annotCtx.setLineDash([6, 4])
+        annotCtx.beginPath()
+        if (g.axis === 'x') {
+          annotCtx.moveTo(c(g.value), 0)
+          annotCtx.lineTo(c(g.value), annotCanvas.height)
+        } else {
+          annotCtx.moveTo(0, c(g.value))
+          annotCtx.lineTo(annotCanvas.width, c(g.value))
+        }
+        annotCtx.stroke()
       }
-      annotCtx.stroke()
     })
     annotCtx.restore()
   }
