@@ -193,6 +193,7 @@ Code changes and document updates should be **committed in the same session**. U
 - Most pages implement a **bilingual toggle** (`中` / `EN`) via JavaScript.
 - Translation strings are stored inline using `data-lang-key` attributes and a JS translation map.
 - When editing content, maintain both language variants unless instructed otherwise.
+- **Use `臺` not `台`** — always write `臺灣`, `臺北`, `臺中`, etc. This is the author's explicit preference and the orthographically correct Traditional Chinese form. Never silently substitute `台`.
 
 ### Styling
 - **Tailwind CSS utility classes** are the primary styling mechanism.
