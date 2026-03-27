@@ -456,7 +456,8 @@ kbd {
   transition: border-color 0.15s, background 0.15s;
 }
 
-.batch-dropzone.drag-over {
+.batch-dropzone.drag-over,
+.batch-filelist.drag-over {
   border-color: #4a9eff;
   background: rgba(74,158,255,0.08);
 }
@@ -481,6 +482,9 @@ kbd {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  border: 2px dashed transparent;
+  border-radius: 8px;
+  transition: border-color 150ms, background 150ms;
 }
 
 .filelist-scroll {
