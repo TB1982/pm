@@ -224,6 +224,10 @@ const STRINGS = {
     btn_copy_title: '複製最終圖片到剪貼簿 (⌘⇧C)',
     btn_save: '完成並儲存',
 
+    // ── Flip ─────────────────────────────────────────────────────
+    opt_flip_h: '水平鏡射',
+    opt_flip_v: '垂直鏡射',
+
     // ── Open menu & New Canvas modal ─────────────────────────────
     open_menu_new: '新開畫布',
     open_menu_file: '開啟檔案',
@@ -560,6 +564,10 @@ const STRINGS = {
     btn_copy: 'Copy',
     btn_copy_title: 'Copy to Clipboard (⌘⇧C)',
     btn_save: 'Save',
+
+    // ── Flip ─────────────────────────────────────────────────────
+    opt_flip_h: 'Flip Horizontal',
+    opt_flip_v: 'Flip Vertical',
 
     // ── Open menu & New Canvas modal ─────────────────────────────
     open_menu_new: 'New Canvas',

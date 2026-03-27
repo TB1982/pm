@@ -332,7 +332,7 @@ function hideAllOptions() {
    'grpLineStyle','grpPenBorder','grpStrokeBorder','grpDashStyle',
    'grpCaps','grpRadius','grpFont','grpNumber','grpStrokeOpacity',
    'grpShadow','grpZoom','grpCrop','grpOcr','grpBoxSelect',
-   'grpMosaic','grpSymbol','grpPrivacyMask','grpAlign'].forEach(id => {
+   'grpMosaic','grpSymbol','grpPrivacyMask','grpAlign','grpFlip'].forEach(id => {
     const el = document.getElementById(id)
     if (el) el.classList.add('hidden')
   })
@@ -344,6 +344,7 @@ function hideAllOptions() {
 function showAlignOptions() {
   hideAllOptions()
   document.getElementById('grpAlign').classList.remove('hidden')
+  document.getElementById('grpFlip').classList.remove('hidden')
   const n = selectedIds.size
   document.getElementById('btnDistributeH').disabled = n < 3
   document.getElementById('btnDistributeV').disabled = n < 3
@@ -600,6 +601,22 @@ document.getElementById('btnAlignVCenter')?.addEventListener('click', () => _ali
 document.getElementById('btnAlignBottom')?.addEventListener('click',  () => _alignSelectedAnnots('bottom'))
 document.getElementById('btnDistributeH')?.addEventListener('click',  () => _alignSelectedAnnots('distributeH'))
 document.getElementById('btnDistributeV')?.addEventListener('click',  () => _alignSelectedAnnots('distributeV'))
+
+// ── Flip buttons ──────────────────────────────────────────────────────────────
+function _applyFlip(axis) {
+  const targets = selectedIds.size > 0
+    ? [...selectedIds].map(id => annotations.find(a => a.id === id)).filter(Boolean)
+    : selectedId ? [annotations.find(a => a.id === selectedId)].filter(Boolean) : []
+  if (targets.length === 0) return
+  targets.forEach(a => {
+    if (axis === 'h') a.flipX = !a.flipX
+    else              a.flipY = !a.flipY
+  })
+  pushHistory()
+  renderAnnotations()
+}
+document.getElementById('btnFlipH')?.addEventListener('click', () => _applyFlip('h'))
+document.getElementById('btnFlipV')?.addEventListener('click', () => _applyFlip('v'))
 
 function showOptionsForTool(tool) {
   hideAllOptions()
@@ -860,6 +877,7 @@ function showOptionsForAnnot(a) {
     mosaicBlurRadius= a.blurRadius ?? 8
     sh('grpMosaic')
     syncMosaicUI()
+    sh('grpFlip')
     return
   }
   if (t === 'symbol') {
@@ -869,8 +887,10 @@ function showOptionsForAnnot(a) {
     sh('grpColor'); sh('grpSymbol'); sh('grpShadow')
     syncSymbolUI()
     syncShadowCheck(a.shadow ?? false)
+    sh('grpFlip')
     return
   }
+  sh('grpFlip')
 }
 
 // Sync UI controls
@@ -2520,11 +2540,25 @@ function drawSymbol(ctx, a) {
   ctx.restore()
 }
 
+// Apply flipX/flipY transform around annotation bounding-box centre
+function _applyFlipTransform(ctx, a) {
+  if (!a.flipX && !a.flipY) return
+  const b = bounds(a)
+  const fcx = c(b.x + b.w / 2)
+  const fcy = c(b.y + b.h / 2)
+  ctx.translate(fcx, fcy)
+  ctx.scale(a.flipX ? -1 : 1, a.flipY ? -1 : 1)
+  ctx.translate(-fcx, -fcy)
+}
+
 function drawOne(ctx, a) {
   if (a.type === 'img') {
     const img = getImg(a)
     if (img.complete && img.naturalWidth > 0) {
+      ctx.save()
+      _applyFlipTransform(ctx, a)
       ctx.drawImage(img, c(a.x), c(a.y), c(a.w), c(a.h))
+      ctx.restore()
     }
     return
   }
@@ -2542,6 +2576,7 @@ function drawOne(ctx, a) {
     octx.strokeStyle = a.color
     octx.fillStyle   = a.color
     octx.lineWidth   = a.thickness * viewScale
+    _applyFlipTransform(octx, a)
     const fullA = a.type === 'pen'
       ? { ...a, penOpacity: 100 }
       : { ...a, opacity: 100 }
@@ -2561,6 +2596,7 @@ function drawOne(ctx, a) {
   ctx.strokeStyle = a.color
   ctx.fillStyle   = a.color
   ctx.lineWidth   = a.thickness * viewScale
+  _applyFlipTransform(ctx, a)
   switch (a.type) {
     case 'rect':     drawRect(ctx, a);     break
     case 'ellipse':  drawEllipse(ctx, a);  break
