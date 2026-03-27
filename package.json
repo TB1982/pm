@@ -7,8 +7,8 @@
   "scripts": {
     "start": "electron .",
     "test:window": "electron test-window-capture.js",
-    "build": "set CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder --win nsis",
-    "build:mac": "electron-builder --mac dmg"
+    "build": "electron-builder --mac dmg",
+    "build:mac:signed": "electron-builder --mac dmg"
   },
   "devDependencies": {
     "electron": "^41.0.0",
@@ -43,9 +43,7 @@
       "gatekeeperAssess": false,
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.inherit.plist",
-      "notarize": {
-        "teamId": "FILL_IN_AFTER_ENROLLMENT"
-      }
+      "notarize": false
     }
   }
 }
