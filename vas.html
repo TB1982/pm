@@ -263,6 +263,7 @@
                     <div class="feat-item"><span class="feat-icon" aria-hidden="true">文</span><div><div class="feat-name" data-lang-key="qa5n">OCR 文字辨識</div><div class="feat-desc" data-lang-key="qa5d">截圖裡的錯誤訊息一鍵掃成可編輯文字，直接貼進 Jira</div></div></div>
                     <div class="feat-item"><span class="feat-icon" aria-hidden="true">📋</span><div><div class="feat-name" data-lang-key="qa6n">一鍵複製 + 拖曳匯出</div><div class="feat-desc" data-lang-key="qa6d">標注完畢直接貼進 Slack、Notion、Confluence，或拖入附件區</div></div></div>
                     <div class="feat-item"><span class="feat-icon" aria-hidden="true">✂️</span><div><div class="feat-name" data-lang-key="qa7n">區域 / 視窗截圖</div><div class="feat-desc" data-lang-key="qa7d">精準框選問題區域，或只截特定視窗，不含桌面雜訊</div></div></div>
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">⏱</span><div><div class="feat-name" data-lang-key="qa8n">延遲截圖</div><div class="feat-desc" data-lang-key="qa8d">設定 1–3 秒延遲，補抓 tooltip、dropdown、hover 狀態等稍縱即逝的 UI 畫面</div></div></div>
                 </div>
             </div>
 
@@ -402,13 +403,14 @@
                 tabPM: '📋 PM / 跨職能協作',
                 tabDev: '💻 開發者 / DevOps',
                 qaTagline: '截圖要給人看，但截圖裡有不能給人看的東西',
-                qa1n: '隱私遮蔽', qa1d: '自動偵測並遮蔽 IP、Email、電話、身分證、信用卡、API Token、密碼等十餘種敏感資料',
+                qa1n: '隱私遮蔽', qa1d: '自動偵測並遮蔽 IP、Email、電話、身分證、信用卡、API Token、密碼等十餘種敏感資料；已完成繁體中文場景特化（姓名、中華民國格式電話、身分證字號等）',
                 qa2n: '馬賽克 / 模糊', qa2d: '手動框選任意區域打碼，區塊大小可調，支援模糊模式',
                 qa3n: '編號步驟印章', qa3d: '替截圖貼上序號，Bug Report 的步驟說明一目了然',
                 qa4n: '矩形紅框標注', qa4d: '老牌必備，圈出問題區域；支援圓角、描邊顏色、陰影',
                 qa5n: 'OCR 文字辨識', qa5d: '截圖裡的錯誤訊息一鍵掃成可編輯文字，直接貼進 Jira',
                 qa6n: '一鍵複製 + 拖曳匯出', qa6d: '標注完畢直接貼進 Slack、Notion、Confluence，或拖入附件區',
                 qa7n: '區域 / 視窗截圖', qa7d: '精準框選問題區域，或只截特定視窗，不含桌面雜訊',
+                qa8n: '延遲截圖', qa8d: '設定 1–3 秒延遲，補抓 tooltip、dropdown、hover 狀態等稍縱即逝的 UI 畫面',
                 designTagline: '截圖只是素材，我還要在上面做事',
                 d1n: '新開畫布', d1d: 'A4、Full HD、IG 貼文、YouTube 縮圖等預設尺寸一鍵開啟，不用再手動計算像素',
                 d2n: '填色塊（漸層 / 透明）', d2d: '矩形 / 橢圓色塊，支援雙色漸層、透明度，快速鋪底色',
@@ -428,7 +430,7 @@
                 pm7n: '批次截圖', pm7d: '一次截多個視窗或區域，適合製作多頁說明文件',
                 pm8n: '疊入圖片', pm8d: '把 wireframe、設計稿或 logo 疊進截圖，一張圖說清楚',
                 devTagline: '截圖含伺服器資訊，對外分享前需要清理',
-                dev1n: '隱私遮蔽（伺服器資訊）', dev1d: '自動偵測 IPv4 / IPv6、API Token、伺服器路徑、統一編號，截圖對外安全',
+                dev1n: '隱私遮蔽（伺服器資訊）', dev1d: '自動偵測 IPv4 / IPv6、API Token、伺服器路徑、統一編號，截圖對外安全；已完成繁體中文場景特化',
                 dev2n: 'OCR 文字辨識', dev2d: '把 terminal log 截圖轉成可搜尋文字，方便貼進 issue 或 ticket',
                 dev3n: '馬賽克 / 模糊', dev3d: '手動遮蔽自動偵測沒抓到的特定欄位或自訂格式敏感資料',
                 dev4n: 'QR Code 掃描', dev4d: '截 deploy 產出的 QR code 直接驗證跳轉，不需要拿手機',
@@ -471,13 +473,14 @@
                 tabPM: '📋 PMs / Cross-team',
                 tabDev: '💻 Developers / DevOps',
                 qaTagline: 'Screenshots go out, but some things in them can\'t',
-                qa1n: 'Privacy Mask', qa1d: 'Auto-detect and redact IPs, emails, phone numbers, IDs, credit cards, API tokens, passwords, and more',
+                qa1n: 'Privacy Mask', qa1d: 'Auto-detect and redact IPs, emails, phone numbers, IDs, credit cards, API tokens, passwords, and more — with Traditional Chinese locale support (TW ID format, phone patterns, names)',
                 qa2n: 'Mosaic / Blur', qa2d: 'Manually redact any region; adjustable block size, supports blur mode',
                 qa3n: 'Numbered Step Stamps', qa3d: 'Label screenshots with step numbers — make bug reports self-explanatory',
                 qa4n: 'Rectangle Annotation', qa4d: 'The classic red box; supports rounded corners, border colour, drop shadow',
                 qa5n: 'OCR Text Recognition', qa5d: 'Scan error messages in screenshots into copyable text — paste straight into Jira',
                 qa6n: 'Copy + Drag Export', qa6d: 'Paste annotated screenshots into Slack, Notion, or Confluence, or drag to any attachment field',
                 qa7n: 'Region / Window Capture', qa7d: 'Precisely select an area, or capture a specific window — no desktop clutter',
+                qa8n: 'Delayed Capture', qa8d: 'Set a 1–3 second delay to capture tooltips, dropdowns, hover states, and other transient UI moments',
                 designTagline: 'A screenshot is just raw material — I need to work on it',
                 d1n: 'New Canvas', d1d: 'One-click presets for A4, Full HD, IG posts, YouTube thumbnails — no pixel math needed',
                 d2n: 'Fill Shapes (Gradient / Alpha)', d2d: 'Rect and ellipse fills with dual-colour gradients and opacity control',
@@ -497,7 +500,7 @@
                 pm7n: 'Batch Capture', pm7d: 'Capture multiple windows or regions in sequence — perfect for multi-page documents',
                 pm8n: 'Overlay Image', pm8d: 'Drop a wireframe, design mockup, or logo into a screenshot — one image tells the whole story',
                 devTagline: 'Screenshots contain server info — clean them before sharing',
-                dev1n: 'Privacy Mask (Server Info)', dev1d: 'Auto-detect IPv4 / IPv6, API tokens, server paths, and registration numbers — safe to share externally',
+                dev1n: 'Privacy Mask (Server Info)', dev1d: 'Auto-detect IPv4 / IPv6, API tokens, server paths, and registration numbers — safe to share externally; Traditional Chinese locale support included',
                 dev2n: 'OCR Text Recognition', dev2d: 'Convert terminal log screenshots into searchable text — paste straight into issues or tickets',
                 dev3n: 'Mosaic / Blur', dev3d: 'Manually redact fields that auto-detection misses or custom-format sensitive data',
                 dev4n: 'QR Code Scan', dev4d: 'Frame a deployment QR code and jump straight to the URL — no phone needed',
