@@ -504,6 +504,7 @@ body {
   font-weight: 500;
   padding: 8px 20px;
   transition: background 0.15s;
+  margin-left: 8px;
 }
 
 .save-btn:hover { background: #0070e0; }
