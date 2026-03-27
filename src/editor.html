@@ -387,6 +387,50 @@
   cursor: not-allowed;
 }
 
+/* ─── Action Toast ───────────────────────────────────── */
+.action-toast {
+  position: fixed;
+  bottom: 72px; left: 50%; transform: translateX(-50%);
+  z-index: 4000;
+  display: flex; align-items: center; gap: 12px;
+  background: #1e2030;
+  border: 1px solid #4a4a7a;
+  border-radius: 10px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.55);
+  padding: 10px 14px;
+  min-width: 300px; max-width: 520px;
+  animation: actionToastIn 0.2s ease;
+}
+.action-toast.hidden { display: none; }
+@keyframes actionToastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+.action-toast-msg {
+  flex: 1;
+  font-size: 13px; color: #c8d0e8;
+  line-height: 1.4;
+  word-break: break-all;
+}
+.action-toast-btns {
+  display: flex; gap: 6px; flex-shrink: 0;
+}
+.action-toast-btn-primary {
+  font-size: 12px; font-weight: 600;
+  padding: 5px 14px;
+  background: #5b5ef4; border: none;
+  border-radius: 6px; color: #fff; cursor: pointer;
+  transition: background 0.1s;
+}
+.action-toast-btn-primary:hover { background: #6f72ff; }
+.action-toast-btn-secondary {
+  font-size: 12px; padding: 5px 12px;
+  background: #2a2a48; border: 1px solid #3a3a5c;
+  border-radius: 6px; color: #a0a8c0; cursor: pointer;
+  transition: background 0.1s;
+}
+.action-toast-btn-secondary:hover { background: #363658; color: #d0d8f0; }
+
 /* ─── Open Menu dropdown ─────────────────────────────── */
 .open-menu-popup {
   position: fixed;
@@ -1085,6 +1129,15 @@
 
 <!-- Toast -->
 <div class="toast" id="toast"></div>
+
+<!-- Action Toast (QR / interactive) -->
+<div class="action-toast hidden" id="actionToast">
+  <span class="action-toast-msg" id="actionToastMsg"></span>
+  <div class="action-toast-btns">
+    <button class="action-toast-btn-primary" id="actionToastConfirm"></button>
+    <button class="action-toast-btn-secondary" id="actionToastDismiss" data-i18n="action_toast_dismiss">略過</button>
+  </div>
+</div>
 
 <!-- OCR download confirmation modal -->
 <div class="modal-overlay hidden" id="ocrDownloadModal">

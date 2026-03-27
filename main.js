@@ -9,6 +9,7 @@ const path = require('path')
 const fs   = require('fs')
 const os   = require('os')
 const sharp = require('sharp')
+const jsQR  = require('jsqr')
 
 const execAsync = promisify(exec)
 
@@ -101,7 +102,8 @@ function createWindow() {
 // scaleFactor: the display's scaleFactor at capture time (1 = normal, 2 = Retina).
 // Pass it explicitly when known (avoids unreliable metadata reads).
 // When null, fall back to Sharp density metadata.
-function openEditorWindow(imagePath, scaleFactor = null) {
+// extra: optional { qr: { data, ratio, isUrl } } — sent after load-image
+function openEditorWindow(imagePath, scaleFactor = null, extra = null) {
   const win = new BrowserWindow({
     width: 1280,
     height: 820,
@@ -137,7 +139,13 @@ function openEditorWindow(imagePath, scaleFactor = null) {
       } catch (_) {}
     }
     win.webContents.send('load-image', { path: imagePath, imgDPR })
+    if (extra?.qr) {
+      // Slight delay so editor has time to process load-image before showing toast
+      setTimeout(() => win.webContents.send('qr-detected', extra.qr), 300)
+    }
   })
+
+  return win
 }
 
 // ─── IPC: modal resize ────────────────────────────────────────────────────────
@@ -198,6 +206,7 @@ ipcMain.on('close-editor-window', (event) => {
 })
 
 // Clipboard (handled in main process to avoid contextBridge serialisation issues)
+ipcMain.handle('open-url', (_, url) => { shell.openExternal(url) })
 ipcMain.handle('clipboard-write-text', (_, text) => { clipboard.writeText(text) })
 ipcMain.handle('clipboard-write-image', (_, dataURL) => {
   clipboard.writeImage(nativeImage.createFromDataURL(dataURL))
@@ -684,6 +693,28 @@ ipcMain.handle('open-overlay', async () => {
   })
 })
 
+// ─── QR code detection helper ─────────────────────────────────────────────────
+
+// Returns { data, ratio } or null.
+// ratio = (QR bounding-box area) / (total image area) * 100
+async function detectQR(imagePath, imgW, imgH) {
+  try {
+    const { data, info } = await sharp(imagePath)
+      .ensureAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true })
+    const result = jsQR(new Uint8ClampedArray(data.buffer), info.width, info.height)
+    if (!result) return null
+    const loc = result.location
+    const xs = [loc.topLeftCorner.x, loc.topRightCorner.x, loc.bottomRightCorner.x, loc.bottomLeftCorner.x]
+    const ys = [loc.topLeftCorner.y, loc.topRightCorner.y, loc.bottomRightCorner.y, loc.bottomLeftCorner.y]
+    const qrW = Math.max(...xs) - Math.min(...xs)
+    const qrH = Math.max(...ys) - Math.min(...ys)
+    const ratio = (qrW * qrH) / (info.width * info.height) * 100
+    return { data: result.data, ratio }
+  } catch (_) { return null }
+}
+
 // ─── IPC: capture cropped rect ────────────────────────────────────────────────
 
 ipcMain.handle('capture-rect', async (event, rect) => {
@@ -704,6 +735,33 @@ ipcMain.handle('capture-rect', async (event, rect) => {
     clipboard.writeImage(image)
     const { width, height } = image.getSize()
     const captureDisplay = screen.getDisplayNearestPoint({ x: gx + gw / 2, y: gy + gh / 2 })
+
+    // ── QR code detection ──────────────────────────────────────────────────────
+    const qr = await detectQR(tmpPath, gw, gh)
+    if (qr) {
+      const isUrl = /^https?:\/\//i.test(qr.data)
+      if (qr.ratio >= 70) {
+        // Intentional scan — open URL directly, skip editor
+        if (isUrl) {
+          shell.openExternal(qr.data)
+        } else {
+          clipboard.writeText(qr.data)
+          mainWindow.show(); mainWindow.focus()
+        }
+        mainWindow.webContents.send('capture-result', { success: true, path: tmpPath, width, height })
+        return
+      }
+      if (qr.ratio >= 21) {
+        // Ambiguous — open editor + action toast prompt
+        openEditorWindow(tmpPath, captureDisplay.scaleFactor, {
+          qr: { data: qr.data, ratio: Math.round(qr.ratio), isUrl }
+        })
+        mainWindow.webContents.send('capture-result', { success: true, path: tmpPath, width, height })
+        return
+      }
+      // ratio < 21 — incidental QR, open editor silently (fall through)
+    }
+    // ── Normal flow ────────────────────────────────────────────────────────────
     openEditorWindow(tmpPath, captureDisplay.scaleFactor)
     mainWindow.webContents.send('capture-result', { success: true, path: tmpPath, width, height })
   } catch (err) {

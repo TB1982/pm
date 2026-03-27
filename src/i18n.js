@@ -336,6 +336,10 @@ const STRINGS = {
     toast_img_copied: '圖片已複製到剪貼簿',
     toast_drop_images: '請拖曳圖片檔案（PNG / JPG / WebP / GIF）',
     toast_imported: (name) => `已匯入：${name}`,
+    qr_toast_msg: (url) => `偵測到 QR Code：${url}`,
+    qr_toast_open: '開啟',
+    qr_toast_copied: 'QR Code 內容已複製到剪貼簿',
+    action_toast_dismiss: '略過',
   },
 
   en: {
@@ -669,6 +673,10 @@ const STRINGS = {
     toast_img_copied: 'Image copied to clipboard',
     toast_drop_images: 'Drop image files here (PNG / JPG / WebP / GIF)',
     toast_imported: (name) => `Imported: ${name}`,
+    qr_toast_msg: (url) => `QR Code detected: ${url}`,
+    qr_toast_open: 'Open',
+    qr_toast_copied: 'QR Code content copied to clipboard',
+    action_toast_dismiss: 'Dismiss',
   }
 }
 

@@ -1,8 +1,54 @@
 # SDD：Mac 截圖與圖片編輯工具
-**版本：** 3.35
+**版本：** 3.36
 **日期：** 2026-03-27
 **狀態：** 待審閱
 **變更紀錄：**
+
+### v3.36 — QR Code 智慧掃描
+
+#### 功能概述
+
+區域截圖完成後，自動使用 `jsQR` 掃描圖片內是否包含 QR code。依 QR code 佔截圖面積比例，觸發三種行為。
+
+#### 比例判斷邏輯
+
+| QR 佔比 | 行為 |
+|---------|------|
+| ≥ 70% | 判定為刻意掃碼。若為 URL 直接呼叫 `shell.openExternal`，**不開編輯器**；若為純文字則複製到剪貼簿 |
+| 21–69% | 判定為模糊意圖。開啟編輯器並顯示 Action Toast，讓使用者決定是否開啟 |
+| ≤ 20% | 判定為截圖順帶包含 QR，靜默開啟編輯器 |
+
+#### 技術實作
+
+- **函式庫**：`jsqr@^1.4.0`（純 JS，無原生依賴）
+- **偵測節點**：`main.js` 的 `capture-rect` IPC handler，於 `captureGlobalRect` 之後執行
+- **像素取得**：`sharp(imagePath).ensureAlpha().raw().toBuffer()` → 傳入 `jsQR(Uint8ClampedArray, w, h)`
+- **面積比例**：QR 四角點 bounding box 面積 ÷ 圖片總面積 × 100
+- **IPC**：新增 `qr-detected`（main → editor renderer）、`open-url`（editor → main）
+
+#### Action Toast
+
+Action Toast 為帶按鈕的互動式提示，不自動消失：
+- 訊息：`偵測到 QR Code：<url>`
+- 按鈕：「開啟」（紫色主要按鈕）／「略過」（次要按鈕）
+- 點「開啟」→ `invoke('open-url', url)` → `shell.openExternal`
+
+#### 非 URL QR code（21–69% 區間）
+
+純文字 QR（名片 vCard、WiFi 設定等）→ 複製到剪貼簿 + 一般 toast 提示。
+
+#### TDD 測試案例（v3.36）
+
+- [ ] QR code 佔比 ≥ 70%，URL 類型 → 直接開瀏覽器，不開編輯器
+- [ ] QR code 佔比 ≥ 70%，純文字類型 → 複製到剪貼簿，不開編輯器
+- [ ] QR code 佔比 21–69% → 開編輯器 + Action Toast 顯示 URL
+- [ ] Action Toast 點「開啟」→ 開啟對應網頁
+- [ ] Action Toast 點「略過」→ toast 消失，編輯器正常使用
+- [ ] QR code 佔比 ≤ 20% → 靜默開編輯器，不顯示任何 QR 提示
+- [ ] 截圖範圍內無 QR code → 正常流程，不影響效能
+- [ ] 非 URL QR（21–69%）→ 複製到剪貼簿 + toast，不顯示 Action Toast URL
+
+---
 
 ### v3.35 — 新開畫布 / 開啟檔案
 

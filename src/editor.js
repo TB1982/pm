@@ -5699,6 +5699,49 @@ async function runPrivacyScan(region) {
   setTool('select')  // auto-switch so user can immediately drag resize handles on any generated mosaic
 }
 
+// ─── Action Toast (QR code prompt) ───────────────────────────────────────────
+
+const _actionToast       = document.getElementById('actionToast')
+const _actionToastMsg    = document.getElementById('actionToastMsg')
+const _actionToastConfirm  = document.getElementById('actionToastConfirm')
+const _actionToastDismiss  = document.getElementById('actionToastDismiss')
+let   _actionToastOnConfirm = null
+
+function showActionToast(msg, confirmLabel, onConfirm) {
+  _actionToastMsg.textContent = msg
+  _actionToastConfirm.textContent = confirmLabel
+  _actionToastOnConfirm = onConfirm
+  _actionToast.classList.remove('hidden')
+}
+
+function hideActionToast() {
+  _actionToast.classList.add('hidden')
+  _actionToastOnConfirm = null
+}
+
+_actionToastConfirm.addEventListener('click', () => {
+  if (_actionToastOnConfirm) _actionToastOnConfirm()
+  hideActionToast()
+})
+_actionToastDismiss.addEventListener('click', hideActionToast)
+
+// Listen for QR code detection from main process (21–69% ratio)
+if (window.electronAPI) {
+  window.electronAPI.on('qr-detected', ({ data, ratio, isUrl }) => {
+    if (isUrl) {
+      showActionToast(
+        t('qr_toast_msg', data),
+        t('qr_toast_open'),
+        () => window.electronAPI.invoke('open-url', data)
+      )
+    } else {
+      // Non-URL QR (text, vCard, etc.) — copy to clipboard + regular toast
+      window.electronAPI.clipboard.writeText(data)
+      showToast(t('qr_toast_copied'))
+    }
+  })
+}
+
 // ─── Open Menu (新開畫布 / 開啟檔案) ────────────────────────────────────────
 
 const _openMenuPopup    = document.getElementById('openMenuPopup')
