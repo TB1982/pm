@@ -1,6 +1,6 @@
 {
   "name": "vas",
-  "version": "0.1.0",
+  "version": "3.37.0",
   "author": "Nova <babelon1882@gmail.com>",
   "description": "VAS — capture, frame, and share with ease",
   "main": "main.js",
