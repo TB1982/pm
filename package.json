@@ -37,7 +37,7 @@
     "buildDependenciesFromSource": false,
     "mac": {
       "category": "public.app-category.graphics-design",
-      "icon": "img/vas.png",
+      "icon": "img/vasweb.png",
       "target": "dmg",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
