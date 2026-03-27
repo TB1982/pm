@@ -191,15 +191,13 @@
             </p>
 
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <a href="https://github.com/TB1982/pm/releases/download/v0.1.0/Vas-0.1.0-arm64.dmg"
-                   class="download-btn inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-semibold text-white text-lg min-h-[52px]"
-                   aria-label="下載 VAS v0.1.0 for Mac (Apple Silicon, DMG 格式)">
+                <span class="download-btn inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-semibold text-white/40 text-lg min-h-[52px] cursor-default select-none" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);" aria-disabled="true">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
                         <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
                         <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
                     </svg>
-                    <span data-lang-key="downloadBtn">下載 for Mac</span>
-                </a>
+                    <span data-lang-key="downloadBtn">Coming Soon</span>
+                </span>
                 <a href="https://github.com/TB1982/pm/releases/tag/v0.1.0"
                    target="_blank" rel="noopener noreferrer"
                    class="inline-flex items-center gap-2 px-6 py-4 rounded-2xl font-medium text-white/70 hover:text-white transition-colors min-h-[52px]"
@@ -216,17 +214,6 @@
                 需要 macOS · Apple Silicon (arm64) · 113 MB
             </p>
 
-            <!-- Gatekeeper Notice -->
-            <div class="mt-8 mx-auto max-w-lg rounded-2xl px-6 py-5 text-left" style="background: rgba(196,113,245,0.08); border: 1px solid rgba(196,113,245,0.2);">
-                <p class="text-sm font-semibold text-white/70 mb-3" data-lang-key="gkTitle">⚠️ 第一次開啟 VAS</p>
-                <p class="text-xs text-white/45 mb-3" data-lang-key="gkDesc">
-                    macOS 可能顯示「無法開啟」。這是正常的安全機制，不代表檔案有問題。按照以下任一方式即可解決：
-                </p>
-                <ol class="text-xs text-white/55 space-y-1.5 list-decimal list-inside" data-lang-key="gkSteps">
-                    <li><strong class="text-white/70">右鍵開啟：</strong>在 Finder 找到 Vas.app → 按住 Control 點一下 → 選「開啟」→ 再點「開啟」確認</li>
-                    <li><strong class="text-white/70">終端機指令：</strong>執行 <code class="bg-white/10 px-1.5 py-0.5 rounded text-white/80">xattr -cr /Applications/Vas.app</code></li>
-                </ol>
-            </div>
         </section>
 
         <!-- About -->
@@ -402,7 +389,7 @@
                 badge: 'Mac 專屬 · v0.1.0 正式發布',
                 heroSubtitle: 'Visual Annotation Studio',
                 heroTagline: '為跨領域溝通而生的截圖與圖像敘述工具',
-                downloadBtn: '下載 for Mac',
+                downloadBtn: 'Coming Soon',
                 releaseNotesBtn: 'Release Notes',
                 sysReq: '需要 macOS · Apple Silicon (arm64) · 113 MB',
                 aboutTitle: '關於 VAS',
@@ -449,7 +436,7 @@
                 dev6n: '區域截圖', dev6d: '只截 console 或特定視窗區域，不截入桌面其他視窗的機密資訊',
                 toolbarLabel: '截圖工具列',
                 storyTitle: 'Origin',
-                storyBody: '來自一位<strong class="text-white">一行程式碼都不會寫的 PM</strong>，<br>以及 Claude Code 的 Claude，<br>人機協作 <strong class="gradient-text text-2xl font-bold">36 小時</strong>內迭代至 v3.26 而誕生的作品。',
+                storyBody: '來自一位<strong class="text-white">一行程式碼都不會寫的 PM</strong>，<br>以及 Claude Code 的 Claude，<br>人機協作 <strong class="gradient-text text-2xl font-bold">一週</strong>內迭代至 v3.37 而誕生的作品。',
                 storyByline: '— Nova & Claude，2026',
                 footer: '由 GitHub 部署　｜　Claude Code 傾力打造　｜　<a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a> 最後更新於 2026',
                 gkTitle: '⚠️ 第一次開啟 VAS',
@@ -471,7 +458,7 @@
                 badge: 'Mac Only · v0.1.0 Now Available',
                 heroSubtitle: 'Visual Annotation Studio',
                 heroTagline: 'A screenshot and visual communication tool, built for Mac.',
-                downloadBtn: 'Download for Mac',
+                downloadBtn: 'Coming Soon',
                 releaseNotesBtn: 'Release Notes',
                 sysReq: 'Requires macOS · Apple Silicon (arm64) · 113 MB',
                 aboutTitle: 'About VAS',
@@ -518,7 +505,7 @@
                 dev6n: 'Region Capture', dev6d: 'Capture only the console or a specific window — no other windows\' confidential data in frame',
                 toolbarLabel: 'Capture Toolbar',
                 storyTitle: 'Origin',
-                storyBody: 'Born from a collaboration between <strong class="text-white">a PM who can\'t write a single line of code</strong> and Claude from Claude Code —<br>iterated together to v3.26 in <strong class="gradient-text text-2xl font-bold">36 hours</strong>.',
+                storyBody: 'Born from a collaboration between <strong class="text-white">a PM who can\'t write a single line of code</strong> and Claude from Claude Code —<br>iterated together to v3.37 in <strong class="gradient-text text-2xl font-bold">one week</strong>.',
                 storyByline: '— Nova & Claude, 2026',
                 footer: 'Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by <a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a>',
                 gkTitle: '⚠️ First time opening VAS',
