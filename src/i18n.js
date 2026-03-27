@@ -205,6 +205,7 @@ const STRINGS = {
     tool_zoom_out: '縮小 (⌘-)',
     tool_fit: '適合視窗 (⌘0)',
     tool_crop: '裁切 (C)',
+    tool_open_menu: '開啟 / 新畫布',
     tool_resize: '調整大小 (S)',
     tool_extend: '延伸畫布 (E)',
     tool_overlay: '疊入圖片 (O)',
@@ -222,6 +223,17 @@ const STRINGS = {
     btn_copy: '複製',
     btn_copy_title: '複製最終圖片到剪貼簿 (⌘⇧C)',
     btn_save: '完成並儲存',
+
+    // ── Open menu & New Canvas modal ─────────────────────────────
+    open_menu_new: '新開畫布',
+    open_menu_file: '開啟檔案',
+    newcanvas_title: '新開畫布',
+    newcanvas_preset: '預設尺寸',
+    newcanvas_custom: '自訂',
+    newcanvas_bg: '背景顏色',
+    newcanvas_transparent: '透明',
+    newcanvas_create: '建立',
+    toast_new_canvas: (w, h) => `已建立 ${w} × ${h} 畫布`,
 
     // ── Resize modal ─────────────────────────────────────────────
     resize_title: '調整尺寸',
@@ -526,6 +538,7 @@ const STRINGS = {
     tool_zoom_out: 'Zoom Out (⌘-)',
     tool_fit: 'Fit to Window (⌘0)',
     tool_crop: 'Crop (C)',
+    tool_open_menu: 'Open / New Canvas',
     tool_resize: 'Resize (S)',
     tool_extend: 'Extend Canvas (E)',
     tool_overlay: 'Overlay Image (O)',
@@ -543,6 +556,17 @@ const STRINGS = {
     btn_copy: 'Copy',
     btn_copy_title: 'Copy to Clipboard (⌘⇧C)',
     btn_save: 'Save',
+
+    // ── Open menu & New Canvas modal ─────────────────────────────
+    open_menu_new: 'New Canvas',
+    open_menu_file: 'Open File',
+    newcanvas_title: 'New Canvas',
+    newcanvas_preset: 'Preset',
+    newcanvas_custom: 'Custom',
+    newcanvas_bg: 'Background',
+    newcanvas_transparent: 'Transparent',
+    newcanvas_create: 'Create',
+    toast_new_canvas: (w, h) => `Canvas created: ${w} × ${h}`,
 
     // ── Resize modal ─────────────────────────────────────────────
     resize_title: 'Resize',
