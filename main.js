@@ -122,6 +122,7 @@ function openEditorWindow(imagePath, scaleFactor = null) {
     editorWindows = editorWindows.filter(w => !w.isDestroyed())
     if (editorWindows.length === 0) {
       mainWindow.show()
+      mainWindow.focus()
     }
   })
 
@@ -493,7 +494,7 @@ ipcMain.handle('capture-fullscreen', async () => {
       openEditorWindow(tmpPath, displays[0].scaleFactor)
       return { success: true, path: tmpPath, width, height }
     } catch (err) {
-      mainWindow.show()
+      mainWindow.show(); mainWindow.focus()
       if (err.message === 'PERMISSION') return { success: false, needsPermission: true }
       return { success: false, error: err.message }
     }
@@ -569,7 +570,7 @@ ipcMain.handle('capture-selected-screen', async (event) => {
     openEditorWindow(tmpPath, activeEntry.display.scaleFactor)
     mainWindow.webContents.send('capture-result', { success: true, path: tmpPath, width, height })
   } catch (err) {
-    mainWindow.show()
+    mainWindow.show(); mainWindow.focus()
     const needsPermission = err.message === 'PERMISSION'
     mainWindow.webContents.send('capture-result', {
       success: false,
@@ -635,7 +636,7 @@ ipcMain.handle('capture-all-screens-merged', async () => {
     openEditorWindow(stitchedPath, 1)
     mainWindow.webContents.send('capture-result', { success: true, path: stitchedPath, width, height })
   } catch (err) {
-    mainWindow.show()
+    mainWindow.show(); mainWindow.focus()
     const needsPermission = err.message === 'PERMISSION'
     mainWindow.webContents.send('capture-result', {
       success: false,
@@ -706,7 +707,7 @@ ipcMain.handle('capture-rect', async (event, rect) => {
     openEditorWindow(tmpPath, captureDisplay.scaleFactor)
     mainWindow.webContents.send('capture-result', { success: true, path: tmpPath, width, height })
   } catch (err) {
-    mainWindow.show()
+    mainWindow.show(); mainWindow.focus()
     const needsPermission = err.message === 'PERMISSION'
     mainWindow.webContents.send('capture-result', {
       success: false,
@@ -774,7 +775,7 @@ ipcMain.handle('capture-window', async (_, sourceId) => {
     openEditorWindow(tmpPath)
     return { success: true, path: tmpPath, width, height }
   } catch (err) {
-    mainWindow.show()   // 失敗時恢復工具列
+    mainWindow.show(); mainWindow.focus()   // 失敗時恢復工具列
     if (err.message === 'PERMISSION') return { success: false, needsPermission: true }
     return { success: false, error: err.message }
   }
@@ -785,6 +786,7 @@ ipcMain.handle('capture-window', async (_, sourceId) => {
 ipcMain.handle('cancel-overlay', () => {
   closeAllOverlays()
   mainWindow.show()
+  mainWindow.focus()
 })
 
 // ─── IPC: open screen-recording permission pane ───────────────────────────────
