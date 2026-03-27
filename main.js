@@ -766,6 +766,7 @@ ipcMain.handle('capture-rect', async (event, rect) => {
       if (qr.ratio >= 45) {
         // Intentional scan — open URL directly, skip editor
         if (isUrl) {
+          mainWindow.show(); mainWindow.focus()
           shell.openExternal(qr.data)
         } else {
           clipboard.writeText(qr.data)

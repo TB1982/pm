@@ -5780,20 +5780,6 @@ if (window.electronAPI) {
 
 // ─── Open Menu (新開畫布 / 開啟檔案) ────────────────────────────────────────
 
-// ── 開啟檔案（⊞ 直接開檔） ────────────────────────────────────────────────────
-
-const _fileInputOpen = document.getElementById('fileInputOpen')
-
-document.getElementById('btnOpenMenu').addEventListener('click', () => {
-  _fileInputOpen.click()
-})
-
-_fileInputOpen.addEventListener('change', e => {
-  const file = e.target.files?.[0]
-  if (file) _loadFileIntoEditor(file)
-  _fileInputOpen.value = ''   // reset so same file can be re-opened
-})
-
 // ─── Toast ────────────────────────────────────────────────────────────────────
 
 function showToast(msg, isError = false) {

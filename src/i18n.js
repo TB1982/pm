@@ -12,6 +12,7 @@ const STRINGS = {
     region: '矩形',
     delay: '延遲',
     open: '開啟',
+    whiteboard: '白板',
     batch: '批次轉',
     esc_cancel: 'Esc 取消',
 
@@ -353,6 +354,7 @@ const STRINGS = {
     region: 'Region',
     delay: 'Delay',
     open: 'Open',
+    whiteboard: 'Canvas',
     batch: 'Batch',
     esc_cancel: 'Esc cancel',
 

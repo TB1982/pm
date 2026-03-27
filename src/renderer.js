@@ -210,27 +210,15 @@ function delayedAction(fn) {
   tick()
 }
 
-// ─── Open button dropdown ──────────────────────────────────────────────────────
-const openMenuPopup     = document.getElementById('openMenuPopup')
-const openMenuNewCanvas = document.getElementById('openMenuNewCanvas')
-const openMenuOpenFile  = document.getElementById('openMenuOpenFile')
-
+// ─── Open image file ──────────────────────────────────────────────────────────
 document.getElementById('btnOpenImage').addEventListener('click', e => {
-  e.stopPropagation()
   setToolbarActive(e.currentTarget)
-  openMenuPopup.classList.toggle('hidden')
-})
-
-document.addEventListener('click', () => openMenuPopup.classList.add('hidden'))
-openMenuPopup.addEventListener('click', e => e.stopPropagation())
-
-openMenuOpenFile.addEventListener('click', () => {
-  openMenuPopup.classList.add('hidden')
   ipcInvoke('open-image-file')
 })
 
-openMenuNewCanvas.addEventListener('click', () => {
-  openMenuPopup.classList.add('hidden')
+// ─── Whiteboard (new blank canvas) ────────────────────────────────────────────
+document.getElementById('btnWhiteboard').addEventListener('click', e => {
+  setToolbarActive(e.currentTarget)
   showNewCanvasModal()
 })
 
