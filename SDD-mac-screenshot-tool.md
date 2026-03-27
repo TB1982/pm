@@ -3611,6 +3611,7 @@ Menu.buildFromTemplate([{
 |------|------|
 | **物件旋轉（Rotation）** | 點擊偵測需反向旋轉座標系，改動範圍大；Tauri 後 canvas 渲染邏輯更穩定再加 |
 | **截圖歷史（Screenshot History）** | Electron 下 temp 檔生命週期不可靠、縮圖快取與 IPC 有時序問題；Tauri 用 `tauri-plugin-store` + `std::fs` 管理後生命週期可完全控制 |
+| **移除拖曳匯出浮水印** | Tauri 版為付費產品，不需要 VAS 浮水印；移除匯出時的浮水印疊加邏輯 |
 
 > 旋轉的渲染核心：每個標注新增 `angle` 欄位，選取時顯示旋轉把手，`ctx.save()` → `ctx.translate(cx,cy)` → `ctx.rotate(angle)` → 繪製 → `ctx.restore()`。點擊偵測需將滑鼠座標反向旋轉至物件局部座標系再判斷 hit。
 
