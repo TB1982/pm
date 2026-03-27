@@ -2771,8 +2771,8 @@ function drawFillEllipse(ctx, a) {
 function drawLine(ctx, a) {
   const x1 = c(a.x1), y1 = c(a.y1), x2 = c(a.x2), y2 = c(a.y2)
   const isCurved = (a.cx !== undefined && a.cy !== undefined)
-  const qcx = isCurved ? c(a.cx) : null
-  const qcy = isCurved ? c(a.cy) : null
+  const qcx = isCurved ? c((a.x1 + a.x2) / 2 + a.cx) : null
+  const qcy = isCurved ? c((a.y1 + a.y2) / 2 + a.cy) : null
   const sz  = (a.thickness * 4 + 8) * viewScale
   const hasBorder = !!(a.lineBorderColor && a.lineBorderColor !== 'transparent')
   const capBorderW = hasBorder ? ((a.borderThickness ?? a.thickness + 4) - a.thickness) * viewScale * 2 : 0
@@ -3215,8 +3215,10 @@ function getHandles(a) {
     ]
   }
   if (a.type === 'line') {
-    const cx = a.cx ?? (a.x1 + a.x2) / 2
-    const cy = a.cy ?? (a.y1 + a.y2) / 2
+    const midX = (a.x1 + a.x2) / 2
+    const midY = (a.y1 + a.y2) / 2
+    const cx = midX + (a.cx ?? 0)
+    const cy = midY + (a.cy ?? 0)
     return [
       { id: 'p1',    x: a.x1, y: a.y1, cursor: 'crosshair' },
       { id: 'p2',    x: a.x2, y: a.y2, cursor: 'crosshair' },
@@ -3387,7 +3389,7 @@ function applyResize(a, pos) {
   if (a.type === 'line') {
     if (h.id === 'p1')    { a.x1 = pos.x; a.y1 = pos.y }
     if (h.id === 'p2')    { a.x2 = pos.x; a.y2 = pos.y }
-    if (h.id === 'curve') { a.cx = pos.x; a.cy = pos.y }
+    if (h.id === 'curve') { a.cx = pos.x - (a.x1 + a.x2) / 2; a.cy = pos.y - (a.y1 + a.y2) / 2 }
   }
   if (a.type === 'number') {
     const d = Math.max(Math.abs(pos.x - h.cx), Math.abs(pos.y - h.cy))
@@ -3612,8 +3614,8 @@ function bounds(a) {
     case 'img':    return { x: a.x, y: a.y, w: a.w, h: a.h }
     case 'symbol': { const { hw, ascent, descent } = measureSymbol(a.char ?? '★', a.size ?? 64); return { x: a.x - hw, y: a.y - ascent, w: hw * 2, h: ascent + descent } }
     case 'line': {
-      const xs = [a.x1, a.x2]; if (a.cx !== undefined) xs.push(a.cx)
-      const ys = [a.y1, a.y2]; if (a.cy !== undefined) ys.push(a.cy)
+      const xs = [a.x1, a.x2]; if (a.cx !== undefined) xs.push((a.x1 + a.x2) / 2 + a.cx)
+      const ys = [a.y1, a.y2]; if (a.cy !== undefined) ys.push((a.y1 + a.y2) / 2 + a.cy)
       const minX = Math.min(...xs), maxX = Math.max(...xs)
       const minY = Math.min(...ys), maxY = Math.max(...ys)
       return { x:minX, y:minY, w:Math.max(maxX-minX,1), h:Math.max(maxY-minY,1) }
@@ -3994,7 +3996,7 @@ annotCanvas.addEventListener('mousemove', e => {
       if (a.type === 'line') {
         a.x1 = s.x1 + totalDx; a.y1 = s.y1 + totalDy
         a.x2 = s.x2 + totalDx; a.y2 = s.y2 + totalDy
-        if (s.cx !== undefined) { a.cx = s.cx + totalDx; a.cy = s.cy + totalDy }
+        if (s.cx !== undefined) { a.cx = s.cx; a.cy = s.cy }
       } else {
         a.x = s.x + totalDx
         a.y = s.y + totalDy
@@ -4262,7 +4264,6 @@ function moveAnnot(a, dx, dy) {
     case 'symbol': a.x += dx; a.y += dy; break
     case 'line':
       a.x1 += dx; a.y1 += dy; a.x2 += dx; a.y2 += dy
-      if (a.cx !== undefined) { a.cx += dx; a.cy += dy }
       break
     case 'polyline':
     case 'pen':      a.points.forEach(p => { p.x += dx; p.y += dy }); break
