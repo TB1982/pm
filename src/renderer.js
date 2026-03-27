@@ -123,10 +123,14 @@ async function doWindow() {
   sources.forEach(source => {
     const card = document.createElement('button')
     card.className = 'win-card'
-    card.innerHTML = `
-      <img class="win-thumb" src="${source.thumbnail}" alt="">
-      <span class="win-name">${source.name}</span>
-    `
+    const thumb = document.createElement('img')
+    thumb.className = 'win-thumb'
+    thumb.src = source.thumbnail  // data URL — safe
+    thumb.alt = ''
+    const label = document.createElement('span')
+    label.className = 'win-name'
+    label.textContent = source.name  // textContent — XSS safe
+    card.append(thumb, label)
     card.addEventListener('click', async () => {
       hideWindowPicker()
       const result = await ipcInvoke('capture-window', source.id)
@@ -269,7 +273,7 @@ newCanvasTrans.addEventListener('click', () => {
 btnNewCanvasOk.addEventListener('click', async () => {
   const w = parseInt(newCanvasW.value, 10)
   const h = parseInt(newCanvasH.value, 10)
-  if (!w || !h || w < 1 || h < 1) return
+  if (!w || !h || w < 1 || h < 1 || w > 8192 || h > 8192) return
   const bgColor = ncTransparent ? null : newCanvasBg.value
   hideNewCanvasModal()
   await ipcInvoke('new-canvas-create', { width: w, height: h, bgColor })
@@ -369,7 +373,16 @@ function renderFileList() {
     const item = document.createElement('div')
     item.className = 'file-item'
     // 不在這裡綁 listener——由下方事件委派統一處理，避免 re-render 後 listener 失效
-    item.innerHTML = `<span class="file-name" title="${p}">${name}</span><button class="file-remove" data-idx="${i}" aria-label="移除 ${name}">✕</button>`
+    const nameSpan = document.createElement('span')
+    nameSpan.className = 'file-name'
+    nameSpan.title = p        // textContent path — safe
+    nameSpan.textContent = name
+    const removeBtn = document.createElement('button')
+    removeBtn.className = 'file-remove'
+    removeBtn.dataset.idx = i
+    removeBtn.setAttribute('aria-label', `移除 ${name}`)
+    removeBtn.textContent = '✕'
+    item.append(nameSpan, removeBtn)
     scroll.appendChild(item)
   })
 
