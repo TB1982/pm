@@ -4248,7 +4248,7 @@ document.addEventListener('mouseup', e => {
   const end = drawCurrent ?? evToImg(e)
   const ann = commitShape(drawStart, end)
   if (ann) {
-    pushHistory(); annotations.push(ann)
+    annotations.push(ann); pushHistory()
     setTool('select'); selectedId = ann.id; showOptionsForAnnot(ann)
   }
   renderAnnotations()
