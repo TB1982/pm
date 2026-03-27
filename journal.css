@@ -473,7 +473,7 @@ button, input, textarea { font: inherit; }
 
 .summary-shell {
   position: relative;
-  width: min(1100px, 100%);
+  width: min(1000px, 100%);
   transition: opacity 480ms ease, transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 .summary-shell.is-dismissed {
@@ -538,6 +538,7 @@ button, input, textarea { font: inherit; }
 }
 
 .summary-card {
+  width: 100%;
   padding: 22px;
   max-height: min(78vh, 860px);
   overflow: auto;
