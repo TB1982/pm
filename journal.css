@@ -703,6 +703,11 @@ button, input, textarea { font: inherit; }
     font-size: 0.82rem;
   }
   .topbar-right {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "date date"
+      "name name"
+      "presence toggle";
     gap: 8px;
   }
   .field input {
