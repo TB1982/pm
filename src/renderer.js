@@ -332,12 +332,17 @@ dropzone.addEventListener('drop', (e) => {
   addBatchFiles(paths)
 })
 
+const BATCH_MAX = 100
+
 function addBatchFiles(newPaths) {
   if (!newPaths || newPaths.length === 0) return
   const existing = new Set(batchFiles)
+  let skipped = 0
   for (const p of newPaths) {
-    if (!existing.has(p)) batchFiles.push(p)
+    if (batchFiles.length >= BATCH_MAX) { skipped++; continue }
+    if (!existing.has(p)) { batchFiles.push(p); existing.add(p) }
   }
+  if (skipped > 0) showToast(t('batch_limit_reached', BATCH_MAX), true)
   renderFileList()
   updateConditionalRows()   // 內部會呼叫 updateSameFormatWarning
 }
