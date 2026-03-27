@@ -3603,6 +3603,16 @@ Menu.buildFromTemplate([{
 - Sharp 影像處理改用 Tauri 的 Rust image crate 或保留 Node sidecar，視 bundle 體積評估決定。
 - `localStorage` 用於儲存偏好設定的邏輯不變（Tauri WebView 支援 localStorage）。
 
+#### 遷移後新增功能排程
+
+以下功能刻意保留至 Tauri 版本再實作，避免在遷移前引入額外複雜度：
+
+| 功能 | 原因 |
+|------|------|
+| **物件旋轉（Rotation）** | 點擊偵測需反向旋轉座標系，改動範圍大；Tauri 後 canvas 渲染邏輯更穩定再加 |
+
+> 旋轉的渲染核心：每個標注新增 `angle` 欄位，選取時顯示旋轉把手，`ctx.save()` → `ctx.translate(cx,cy)` → `ctx.rotate(angle)` → 繪製 → `ctx.restore()`。點擊偵測需將滑鼠座標反向旋轉至物件局部座標系再判斷 hit。
+
 #### 遷移檢查清單（啟動前確認）
 - [ ] Electron 版本所有 TDD 測試案例全部通過
 - [ ] `.dmg` 安裝包在 macOS 13 / 14 / 15 測試無誤
