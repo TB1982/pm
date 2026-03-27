@@ -1,8 +1,344 @@
 # SDD：Mac 截圖與圖片編輯工具
-**版本：** 3.29
-**日期：** 2026-03-26
+**版本：** 3.32
+**日期：** 2026-03-27
 **狀態：** 待審閱
 **變更紀錄：**
+
+### v3.32 — 對齊工具列（多選子功能）
+
+#### 功能概述
+
+多選狀態下，options bar 空白區域顯示 8 個對齊按鈕 + 1 個 checkbox，操作完成後一次 pushHistory，支援 Cmd+Z 還原。
+
+#### UI 位置
+
+options bar（`#optionsBar`）內，多選時顯示 `#grpAlign` 區塊；單選或無選取時隱藏。
+
+#### 按鈕與行為
+
+| 按鈕 ID | 圖示 | unchecked（對齊物件） | checked（對齊中線） |
+|---------|------|----------------------|-------------------|
+| `btnAlignLeft`    | ⬛← | 所有左邊緣 → 最左物件左邊緣 | 所有左邊緣 → x = 0 |
+| `btnAlignHCenter` | ⬛↔ | 所有中心 x → 群組 bounding box 水平中線 | 所有中心 x → imgWidth / 2 |
+| `btnAlignRight`   | →⬛ | 所有右邊緣 → 最右物件右邊緣 | 所有右邊緣 → imgWidth |
+| `btnAlignTop`     | ⬛↑ | 所有上邊緣 → 最上物件上邊緣 | 所有上邊緣 → y = 0 |
+| `btnAlignVCenter` | ⬛↕ | 所有中心 y → 群組 bounding box 垂直中線 | 所有中心 y → imgHeight / 2 |
+| `btnAlignBottom`  | ↓⬛ | 所有下邊緣 → 最下物件下邊緣 | 所有下邊緣 → imgHeight |
+| `btnDistributeH`  | ↔均 | 水平間距相等（需 ≥ 3 個標注） | 同左（均分不參照圖片） |
+| `btnDistributeV`  | ↕均 | 垂直間距相等（需 ≥ 3 個標注） | 同左 |
+
+#### Checkbox
+
+```
+☐ 對齊中線   （id: chkAlignToCanvas）
+```
+- 未勾：所有對齊以選取群組中的物件為參照
+- 勾選：對齊以圖片邊緣 / 中線為參照
+- 均分（水平/垂直均分）不受 checkbox 影響
+
+#### 對齊邏輯（unchecked）
+
+```javascript
+// 靠左
+const anchor = Math.min(...annots.map(a => bounds(a).x))
+annots.forEach(a => { const b = bounds(a); moveAnnot(a, anchor - b.x, 0) })
+
+// 水平置中
+const cx = (groupBounds.x + groupBounds.x + groupBounds.w) / 2
+annots.forEach(a => { const b = bounds(a); moveAnnot(a, cx - (b.x + b.w/2), 0) })
+
+// 水平均分（≥3）
+// 按 left 排序 → 第一個與最後一個固定，中間的 x 均分
+```
+
+#### 均分演算法
+
+```
+水平均分：
+  1. 按 bounds.x 由左至右排序
+  2. totalSpan = rightmost.right - leftmost.left
+  3. sumWidths  = Σ bounds(a).w
+  4. gap = (totalSpan - sumWidths) / (n - 1)
+  5. 從第二個開始：a.left = prev.right + gap
+```
+
+垂直均分同理，改為 y 軸。
+
+#### History
+
+對齊操作前呼叫 `pushHistory()`，一次操作一次還原點。
+
+---
+
+#### TDD v3.32
+
+**靠左 / 靠右 / 靠上 / 靠下（unchecked）**
+- [ ] 選取 3 個 x 位置不同的矩形 → 按靠左 → 三個左邊緣對齊最左那個
+- [ ] 按靠右 → 三個右邊緣對齊最右那個
+- [ ] 按靠上 → 三個上邊緣對齊最上那個
+- [ ] 按靠下 → 三個下邊緣對齊最下那個
+- [ ] Cmd+Z → 還原至對齊前位置
+
+**水平/垂直置中（unchecked）**
+- [ ] 3 個位置不同的標注 → 按水平置中 → 三個中心 x 對齊群組 bounding box 水平中線
+- [ ] 按垂直置中 → 三個中心 y 對齊群組 bounding box 垂直中線
+
+**對齊中線（checked）**
+- [ ] 勾選 checkbox → 按靠左 → 所有標注左邊緣貼圖片左緣（x=0）
+- [ ] 按水平置中 → 所有標注中心 x 對齊 imgWidth/2
+- [ ] 按靠右 → 所有標注右邊緣貼圖片右緣
+- [ ] 靠上 / 垂直置中 / 靠下 同理
+
+**均分（≥3 個）**
+- [ ] 3 個水平位置不均等的標注 → 按水平均分 → 三個間距目視相等
+- [ ] 3 個垂直位置不均等的標注 → 按垂直均分 → 三個間距目視相等
+- [ ] 只選 2 個 → 均分按鈕 disabled（灰色不可點）
+
+**整體**
+- [ ] 單選時 grpAlign 隱藏，不干擾現有 options bar
+- [ ] 多選時 grpAlign 顯示於 options bar
+
+---
+
+### v3.31 — 複數選取（框選 + Shift 加選）
+
+#### 功能概述
+
+在選取工具（箭頭）模式下支援複數標注同時選取，為後續對齊工具列奠定基礎。
+
+#### 操作方式
+
+| 操作 | 行為 |
+|------|------|
+| 箭頭工具 + 點擊標注 | 單選（維持現有行為） |
+| 箭頭工具 + Shift + 點擊已選取標注 | 從選取中移除該標注 |
+| 箭頭工具 + Shift + 點擊未選取標注 | 加入選取 |
+| 箭頭工具 + 空白處拖曳 | 框選（橡皮筋矩形），放開後選取完全包含於框內的標注 |
+| 箭頭工具 + 點擊空白處（無拖曳）| 取消全選 |
+| 拖曳任一選取標注 | 整組一起移動（每個標注個別 moveAnnot） |
+| Delete / Backspace | 整組刪除（逐一 removeAnnot + 單次 pushHistory） |
+| Escape | 取消全選，回到零選狀態 |
+| Cmd+A | 全選所有標注 |
+
+#### 狀態變數
+
+```javascript
+let selectedIds = new Set()   // 目前選取的標注 id 集合（補充現有 selectedAnnot）
+let rubberBand  = null        // 框選矩形：{ x0, y0, x1, y1 } canvas 座標，null = 未框選
+```
+
+`selectedAnnot`（原單選指標）維持不動，單選時 `selectedIds` 同步為 `{ selectedAnnot.id }`；多選時 `selectedAnnot = null`。
+
+#### 視覺回饋
+
+| 狀態 | 呈現 |
+|------|------|
+| 多選中的標注 | 原有藍色外框（`drawSelectionBox`）保持；每個選取標注都畫外框 |
+| 框選拖曳中 | 淡藍半透明矩形（`rgba(0,122,255,0.12)`）+ 藍色 1px 邊線（`#007AFF`），繪製於 annotCtx 最上層 |
+| 框選結束 | 橡皮筋矩形消失，被框住的標注顯示選取外框 |
+
+#### 移動行為
+
+- 拖曳任一選取標注時，計算 `(dx, dy)` → 對 `selectedIds` 內每個標注呼叫 `moveAnnot(a, dx, dy)`
+- 移動過程中 **不觸發** pushHistory，mouseup 時才一次 pushHistory
+- 正在移動的標注的 resize handle **不顯示**（多選移動時不提供 resize）
+
+#### 與現有功能的相容性
+
+| 場景 | 行為 |
+|------|------|
+| 單選時所有現有操作 | 不變（resize handle、options bar 等） |
+| 多選時點擊非選取標注 | 切換為單選該標注（除非按住 Shift） |
+| 多選時 Cmd+C / Cmd+V | 暫不支援（維持現有單選複製貼上） |
+| 多選時 Cmd+Z | 回到上一個 history 狀態（整組移動 / 刪除可一次 undo） |
+
+#### 對齊工具列（預留，下一版實作）
+
+多選狀態下，options bar 目前空白區域將顯示對齊按鈕組：
+
+```
+[ ⬛← ] [ ⬛↔ ] [ →⬛ ]   ←左對齊、水平置中、右對齊
+[ ⬛↑ ] [ ⬛↕ ] [ ↓⬛ ]   ←上對齊、垂直置中、下對齊
+```
+
+對齊基準：**圖片邊緣 / 中線**（非選取集合的 bounding box）。
+
+| 按鈕 | 行為 |
+|------|------|
+| 齊左 | 每個標注的左邊緣對齊圖片左邊緣（x = 0） |
+| 水平置中 | 每個標注水平中心對齊圖片水平中線 |
+| 齊右 | 每個標注的右邊緣對齊圖片右邊緣 |
+| 齊上 | 每個標注的上邊緣對齊圖片上邊緣（y = 0） |
+| 垂直置中 | 每個標注垂直中心對齊圖片垂直中線 |
+| 齊下 | 每個標注的下邊緣對齊圖片下邊緣 |
+
+本版規格暫不實作，介面留空。
+
+---
+
+#### TDD v3.31
+
+**Shift 加選**
+- [ ] 箭頭工具下 Shift+點擊第二個標注 → 兩個標注均顯示選取外框
+- [ ] 再次 Shift+點擊已選取標注 → 該標注取消選取，另一個保持選取
+
+**框選**
+- [ ] 箭頭工具下在空白處拖曳 → 顯示藍色半透明橡皮筋矩形
+- [ ] 放開滑鼠 → 完全包含在框內的標注被選取，框消失
+- [ ] 僅部分重疊的標注（框未完全覆蓋）→ 不被選取
+
+**整組移動**
+- [ ] 多選後拖曳任一選取標注 → 所有選取標注同步移動，相對位置不變
+- [ ] 移動完成放開滑鼠 → 一次 Cmd+Z 可還原整組移動
+
+**整組刪除**
+- [ ] 多選後按 Delete → 所有選取標注同時刪除
+- [ ] 一次 Cmd+Z 還原整組刪除
+
+**全選**
+- [ ] Cmd+A → 所有標注顯示選取外框
+
+**取消選取**
+- [ ] Escape → 清除所有選取
+- [ ] 點擊空白處（無拖曳）→ 清除所有選取
+
+**相容性**
+- [ ] 多選後點擊非選取標注（無 Shift）→ 切換為單選該標注
+- [ ] 單選時所有原有操作（resize、options bar、雙擊文字編輯）均正常
+
+---
+
+### v3.30 — 資安升級 + Retina WYSIWYG + 數字工具修正 + contextBridge 後置修補
+
+#### 資安升級：contextIsolation + Preload 橋接
+
+**動機**
+移除 `nodeIntegration: true` / `contextIsolation: false`，消除 XSS 攻擊可直接呼叫 Node.js API 的風險。
+
+**四個視窗全面改為：**
+```
+nodeIntegration: false
+contextIsolation: true
+preload: path.join(__dirname, 'src/preload-X.js')
+```
+
+**Preload 設計原則**
+- 以 `contextBridge.exposeInMainWorld('electronAPI', {...})` 暴露最小必要介面
+- IPC 頻道採 `Set` allowlist，呼叫不在名單內的頻道直接拋出 `Error`
+- `ipcRenderer.on` 回呼以 `WeakMap` 記錄包裝函式，支援 `removeListener`
+
+| Preload 檔案 | 對應視窗 | 暴露的 API |
+|---|---|---|
+| `preload-editor.js` | 圖片編輯器 | invoke / send / on / removeListener / clipboard |
+| `preload-toolbar.js` | 工具列 | invoke / on / removeListener / getPathForFile |
+| `preload-overlay.js` | 擷取遮罩 | invoke |
+| `preload-screen-select.js` | 螢幕選擇 | invoke / on |
+
+**Renderer 端改動**
+- `editor.js`、`overlay.js`、`renderer.js`、`screen-select.js` 全部移除 `require('electron')` / `require('./i18n')`
+- 改用 `window.electronAPI.*` 呼叫 IPC
+- `i18n.js` 改為雙模式：Node.js 環境用 `module.exports`，瀏覽器環境掛到 `window.t / window.applyI18n / window.lang`
+- `editor.html` / `src/index.html` 加入 `<script src="i18n.js">` 載入順序置於 app script 之前
+
+**Clipboard 架構調整**
+原設計於 preload 直接呼叫 `clipboard.writeImage(nativeImage.createFromDataURL(dataURL))`。Electron 41 序列化大型 dataURL 後 contextBridge sub-object 會失效，導致後續 `writeText` 出現 `Cannot read properties of undefined` 錯誤。
+
+改為由 main process 統一處理：
+- `ipcMain.handle('clipboard-write-text')`
+- `ipcMain.handle('clipboard-write-image')`
+- `ipcMain.handle('clipboard-clear')`
+
+Preload 的 `clipboard` 物件改為 `ipcRenderer.invoke(...)` 橋接，API surface 對 editor.js 不變。
+
+---
+
+#### Retina WYSIWYG：imgDPR 狀態變數 + fitScale 校正
+
+**問題**
+Retina 螢幕截圖（DPR=2）在編輯器內顯示為 200%，導致標注圓圈在視覺上只有 ViewSonic 延伸螢幕的一半大。
+
+**解法**
+
+| 機制 | 說明 |
+|---|---|
+| `imgDPR` 狀態變數 | 追蹤來源圖片的像素密度（ViewSonic=1，Retina=2） |
+| `scaleFactor` 截圖時傳入 | `screen.getDisplayNearestPoint({x,y}).scaleFactor` 於截圖當下取得，作為第一優先；fallback 為 Sharp metadata `density > 90 → Math.round(density/72)` |
+| `fitScale` 上限 `1/imgDPR` | `Math.min(aw/imgWidth, ah/imgHeight, 1/imgDPR)` — Retina 圖片最多縮放到邏輯 100%，確保所見即所得 |
+| 標注渲染乘以 `imgDPR` | `r = size * viewScale * imgDPR` — ViewSonic: `size * 1 * 1 = size`；Retina: `size * 0.5 * 2 = size`（CSS pixel 一致） |
+| burnIn 匯出 | 設 `viewScale=1`，標注以 `size * imgDPR` 渲染，與圖片像素比例一致 |
+
+---
+
+#### 數字工具修正
+
+**圓圈大小三段（修正自 v3.29）**
+
+| 標籤 | 值 |
+|---|---|
+| 小 | 18 |
+| 中（預設） | 24 |
+| 大 | 30 |
+
+v3.29 的「大=32」在 DPR 修正後視覺偏大，調整為 30。
+
+**數字字符垂直置中修正**
+舊版以 `textBaseline = 'middle'` 對齊 em-box 中線，字形視覺中心偏上。改用：
+```javascript
+ctx.textBaseline = 'alphabetic'
+const m = ctx.measureText(str)
+const yOff = (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2
+ctx.fillText(str, cx, cy + yOff)
+```
+
+---
+
+#### contextBridge 後置修補
+
+| # | 問題 | 修正 |
+|---|------|------|
+| 1 | `showOptionsForTool(t)` 參數名 `t` 遮蔽全域 `window.t()` → OCR 工具切換時 `t('ocr_drag')` TypeError | 函數參數改名：`showOptionsForTool(tool)`、`setTool(newTool)` |
+| 2 | Electron 41 廢棄 `file.path`，批次拖曳檔案列表空白 | `preload-toolbar.js` 暴露 `webUtils.getPathForFile`；renderer.js drop handler 改用 `window.electronAPI.getPathForFile(f)` |
+| 3 | `select-batch-files` 對話框取消時回傳 `null`，`addBatchFiles(null)` 崩潰 | 函數頂部加 `if (!newPaths \|\| newPaths.length === 0) return` |
+| 4 | 選色後色彩面板立即關閉，無法連續新增品牌色 | 移除 `applyColor*` 系列函數內的 `hideColorPanel()`；改加 document capture-phase click-outside handler，點色板外才收起 |
+| 5 | OCR 複製前的 `clipboard.clear()` 有時造成剪貼簿短暫空白被其他事件插隊 | 移除 `clear()`；`writeText()` 本身即替換剪貼簿內容 |
+
+---
+
+#### TDD v3.30
+
+**資安 — Preload 橋接**
+- [ ] 工具列：全螢幕截圖、視窗截圖、矩形截圖、延遲截圖均可正常觸發
+- [ ] 編輯器：Cmd+S 儲存、Cmd+Shift+C 複製圖片、OCR 辨識均正常
+- [ ] 批次：拖曳 PNG 進批次視窗 → 檔案名稱出現；按「新增檔案」也正常
+- [ ] 多螢幕選取：點擊目標螢幕 → 截到正確螢幕
+
+**Retina WYSIWYG**
+- [ ] 於 Retina 螢幕截圖後開啟編輯器：右下角縮放顯示 47%（或接近 `1/DPR` 值），圖片物理尺寸與 ViewSonic 延伸螢幕一致
+- [ ] 於 ViewSonic 延伸螢幕截圖後開啟編輯器：右下角縮放顯示 100%
+- [ ] 兩種螢幕的數字圓圈視覺大小一致（中=24 時目視相同）
+
+**數字工具**
+- [ ] 小/中/大 按鈕對應 18/24/30；預設為「中」（active 狀態）
+- [ ] 數字字符目視垂直置中於圓圈內（測試單位數 1、雙位數 10、三位數 100）
+- [ ] Retina 與 ViewSonic 截圖匯出後，數字大小比例一致
+
+**Clipboard（OCR × 圖片複製 互動）**
+- [ ] 先「複製圖片」（Cmd+Shift+C）→ 再 OCR「複製文字」→ 貼入文字編輯器得純文字
+- [ ] 先 OCR「複製文字」→ 再「複製圖片」→ 貼入 Preview/Finder 得圖片
+- [ ] 反覆交替複製 5 次：無崩潰、無 `Cannot read properties of undefined` 錯誤
+
+**色彩面板 click-outside**
+- [ ] 點擊顏色按鈕：面板開啟
+- [ ] 點擊面板內色票：顏色套用，面板保持開啟
+- [ ] 點擊面板外任意位置：面板收起
+- [ ] 連續點「+」加入多個品牌色：面板全程不關閉
+- [ ] 切換工具：面板自動收起
+
+**批次拖曳（Electron 41）**
+- [ ] 從 Finder 拖曳 PNG / JPG / WebP 至批次視窗：檔案名稱正確顯示
+- [ ] 拖曳後按「開始轉換」：轉換正常完成
+
+---
 
 ### v3.29 — 測試修正批次：歷史按鈕、字型預設、數字大小、裁切復原、疊圖限制、OCR 複製、關閉動畫
 

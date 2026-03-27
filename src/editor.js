@@ -183,6 +183,8 @@ let drawCurrent = null
 
 // Select / drag
 let selectedId   = null
+let selectedIds  = new Set()  // multi-select id set
+let rubberBand   = null       // { x0, y0, x1, y1 } in image coords during rubber-band drag
 let isDragging   = false
 let hasDragged   = false
 let lastMousePos = null
@@ -324,7 +326,7 @@ function hideAllOptions() {
    'grpLineStyle','grpPenBorder','grpStrokeBorder','grpDashStyle',
    'grpCaps','grpRadius','grpFont','grpNumber','grpStrokeOpacity',
    'grpShadow','grpZoom','grpCrop','grpOcr','grpBoxSelect',
-   'grpMosaic','grpSymbol','grpPrivacyMask'].forEach(id => {
+   'grpMosaic','grpSymbol','grpPrivacyMask','grpAlign'].forEach(id => {
     const el = document.getElementById(id)
     if (el) el.classList.add('hidden')
   })
@@ -332,6 +334,115 @@ function hideAllOptions() {
   document.getElementById('btnLineOrtho')?.classList.remove('hidden')  // reset to visible by default
   hideSymbolPanel()
 }
+
+function showAlignOptions() {
+  hideAllOptions()
+  document.getElementById('grpAlign').classList.remove('hidden')
+  const n = selectedIds.size
+  document.getElementById('btnDistributeH').disabled = n < 3
+  document.getElementById('btnDistributeV').disabled = n < 3
+  _syncAlignLRVisibility()
+}
+
+function _syncAlignLRVisibility() {
+  const toCanvas = document.getElementById('chkAlignToCanvas').checked
+  document.getElementById('btnGrpAlignLeft') .classList.toggle('hidden', toCanvas)
+  document.getElementById('btnGrpAlignRight').classList.toggle('hidden', toCanvas)
+}
+
+document.getElementById('chkAlignToCanvas')?.addEventListener('change', _syncAlignLRVisibility)
+
+// ─── Alignment helpers ────────────────────────────────────────────────────────
+
+function _alignSelectedAnnots(mode) {
+  const annots = annotations.filter(a => selectedIds.has(a.id))
+  if (annots.length < 2) return
+  const toCanvas = document.getElementById('chkAlignToCanvas').checked
+
+  // Snapshot all bounds BEFORE any moveAnnot calls
+  const bbs = annots.map(a => bounds(a))
+  if (bbs.some(b => !b)) return
+
+  const gx0 = Math.min(...bbs.map(b => b.x))
+  const gy0 = Math.min(...bbs.map(b => b.y))
+  const gx1 = Math.max(...bbs.map(b => b.x + b.w))
+  const gy1 = Math.max(...bbs.map(b => b.y + b.h))
+  const gCx = (gx0 + gx1) / 2
+  const gCy = (gy0 + gy1) / 2
+
+  pushHistory()
+
+  switch (mode) {
+    case 'left': {
+      const dx = toCanvas ? -gx0 : 0
+      annots.forEach((a, i) => moveAnnot(a, toCanvas ? dx : gx0 - bbs[i].x, 0))
+      break
+    }
+    case 'hcenter': {
+      const dx = toCanvas ? imgWidth / 2 - gCx : 0
+      annots.forEach((a, i) => moveAnnot(a, toCanvas ? dx : gCx - (bbs[i].x + bbs[i].w / 2), 0))
+      break
+    }
+    case 'right': {
+      const dx = toCanvas ? imgWidth - gx1 : 0
+      annots.forEach((a, i) => moveAnnot(a, toCanvas ? dx : gx1 - (bbs[i].x + bbs[i].w), 0))
+      break
+    }
+    case 'top': {
+      const dy = toCanvas ? -gy0 : 0
+      annots.forEach((a, i) => moveAnnot(a, 0, toCanvas ? dy : gy0 - bbs[i].y))
+      break
+    }
+    case 'vcenter': {
+      const dy = toCanvas ? imgHeight / 2 - gCy : 0
+      annots.forEach((a, i) => moveAnnot(a, 0, toCanvas ? dy : gCy - (bbs[i].y + bbs[i].h / 2)))
+      break
+    }
+    case 'bottom': {
+      const dy = toCanvas ? imgHeight - gy1 : 0
+      annots.forEach((a, i) => moveAnnot(a, 0, toCanvas ? dy : gy1 - (bbs[i].y + bbs[i].h)))
+      break
+    }
+    case 'distributeH': {
+      if (annots.length < 3) return
+      const order = annots.map((a, i) => ({ a, b: bbs[i] })).sort((p, q) => p.b.x - q.b.x)
+      const span = order[order.length - 1].b.x + order[order.length - 1].b.w - order[0].b.x
+      const sumW = order.reduce((s, p) => s + p.b.w, 0)
+      const gap  = (span - sumW) / (order.length - 1)
+      let curX = order[0].b.x + order[0].b.w
+      for (let i = 1; i < order.length - 1; i++) {
+        moveAnnot(order[i].a, curX + gap - order[i].b.x, 0)
+        curX += gap + order[i].b.w
+      }
+      break
+    }
+    case 'distributeV': {
+      if (annots.length < 3) return
+      const order = annots.map((a, i) => ({ a, b: bbs[i] })).sort((p, q) => p.b.y - q.b.y)
+      const span = order[order.length - 1].b.y + order[order.length - 1].b.h - order[0].b.y
+      const sumH = order.reduce((s, p) => s + p.b.h, 0)
+      const gap  = (span - sumH) / (order.length - 1)
+      let curY = order[0].b.y + order[0].b.h
+      for (let i = 1; i < order.length - 1; i++) {
+        moveAnnot(order[i].a, 0, curY + gap - order[i].b.y)
+        curY += gap + order[i].b.h
+      }
+      break
+    }
+  }
+  renderAnnotations()
+}
+
+// ─── Alignment button listeners ───────────────────────────────────────────────
+
+document.getElementById('btnGrpAlignLeft')?.addEventListener('click',  () => _alignSelectedAnnots('left'))
+document.getElementById('btnAlignHCenter')?.addEventListener('click',  () => _alignSelectedAnnots('vcenter'))
+document.getElementById('btnGrpAlignRight')?.addEventListener('click', () => _alignSelectedAnnots('right'))
+document.getElementById('btnAlignTop')?.addEventListener('click',     () => _alignSelectedAnnots('top'))
+document.getElementById('btnAlignVCenter')?.addEventListener('click', () => _alignSelectedAnnots('hcenter'))
+document.getElementById('btnAlignBottom')?.addEventListener('click',  () => _alignSelectedAnnots('bottom'))
+document.getElementById('btnDistributeH')?.addEventListener('click',  () => _alignSelectedAnnots('distributeH'))
+document.getElementById('btnDistributeV')?.addEventListener('click',  () => _alignSelectedAnnots('distributeV'))
 
 function showOptionsForTool(tool) {
   hideAllOptions()
@@ -1950,9 +2061,39 @@ function renderAnnotations() {
     })
     annotCtx.restore()
   }
-  if (selectedId) {
+  if (selectedIds.size > 1) {
+    // Multi-select: dashed box around each, no resize handles
+    selectedIds.forEach(id => {
+      const a = annotations.find(x => x.id === id)
+      if (!a) return
+      const b = bounds(a)
+      if (!b) return
+      annotCtx.save()
+      annotCtx.strokeStyle = '#4a9eff'
+      annotCtx.lineWidth   = 1.5
+      annotCtx.setLineDash([5, 3])
+      annotCtx.strokeRect(c(b.x) - 5, c(b.y) - 5, c(b.w) + 10, c(b.h) + 10)
+      annotCtx.restore()
+    })
+  } else if (selectedId) {
     const a = annotations.find(x => x.id === selectedId)
     if (a) drawSelection(annotCtx, a)
+  }
+
+  // Rubber band selection (select tool drag on empty space)
+  if (rubberBand) {
+    const x0 = Math.min(rubberBand.x0, rubberBand.x1)
+    const y0 = Math.min(rubberBand.y0, rubberBand.y1)
+    const w  = Math.abs(rubberBand.x1 - rubberBand.x0)
+    const h  = Math.abs(rubberBand.y1 - rubberBand.y0)
+    annotCtx.save()
+    annotCtx.strokeStyle = '#007AFF'
+    annotCtx.lineWidth   = 1
+    annotCtx.setLineDash([])
+    annotCtx.strokeRect(c(x0), c(y0), c(w), c(h))
+    annotCtx.fillStyle = 'rgba(0,122,255,0.12)'
+    annotCtx.fillRect(c(x0), c(y0), c(w), c(h))
+    annotCtx.restore()
   }
 
   // Crop overlay: dim outside selection, dashed border + resize handles
@@ -3234,7 +3375,7 @@ function bounds(a) {
       const bx    = tal === 'center' ? a.x - maxW / 2 : tal === 'right' ? a.x - maxW : a.x
       return { x:bx, y:a.y, w:maxW, h:lines.length*a.fontSize*1.25 }
     }
-    case 'number': { const r = a.size ?? 14; return { x:a.x-r, y:a.y-r, w:r*2, h:r*2 } }
+    case 'number': { const r = (a.size ?? 14) * imgDPR; return { x:a.x-r, y:a.y-r, w:r*2, h:r*2 } }
     case 'polyline':
     case 'pen': {
       const xs = a.points.map(p => p.x), ys = a.points.map(p => p.y)
@@ -3340,27 +3481,63 @@ annotCanvas.addEventListener('mousedown', e => {
   }
 
   if (tool === 'select') {
-    // 1. Check resize handles on selected annotation
-    if (selectedId) {
+    // 1. Shift+click: toggle annotation in/out of multi-select
+    if (e.shiftKey) {
+      const hit = findAt(pos)
+      if (hit) {
+        if (selectedIds.has(hit.id)) {
+          selectedIds.delete(hit.id)
+        } else {
+          selectedIds.add(hit.id)
+        }
+        // Sync selectedId: use last added when single, null when multi
+        if (selectedIds.size === 1) {
+          selectedId = [...selectedIds][0]
+          const ann = annotations.find(x => x.id === selectedId)
+          if (ann) showOptionsForAnnot(ann)
+        } else if (selectedIds.size > 1) {
+          selectedId = null
+          showAlignOptions()
+        } else {
+          selectedId = null
+          hideAllOptions()
+        }
+        renderAnnotations()
+        return
+      }
+    }
+    // 2. Check resize handles (single-select only, no handles in multi)
+    if (selectedId && selectedIds.size <= 1) {
       const a = annotations.find(x => x.id === selectedId)
       if (a) {
         const h = findHandle(pos, a)
         if (h) { startResize(h.id, a); return }
-        // Body hit → drag
         if (hits(pos, a)) {
           isDragging = true; hasDragged = false; lastMousePos = pos
           renderAnnotations(); return
         }
       }
     }
-    // 2. Try to select a different annotation
+    // 3. Click on a selected annotation in multi-select → start group drag
+    if (selectedIds.size > 1) {
+      const hit = findAt(pos)
+      if (hit && selectedIds.has(hit.id)) {
+        isDragging = true; hasDragged = false; lastMousePos = pos
+        renderAnnotations(); return
+      }
+    }
+    // 4. Click on any annotation → single-select + drag
     const hit = findAt(pos)
     if (hit) {
       selectedId = hit.id
+      selectedIds = new Set([hit.id])
       isDragging = true; hasDragged = false; lastMousePos = pos
       showOptionsForAnnot(hit)
     } else {
+      // 5. Click on empty space → clear selection, start rubber band
       selectedId = null
+      selectedIds = new Set()
+      rubberBand = { x0: pos.x, y0: pos.y, x1: pos.x, y1: pos.y }
       hideAllOptions()
     }
     renderAnnotations()
@@ -3503,6 +3680,14 @@ annotCanvas.addEventListener('mousemove', e => {
     return
   }
 
+  // Rubber-band selection drag (select tool, empty-space drag)
+  if (rubberBand) {
+    rubberBand.x1 = pos.x
+    rubberBand.y1 = pos.y
+    renderAnnotations()
+    return
+  }
+
   if (isMosaicDrawing && mosaicDrawStart) {
     mosaicPreviewRect = {
       x: Math.min(mosaicDrawStart.x, pos.x),
@@ -3544,9 +3729,13 @@ annotCanvas.addEventListener('mousemove', e => {
     return
   }
 
-  if (isDragging && selectedId) {
-    if (lastMousePos) {
-      const dx = pos.x - lastMousePos.x, dy = pos.y - lastMousePos.y
+  if (isDragging && lastMousePos) {
+    const dx = pos.x - lastMousePos.x, dy = pos.y - lastMousePos.y
+    if (selectedIds.size > 1) {
+      // Group move: apply delta to every selected annotation
+      annotations.forEach(a => { if (selectedIds.has(a.id)) moveAnnot(a, dx, dy) })
+      hasDragged = true
+    } else if (selectedId) {
       const a = annotations.find(x => x.id === selectedId)
       if (a) { moveAnnot(a, dx, dy); hasDragged = true }
     }
@@ -3585,7 +3774,11 @@ annotCanvas.addEventListener('mousemove', e => {
   // Update cursor for select tool
   if (tool === 'select') {
     let cur = 'default'
-    if (selectedId) {
+    if (selectedIds.size > 1) {
+      const hit = findAt(pos)
+      if (hit && selectedIds.has(hit.id)) cur = 'move'
+      else if (hit) cur = 'move'
+    } else if (selectedId) {
       const a = annotations.find(x => x.id === selectedId)
       if (a) {
         const h = findHandle(pos, a)
@@ -3730,6 +3923,36 @@ document.addEventListener('mouseup', e => {
     }
     return
   }
+  // Rubber-band: finalise selection
+  if (rubberBand) {
+    const x0 = Math.min(rubberBand.x0, rubberBand.x1)
+    const y0 = Math.min(rubberBand.y0, rubberBand.y1)
+    const x1 = Math.max(rubberBand.x0, rubberBand.x1)
+    const y1 = Math.max(rubberBand.y0, rubberBand.y1)
+    rubberBand = null
+    if (x1 - x0 > 2 && y1 - y0 > 2) {
+      const caught = new Set()
+      annotations.forEach(a => {
+        const b = bounds(a)
+        if (b && b.x >= x0 && b.y >= y0 && b.x + b.w <= x1 && b.y + b.h <= y1) {
+          caught.add(a.id)
+        }
+      })
+      if (caught.size > 0) {
+        selectedIds = caught
+        selectedId  = caught.size === 1 ? [...caught][0] : null
+        if (selectedId) {
+          const ann = annotations.find(x => x.id === selectedId)
+          if (ann) showOptionsForAnnot(ann)
+        } else {
+          showAlignOptions()
+        }
+      }
+    }
+    renderAnnotations()
+    return
+  }
+
   if (isDragging) {
     isDragging = false
     if (hasDragged) pushHistory()
@@ -4066,15 +4289,25 @@ document.addEventListener('keydown', e => {
       if (tool === 'boxselect') { boxSelRect = null; isBoxSelecting = false; syncBoxSelUI(); renderAnnotations(); break }
       if (tool === 'mosaic')    { mosaicPreviewRect = null; isMosaicDrawing = false; renderAnnotations(); break }
       selectedId = null
+      selectedIds = new Set()
+      rubberBand = null
       isDrawing  = false
       if (tool === 'select') hideAllOptions()
       renderAnnotations()
       break
     case 'Delete': case 'Backspace':
-      if (selectedId) {
+      if (selectedIds.size > 1) {
+        pushHistory()
+        annotations = annotations.filter(a => !selectedIds.has(a.id))
+        selectedIds = new Set()
+        selectedId  = null
+        hideAllOptions()
+        renderAnnotations()
+      } else if (selectedId) {
         pushHistory()
         annotations = annotations.filter(a => a.id !== selectedId)
         selectedId  = null
+        selectedIds = new Set()
         hideAllOptions()
         renderAnnotations()
       }
@@ -4987,6 +5220,58 @@ function burnIn(format) {
   return off.toDataURL(mime, 0.92)
 }
 
+// Add subtle VAS attribution badge to a canvas context (bottom-right corner)
+// Auto-detects background brightness to choose black or white text.
+function addVasBadge(ctx, w, h) {
+  const scale    = imgDPR || 1
+  const fontSize = Math.round(10 * scale)
+  const margin   = Math.round(8  * scale)
+
+  ctx.save()
+  ctx.font = `600 ${fontSize}px -apple-system, BlinkMacSystemFont, "Inter", sans-serif`
+  const textW = Math.ceil(ctx.measureText('VAS').width)
+  const textH = fontSize
+
+  // Sample the pixels behind the badge area to decide ink colour
+  const sx = Math.max(0, w - margin - textW - 4)
+  const sy = Math.max(0, h - margin - textH - 4)
+  const sw = Math.min(textW + 8, w - sx)
+  const sh = Math.min(textH + 8, h - sy)
+  let brightness = 0.5
+  if (sw > 0 && sh > 0) {
+    const px = ctx.getImageData(sx, sy, sw, sh).data
+    let sum = 0
+    for (let i = 0; i < px.length; i += 4) {
+      sum += 0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2]
+    }
+    brightness = sum / (px.length / 4) / 255
+  }
+
+  ctx.textBaseline = 'alphabetic'
+  ctx.textAlign    = 'right'
+  ctx.fillStyle    = brightness > 0.5
+    ? 'rgba(0,0,0,0.45)'         // dark text on light background
+    : 'rgba(255,255,255,0.60)'   // light text on dark background
+  ctx.fillText('VAS', w - margin, h - margin)
+  ctx.restore()
+}
+
+// Burn annotations + VAS badge (used only for drag export)
+function burnInTagged() {
+  const off = document.createElement('canvas')
+  off.width = imgWidth; off.height = imgHeight
+  const ctx = off.getContext('2d')
+  ctx.drawImage(imgElement, 0, 0, imgWidth, imgHeight)
+
+  const savedScale = viewScale
+  viewScale = 1
+  annotations.forEach(a => drawOne(ctx, a))
+  viewScale = savedScale
+
+  addVasBadge(ctx, imgWidth, imgHeight)
+  return off.toDataURL('image/png')
+}
+
 // ─── Copy final image to clipboard ───────────────────────────────────────────
 
 function copyFinalImage() {
@@ -5023,12 +5308,11 @@ document.getElementById('btnCopyImage').addEventListener('click', copyFinalImage
   })
   document.addEventListener('mouseup', () => { drag = null })
 
-  // Main area — start OS-level drag export
+  // Main area — start OS-level drag export (includes VAS badge)
   btn.addEventListener('mousedown', e => {
     if (e.target === handle || handle.contains(e.target)) return
     if (!imgElement) { showToast(t('toast_no_image'), true); return }
-    const dataURL = burnIn('png')
-    ipcSend('start-drag-export', { dataURL })
+    ipcSend('start-drag-export', { dataURL: burnInTagged() })
   })
 })()
 
