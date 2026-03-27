@@ -4543,6 +4543,14 @@ document.addEventListener('keydown', e => {
 
   if (e.key === 'Enter' && tool === 'crop') { e.preventDefault(); confirmCrop(); return }
 
+  if (tool === 'crop' && cropRect && !isCropping) {
+    const step = e.shiftKey ? 10 : 1
+    if (e.key === 'ArrowLeft')  { e.preventDefault(); cropRect = { ...cropRect, x: cropRect.x - step }; updateCropSizeLabel(); renderAnnotations(); return }
+    if (e.key === 'ArrowRight') { e.preventDefault(); cropRect = { ...cropRect, x: cropRect.x + step }; updateCropSizeLabel(); renderAnnotations(); return }
+    if (e.key === 'ArrowUp')    { e.preventDefault(); cropRect = { ...cropRect, y: cropRect.y - step }; updateCropSizeLabel(); renderAnnotations(); return }
+    if (e.key === 'ArrowDown')  { e.preventDefault(); cropRect = { ...cropRect, y: cropRect.y + step }; updateCropSizeLabel(); renderAnnotations(); return }
+  }
+
   switch (e.key) {
     case 'v': case 'V': setTool('select');    break
     case 'm': case 'M': setTool('boxselect'); break
