@@ -414,42 +414,66 @@ function _computeSnap(draggedAnnots) {
     }
   }
 
-  // Distribute snap: horizontal — find any pair (A, B) where dragged fits with equal gaps
+  // Distribute snap: horizontal — 3 cases per pair (A left of B):
+  //   1. dragged between A and B (equal gaps on both sides)
+  //   2. dragged to the right of B (gap B→dragged = gap A→B)
+  //   3. dragged to the left of A (gap dragged→A = gap A→B)
   let distributeXLines = null
   for (let i = 0; i < others.length; i++) {
     for (let j = 0; j < others.length; j++) {
       if (i === j) continue
       const A = others[i], B = others[j]
-      if (A.x + A.w >= B.x) continue          // A must be fully left of B
-      const space = B.x - (A.x + A.w)
-      if (space <= gw) continue                // dragged group won't fit
-      const equal_gap = (space - gw) / 2
-      const snap_gx0  = (A.x + A.w) + equal_gap
-      const delta = snap_gx0 - gx0
-      if (Math.abs(delta) < threshold && (bestDx === null || Math.abs(delta) < Math.abs(bestDx))) {
-        bestDx = delta; snapXType = 'distribute'
-        // four lines: A's right edge, dragged left, dragged right, B's left edge
-        distributeXLines = [A.x + A.w, snap_gx0, snap_gx0 + gw, B.x]
+      if (A.x + A.w >= B.x) continue          // enforce A fully left of B
+      const gap_AB = B.x - (A.x + A.w)
+
+      const trySnapX = (snap_gx0, lines) => {
+        const delta = snap_gx0 - gx0
+        if (Math.abs(delta) < threshold && (bestDx === null || Math.abs(delta) < Math.abs(bestDx))) {
+          bestDx = delta; snapXType = 'distribute'; distributeXLines = lines
+        }
       }
+
+      // Case 1: dragged fits between A and B
+      if (gap_AB > gw) {
+        const eq = (gap_AB - gw) / 2
+        const s  = (A.x + A.w) + eq
+        trySnapX(s, [A.x + A.w, s, s + gw, B.x])
+      }
+      // Case 2: dragged extends right of B — gap(B→dragged) = gap_AB
+      trySnapX((B.x + B.w) + gap_AB, [A.x + A.w, B.x, B.x + B.w, (B.x + B.w) + gap_AB])
+      // Case 3: dragged extends left of A — gap(dragged→A) = gap_AB
+      const s3 = A.x - gap_AB - gw
+      trySnapX(s3, [s3 + gw, A.x, A.x + A.w, B.x])
     }
   }
 
-  // Distribute snap: vertical — same logic for Y
+  // Distribute snap: vertical — same 3 cases for Y
   let distributeYLines = null
   for (let i = 0; i < others.length; i++) {
     for (let j = 0; j < others.length; j++) {
       if (i === j) continue
       const A = others[i], B = others[j]
       if (A.y + A.h >= B.y) continue
-      const space = B.y - (A.y + A.h)
-      if (space <= gh) continue
-      const equal_gap = (space - gh) / 2
-      const snap_gy0  = (A.y + A.h) + equal_gap
-      const delta = snap_gy0 - gy0
-      if (Math.abs(delta) < threshold && (bestDy === null || Math.abs(delta) < Math.abs(bestDy))) {
-        bestDy = delta; snapYType = 'distribute'
-        distributeYLines = [A.y + A.h, snap_gy0, snap_gy0 + gh, B.y]
+      const gap_AB = B.y - (A.y + A.h)
+
+      const trySnapY = (snap_gy0, lines) => {
+        const delta = snap_gy0 - gy0
+        if (Math.abs(delta) < threshold && (bestDy === null || Math.abs(delta) < Math.abs(bestDy))) {
+          bestDy = delta; snapYType = 'distribute'; distributeYLines = lines
+        }
       }
+
+      // Case 1: dragged fits between A and B
+      if (gap_AB > gh) {
+        const eq = (gap_AB - gh) / 2
+        const s  = (A.y + A.h) + eq
+        trySnapY(s, [A.y + A.h, s, s + gh, B.y])
+      }
+      // Case 2: dragged extends below B — gap(B→dragged) = gap_AB
+      trySnapY((B.y + B.h) + gap_AB, [A.y + A.h, B.y, B.y + B.h, (B.y + B.h) + gap_AB])
+      // Case 3: dragged extends above A — gap(dragged→A) = gap_AB
+      const s3 = A.y - gap_AB - gh
+      trySnapY(s3, [s3 + gh, A.y, A.y + A.h, B.y])
     }
   }
 
