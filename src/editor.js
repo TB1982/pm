@@ -5147,8 +5147,8 @@ function _tplDrawImgRounded(ctx, img, x, y, w, h, radius, shadowColor, shadowBlu
 // ── 套版可調參數 ──────────────────────────────────────────────
 let _tplTargetRatio   = null  // null = auto (uniform padding)
 let _tplPadding       = 9     // 2–30  (% of min dimension)
-let _tplRadius        = 5     // 0–10  → radius factor = value × 0.005
-let _tplShadow        = 5     // 0–10  → blur   factor = value × 0.008
+let _tplRadius        = 5     // 0–10 (step 0.1) → radius factor = value × 0.005
+let _tplShadow        = 5     // 0–10 (step 0.1) → blur   factor = value × 0.008
 let _lastAppliedTplId = null  // for slider live-preview re-apply
 
 // Shared layout helper — respects _tplTargetRatio and _tplPadding
@@ -5395,8 +5395,8 @@ function _syncSliderLabels() {
   const rEl = document.getElementById('tplRadius')
   const sEl = document.getElementById('tplShadow')
   if (pEl) document.getElementById('tplPaddingVal').textContent = pEl.value + '%'
-  if (rEl) document.getElementById('tplRadiusVal').textContent  = rEl.value
-  if (sEl) document.getElementById('tplShadowVal').textContent  = sEl.value
+  if (rEl) document.getElementById('tplRadiusVal').textContent  = parseFloat(rEl.value).toFixed(1)
+  if (sEl) document.getElementById('tplShadowVal').textContent  = parseFloat(sEl.value).toFixed(1)
 }
 
 function _applySliderChange() {
@@ -5404,8 +5404,8 @@ function _applySliderChange() {
   const rEl = document.getElementById('tplRadius')
   const sEl = document.getElementById('tplShadow')
   if (pEl) _tplPadding = parseInt(pEl.value, 10)
-  if (rEl) _tplRadius  = parseInt(rEl.value, 10)
-  if (sEl) _tplShadow  = parseInt(sEl.value, 10)
+  if (rEl) _tplRadius  = parseFloat(rEl.value)
+  if (sEl) _tplShadow  = parseFloat(sEl.value)
   if (_lastAppliedTplId && _tplBaseSnapshot) applyTemplate(_lastAppliedTplId)
 }
 
