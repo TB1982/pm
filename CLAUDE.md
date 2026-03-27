@@ -256,6 +256,7 @@ docs(SDD): v0.8 更新文字工具規格與 TDD 測試案例
 - **Image assets** in `修正方式/` and `預覽圖/` are reference screenshots only; do not delete them.
 - **No minification or asset hashing** — filenames are stable, caching is not a concern.
 - **Canvas page** (`deepholding.html`) contains complex standalone JavaScript; test carefully after any edits.
+- **VAS version string in `vas.html`** — whenever `package.json` version is bumped, update the version number in both the Chinese and English story strings in `vas.html` (search for `迭代至 v` and `iterated together to v`).
 
 ---
 
