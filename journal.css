@@ -299,6 +299,7 @@ button, input, textarea { font: inherit; }
   margin-top: 10px;
   font-size: clamp(2rem, 4vw, 3.2rem);
   line-height: 1.15;
+  text-wrap: balance;
 }
 
 .stage-copy {
@@ -660,7 +661,7 @@ button, input, textarea { font: inherit; }
     padding: 24px 20px;
   }
   .intro-card h2 {
-    font-size: clamp(1.7rem, 8vw, 2.3rem);
+    font-size: clamp(1.4rem, 6.5vw, 2rem);
   }
   .question-card {
     min-height: min(540px, calc(100% - 8px));
