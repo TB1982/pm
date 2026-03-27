@@ -210,9 +210,81 @@ function delayedAction(fn) {
   tick()
 }
 
+// ─── Open button dropdown ──────────────────────────────────────────────────────
+const openMenuPopup     = document.getElementById('openMenuPopup')
+const openMenuNewCanvas = document.getElementById('openMenuNewCanvas')
+const openMenuOpenFile  = document.getElementById('openMenuOpenFile')
+
 document.getElementById('btnOpenImage').addEventListener('click', e => {
+  e.stopPropagation()
   setToolbarActive(e.currentTarget)
+  openMenuPopup.classList.toggle('hidden')
+})
+
+document.addEventListener('click', () => openMenuPopup.classList.add('hidden'))
+openMenuPopup.addEventListener('click', e => e.stopPropagation())
+
+openMenuOpenFile.addEventListener('click', () => {
+  openMenuPopup.classList.add('hidden')
   ipcInvoke('open-image-file')
+})
+
+openMenuNewCanvas.addEventListener('click', () => {
+  openMenuPopup.classList.add('hidden')
+  showNewCanvasModal()
+})
+
+// ─── New canvas modal (toolbar) ────────────────────────────────────────────────
+const NC_MODAL_W = 480
+const NC_MODAL_H = 360
+
+const newCanvasModal      = document.getElementById('newCanvasModal')
+const newCanvasPreset     = document.getElementById('newCanvasPreset')
+const newCanvasW          = document.getElementById('newCanvasW')
+const newCanvasH          = document.getElementById('newCanvasH')
+const newCanvasBg         = document.getElementById('newCanvasBg')
+const newCanvasTrans      = document.getElementById('newCanvasTrans')
+const btnNewCanvasOk      = document.getElementById('btnNewCanvasOk')
+const btnNewCanvasCancel  = document.getElementById('btnNewCanvasCancel')
+const newCanvasModalClose = document.getElementById('newCanvasModalClose')
+
+let ncTransparent = false
+
+async function showNewCanvasModal() {
+  await expandForModal(NC_MODAL_W, NC_MODAL_H)
+  newCanvasModal.classList.remove('hidden')
+}
+
+function hideNewCanvasModal() {
+  newCanvasModal.classList.add('hidden')
+  collapseToToolbar()
+}
+
+newCanvasPreset.addEventListener('change', () => {
+  const v = newCanvasPreset.value
+  if (v === 'custom') return
+  const [w, h] = v.split('x').map(Number)
+  newCanvasW.value = w
+  newCanvasH.value = h
+})
+
+newCanvasTrans.addEventListener('click', () => {
+  ncTransparent = !ncTransparent
+  newCanvasTrans.classList.toggle('active', ncTransparent)
+  newCanvasBg.disabled = ncTransparent
+})
+
+;[btnNewCanvasCancel, newCanvasModalClose].forEach(btn =>
+  btn.addEventListener('click', hideNewCanvasModal)
+)
+
+btnNewCanvasOk.addEventListener('click', async () => {
+  const w = parseInt(newCanvasW.value, 10)
+  const h = parseInt(newCanvasH.value, 10)
+  if (!w || !h || w < 1 || h < 1) return
+  const bgColor = ncTransparent ? null : newCanvasBg.value
+  hideNewCanvasModal()
+  await ipcInvoke('new-canvas-create', { width: w, height: h, bgColor })
 })
 
 // ─── Batch conversion ─────────────────────────────────────────────────────────

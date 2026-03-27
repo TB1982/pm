@@ -457,6 +457,8 @@
 /* ─── New Canvas modal extras ────────────────────────── */
 .newcanvas-select {
   flex: 1;
+  min-width: 0;
+  max-width: 100%;
   background: #1a1a2e;
   border: 1px solid #3a3a5c;
   border-radius: 6px;
@@ -464,6 +466,7 @@
   font-size: 13px;
   padding: 4px 8px;
   cursor: pointer;
+  box-sizing: border-box;
 }
 .newcanvas-select:focus { outline: none; border-color: #6b6baa; }
 .newcanvas-bg-row {
@@ -884,11 +887,6 @@
   <!-- Body -->
   <div class="editor-body">
 
-    <!-- Open menu dropdown (outside toolbar for z-index) -->
-    <div class="open-menu-popup hidden" id="openMenuPopup">
-      <button class="open-menu-item" id="openMenuNewCanvas" data-i18n="open_menu_new">新開畫布</button>
-      <button class="open-menu-item" id="openMenuOpenFile" data-i18n="open_menu_file">開啟檔案</button>
-    </div>
     <input type="file" id="fileInputOpen" accept="image/*" class="hidden" style="display:none">
 
     <!-- Left toolbar (雙排) -->
@@ -957,76 +955,6 @@
   </div>
 
 
-</div>
-
-<!-- New Canvas modal -->
-<div class="modal-overlay hidden" id="newCanvasModal">
-  <div class="modal">
-    <div class="modal-header">
-      <h2 data-i18n="newcanvas_title">新開畫布</h2>
-      <button class="modal-close" id="newCanvasModalClose">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="resize-fields">
-        <!-- Preset selector -->
-        <div class="resize-row">
-          <span class="opt-label resize-lbl" data-i18n="newcanvas_preset">預設尺寸</span>
-          <select id="newCanvasPreset" class="newcanvas-select">
-            <option value="custom" data-i18n="newcanvas_custom">自訂</option>
-            <optgroup label="螢幕">
-              <option value="1280x720">HD（1280 × 720）</option>
-              <option value="1920x1080">Full HD（1920 × 1080）</option>
-              <option value="2560x1440">2K（2560 × 1440）</option>
-              <option value="3840x2160">4K（3840 × 2160）</option>
-            </optgroup>
-            <optgroup label="紙張（72 dpi）">
-              <option value="595x842">A4 直（595 × 842）</option>
-              <option value="842x595">A4 橫（842 × 595）</option>
-              <option value="842x1191">A3 直（842 × 1191）</option>
-              <option value="1191x842">A3 橫（1191 × 842）</option>
-            </optgroup>
-            <optgroup label="社群媒體（建議尺寸）">
-              <option value="1080x1080">IG 貼文 1:1（1080 × 1080）</option>
-              <option value="1080x1350">IG 貼文 4:5（1080 × 1350）</option>
-              <option value="1080x1920">IG / TikTok Story 9:16（1080 × 1920）</option>
-              <option value="1200x630">Facebook 貼文（1200 × 630）</option>
-              <option value="1600x900">X / Twitter（1600 × 900）</option>
-              <option value="1200x627">LinkedIn（1200 × 627）</option>
-              <option value="1280x720">YouTube 縮圖（1280 × 720）</option>
-            </optgroup>
-            <optgroup label="其他">
-              <option value="1000x1000">正方形（1000 × 1000）</option>
-              <option value="800x600">800 × 600</option>
-            </optgroup>
-          </select>
-        </div>
-        <!-- Width -->
-        <div class="resize-row">
-          <span class="opt-label resize-lbl" data-i18n="resize_width">寬度</span>
-          <input type="number" id="newCanvasW" min="1" max="99999" value="1920" class="resize-input">
-          <span class="opt-label">px</span>
-        </div>
-        <!-- Height -->
-        <div class="resize-row">
-          <span class="opt-label resize-lbl" data-i18n="resize_height">高度</span>
-          <input type="number" id="newCanvasH" min="1" max="99999" value="1080" class="resize-input">
-          <span class="opt-label">px</span>
-        </div>
-        <!-- Background colour -->
-        <div class="resize-row">
-          <span class="opt-label resize-lbl" data-i18n="newcanvas_bg">背景顏色</span>
-          <div class="newcanvas-bg-row">
-            <input type="color" id="newCanvasBgColor" value="#ffffff" class="newcanvas-color-input">
-            <button class="newcanvas-trans-btn" id="newCanvasBgTrans" data-i18n="newcanvas_transparent">透明</button>
-          </div>
-        </div>
-      </div>
-      <div class="modal-actions">
-        <button class="btn-secondary" id="btnNewCanvasCancel" data-i18n="resize_cancel">取消</button>
-        <button class="btn-primary"   id="btnNewCanvasConfirm" data-i18n="newcanvas_create">建立</button>
-      </div>
-    </div>
-  </div>
 </div>
 
 <!-- Resize modal -->

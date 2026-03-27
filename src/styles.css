@@ -818,3 +818,97 @@ kbd {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ─── Open-menu popup (toolbar 開啟 button dropdown) ──────────────────────── */
+.open-wrap { position: relative; display: inline-flex; }
+
+.open-menu-popup {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  background: #1e1e2e;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  z-index: 200;
+  min-width: 110px;
+  overflow: hidden;
+}
+
+.open-menu-popup.hidden { display: none; }
+
+.open-menu-item {
+  display: block;
+  width: 100%;
+  padding: 9px 14px;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: #c8d0e8;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.open-menu-item:hover { background: #2a2a48; color: #fff; }
+
+/* ─── New canvas form fields (toolbar modal) ──────────────────────────────── */
+.nc-fields { display: flex; flex-direction: column; gap: 10px; }
+
+.nc-row { display: flex; align-items: center; gap: 8px; }
+
+.nc-lbl { width: 72px; font-size: 12px; color: #888; flex-shrink: 0; }
+
+.nc-select {
+  flex: 1;
+  min-width: 0;
+  background: #1a1a2e;
+  border: 1px solid #3a3a5c;
+  border-radius: 6px;
+  color: #c8d0e8;
+  font-size: 12px;
+  padding: 5px 8px;
+  cursor: pointer;
+}
+
+.nc-select:focus { outline: none; border-color: #6b6baa; }
+
+.nc-input {
+  width: 80px;
+  background: #1a1a2e;
+  border: 1px solid #3a3a5c;
+  border-radius: 6px;
+  color: #c8d0e8;
+  font-size: 12px;
+  padding: 5px 8px;
+  text-align: center;
+}
+
+.nc-input:focus { outline: none; border-color: #6b6baa; }
+
+.nc-unit { font-size: 11px; color: #666; }
+
+.nc-bg-row { display: flex; align-items: center; gap: 8px; }
+
+.nc-color {
+  width: 34px; height: 26px;
+  border: 1px solid #3a3a5c;
+  border-radius: 4px;
+  padding: 0 2px;
+  background: none;
+  cursor: pointer;
+}
+
+.nc-trans-btn {
+  font-size: 11px;
+  padding: 4px 10px;
+  background: #1e2030;
+  border: 1px solid #3a3a5c;
+  border-radius: 5px;
+  color: #a0a8c0;
+  cursor: pointer;
+  transition: background 0.1s, border-color 0.1s;
+}
+
+.nc-trans-btn:hover  { background: #2a2a48; border-color: #6b6baa; color: #d0d8f0; }
+.nc-trans-btn.active { background: #2a2a48; border-color: #7c7ccc; color: #fff; }

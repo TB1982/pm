@@ -254,6 +254,26 @@ ipcMain.handle('open-image-file', async (event) => {
   openEditorWindow(result.filePaths[0])
 })
 
+// ─── New canvas (from toolbar "新開畫布") ──────────────────────────────────────
+
+ipcMain.handle('new-canvas-create', async (_, { width, height, bgColor }) => {
+  try {
+    const tmpPath = path.join(app.getPath('temp'), `vas-canvas-${Date.now()}.png`)
+    const bg = bgColor
+      ? (() => {
+          const h = bgColor.replace('#', '')
+          return { r: parseInt(h.slice(0, 2), 16), g: parseInt(h.slice(2, 4), 16), b: parseInt(h.slice(4, 6), 16), alpha: 255 }
+        })()
+      : { r: 0, g: 0, b: 0, alpha: 0 }
+    await sharp({ create: { width, height, channels: 4, background: bg } }).png().toFile(tmpPath)
+    mainWindow.hide()
+    openEditorWindow(tmpPath, null)
+    return { ok: true }
+  } catch (err) {
+    return { ok: false, error: String(err) }
+  }
+})
+
 // ─── Select watermark image ────────────────────────────────────────────────────
 
 ipcMain.handle('select-watermark-image', async (event) => {
@@ -743,7 +763,7 @@ ipcMain.handle('capture-rect', async (event, rect) => {
     const qr = await detectQR(tmpPath, gw, gh)
     if (qr) {
       const isUrl = /^https?:\/\//i.test(qr.data)
-      if (qr.ratio >= 70) {
+      if (qr.ratio >= 45) {
         // Intentional scan — open URL directly, skip editor
         if (isUrl) {
           shell.openExternal(qr.data)

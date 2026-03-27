@@ -5780,103 +5780,11 @@ if (window.electronAPI) {
 
 // ─── Open Menu (新開畫布 / 開啟檔案) ────────────────────────────────────────
 
-const _openMenuPopup    = document.getElementById('openMenuPopup')
-const _newCanvasModal   = document.getElementById('newCanvasModal')
-const _fileInputOpen    = document.getElementById('fileInputOpen')
-let   _newCanvasBgTransparent = false
+// ── 開啟檔案（⊞ 直接開檔） ────────────────────────────────────────────────────
 
-// Toggle dropdown when ⊞ button clicked
-document.getElementById('btnOpenMenu').addEventListener('click', e => {
-  e.stopPropagation()
-  if (_openMenuPopup.classList.contains('hidden')) {
-    const rect = e.currentTarget.getBoundingClientRect()
-    _openMenuPopup.style.left = (rect.right + 6) + 'px'
-    _openMenuPopup.style.top  = rect.top + 'px'
-    _openMenuPopup.classList.remove('hidden')
-  } else {
-    _openMenuPopup.classList.add('hidden')
-  }
-})
+const _fileInputOpen = document.getElementById('fileInputOpen')
 
-// Close dropdown on outside click
-document.addEventListener('click', () => _openMenuPopup.classList.add('hidden'))
-_openMenuPopup.addEventListener('click', e => e.stopPropagation())
-
-// ── 新開畫布 ──────────────────────────────────────────────────────────────────
-
-function openNewCanvasModal() {
-  _newCanvasBgTransparent = false
-  document.getElementById('newCanvasBgTrans').classList.remove('active')
-  document.getElementById('newCanvasBgColor').disabled = false
-  _newCanvasModal.classList.remove('hidden')
-}
-
-document.getElementById('openMenuNewCanvas').addEventListener('click', () => {
-  _openMenuPopup.classList.add('hidden')
-  openNewCanvasModal()
-})
-
-// Preset dropdown → fill width/height
-document.getElementById('newCanvasPreset').addEventListener('change', e => {
-  const val = e.target.value
-  if (val === 'custom') return
-  const [w, h] = val.split('x').map(Number)
-  document.getElementById('newCanvasW').value = w
-  document.getElementById('newCanvasH').value = h
-})
-
-// Width/height manual edit → switch preset to "自訂"
-;['newCanvasW', 'newCanvasH'].forEach(id => {
-  document.getElementById(id).addEventListener('input', () => {
-    document.getElementById('newCanvasPreset').value = 'custom'
-  })
-})
-
-// Transparent toggle
-document.getElementById('newCanvasBgTrans').addEventListener('click', () => {
-  _newCanvasBgTransparent = !_newCanvasBgTransparent
-  document.getElementById('newCanvasBgTrans').classList.toggle('active', _newCanvasBgTransparent)
-  document.getElementById('newCanvasBgColor').disabled = _newCanvasBgTransparent
-})
-
-// Cancel / close
-document.getElementById('btnNewCanvasCancel').addEventListener('click', () => _newCanvasModal.classList.add('hidden'))
-document.getElementById('newCanvasModalClose').addEventListener('click', () => _newCanvasModal.classList.add('hidden'))
-_newCanvasModal.addEventListener('click', e => { if (e.target === _newCanvasModal) _newCanvasModal.classList.add('hidden') })
-
-// Confirm — create blank canvas
-document.getElementById('btnNewCanvasConfirm').addEventListener('click', () => {
-  const w = Math.max(1, parseInt(document.getElementById('newCanvasW').value) || 1)
-  const h = Math.max(1, parseInt(document.getElementById('newCanvasH').value) || 1)
-  const bgColor = _newCanvasBgTransparent ? null : document.getElementById('newCanvasBgColor').value
-
-  const off = document.createElement('canvas')
-  off.width = w; off.height = h
-  const octx = off.getContext('2d')
-  if (bgColor) { octx.fillStyle = bgColor; octx.fillRect(0, 0, w, h) }
-  // transparent: leave as-is (black alpha-0)
-
-  const newImg = new Image()
-  newImg.onload = () => {
-    imgElement  = newImg
-    imgWidth    = w; imgHeight   = h
-    annotations = []
-    history     = [[]]; historyIdx = 0
-    selectedId  = null; selectedIds = new Set(); userZoomed = false
-    document.getElementById('imgInfo').textContent = `${w} × ${h} px`
-    fitCanvas()
-    drawBase()
-    renderAnnotations()
-    showToast(t('toast_new_canvas', w, h))
-  }
-  newImg.src = bgColor ? off.toDataURL('image/png') : off.toDataURL('image/png')
-  _newCanvasModal.classList.add('hidden')
-})
-
-// ── 開啟檔案 ──────────────────────────────────────────────────────────────────
-
-document.getElementById('openMenuOpenFile').addEventListener('click', () => {
-  _openMenuPopup.classList.add('hidden')
+document.getElementById('btnOpenMenu').addEventListener('click', () => {
   _fileInputOpen.click()
 })
 
