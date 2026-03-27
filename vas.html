@@ -343,6 +343,51 @@
             </blockquote>
         </section>
 
+        <!-- Roadmap & Pricing -->
+        <section class="container mx-auto px-6 py-16 max-w-3xl" aria-labelledby="roadmap-heading">
+            <div class="divider mx-auto mb-8"></div>
+            <h2 id="roadmap-heading" class="text-xl font-bold mb-2 text-white/60 tracking-widest uppercase text-sm text-center" data-lang-key="roadmapTitle">Roadmap &amp; Pricing</h2>
+            <p class="text-white/40 text-sm text-center mb-10" data-lang-key="roadmapSub">兩個版本，一個故事</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Electron — current free -->
+                <div class="glass-section rounded-3xl p-7 flex flex-col gap-4 border border-white/10">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl" aria-hidden="true">📦</span>
+                        <div>
+                            <div class="text-white font-bold text-base" data-lang-key="planElectronName">Electron 版（現行）</div>
+                            <div class="text-white/40 text-xs mt-0.5" data-lang-key="planElectronPriceBadge">免費 · 完整功能</div>
+                        </div>
+                    </div>
+                    <ul class="space-y-2 text-white/65 text-sm flex-1" data-lang-key="planElectronFeatures">
+                        <li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>所有現有功能完整收錄</span></li>
+                        <li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>無使用期限，永久免費</span></li>
+                        <li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">△</span><span>安裝包體積較大（~113 MB）</span></li>
+                        <li class="flex gap-2"><span class="text-white/30 mt-0.5" aria-hidden="true">—</span><span>發布後不再新增功能</span></li>
+                    </ul>
+                    <div class="text-white/25 text-xs border-t border-white/10 pt-4" data-lang-key="planElectronNote">首發版本，功能完整，歡迎久用。</div>
+                </div>
+
+                <!-- Tauri — coming paid -->
+                <div class="glass-section rounded-3xl p-7 flex flex-col gap-4 border border-purple-400/25" style="background: linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(59,130,246,0.08) 100%);">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl" aria-hidden="true">🚀</span>
+                        <div>
+                            <div class="text-white font-bold text-base" data-lang-key="planTauriName">Tauri 版（開發中）</div>
+                            <div class="text-purple-300/70 text-xs mt-0.5" data-lang-key="planTauriPriceBadge">付費 · 持續更新</div>
+                        </div>
+                    </div>
+                    <ul class="space-y-2 text-white/65 text-sm flex-1" data-lang-key="planTauriFeatures">
+                        <li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>全新輕量架構，體積大幅縮小</span></li>
+                        <li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>所有後續新功能優先上線</span></li>
+                        <li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>旋轉、截圖歷史等進階工具</span></li>
+                        <li class="flex gap-2"><span class="text-purple-300/80 mt-0.5" aria-hidden="true">★</span><span>Electron 早鳥用戶享升級優惠</span></li>
+                    </ul>
+                    <div class="text-purple-300/40 text-xs border-t border-purple-400/15 pt-4" data-lang-key="planTauriNote">現在使用 Electron 版，等 Tauri 版推出時享有早鳥優惠。</div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <!-- Footer -->
@@ -409,7 +454,17 @@
                 footer: '由 GitHub 部署　｜　Claude Code 傾力打造　｜　<a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a> 最後更新於 2026',
                 gkTitle: '⚠️ 第一次開啟 VAS',
                 gkDesc: 'macOS 可能顯示「無法開啟」。這是正常的安全機制，不代表檔案有問題。按照以下任一方式即可解決：',
-                gkSteps: '<li><strong class="text-white/70">右鍵開啟：</strong>在 Finder 找到 Vas.app → 按住 Control 點一下 → 選「開啟」→ 再點「開啟」確認</li><li><strong class="text-white/70">終端機指令：</strong>執行 <code class="bg-white/10 px-1.5 py-0.5 rounded text-white/80">xattr -cr /Applications/Vas.app</code></li>'
+                gkSteps: '<li><strong class="text-white/70">右鍵開啟：</strong>在 Finder 找到 Vas.app → 按住 Control 點一下 → 選「開啟」→ 再點「開啟」確認</li><li><strong class="text-white/70">終端機指令：</strong>執行 <code class="bg-white/10 px-1.5 py-0.5 rounded text-white/80">xattr -cr /Applications/Vas.app</code></li>',
+                roadmapTitle: 'Roadmap &amp; Pricing',
+                roadmapSub: '兩個版本，一個故事',
+                planElectronName: 'Electron 版（現行）',
+                planElectronPriceBadge: '免費 · 完整功能',
+                planElectronFeatures: '<li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>所有現有功能完整收錄</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>無使用期限，永久免費</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">△</span><span>安裝包體積較大（~113 MB）</span></li><li class="flex gap-2"><span class="text-white/30 mt-0.5" aria-hidden="true">—</span><span>發布後不再新增功能</span></li>',
+                planElectronNote: '首發版本，功能完整，歡迎久用。',
+                planTauriName: 'Tauri 版（開發中）',
+                planTauriPriceBadge: '付費 · 持續更新',
+                planTauriFeatures: '<li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>全新輕量架構，體積大幅縮小</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>所有後續新功能優先上線</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>旋轉、截圖歷史等進階工具</span></li><li class="flex gap-2"><span class="text-purple-300/80 mt-0.5" aria-hidden="true">★</span><span>Electron 早鳥用戶享升級優惠</span></li>',
+                planTauriNote: '現在使用 Electron 版，等 Tauri 版推出時享有早鳥優惠。'
             },
             en: {
                 backLabel: 'Deep Holding Project',
@@ -468,7 +523,17 @@
                 footer: 'Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by <a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a>',
                 gkTitle: '⚠️ First time opening VAS',
                 gkDesc: 'macOS may show "cannot be opened". This is a normal security check — not a problem with the file. Fix it with either method below:',
-                gkSteps: '<li><strong class="text-white/70">Right-click to open:</strong> Find Vas.app in Finder → Control-click → select "Open" → click "Open" to confirm</li><li><strong class="text-white/70">Terminal command:</strong> Run <code class="bg-white/10 px-1.5 py-0.5 rounded text-white/80">xattr -cr /Applications/Vas.app</code></li>'
+                gkSteps: '<li><strong class="text-white/70">Right-click to open:</strong> Find Vas.app in Finder → Control-click → select "Open" → click "Open" to confirm</li><li><strong class="text-white/70">Terminal command:</strong> Run <code class="bg-white/10 px-1.5 py-0.5 rounded text-white/80">xattr -cr /Applications/Vas.app</code></li>',
+                roadmapTitle: 'Roadmap &amp; Pricing',
+                roadmapSub: 'Two versions, one story',
+                planElectronName: 'Electron (Current)',
+                planElectronPriceBadge: 'Free · Full-featured',
+                planElectronFeatures: '<li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>All current features included</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>No expiry — free forever</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">△</span><span>Larger install size (~113 MB)</span></li><li class="flex gap-2"><span class="text-white/30 mt-0.5" aria-hidden="true">—</span><span>No new features after initial release</span></li>',
+                planElectronNote: 'The launch version — fully capable. Keep using it as long as you like.',
+                planTauriName: 'Tauri (Coming Soon)',
+                planTauriPriceBadge: 'Paid · Continuously updated',
+                planTauriFeatures: '<li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>New lightweight architecture — much smaller footprint</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>All future features land here first</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>Rotation, capture history, and more advanced tools</span></li><li class="flex gap-2"><span class="text-purple-300/80 mt-0.5" aria-hidden="true">★</span><span>Electron early adopters get an upgrade discount</span></li>',
+                planTauriNote: 'Use the Electron version now — early adopter pricing awaits when Tauri launches.'
             }
         };
 
