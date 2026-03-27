@@ -442,7 +442,7 @@
                 dev8n: '一鍵複製 + 拖曳匯出', dev8d: '截完直接貼進 GitHub issue、PR comment、Slack 頻道，不需存檔再附加；截圖變附件，動作少一半',
                 toolbarLabel: '截圖工具列',
                 storyTitle: 'Origin',
-                storyBody: '來自一位<strong class="text-white">一行程式碼都不會寫的 PM</strong>，<br>以及 Claude Code 的 Claude，<br>人機協作 <strong class="gradient-text text-2xl font-bold">一週</strong>內迭代至 v3.37 而誕生的作品。',
+                storyBody: '來自一位<strong class="text-white">一行程式碼都不會寫的 PM</strong>，<br>以及 Claude Code 的 Claude，<br>人機協作 <strong class="gradient-text text-2xl font-bold">一週</strong> 內迭代至 v3.37 而誕生的作品。',
                 storyByline: '— Nova & Claude，2026',
                 footer: '由 GitHub 部署　｜　Claude Code 傾力打造　｜　<a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a> 最後更新於 2026',
                 gkTitle: '⚠️ 第一次開啟 VAS',
@@ -551,6 +551,8 @@
 
         langZhBtn.addEventListener('click', () => switchLanguage('zh'));
         langEnBtn.addEventListener('click', () => switchLanguage('en'));
+
+        switchLanguage('zh'); // 初始化：套用 zh i18n key，確保硬寫內容與翻譯一致
 
         // ── Persona Tab switching ──────────────────────────────────────────────
         document.querySelectorAll('.tab-btn').forEach(btn => {
