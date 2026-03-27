@@ -50,6 +50,29 @@ body {
   margin: 0 4px;
 }
 
+.tb-drag-handle {
+  -webkit-app-region: drag;
+  display: grid;
+  grid-template-columns: repeat(2, 4px);
+  grid-template-rows: repeat(3, 4px);
+  gap: 3px;
+  padding: 0 8px 0 6px;
+  flex-shrink: 0;
+  cursor: grab;
+}
+
+.tb-drag-handle span {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  pointer-events: none;
+}
+
+.toolbar:hover .tb-drag-handle span {
+  background: rgba(255, 255, 255, 0.38);
+}
+
 /* ─── Toolbar buttons ───────────────────────────────────────────────────────── */
 
 .tb-btn {
