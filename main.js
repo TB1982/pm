@@ -206,7 +206,10 @@ ipcMain.on('close-editor-window', (event) => {
 })
 
 // Clipboard (handled in main process to avoid contextBridge serialisation issues)
-ipcMain.handle('open-url', (_, url) => { shell.openExternal(url) })
+ipcMain.handle('open-url', (_, url) => {
+  if (typeof url !== 'string' || !/^https?:\/\//i.test(url)) return
+  shell.openExternal(url)
+})
 ipcMain.handle('clipboard-write-text', (_, text) => { clipboard.writeText(text) })
 ipcMain.handle('clipboard-write-image', (_, dataURL) => {
   clipboard.writeImage(nativeImage.createFromDataURL(dataURL))
