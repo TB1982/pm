@@ -3773,12 +3773,25 @@ Menu.buildFromTemplate([{
 | **兩點貝茲曲線（Cubic Bezier）** | 升級為兩個控制點，與免費版單點貝茲做功能區隔；需更新資料模型（cp1/cp2 相對偏移）、渲染（`bezierCurveTo`）、handle 顯示（端點連控制點虛線）、箭頭切線角度計算 |
 | **Share Sheet（系統原生分享）** | 刻意不在 Electron 版實作，作為付費版差異化功能；Tauri 版使用 `tauri-plugin-share` 呼叫 `NSSharingServicePicker` |
 | **線條漸層（Line Gradient Stroke）** | 箭頭 / 曲線支援起點→終點雙色漸層；Canvas 原生 `ctx.createLinearGradient` 即可實作，`strokeStyle` 直接吃 gradient object；貝茲曲線以端點連線方向計算漸層向量 |
-| **日文 UI 在地化（ja）** | 新增第三語系；i18n 架構擴充為 zh / en / ja 三包翻譯；隱私遮蔽規則補充日文場景特化（マイナンバー、電話番号 JP 格式、メールアドレス）；韌性市場拓展 |
+| **日文 UI 在地化（ja）** ⚑ | 新增第三語系；i18n 架構擴充為 zh / en / ja 三包翻譯；隱私遮蔽規則補充日文場景特化（マイナンバー、電話番号 JP 格式、メールアドレス）；韌性市場拓展。**⚑ 優先項：此項須在 Tauri 開發早期完成，早於所有新功能開發。見下方「Tauri 開發順序約束」。** |
 | **批次網頁截圖（Batch Web Capture）** | 使用者貼入多個 URL，VAS 以 Playwright 依序開啟每個頁面並截圖，自動以網域+頁名命名存檔；主要使用者場景：QA 版本比對（確認每頁是否跑版）、RWD 多頁確認、多語系版面核對；市場上無同類輕量 Mac 桌面工具，為差異化功能 |
 | **捲軸截圖（Scrolling / Full-Page Capture）** | 截取超過視窗高度的完整網頁；以 Playwright `page.screenshot({ fullPage: true })` 實作，自動捲動並拼接，處理 sticky header 重疊問題；需求高但實作複雜，列為 Tauri 版研究工項 |
 | **圖片轉 PDF（Image to PDF）** | 將一張或多張圖片（JPG / PNG / WebP）打包為單一 PDF 檔案；使用 Rust `printpdf` crate 實作，無需 Adobe 授權；支援自訂頁面尺寸與排列順序 |
 
 > 旋轉的渲染核心：每個標注新增 `angle` 欄位，選取時顯示旋轉把手，`ctx.save()` → `ctx.translate(cx,cy)` → `ctx.rotate(angle)` → 繪製 → `ctx.restore()`。點擊偵測需將滑鼠座標反向旋轉至物件局部座標系再判斷 hit。
+
+#### Tauri 開發順序約束
+
+日文在地化必須在任何新功能開發之前完成。原因：
+- i18n 架構擴充為三語系後，所有新 UI 字串都要同時寫三份（zh / en / ja）
+- 若新功能先上，日文又落後，會重蹈 Electron 版 v3.43 雙語盤查的覆轍
+- 日文翻譯完成後，術語表（§ 9.2）同步擴充 `ja` 欄，作為後續開發的對照基準
+
+**Tauri 功能開發啟動前，日文 DoD 必須全部打 `[x]`：**
+- [ ] `i18n.js`（或 Tauri 對應的 i18n 模組）加入完整 `ja` 翻譯包
+- [ ] 所有 UI 元素以 ja 語系顯示，目視確認無空白或 fallback key
+- [ ] 隱私遮蔽規則補充日文場景（マイナンバー、JP 電話番号、メールアドレス）
+- [ ] § 9.2 術語對照表新增 `ja` 欄
 
 #### 遷移檢查清單（啟動前確認）
 - [ ] Electron 版本所有 TDD 測試案例全部通過

@@ -166,6 +166,18 @@ npm start         # launch the app
 
 ---
 
+## Tauri Migration — Development Constraints
+
+When the Electron → Tauri migration begins:
+
+1. **Japanese localization first** — before any new feature development starts in Tauri, Japanese UI (`ja`) must be complete and all DoD conditions met. This prevents repeating the Electron v3.43 bilingual audit situation with a third language.
+2. **i18n architecture is three-language from day one** — every new UI string added in Tauri must have `zh`, `en`, and `ja` entries simultaneously. The bilingual scope rule (three files) expands to include `ja` in all three.
+3. **§ 9.2 terminology table must include `ja` column** before feature development begins.
+
+See `SDD-mac-screenshot-tool.md` § 9.1 「Tauri 開發順序約束」for the full Japanese DoD checklist.
+
+---
+
 ## Feature Development Lifecycle — Electron Tool
 
 Every feature or bug fix must follow this sequence in order. Do not start the next stage until the current one is complete.
