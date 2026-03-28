@@ -315,22 +315,44 @@ fn apply_image_watermark(
   *img = image::DynamicImage::ImageRgba8(base);
 }
 
+/// Load the best available macOS system font, preferring CJK-capable fonts.
+/// Tries TTC (TrueType Collection) files with index 0, then plain TTF/OTF.
+fn load_best_font() -> Option<ab_glyph::FontVec> {
+  struct Candidate { path: &'static str, is_ttc: bool }
+  let candidates = [
+    // CJK-capable — covers zh/ja/ko + Latin
+    Candidate { path: "/System/Library/Fonts/PingFang.ttc",              is_ttc: true  },
+    Candidate { path: "/System/Library/Fonts/Hiragino Sans GB.ttc",      is_ttc: true  },
+    Candidate { path: "/System/Library/Fonts/STHeiti Light.ttc",         is_ttc: true  },
+    Candidate { path: "/Library/Fonts/Arial Unicode MS.ttf",             is_ttc: false },
+    // Latin fallback
+    Candidate { path: "/System/Library/Fonts/Supplemental/Arial.ttf",    is_ttc: false },
+    Candidate { path: "/Library/Fonts/Arial.ttf",                        is_ttc: false },
+    Candidate { path: "/System/Library/Fonts/Geneva.ttf",                is_ttc: false },
+  ];
+  for c in &candidates {
+    if let Ok(data) = std::fs::read(c.path) {
+      let result = if c.is_ttc {
+        ab_glyph::FontVec::try_from_vec_and_index(data, 0)
+      } else {
+        ab_glyph::FontVec::try_from_vec(data)
+      };
+      if let Ok(font) = result { return Some(font); }
+    }
+  }
+  None
+}
+
 fn apply_text_watermark(
   img: &mut image::DynamicImage, text: &str, font_size: f32,
   color_hex: &str, opacity: f64, position: &str, margin: u32,
 ) {
   use ab_glyph::{FontVec, PxScale, Font as AbFont, ScaleFont, Glyph, point};
 
-  // Try common macOS TTF font paths (this is a macOS-only app)
-  let font_bytes: Option<Vec<u8>> = [
-    "/System/Library/Fonts/Supplemental/Arial.ttf",
-    "/Library/Fonts/Arial.ttf",
-    "/System/Library/Fonts/Geneva.ttf",
-    "/System/Library/Fonts/Helvetica.ttf",
-  ].iter().find_map(|p| std::fs::read(p).ok());
-
-  let font_bytes = match font_bytes { Some(b) => b, None => return };
-  let font = match FontVec::try_from_vec(font_bytes) { Ok(f) => f, Err(_) => return };
+  // Prefer CJK-capable fonts so Chinese/Japanese/Korean characters render correctly.
+  // TTC (TrueType Collection) files must be loaded with try_from_vec_and_index.
+  let font = load_best_font();
+  let font = match font { Some(f) => f, None => return };
 
   let scale  = PxScale::from(font_size);
   let scaled = font.as_scaled(scale);
