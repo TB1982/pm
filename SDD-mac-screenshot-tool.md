@@ -3774,7 +3774,9 @@ Menu.buildFromTemplate([{
 | **Share Sheet（系統原生分享）** | 刻意不在 Electron 版實作，作為付費版差異化功能；Tauri 版使用 `tauri-plugin-share` 呼叫 `NSSharingServicePicker` |
 | **線條漸層（Line Gradient Stroke）** | 箭頭 / 曲線支援起點→終點雙色漸層；Canvas 原生 `ctx.createLinearGradient` 即可實作，`strokeStyle` 直接吃 gradient object；貝茲曲線以端點連線方向計算漸層向量 |
 | **日文 UI 在地化（ja）** | 新增第三語系；i18n 架構擴充為 zh / en / ja 三包翻譯；隱私遮蔽規則補充日文場景特化（マイナンバー、電話番号 JP 格式、メールアドレス）；韌性市場拓展 |
-| **批次截圖（Batch Capture）** | 一次截多個視窗或區域、依序觸發並自動命名存檔；Electron IPC 多視窗協調複雜度高，Tauri 原生多視窗 API 更適合實作 |
+| **批次網頁截圖（Batch Web Capture）** | 使用者貼入多個 URL，VAS 以 Playwright 依序開啟每個頁面並截圖，自動以網域+頁名命名存檔；主要使用者場景：QA 版本比對（確認每頁是否跑版）、RWD 多頁確認、多語系版面核對；市場上無同類輕量 Mac 桌面工具，為差異化功能 |
+| **捲軸截圖（Scrolling / Full-Page Capture）** | 截取超過視窗高度的完整網頁；以 Playwright `page.screenshot({ fullPage: true })` 實作，自動捲動並拼接，處理 sticky header 重疊問題；需求高但實作複雜，列為 Tauri 版研究工項 |
+| **圖片轉 PDF（Image to PDF）** | 將一張或多張圖片（JPG / PNG / WebP）打包為單一 PDF 檔案；使用 Rust `printpdf` crate 實作，無需 Adobe 授權；支援自訂頁面尺寸與排列順序 |
 
 > 旋轉的渲染核心：每個標注新增 `angle` 欄位，選取時顯示旋轉把手，`ctx.save()` → `ctx.translate(cx,cy)` → `ctx.rotate(angle)` → 繪製 → `ctx.restore()`。點擊偵測需將滑鼠座標反向旋轉至物件局部座標系再判斷 hit。
 
