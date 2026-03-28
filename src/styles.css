@@ -690,23 +690,25 @@ kbd {
   flex: 1;
   min-width: 0;
 }
-.wm-color-input {
-  -webkit-appearance: none;
+/* 自製色塊按鈕（取代 input[type=color] 的原生外觀，相容 WKWebView） */
+.wm-color-swatch {
   width: 28px;
   height: 24px;
-  border: 1px solid rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
   border-radius: 4px;
-  background: none;
+  background: #ffffff;
   cursor: pointer;
-  padding: 0;
+  flex-shrink: 0;
+  transition: border-color 0.15s;
 }
-.wm-color-input::-webkit-color-swatch-wrapper {
-  padding: 2px;
-  border-radius: 3px;
-}
-.wm-color-input::-webkit-color-swatch {
-  border: none;
-  border-radius: 2px;
+.wm-color-swatch:hover { border-color: rgba(255,255,255,0.5); }
+/* 隱藏真正的 color input；保留 DOM 元素讓瀏覽器彈出色盤 */
+.wm-color-hidden {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
 }
 .wm-grid {
   display: grid;

@@ -481,6 +481,14 @@ document.getElementById('wmImgSelectBtn').addEventListener('click', async () => 
   }
 })
 
+// 色塊按鈕：點擊色塊 → 觸發隱藏的 color input；顏色變更 → 同步色塊背景
+const wmTextColorSwatch = document.getElementById('wmTextColorSwatch')
+const wmTextColorInput  = document.getElementById('wmTextColor')
+wmTextColorSwatch.addEventListener('click', () => wmTextColorInput.click())
+wmTextColorInput.addEventListener('input', () => {
+  wmTextColorSwatch.style.background = wmTextColorInput.value
+})
+
 document.getElementById('wmTextGrid').addEventListener('click', (e) => {
   const cell = e.target.closest('.wm-cell')
   if (!cell) return
