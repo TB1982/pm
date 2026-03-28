@@ -172,9 +172,9 @@ When the Electron → Tauri migration begins:
 
 1. **Japanese localization first** — before any new feature development starts in Tauri, Japanese UI (`ja`) must be complete and all DoD conditions met. This prevents repeating the Electron v3.43 bilingual audit situation with a third language.
 2. **i18n architecture is three-language from day one** — every new UI string added in Tauri must have `zh`, `en`, and `ja` entries simultaneously. The bilingual scope rule (three files) expands to include `ja` in all three.
-3. **§ 9.2 terminology table must include `ja` column** before feature development begins.
+3. **§ 10.2 terminology table must include `ja` column** before feature development begins.
 
-See `SDD-mac-screenshot-tool.md` § 9.1 「Tauri 開發順序約束」for the full Japanese DoD checklist.
+See `SDD-mac-screenshot-tool.md` § 10.1 「Tauri 開發順序約束」for the full Japanese DoD checklist.
 
 ---
 
@@ -329,7 +329,7 @@ docs(SDD): v0.8 更新文字工具規格與 TDD 測試案例
 **Pre-build gates (steps 1–5)**
 
 1. **Security audit** — run `npm audit`; resolve any moderate-or-above vulnerabilities before proceeding.
-2. **Bilingual verification** — audit `src/editor.html` and `src/editor.js` for any UI strings, toast messages, tooltips, or labels added since the last release that are missing their English translation. Cross-check against the terminology table in `SDD-mac-screenshot-tool.md` § 9.2.
+2. **Bilingual verification** — audit `src/editor.html` and `src/editor.js` for any UI strings, toast messages, tooltips, or labels added since the last release that are missing their English translation. Cross-check against the terminology table in `SDD-mac-screenshot-tool.md` § 10.2.
 3. **TDD sign-off** — confirm all test cases for the current version in SDD § 5 are marked `[x]`; no open `[ ]` items for shipped features.
 4. **Version sync** — verify that `package.json` version, the SDD `版本：` field, and the `vas.html` version strings (`迭代至 v` / `iterated together to v`) all match.
 5. **Certificate check** — confirm the Developer ID Application certificate is valid in Keychain (`security find-identity -v -p codesigning`). Do not start the build if the certificate is missing or expired.
