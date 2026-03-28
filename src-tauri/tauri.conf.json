@@ -9,6 +9,7 @@
     "beforeDevCommand": "python3 -m http.server 8080 --directory src"
   },
   "app": {
+    "macOSPrivateApi": true,
     "windows": [
       {
         "label": "toolbar",

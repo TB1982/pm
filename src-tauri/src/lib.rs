@@ -1,4 +1,5 @@
 use tauri::Manager;
+use tauri::window::Color;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -13,7 +14,7 @@ pub fn run() {
       }
       // Explicitly clear WebView background — transparent:true alone is insufficient on macOS
       if let Some(win) = app.get_webview_window("toolbar") {
-        let _ = win.set_background_color(Some(tauri::Color(0, 0, 0, 0)));
+        let _ = win.set_background_color(Some(Color(0, 0, 0, 0)));
       }
       Ok(())
     })
