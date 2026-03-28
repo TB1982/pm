@@ -33,12 +33,20 @@ pub fn run() {
 // ── Toolbar IPC stubs ──────────────────────────────────────────────────────
 
 #[tauri::command]
-async fn resize_for_modal(_width: u32, _height: u32) -> Result<(), String> {
+async fn resize_for_modal(app: tauri::AppHandle, width: u32, height: u32) -> Result<(), String> {
+  if let Some(win) = app.get_webview_window("toolbar") {
+    win.set_size(tauri::Size::Logical(tauri::LogicalSize { width: width as f64, height: height as f64 }))
+      .map_err(|e| e.to_string())?;
+  }
   Ok(())
 }
 
 #[tauri::command]
-async fn resize_to_toolbar() -> Result<(), String> {
+async fn resize_to_toolbar(app: tauri::AppHandle) -> Result<(), String> {
+  if let Some(win) = app.get_webview_window("toolbar") {
+    win.set_size(tauri::Size::Logical(tauri::LogicalSize { width: 520.0, height: 64.0 }))
+      .map_err(|e| e.to_string())?;
+  }
   Ok(())
 }
 
