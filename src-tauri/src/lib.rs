@@ -158,7 +158,8 @@ async fn batch_convert(app: tauri::AppHandle, payload: serde_json::Value) -> Res
   let output_mode  = payload["outputMode"].as_str().unwrap_or("same").to_string();
   let output_dir   = payload["outputDir"].as_str().map(String::from);
   let delete_orig  = payload["deleteOriginals"].as_bool().unwrap_or(false);
-  let resize_val   = payload.get("resize").cloned();
+  let resize_val    = payload.get("resize").cloned();
+  let watermark_val = if payload["watermark"].is_null() { None } else { payload.get("watermark").cloned() };
 
   let mut results = Vec::new();
   let total = files.len();
@@ -180,7 +181,7 @@ async fn batch_convert(app: tauri::AppHandle, payload: serde_json::Value) -> Res
                .unwrap_or_else(|| std::path::PathBuf::from(&new_name)),
     };
 
-    let mut r = match convert_single(src, &out_path, &format, quality, &resize_val) {
+    let mut r = match convert_single(src, &out_path, &format, quality, &resize_val, &watermark_val) {
       Ok(()) => {
         if delete_orig && src.to_string_lossy() != out_path.to_string_lossy() {
           let _ = std::fs::remove_file(src);
@@ -207,6 +208,7 @@ fn format_ext(fmt: &str) -> &'static str {
 fn convert_single(
   src: &std::path::Path, dst: &std::path::Path,
   format: &str, quality: u8, resize: &Option<serde_json::Value>,
+  watermark: &Option<serde_json::Value>,
 ) -> Result<(), String> {
   let mut img = image::open(src).map_err(|e| format!("無法開啟：{e}"))?;
 
@@ -214,6 +216,10 @@ fn convert_single(
     if let (Some(axis), Some(val)) = (r["axis"].as_str(), r["value"].as_u64()) {
       img = resize_img(img, axis, val as u32);
     }
+  }
+
+  if let Some(wm) = watermark {
+    apply_watermarks(&mut img, wm);
   }
 
   if let Some(parent) = dst.parent() {
@@ -238,6 +244,144 @@ fn convert_single(
     }
   }
   Ok(())
+}
+
+// ── Watermark helpers ─────────────────────────────────────────────────────────
+
+fn apply_watermarks(img: &mut image::DynamicImage, wm: &serde_json::Value) {
+  let position = wm["position"].as_str().unwrap_or("southeast");
+  let margin   = wm["margin"].as_u64().unwrap_or(20) as u32;
+
+  // Text layer first (underneath), then image layer on top — per spec
+  let text_wm = &wm["text"];
+  if text_wm["enabled"].as_bool().unwrap_or(false) {
+    let content = text_wm["content"].as_str().unwrap_or("");
+    if !content.is_empty() {
+      let size      = text_wm["size"].as_u64().unwrap_or(32) as f32;
+      let color_hex = text_wm["color"].as_str().unwrap_or("#ffffff");
+      let opacity   = text_wm["opacity"].as_u64().unwrap_or(80) as f64 / 100.0;
+      apply_text_watermark(img, content, size, color_hex, opacity, position, margin);
+    }
+  }
+
+  let img_wm = &wm["img"];
+  if img_wm["enabled"].as_bool().unwrap_or(false) {
+    let path      = img_wm["path"].as_str().unwrap_or("");
+    if !path.is_empty() {
+      let size_pct = img_wm["sizePercent"].as_u64().unwrap_or(20) as f64 / 100.0;
+      let opacity  = img_wm["opacity"].as_u64().unwrap_or(80) as f64 / 100.0;
+      apply_image_watermark(img, path, size_pct, opacity, position, margin);
+    }
+  }
+}
+
+/// Calculate top-left offset of a watermark element inside the base image.
+fn wm_offset(base_w: u32, base_h: u32, el_w: u32, el_h: u32, position: &str, margin: u32) -> (i64, i64) {
+  let (bw, bh) = (base_w as i64, base_h as i64);
+  let (ew, eh) = (el_w  as i64, el_h  as i64);
+  let m = margin as i64;
+  let x = match position {
+    "northeast" | "east" | "southeast" => bw - ew - m,
+    "northwest" | "west" | "southwest" => m,
+    _                                   => (bw - ew) / 2,
+  };
+  let y = match position {
+    "northwest" | "north" | "northeast" => m,
+    "southwest" | "south" | "southeast" => bh - eh - m,
+    _                                    => (bh - eh) / 2,
+  };
+  (x.max(0), y.max(0))
+}
+
+fn apply_image_watermark(
+  img: &mut image::DynamicImage, path: &str,
+  size_pct: f64, opacity: f64, position: &str, margin: u32,
+) {
+  let wm_src = match image::open(path) { Ok(i) => i, Err(_) => return };
+  let target_w = ((img.width() as f64) * size_pct).round() as u32;
+  if target_w == 0 { return; }
+  let target_h = {
+    let ratio = target_w as f64 / wm_src.width() as f64;
+    ((wm_src.height() as f64) * ratio).round() as u32
+  };
+  let mut wm_rgba = image::imageops::resize(
+    &wm_src.to_rgba8(), target_w, target_h.max(1), image::imageops::FilterType::Lanczos3,
+  );
+  // Apply opacity via alpha channel
+  for px in wm_rgba.pixels_mut() { px[3] = ((px[3] as f64) * opacity) as u8; }
+  let (x, y) = wm_offset(img.width(), img.height(), wm_rgba.width(), wm_rgba.height(), position, margin);
+  let mut base = img.to_rgba8();
+  image::imageops::overlay(&mut base, &wm_rgba, x, y);
+  *img = image::DynamicImage::ImageRgba8(base);
+}
+
+fn apply_text_watermark(
+  img: &mut image::DynamicImage, text: &str, font_size: f32,
+  color_hex: &str, opacity: f64, position: &str, margin: u32,
+) {
+  use ab_glyph::{FontVec, PxScale, Font as AbFont, ScaleFont, Glyph, point};
+
+  // Try common macOS TTF font paths (this is a macOS-only app)
+  let font_bytes: Option<Vec<u8>> = [
+    "/System/Library/Fonts/Supplemental/Arial.ttf",
+    "/Library/Fonts/Arial.ttf",
+    "/System/Library/Fonts/Geneva.ttf",
+    "/System/Library/Fonts/Helvetica.ttf",
+  ].iter().find_map(|p| std::fs::read(p).ok());
+
+  let font_bytes = match font_bytes { Some(b) => b, None => return };
+  let font = match FontVec::try_from_vec(font_bytes) { Ok(f) => f, Err(_) => return };
+
+  let scale  = PxScale::from(font_size);
+  let scaled = font.as_scaled(scale);
+
+  // Measure text bounding box
+  let text_w: f32 = text.chars().map(|c| scaled.h_advance(font.glyph_id(c))).sum();
+  let text_h = (scaled.ascent() - scaled.descent()).ceil() as u32;
+
+  let (ox, oy) = wm_offset(img.width(), img.height(), text_w as u32, text_h, position, margin);
+
+  // Parse hex color
+  let hex = color_hex.trim_start_matches('#');
+  let cr = u8::from_str_radix(hex.get(0..2).unwrap_or("ff"), 16).unwrap_or(255);
+  let cg = u8::from_str_radix(hex.get(2..4).unwrap_or("ff"), 16).unwrap_or(255);
+  let cb = u8::from_str_radix(hex.get(4..6).unwrap_or("ff"), 16).unwrap_or(255);
+
+  let mut base = img.to_rgba8();
+  let img_w = base.width() as i32;
+  let img_h = base.height() as i32;
+
+  // Baseline: top of bounding box + ascent
+  let baseline_y = oy as f32 + scaled.ascent();
+  let mut cursor_x = ox as f32;
+
+  for ch in text.chars() {
+    let glyph_id = font.glyph_id(ch);
+    let advance  = scaled.h_advance(glyph_id);
+    let glyph    = Glyph { id: glyph_id, scale, position: point(cursor_x, baseline_y) };
+    if let Some(outlined) = font.outline_glyph(glyph) {
+      let bounds = outlined.px_bounds();
+      outlined.draw(|px, py, coverage| {
+        let ix = bounds.min.x as i32 + px as i32;
+        let iy = bounds.min.y as i32 + py as i32;
+        if ix >= 0 && iy >= 0 && ix < img_w && iy < img_h {
+          // Porter-Duff src-over alpha compositing
+          let src_a = (opacity as f32) * coverage;
+          let pixel = base.get_pixel_mut(ix as u32, iy as u32);
+          let dst_a = pixel[3] as f32 / 255.0;
+          let out_a = src_a + dst_a * (1.0 - src_a);
+          if out_a > 0.0 {
+            pixel[0] = ((cr as f32 * src_a + pixel[0] as f32 * dst_a * (1.0 - src_a)) / out_a) as u8;
+            pixel[1] = ((cg as f32 * src_a + pixel[1] as f32 * dst_a * (1.0 - src_a)) / out_a) as u8;
+            pixel[2] = ((cb as f32 * src_a + pixel[2] as f32 * dst_a * (1.0 - src_a)) / out_a) as u8;
+            pixel[3] = (out_a * 255.0) as u8;
+          }
+        }
+      });
+    }
+    cursor_x += advance;
+  }
+  *img = image::DynamicImage::ImageRgba8(base);
 }
 
 fn resize_img(img: image::DynamicImage, axis: &str, value: u32) -> image::DynamicImage {
