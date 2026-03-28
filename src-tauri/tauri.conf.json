@@ -11,11 +11,20 @@
   "app": {
     "windows": [
       {
+        "label": "toolbar",
+        "url": "http://localhost:8080/editor.html",
         "title": "VAS",
-        "width": 800,
-        "height": 600,
-        "resizable": true,
-        "fullscreen": false
+        "width": 520,
+        "height": 64,
+        "minWidth": 520,
+        "minHeight": 64,
+        "maxHeight": 64,
+        "resizable": false,
+        "fullscreen": false,
+        "decorations": false,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "shadow": true
       }
     ],
     "security": {
