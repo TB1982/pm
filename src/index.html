@@ -286,23 +286,28 @@
               </label>
             </div>
             <div class="batch-wm-sub hidden" id="wmImgOpts">
-              <div class="wm-panel">
-                <div class="wm-controls">
-                  <div class="batch-row">
-                    <button class="dir-select-btn" id="wmImgSelectBtn" data-i18n="batch_wm_choose_img">選取圖片…</button>
-                    <span class="dir-path" id="wmImgPath" data-i18n="batch_not_selected">尚未選擇</span>
-                  </div>
+              <!-- 檔案選取列 -->
+              <div class="batch-row">
+                <button class="dir-select-btn" id="wmImgSelectBtn" data-i18n="batch_wm_choose_img">選取圖片…</button>
+                <span class="dir-path" id="wmImgPath" data-i18n="batch_not_selected">尚未選擇</span>
+              </div>
+              <!-- 3欄：預覽方塊 ｜ 數值設定 ｜ 位置格 -->
+              <div class="wm-img-layout">
+                <!-- 左：預覽方塊 (Logo 比例) -->
+                <div class="wm-img-preview" id="wmImgPreview">
+                  <span class="wm-img-preview-hint" data-i18n="batch_wm_preview">預覽</span>
+                </div>
+                <!-- 中：數值設定 -->
+                <div class="wm-img-controls">
                   <div class="batch-row">
                     <span class="opt-label" data-i18n="batch_wm_img_size">寬度佔比</span>
                     <input class="opt-num" type="number" id="wmImgSize" value="20" min="1" max="100">
                     <span class="opt-unit">%</span>
+                  </div>
+                  <div class="batch-row">
                     <span class="opt-label" data-i18n="batch_wm_opacity">不透明</span>
                     <input class="opt-num" type="number" id="wmImgOpacity" value="80" min="1" max="100">
                     <span class="opt-unit">%</span>
-                  </div>
-                  <!-- 預覽圖片 — Wishlist：待實作縮圖顯示 -->
-                  <div class="wm-img-preview" id="wmImgPreview">
-                    <span class="wm-img-preview-hint" data-i18n="batch_wm_preview">預覽圖片</span>
                   </div>
                   <div class="batch-row">
                     <span class="opt-label" data-i18n="batch_wm_margin">邊距</span>
@@ -310,6 +315,7 @@
                     <span class="opt-unit">px</span>
                   </div>
                 </div>
+                <!-- 右：位置 9-grid -->
                 <div class="wm-position-col">
                   <span class="wm-pos-header" data-i18n="batch_wm_position">位置</span>
                   <div class="wm-grid" id="wmImgGrid">

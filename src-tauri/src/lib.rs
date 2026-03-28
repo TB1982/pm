@@ -359,11 +359,32 @@ fn apply_text_watermark(
   let scale  = PxScale::from(font_size);
   let scaled = font.as_scaled(scale);
 
-  // Measure text bounding box
-  let text_w: f32 = text.chars().map(|c| scaled.h_advance(font.glyph_id(c))).sum();
   let text_h = (scaled.ascent() - scaled.descent()).ceil() as u32;
 
-  let (ox, oy) = wm_offset(img.width(), img.height(), text_w as u32, text_h, position, margin);
+  // First pass: measure actual pixel bounding box (h_advance overestimates due to
+  // right-bearing on last glyph; use real rendered bounds for accurate positioning).
+  let (actual_text_w, px_offset) = {
+    let mut min_px = f32::MAX;
+    let mut max_px = f32::MIN;
+    let mut cx = 0.0f32;
+    for ch in text.chars() {
+      let gid = font.glyph_id(ch);
+      let adv = scaled.h_advance(gid);
+      let g = Glyph { id: gid, scale, position: point(cx, scaled.ascent()) };
+      if let Some(ol) = font.outline_glyph(g) {
+        let b = ol.px_bounds();
+        if b.min.x < min_px { min_px = b.min.x; }
+        if b.max.x > max_px { max_px = b.max.x; }
+      }
+      cx += adv;
+    }
+    if min_px == f32::MAX { (0u32, 0.0f32) }  // text has no renderable glyphs
+    else { ((max_px - min_px).ceil() as u32, min_px) }
+  };
+
+  if actual_text_w == 0 { return; }  // nothing to draw (e.g. whitespace-only)
+
+  let (ox, oy) = wm_offset(img.width(), img.height(), actual_text_w, text_h, position, margin);
 
   // Parse hex color
   let hex = color_hex.trim_start_matches('#');
@@ -375,9 +396,10 @@ fn apply_text_watermark(
   let img_w = base.width() as i32;
   let img_h = base.height() as i32;
 
-  // Baseline: top of bounding box + ascent
+  // Baseline: top of bounding box + ascent.
+  // Subtract px_offset so the leftmost rendered pixel aligns with ox.
   let baseline_y = oy as f32 + scaled.ascent();
-  let mut cursor_x = ox as f32;
+  let mut cursor_x = ox as f32 - px_offset;
 
   for ch in text.chars() {
     let glyph_id = font.glyph_id(ch);
