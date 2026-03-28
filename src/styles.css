@@ -691,6 +691,11 @@ kbd {
   min-width: 0;
 }
 /* 自製色塊按鈕（取代 input[type=color] 的原生外觀，相容 WKWebView） */
+.wm-color-wrapper {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
 .wm-color-swatch {
   width: 28px;
   height: 24px;
@@ -698,17 +703,28 @@ kbd {
   border-radius: 4px;
   background: #ffffff;
   cursor: pointer;
-  flex-shrink: 0;
   transition: border-color 0.15s;
 }
 .wm-color-swatch:hover { border-color: rgba(255,255,255,0.5); }
-/* 隱藏真正的 color input；保留 DOM 元素讓瀏覽器彈出色盤 */
+/* 隱藏真正的 color input；絕對定位貼齊外層 wrapper，色盤才會從色塊附近彈出 */
 .wm-color-hidden {
   position: absolute;
-  width: 0;
-  height: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   opacity: 0;
   pointer-events: none;
+}
+
+/* 浮水印面板內縮小 label 寬度，讓文字設定列能塞入色塊 */
+.wm-controls .opt-label,
+.wm-img-controls .opt-label {
+  min-width: 52px;
+}
+/* 浮水印面板內縮小數字輸入框 */
+.wm-controls .opt-num,
+.wm-img-controls .opt-num {
+  width: 52px;
 }
 .wm-grid {
   display: grid;
@@ -750,7 +766,7 @@ kbd {
 /* Image watermark: 3-column — preview | controls | 9-grid */
 .wm-img-layout {
   display: flex;
-  gap: 16px;
+  gap: 24px;
   align-items: flex-start;
   padding: 4px 0 2px;
 }

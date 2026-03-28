@@ -254,9 +254,11 @@
                     <span class="opt-label" data-i18n="batch_wm_opacity">不透明</span>
                     <input class="opt-num" type="number" id="wmTextOpacity" value="80" min="1" max="100">
                     <span class="opt-unit">%</span>
-                    <!-- 自製色塊：點擊觸發隱藏的 color input，繞過 WKWebView 偽元素限制 -->
-                    <div class="wm-color-swatch" id="wmTextColorSwatch" title="選擇顏色"></div>
-                    <input type="color" id="wmTextColor" value="#ffffff" class="wm-color-hidden">
+                    <!-- 自製色塊：wrapper 提供 position:relative，讓色盤從色塊附近彈出 -->
+                    <span class="wm-color-wrapper">
+                      <div class="wm-color-swatch" id="wmTextColorSwatch" title="選擇顏色"></div>
+                      <input type="color" id="wmTextColor" value="#ffffff" class="wm-color-hidden">
+                    </span>
                   </div>
                   <div class="batch-row">
                     <input class="opt-text-input" type="text" id="wmText"
