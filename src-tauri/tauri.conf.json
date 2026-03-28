@@ -12,7 +12,7 @@
     "windows": [
       {
         "label": "toolbar",
-        "url": "http://localhost:8080/editor.html",
+        "url": "http://localhost:8080/index.html",
         "title": "VAS",
         "width": 520,
         "height": 64,
