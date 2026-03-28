@@ -27,9 +27,9 @@
         "shadow": true
       }
     ],
+    "withGlobalTauri": true,
     "security": {
-      "csp": null,
-      "withGlobalTauri": true
+      "csp": null
     }
   },
   "bundle": {
