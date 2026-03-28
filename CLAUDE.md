@@ -378,6 +378,11 @@ document.documentElement.lang = isEnglish ? 'en' : 'zh-Hant';
 ## AI Behaviour Rules
 
 - When editing content, **both Chinese and English variants must be updated simultaneously**. Never update one language without updating the other.
+- **Electron tool — bilingual scope:** The bilingual contract covers three files jointly. Any new UI string must be handled in all three at the same time:
+  1. `src/i18n.js` — add the key to **both** `zh` and `en` blocks.
+  2. `src/editor.html` — wire the element with the appropriate `data-i18n`, `data-i18n-title`, `data-i18n-placeholder`, or `data-i18n-aria` attribute. **Never hardcode a Chinese string directly in HTML.**
+  3. `src/editor.js` / `src/renderer.js` — use `t('key')` for any runtime-generated UI text. **Never interpolate a Chinese string literal in JS.**
+  Omitting any one of the three files creates the asymmetry that caused the v3.43 bilingual audit.
 - Do **not** introduce npm packages or local JS files to replace CDN dependencies (static site only).
 - Do **not** propose modifications to any file without reading it first.
 - When working on the Electron tool, follow the **Document Sync Rules** section above.
