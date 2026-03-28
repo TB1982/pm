@@ -166,16 +166,53 @@ npm start         # launch the app
 
 ---
 
-## Definition of Done — Electron Tool
+## Feature Development Lifecycle — Electron Tool
 
-A feature or bug fix is **not complete** until all four conditions are met. Never commit code that satisfies only some of them.
+Every feature or bug fix must follow this sequence in order. Do not start the next stage until the current one is complete.
+
+```
+DoR → SDD → DoD → TDD → Code → Verify → ✅ Done
+```
+
+### Stage 1 — Definition of Ready (DoR)
+
+Before writing any code or spec, confirm all three questions have clear answers:
+
+1. **What problem does this solve?** (user need or bug description)
+2. **How will we verify it's correct?** (acceptance criteria — becomes the TDD cases)
+3. **What existing features might be affected?** (regression scope)
+
+If any question is unanswered, discuss and resolve first. Do not proceed.
+
+### Stage 2 — SDD + DoD + TDD (written before coding)
+
+Once DoR passes, document first:
+
+1. **Update SDD** — bump version, add 變更紀錄 entry, write the feature spec.
+2. **Write TDD test cases** — add `- [ ]` cases to SDD § 5 covering all acceptance criteria from DoR.
+3. **Confirm DoD** — all four conditions below must be achievable for this feature before coding starts.
+
+### Stage 3 — Code
+
+Implement the feature. Bilingual must be handled in the same session as the code:
+- `src/i18n.js` — add key to **both** `zh` and `en`
+- `src/editor.html` — wire `data-i18n*` attribute; never hardcode Chinese in HTML
+- `src/editor.js` / `src/renderer.js` — use `t('key')`; never interpolate Chinese string literals
+
+### Stage 4 — Verify (TDD sign-off)
+
+Run through every `- [ ]` case added in Stage 2. Mark `[x]` only after passing. Do not move to the next feature until all cases are `[x]`.
+
+### Definition of Done (DoD)
+
+A feature is complete only when **all four** are true:
 
 | # | Condition | How to verify |
 |---|-----------|---------------|
-| 1 | **Code works** | Manually tested in `npm start` |
-| 2 | **TDD written & signed off** | SDD § 5 test cases added as `- [ ]`, then marked `[x]` after passing |
-| 3 | **SDD updated** | Version bumped, 變更紀錄 entry added, feature section reflects new behaviour |
-| 4 | **Bilingual complete** | `i18n.js` (zh + en) + `editor.html` (`data-i18n*`) + JS (`t()`) all updated in the same session |
+| 1 | **Code works** | All TDD cases marked `[x]` in SDD § 5 |
+| 2 | **SDD updated** | Version bumped, 變更紀錄 entry written, spec reflects new behaviour |
+| 3 | **Bilingual complete** | `i18n.js` + `editor.html` + JS all updated in same session |
+| 4 | **Committed** | `feat`/`fix` + `docs(SDD)` committed in same session |
 
 > **Rule of thumb:** If you'd feel uncomfortable running the DMG Release Checklist right now, the feature isn't done.
 
