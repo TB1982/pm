@@ -258,6 +258,20 @@ docs(SDD): v0.8 更新文字工具規格與 TDD 測試案例
 - **Canvas page** (`deepholding.html`) contains complex standalone JavaScript; test carefully after any edits.
 - **VAS version string in `vas.html`** — whenever `package.json` version is bumped, update the version number in both the Chinese and English story strings in `vas.html` (search for `迭代至 v` and `iterated together to v`).
 
+## DMG Release Checklist
+
+Before running `npm run build` to produce a distributable DMG, complete all of the following steps in order:
+
+1. **Security audit** — run `npm audit`; resolve any moderate-or-above vulnerabilities before proceeding.
+2. **Bilingual verification** — audit `src/editor.html` and `src/editor.js` for any UI strings, toast messages, tooltips, or labels added since the last release that are missing their English translation. Cross-check against the terminology table in `SDD-mac-screenshot-tool.md` § 9.2.
+3. **TDD sign-off** — confirm all test cases for the current version in SDD § 5 are marked `[x]`; no open `[ ]` items for shipped features.
+4. **Version sync** — verify that `package.json` version, the SDD `版本：` field, and the `vas.html` version strings (`迭代至 v` / `iterated together to v`) all match.
+5. **Certificate check** — confirm the Developer ID Application certificate is valid in Keychain (`security find-identity -v -p codesigning`). Do not start the build if the certificate is missing or expired.
+6. **Clean dist** — delete `dist/` before building to prevent stale artefacts: `rm -rf dist/`.
+7. **Sign the DMG** — after `npm run build`, sign the DMG explicitly before submitting for notarization: `codesign --sign "Developer ID Application: Ying-Tzu Liu (F7RK8N4U62)" dist/VAS-*.dmg`
+8. **Notarize** — submit via `xcrun notarytool submit … --wait`; wait for `status: Accepted` (re-submit if stuck for > 1 hour).
+9. **Staple** — run `xcrun stapler staple dist/VAS-*.dmg` to attach the notarization ticket.
+
 ---
 
 ## AEO — Answer Engine Optimisation
