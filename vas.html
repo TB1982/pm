@@ -191,14 +191,15 @@
             </p>
 
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <span class="download-btn inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-semibold text-white/40 text-lg min-h-[52px] cursor-default select-none" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);" aria-disabled="true">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                        <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-                        <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                <a href="https://github.com/TB1982/pm/releases/download/v3.43.0/VAS-3.43.0-arm64.dmg"
+                   class="download-btn inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-semibold text-white text-lg min-h-[52px]"
+                   download>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="27" height="27" fill="currentColor" aria-hidden="true">
+                        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
                     </svg>
-                    <span data-lang-key="downloadBtn">Coming Soon</span>
-                </span>
-                <a href="https://github.com/TB1982/pm/releases/tag/v0.1.0"
+                    <span data-lang-key="downloadBtn">免費下載</span>
+                </a>
+                <a href="https://github.com/TB1982/pm/releases/tag/v3.43.0"
                    target="_blank" rel="noopener noreferrer"
                    class="inline-flex items-center gap-2 px-6 py-4 rounded-2xl font-medium text-white/70 hover:text-white transition-colors min-h-[52px]"
                    style="border: 1px solid rgba(255,255,255,0.15);">
@@ -210,14 +211,19 @@
                 </a>
             </div>
 
-            <p class="mt-5 text-xs text-white/30" data-lang-key="sysReq">
-                需要 macOS · Apple Silicon (arm64) · 113 MB
+            <p class="mt-5 text-xs font-medium" style="color: #c084fc;" data-lang-key="sysReq">
+                Electron 先行首發版 · 需要 macOS · Apple Silicon (arm64) · 已通過 Apple notarize 驗證
             </p>
+
+            <div class="mt-8">
+                <h2 class="text-sm font-semibold tracking-widest text-white/30 uppercase mb-4" data-lang-key="toolbarLabel">Capture Toolbar</h2>
+                <img src="img/vastoolbar.png" alt="VAS 截圖工具列：全螢幕、視窗、矩形、延遲、開啟、批次轉等功能按鈕" class="mx-auto rounded-2xl shadow-xl max-w-[85%] md:max-w-[50%]" loading="lazy" style="box-shadow: 0 8px 40px rgba(0,0,0,0.4); margin-bottom: -24px;">
+            </div>
 
         </section>
 
         <!-- About -->
-        <section class="container mx-auto px-6 py-16 max-w-3xl" aria-labelledby="about-heading">
+        <section class="container mx-auto px-6 pt-2 pb-16 max-w-3xl" aria-labelledby="about-heading">
             <div class="divider mx-auto mb-8"></div>
             <h2 id="about-heading" class="text-2xl md:text-3xl font-bold text-center mb-10 text-white/90" data-lang-key="aboutTitle">關於 VAS</h2>
 
@@ -323,12 +329,6 @@
 
         </section>
 
-        <!-- Toolbar Preview -->
-        <section class="container mx-auto px-6 pb-4 max-w-3xl text-center" aria-labelledby="toolbar-heading">
-            <h2 id="toolbar-heading" class="text-sm font-semibold tracking-widest text-white/30 uppercase mb-6" data-lang-key="toolbarLabel">Capture Toolbar</h2>
-            <img src="img/vastoolbar.png" alt="VAS 截圖工具列：全螢幕、視窗、矩形、延遲、開啟、批次轉等功能按鈕" class="mx-auto max-w-full rounded-2xl shadow-xl" loading="lazy" style="box-shadow: 0 8px 40px rgba(0,0,0,0.4);">
-        </section>
-
         <!-- Origin Story -->
         <section class="container mx-auto px-6 py-16 max-w-2xl text-center" aria-labelledby="story-heading">
             <div class="divider mx-auto mb-8"></div>
@@ -398,12 +398,12 @@
         const translations = {
             zh: {
                 backLabel: '深握計畫',
-                badge: 'Mac 專屬 · v0.1.0 正式發布',
+                badge: 'Mac 專屬 · v3.43.0 正式發布',
                 heroSubtitle: 'Visual Annotation Studio',
                 heroTagline: '為跨領域溝通而生的截圖與圖像敘述工具',
-                downloadBtn: 'Coming Soon',
+                downloadBtn: '免費下載',
                 releaseNotesBtn: 'Release Notes',
-                sysReq: '需要 macOS · Apple Silicon (arm64) · 113 MB',
+                sysReq: 'Electron 先行首發版 · 需要 macOS · Apple Silicon (arm64) · 已通過 Apple notarize 驗證',
                 aboutTitle: '關於 VAS',
                 about1: '它最特別的地方不在對標哪個產品，而在於它試圖成為<strong class="text-white/95">傳遞資訊的煉金容器</strong>。',
                 about2: '資訊用順勢的方式滑入 VAS，再由各式工具乘載思緒，無痛傳遞到任何你想讓它去的地方。一站式匯聚所有你想像得到的常用工具，讓每個人都能在這個容器裡找到屬於自己的溝通方式。',
@@ -470,12 +470,12 @@
             },
             en: {
                 backLabel: 'Deep Holding Project',
-                badge: 'Mac Only · v0.1.0 Now Available',
+                badge: 'Mac Only · v3.43.0 Now Available',
                 heroSubtitle: 'Visual Annotation Studio',
                 heroTagline: 'A screenshot and visual communication tool, built for Mac.',
-                downloadBtn: 'Coming Soon',
+                downloadBtn: 'Free Download',
                 releaseNotesBtn: 'Release Notes',
-                sysReq: 'Requires macOS · Apple Silicon (arm64) · 113 MB',
+                sysReq: 'Electron Edition · Requires macOS · Apple Silicon (arm64) · Apple Notarized',
                 aboutTitle: 'About VAS',
                 about1: 'What makes it special isn\'t what it competes with — it\'s that VAS aspires to be an <strong class="text-white/95">alchemical vessel for information</strong>.',
                 about2: 'Ideas flow naturally in, get shaped by its tools, and move — without friction — to wherever you need them to go. Every essential communication tool, gathered in one place, so that anyone can find their own way to be understood.',
