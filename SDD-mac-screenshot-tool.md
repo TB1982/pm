@@ -3839,7 +3839,257 @@ function applyLang(lang) {
 
 #### 術語統一原則
 - 切換至 Tauri 前，建立一份**術語對照表**（工具名稱、UI 元素、提示文字），確保翻譯一致後再套入 JS 字典。
-- 術語表附於本節末尾（待 Electron 版本完成後補齊）。
+- 術語表以 `src/i18n.js` 為唯一來源，版本同步更新。
+
+#### 術語對照表（中 / EN）
+
+> 來源：`src/i18n.js`　｜　最後同步：v3.43
+
+**工具列（Toolbar）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 全螢幕 | Fullscreen | `fullscreen` |
+| 視窗 | Window | `window` |
+| 矩形 | Region | `region` |
+| 延遲 | Delay | `delay` |
+| 開啟 | Open | `open` |
+| 白板 | Canvas | `whiteboard` |
+| 批次轉 | Batch | `batch` |
+
+**編輯器工具（Editor Tools）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 選取 | Select | `tool_select` |
+| 框型選取 | Box Select | `tool_boxselect` |
+| 筆型 | Pen | `tool_pen` |
+| 線條 | Line | `tool_line` |
+| 矩形框 | Rectangle | `tool_rect` |
+| 色塊 | Fill | `tool_fillrect` |
+| 文字 | Text | `tool_text` |
+| 隱私遮蔽 | Privacy Mask | `tool_privacymask` |
+| 編號 | Number | `tool_number` |
+| 符號印章 | Stamp | `tool_symbol` |
+| OCR 文字辨識 | OCR | `tool_ocr` |
+| 馬賽克/模糊 | Mosaic/Blur | `tool_mosaic` |
+| 裁切 | Crop | `tool_crop` |
+| 調整大小 | Resize | `tool_resize` |
+| 延伸畫布 | Extend Canvas | `tool_extend` |
+| 疊入圖片 | Overlay Image | `tool_overlay` |
+| 一鍵套版 | Template | `tool_template` |
+| 撤銷 | Undo | `tool_undo` |
+| 重做 | Redo | `tool_redo` |
+
+**選項列（Options Bar）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 顏色 | Color | `opt_color` |
+| 實色 | Solid | `opt_solid` |
+| 漸層 | Gradient | `opt_gradient` |
+| 透明度 | Opacity | `opt_opacity` |
+| 邊框 | Border | `opt_border` |
+| 粗細 | Width | `opt_thickness` |
+| 描邊 | Stroke | `opt_stroke` |
+| 圓角 | Radius | `opt_radius` |
+| 字體 | Font | `opt_font` |
+| 系統預設 | System | `opt_font_system` |
+| 等寬 Menlo | Menlo (Mono) | `opt_font_mono` |
+| 蘋方-繁 | PingFang TC | `font_pingfang` |
+| 黑體-繁 | Heiti TC | `font_heiti` |
+| 宋體-繁 | Songti TC | `font_songti` |
+| 楷體-繁 | Kaiti TC | `font_kaiti` |
+| 粗體 | Bold | `opt_bold` |
+| 斜體 | Italic | `opt_italic` |
+| 底線 | Underline | `opt_underline` |
+| 刪除線 | Strikethrough | `opt_strikethrough` |
+| 陰影 | Shadow | `opt_shadow` |
+| 背景 | Background | `opt_text_bg` |
+| 水平鏡射 | Flip Horizontal | `opt_flip_h` |
+| 垂直鏡射 | Flip Vertical | `opt_flip_v` |
+
+**線條樣式（Line Dash Styles）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 實線 | Solid | `dash_solid` |
+| 短虛線 | Dashed | `dash_dash` |
+| 長虛線 | Long Dash | `dash_dash-lg` |
+| 點線 | Dotted | `dash_dot` |
+| 點虛線 | Dot-Dash | `dash_dot-dash` |
+| 長點點 | Dash-Dot-Dot | `dash_dash-dot-dot` |
+
+**數字標記樣式（Number Styles）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 實心圓點 | Filled dot | `style_dot` |
+| 空心圓圈① | Circle ① | `style_circle` |
+| 實心圓圈➊ | Filled circle ➊ | `style_circle_fill` |
+| 羅馬數字Ⅰ | Roman Ⅰ | `style_roman` |
+| 中文括號㈠ | CJK paren ㈠ | `style_cjk_paren` |
+| 中文圓圈㊀ | CJK circle ㊀ | `style_cjk_circle` |
+
+**符號選取分頁（Symbol Tabs）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 形狀 | Shapes | `sym_shape` |
+| 字母 | Letters | `sym_letter` |
+| 箭頭 | Arrows | `sym_arrow` |
+| 其他 | Misc | `sym_misc` |
+
+**對齊工具列（Align Toolbar）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 對齊 | Align | `align_group_label` |
+| 靠左 | Align Left | `align_left_title` |
+| 水平置中 | Center Horizontal | `align_hcenter_title` |
+| 靠右 | Align Right | `align_right_title` |
+| 靠上 | Align Top | `align_top_title` |
+| 垂直置中 | Center Vertical | `align_vcenter_title` |
+| 靠下 | Align Bottom | `align_bottom_title` |
+| 水平均分 | Distribute Horizontal | `align_dist_h_title` |
+| 垂直均分 | Distribute Vertical | `align_dist_v_title` |
+| 對齊中線 | Center | `align_to_canvas` |
+
+**延伸畫布（Extend Canvas）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 向左延伸 | Extend Left | `extend_left` |
+| 向右延伸 | Extend Right | `extend_right` |
+| 向上延伸 | Extend Up | `extend_up` |
+| 向下延伸 | Extend Down | `extend_down` |
+| 四邊延伸 | Extend All | `extend_all` |
+
+**右鍵選單（Context Menu）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 移到最上層 | Bring to Front | `ctx_to_top` |
+| 上移一層 | Move Up | `ctx_move_up` |
+| 下移一層 | Move Down | `ctx_move_down` |
+| 移到最下層 | Send to Back | `ctx_to_bottom` |
+
+**馬賽克工具（Mosaic Tool）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 馬賽克 | Mosaic | `mosaic` |
+| 模糊 | Blur | `mosaic_blur` |
+| 區塊 | Block | `mosaic_block` |
+| 強度 | Intensity | `mosaic_intensity` |
+
+**隱私遮蔽（Privacy Mask）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 遮蔽方式 | Mask mode | `privacy_mode_label` |
+| 偵測敏感資訊中… | Detecting sensitive info… | `toast_privacy_scanning` |
+| 已遮蔽 n 處 | n region(s) masked | `toast_privacy_done` |
+| 未偵測到敏感資訊 | No sensitive info detected | `toast_privacy_none` |
+| 偵測失敗 | Detection failed | `toast_privacy_fail` |
+
+**OCR 面板（OCR Panel）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| OCR 辨識結果 | OCR Result | `ocr_result_title` |
+| 準備中... | Preparing... | `ocr_preparing` |
+| 辨識中... n% | Recognizing... n% | `ocr_recognizing` |
+| 下載語言包 n% | Downloading language pack n% | `ocr_downloading` |
+| 初始化完成 | Initialized | `ocr_initialized` |
+| 複製 | Copy | `ocr_copy` |
+| 複製並關閉 | Copy & Close | `ocr_copy_close` |
+| 辨識失敗：msg | Recognition failed: msg | `ocr_fail_detail` |
+
+**選色器（Color Picker）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 標準色彩 | Standard Colors | `cpp_standard` |
+| 最近使用 | Recent | `cpp_recent` |
+| 品牌色庫 | Brand Colors | `cpp_brand` |
+| 滴管選色 | Eyedropper | `cpp_eyedropper` |
+| 色碼（16 進位） | Hex color code | `cpp_hex` |
+
+**一鍵套版（Template）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 一鍵套版 | Template | `tpl_title` |
+| 背景 | Background | `tpl_background` |
+| 調整 | Adjust | `tpl_adjust` |
+| 留白 | Padding | `tpl_padding` |
+| 圓角 | Radius | `tpl_radius` |
+| 外框 | Shadow | `tpl_shadow` |
+| 社群尺寸 | Social Sizes | `tpl_social` |
+
+**批次轉換（Batch Convert）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 批次格式轉換 | Batch Format Convert | `batch_title` |
+| 開始轉換 | Start Convert | `batch_start` |
+| 轉換為 | Convert to | `batch_convert_to` |
+| 品質 | Quality | `batch_quality` |
+| 輸出位置 | Output | `batch_output` |
+| 同原始檔案目錄 | Same as source | `batch_same_dir` |
+| 指定目錄 | Custom directory | `batch_custom_dir` |
+| 轉換完成後刪除原始檔 | Delete originals after conversion | `batch_delete_orig` |
+| 加入浮水印 | Add Watermark | `batch_wm_enable` |
+| 文字 | Text | `batch_wm_text` |
+| 圖片（Logo） | Image (Logo) | `batch_wm_img` |
+| 位置 | Position | `batch_wm_position` |
+| 邊距 | Margin | `batch_wm_margin` |
+
+**對話框（Modals）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 新開畫布 | New Canvas | `newcanvas_title` |
+| 預設尺寸 | Preset | `newcanvas_preset` |
+| 自訂 | Custom | `newcanvas_custom` |
+| 建立 | Create | `newcanvas_create` |
+| 調整尺寸 | Resize | `resize_title` |
+| 套用 | Apply | `resize_apply` |
+| 延伸畫布 | Extend Canvas | `extend_title` |
+| 確認延伸 | Confirm | `extend_confirm` |
+| 儲存格式 | Save Format | `save_title` |
+| 儲存 | Save | `save_confirm` |
+| 取消 | Cancel | `save_cancel` |
+| OCR 語言包 | OCR Language Pack | `ocr_dl_title` |
+| 確認下載並辨識 | Download & Recognize | `ocr_dl_confirm` |
+
+**底部列（Bottom Bar）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 歷史截圖 | Screenshot History | `history_title` |
+| 尚無紀錄 | No history yet | `history_empty` |
+| 複製最終圖片到剪貼簿 | Copy to Clipboard | `btn_copy_title` |
+| 完成並儲存 | Save | `btn_save` |
+
+**提示訊息（Toast Messages）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 已複製到剪貼簿 w × h px | Copied to clipboard w × h px | `toast_copied` |
+| 截圖失敗 | Capture failed | `toast_capture_fail` |
+| 已儲存：name | Saved: name | `toast_saved` |
+| 儲存失敗 | Save failed | `toast_save_fail` |
+| 已裁切：w × h px | Cropped: w × h px | `toast_cropped` |
+| 已調整尺寸：w × h px | Resized: w × h px | `toast_resized` |
+| 已延伸：w × h px | Extended: w × h px | `toast_extended` |
+| 已建立 w × h 畫布 | Canvas created: w × h | `toast_new_canvas` |
+| 編號已重置 | Counter reset to 1 | `toast_num_reset` |
+| 套版已套用 | Template applied | `toast_template_applied` |
+| OCR 辨識失敗 | OCR failed | `toast_ocr_fail` |
+| 圖片已複製到剪貼簿 | Image copied to clipboard | `toast_img_copied` |
+| 文字已複製到剪貼簿 | Text copied to clipboard | `toast_text_copied` |
 
 ---
 
