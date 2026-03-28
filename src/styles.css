@@ -674,6 +674,13 @@ kbd {
   flex-direction: column;
   gap: 6px;
 }
+/* 共用邊距列：與其他浮水印子選項同縮排 */
+.wm-margin-row {
+  padding-left: 20px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding-top: 6px;
+  margin-top: 2px;
+}
 .batch-wm-sub {
   padding-left: 20px;
   display: flex;
