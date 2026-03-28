@@ -20,7 +20,7 @@ const helpModal  = document.getElementById('helpModal')
 const modalClose = document.getElementById('modalClose')
 
 helpBtn.addEventListener('click', async () => {
-  await expandForModal(560, 480)
+  await expandForModal(520, 480)
   helpModal.classList.remove('hidden')
 })
 
@@ -227,7 +227,7 @@ document.getElementById('btnWhiteboard').addEventListener('click', e => {
 })
 
 // ─── New canvas modal (toolbar) ────────────────────────────────────────────────
-const NC_MODAL_W = 480
+const NC_MODAL_W = 520
 const NC_MODAL_H = 360
 
 const newCanvasModal      = document.getElementById('newCanvasModal')
@@ -292,7 +292,7 @@ const batchModal = document.getElementById('batchModal')
 
 document.getElementById('btnBatch').addEventListener('click', async e => {
   setToolbarActive(e.currentTarget)
-  await expandForModal(560, 620)
+  await expandForModal(520, 620)
   batchModal.classList.remove('hidden')
 })
 
