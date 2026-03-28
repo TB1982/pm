@@ -51,7 +51,7 @@ async fn resize_for_modal(app: tauri::AppHandle, width: u32, height: u32) -> Res
 #[tauri::command]
 async fn resize_to_toolbar(app: tauri::AppHandle) -> Result<(), String> {
   if let Some(win) = app.get_webview_window("toolbar") {
-    win.set_size(tauri::Size::Logical(tauri::LogicalSize { width: 520.0, height: 64.0 }))
+    win.set_size(tauri::Size::Logical(tauri::LogicalSize { width: 520.0, height: 68.0 }))
       .map_err(|e: tauri::Error| e.to_string())?;
   }
   Ok(())

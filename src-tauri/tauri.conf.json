@@ -16,17 +16,18 @@
         "url": "http://localhost:8080/index.html",
         "title": "VAS",
         "width": 520,
-        "height": 64,
+        "height": 68,
         "minWidth": 520,
-        "minHeight": 64,
-        "maxHeight": 64,
+        "minHeight": 68,
+        "maxHeight": 68,
         "resizable": false,
         "fullscreen": false,
         "decorations": false,
         "transparent": true,
         "alwaysOnTop": true,
         "skipTaskbar": true,
-        "shadow": false
+        "shadow": false,
+        "acceptFirstMouse": true
       }
     ],
     "withGlobalTauri": true,
