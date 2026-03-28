@@ -1,4 +1,5 @@
 use tauri::Manager;
+use tauri::Emitter;
 use tauri::window::Color;
 use tauri_plugin_dialog::DialogExt;
 
