@@ -245,17 +245,36 @@
               </label>
             </div>
             <div class="batch-wm-sub hidden" id="wmTextOpts">
-              <div class="batch-row">
-                <input class="opt-text-input" type="text" id="wmText" data-i18n-placeholder="batch_wm_text_placeholder" placeholder="輸入浮水印文字">
-              </div>
-              <div class="batch-row">
-                <span class="opt-label" data-i18n="batch_wm_size">字級</span>
-                <input class="opt-num" type="number" id="wmTextSize" value="32" min="8" max="300">
-                <span class="opt-unit">px</span>
-                <input type="color" id="wmTextColor" value="#ffffff" class="wm-color-input">
-                <span class="opt-label" data-i18n="batch_wm_opacity">不透明</span>
-                <input class="opt-num" type="number" id="wmTextOpacity" value="80" min="1" max="100">
-                <span class="opt-unit">%</span>
+              <div class="wm-panel">
+                <div class="wm-controls">
+                  <div class="batch-row">
+                    <span class="opt-label" data-i18n="batch_wm_size">字級</span>
+                    <input class="opt-num" type="number" id="wmTextSize" value="32" min="8" max="300">
+                    <span class="opt-unit">px</span>
+                    <span class="opt-label" data-i18n="batch_wm_opacity">不透明</span>
+                    <input class="opt-num" type="number" id="wmTextOpacity" value="80" min="1" max="100">
+                    <span class="opt-unit">%</span>
+                    <input type="color" id="wmTextColor" value="#ffffff" class="wm-color-input">
+                  </div>
+                  <div class="batch-row">
+                    <input class="opt-text-input" type="text" id="wmText"
+                      data-i18n-placeholder="batch_wm_text_placeholder" placeholder="輸入浮水印文字">
+                  </div>
+                </div>
+                <div class="wm-position-col">
+                  <span class="wm-pos-header" data-i18n="batch_wm_position">位置</span>
+                  <div class="wm-grid" id="wmTextGrid">
+                    <button class="wm-cell" data-pos="northwest">↖</button>
+                    <button class="wm-cell" data-pos="north">↑</button>
+                    <button class="wm-cell" data-pos="northeast">↗</button>
+                    <button class="wm-cell" data-pos="west">←</button>
+                    <button class="wm-cell" data-pos="centre">·</button>
+                    <button class="wm-cell" data-pos="east">→</button>
+                    <button class="wm-cell" data-pos="southwest">↙</button>
+                    <button class="wm-cell" data-pos="south">↓</button>
+                    <button class="wm-cell active" data-pos="southeast">↘</button>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -267,37 +286,45 @@
               </label>
             </div>
             <div class="batch-wm-sub hidden" id="wmImgOpts">
-              <div class="batch-row">
-                <button class="dir-select-btn" id="wmImgSelectBtn" data-i18n="batch_wm_choose_img">選取圖片…</button>
-                <span class="dir-path" id="wmImgPath" data-i18n="batch_not_selected">尚未選擇</span>
+              <div class="wm-panel">
+                <div class="wm-controls">
+                  <div class="batch-row">
+                    <button class="dir-select-btn" id="wmImgSelectBtn" data-i18n="batch_wm_choose_img">選取圖片…</button>
+                    <span class="dir-path" id="wmImgPath" data-i18n="batch_not_selected">尚未選擇</span>
+                  </div>
+                  <div class="batch-row">
+                    <span class="opt-label" data-i18n="batch_wm_img_size">寬度佔比</span>
+                    <input class="opt-num" type="number" id="wmImgSize" value="20" min="1" max="100">
+                    <span class="opt-unit">%</span>
+                    <span class="opt-label" data-i18n="batch_wm_opacity">不透明</span>
+                    <input class="opt-num" type="number" id="wmImgOpacity" value="80" min="1" max="100">
+                    <span class="opt-unit">%</span>
+                  </div>
+                  <!-- 預覽圖片 — Wishlist：待實作縮圖顯示 -->
+                  <div class="wm-img-preview" id="wmImgPreview">
+                    <span class="wm-img-preview-hint" data-i18n="batch_wm_preview">預覽圖片</span>
+                  </div>
+                  <div class="batch-row">
+                    <span class="opt-label" data-i18n="batch_wm_margin">邊距</span>
+                    <input class="opt-num" type="number" id="wmMargin" value="20" min="0" max="500">
+                    <span class="opt-unit">px</span>
+                  </div>
+                </div>
+                <div class="wm-position-col">
+                  <span class="wm-pos-header" data-i18n="batch_wm_position">位置</span>
+                  <div class="wm-grid" id="wmImgGrid">
+                    <button class="wm-cell" data-pos="northwest">↖</button>
+                    <button class="wm-cell" data-pos="north">↑</button>
+                    <button class="wm-cell" data-pos="northeast">↗</button>
+                    <button class="wm-cell" data-pos="west">←</button>
+                    <button class="wm-cell" data-pos="centre">·</button>
+                    <button class="wm-cell" data-pos="east">→</button>
+                    <button class="wm-cell" data-pos="southwest">↙</button>
+                    <button class="wm-cell" data-pos="south">↓</button>
+                    <button class="wm-cell active" data-pos="southeast">↘</button>
+                  </div>
+                </div>
               </div>
-              <div class="batch-row">
-                <span class="opt-label" data-i18n="batch_wm_img_size">寬度佔比</span>
-                <input class="opt-num" type="number" id="wmImgSize" value="20" min="1" max="100">
-                <span class="opt-unit">%</span>
-                <span class="opt-label" data-i18n="batch_wm_opacity">不透明</span>
-                <input class="opt-num" type="number" id="wmImgOpacity" value="80" min="1" max="100">
-                <span class="opt-unit">%</span>
-              </div>
-            </div>
-
-            <!-- 位置 + 邊距 -->
-            <div class="batch-row" style="align-items:flex-start; gap:12px;">
-              <span class="opt-label" style="padding-top:4px;" data-i18n="batch_wm_position">位置</span>
-              <div class="wm-grid" id="wmGrid">
-                <button class="wm-cell" data-pos="northwest">↖</button>
-                <button class="wm-cell" data-pos="north">↑</button>
-                <button class="wm-cell" data-pos="northeast">↗</button>
-                <button class="wm-cell" data-pos="west">←</button>
-                <button class="wm-cell" data-pos="centre">·</button>
-                <button class="wm-cell" data-pos="east">→</button>
-                <button class="wm-cell" data-pos="southwest">↙</button>
-                <button class="wm-cell" data-pos="south">↓</button>
-                <button class="wm-cell active" data-pos="southeast">↘</button>
-              </div>
-              <span class="opt-label" style="padding-top:4px;" data-i18n="batch_wm_margin">邊距</span>
-              <input class="opt-num" type="number" id="wmMargin" value="20" min="0" max="500">
-              <span class="opt-unit" style="padding-top:4px;">px</span>
             </div>
 
           </div>

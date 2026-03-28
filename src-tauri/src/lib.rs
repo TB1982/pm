@@ -249,8 +249,8 @@ fn convert_single(
 // ── Watermark helpers ─────────────────────────────────────────────────────────
 
 fn apply_watermarks(img: &mut image::DynamicImage, wm: &serde_json::Value) {
-  let position = wm["position"].as_str().unwrap_or("southeast");
-  let margin   = wm["margin"].as_u64().unwrap_or(20) as u32;
+  // Shared margin; each layer has its own position
+  let margin = wm["margin"].as_u64().unwrap_or(20) as u32;
 
   // Text layer first (underneath), then image layer on top — per spec
   let text_wm = &wm["text"];
@@ -260,16 +260,18 @@ fn apply_watermarks(img: &mut image::DynamicImage, wm: &serde_json::Value) {
       let size      = text_wm["size"].as_u64().unwrap_or(32) as f32;
       let color_hex = text_wm["color"].as_str().unwrap_or("#ffffff");
       let opacity   = text_wm["opacity"].as_u64().unwrap_or(80) as f64 / 100.0;
+      let position  = text_wm["position"].as_str().unwrap_or("southeast");
       apply_text_watermark(img, content, size, color_hex, opacity, position, margin);
     }
   }
 
   let img_wm = &wm["img"];
   if img_wm["enabled"].as_bool().unwrap_or(false) {
-    let path      = img_wm["path"].as_str().unwrap_or("");
+    let path = img_wm["path"].as_str().unwrap_or("");
     if !path.is_empty() {
       let size_pct = img_wm["sizePercent"].as_u64().unwrap_or(20) as f64 / 100.0;
       let opacity  = img_wm["opacity"].as_u64().unwrap_or(80) as f64 / 100.0;
+      let position = img_wm["position"].as_str().unwrap_or("southeast");
       apply_image_watermark(img, path, size_pct, opacity, position, margin);
     }
   }

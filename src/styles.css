@@ -721,6 +721,48 @@ kbd {
 .wm-cell:hover  { background: rgba(255,255,255,0.15); color: #ccc; }
 .wm-cell.active { background: rgba(100,120,255,0.4); border-color: #6678ff; color: #fff; }
 
+/* Two-column layout: controls left, 9-grid right */
+.wm-panel {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 4px 0 2px;
+}
+.wm-controls {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.wm-position-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.wm-pos-header {
+  font-size: 10px;
+  color: rgba(255,255,255,0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+/* Image preview placeholder (Wishlist space reservation) */
+.wm-img-preview {
+  min-height: 68px;
+  border: 1px dashed rgba(255,255,255,0.12);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.02);
+}
+.wm-img-preview-hint {
+  font-size: 11px;
+  color: rgba(255,255,255,0.20);
+}
+
 .batch-warning {
   background: rgba(230,126,34,0.12);
   border: 1px solid rgba(230,126,34,0.35);
