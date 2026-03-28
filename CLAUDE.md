@@ -166,6 +166,21 @@ npm start         # launch the app
 
 ---
 
+## Definition of Done — Electron Tool
+
+A feature or bug fix is **not complete** until all four conditions are met. Never commit code that satisfies only some of them.
+
+| # | Condition | How to verify |
+|---|-----------|---------------|
+| 1 | **Code works** | Manually tested in `npm start` |
+| 2 | **TDD written & signed off** | SDD § 5 test cases added as `- [ ]`, then marked `[x]` after passing |
+| 3 | **SDD updated** | Version bumped, 變更紀錄 entry added, feature section reflects new behaviour |
+| 4 | **Bilingual complete** | `i18n.js` (zh + en) + `editor.html` (`data-i18n*`) + JS (`t()`) all updated in the same session |
+
+> **Rule of thumb:** If you'd feel uncomfortable running the DMG Release Checklist right now, the feature isn't done.
+
+---
+
 ## Document Sync Rules (SDD / TDD) — Mandatory
 
 These rules apply to the Electron screenshot tool sub-project.
@@ -260,16 +275,29 @@ docs(SDD): v0.8 更新文字工具規格與 TDD 測試案例
 
 ## DMG Release Checklist
 
-Before running `npm run build` to produce a distributable DMG, complete all of the following steps in order:
+> Steps 1–5 must be completed **before** `npm run build`. Do not start the build until all pre-build gates pass. Run each step in order — do not skip ahead.
+
+**Pre-build gates (steps 1–5)**
 
 1. **Security audit** — run `npm audit`; resolve any moderate-or-above vulnerabilities before proceeding.
 2. **Bilingual verification** — audit `src/editor.html` and `src/editor.js` for any UI strings, toast messages, tooltips, or labels added since the last release that are missing their English translation. Cross-check against the terminology table in `SDD-mac-screenshot-tool.md` § 9.2.
 3. **TDD sign-off** — confirm all test cases for the current version in SDD § 5 are marked `[x]`; no open `[ ]` items for shipped features.
 4. **Version sync** — verify that `package.json` version, the SDD `版本：` field, and the `vas.html` version strings (`迭代至 v` / `iterated together to v`) all match.
 5. **Certificate check** — confirm the Developer ID Application certificate is valid in Keychain (`security find-identity -v -p codesigning`). Do not start the build if the certificate is missing or expired.
+
+**Build & sign (steps 6–7)**
+
 6. **Clean dist** — delete `dist/` before building to prevent stale artefacts: `rm -rf dist/`.
-7. **Sign the DMG** — after `npm run build`, sign the DMG explicitly before submitting for notarization: `codesign --sign "Developer ID Application: Ying-Tzu Liu (F7RK8N4U62)" dist/VAS-*.dmg`
-8. **Notarize** — submit via `xcrun notarytool submit … --wait`; wait for `status: Accepted` (re-submit if stuck for > 1 hour).
+7. **Build, then sign the DMG** — run `npm run build`, then immediately sign and verify:
+   ```bash
+   codesign --sign "Developer ID Application: Ying-Tzu Liu (F7RK8N4U62)" dist/VAS-*.dmg
+   codesign --verify --deep --strict --verbose=2 dist/VAS-*.dmg
+   ```
+   Do not proceed to notarization if `--verify` reports "not signed" or any error.
+
+**Notarize & distribute (steps 8–9)**
+
+8. **Notarize** — submit via `xcrun notarytool submit … --wait`; wait for `status: Accepted`. If still `In Progress` after 1 hour, abandon and re-submit once — do not submit multiple times in parallel.
 9. **Staple** — run `xcrun stapler staple dist/VAS-*.dmg` to attach the notarization ticket.
 
 ---
