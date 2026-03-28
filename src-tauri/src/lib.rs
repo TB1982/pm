@@ -148,8 +148,107 @@ async fn select_watermark_image(app: tauri::AppHandle) -> Result<String, String>
 }
 
 #[tauri::command]
-async fn batch_convert(_payload: serde_json::Value) -> Result<serde_json::Value, String> {
-  Ok(serde_json::json!({ "ok": 0, "err": 0 }))
+async fn batch_convert(app: tauri::AppHandle, payload: serde_json::Value) -> Result<Vec<serde_json::Value>, String> {
+  let files: Vec<String> = payload["files"]
+    .as_array().ok_or("missing files")?
+    .iter().filter_map(|v| v.as_str().map(String::from)).collect();
+
+  let format       = payload["format"].as_str().unwrap_or("png").to_lowercase();
+  let quality      = payload["quality"].as_u64().unwrap_or(90) as u8;
+  let output_mode  = payload["outputMode"].as_str().unwrap_or("same").to_string();
+  let output_dir   = payload["outputDir"].as_str().map(String::from);
+  let delete_orig  = payload["deleteOriginals"].as_bool().unwrap_or(false);
+  let resize_val   = payload.get("resize").cloned();
+
+  let mut results = Vec::new();
+
+  for file_path in &files {
+    let src  = std::path::Path::new(file_path.as_str());
+    let ext  = format_ext(&format);
+    let stem = src.file_stem().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
+    let new_name = format!("{}.{}", stem, ext);
+
+    let out_path = match output_mode.as_str() {
+      "custom" => {
+        let dir = output_dir.as_deref()
+          .filter(|d| !d.is_empty())
+          .unwrap_or_else(|| src.parent().and_then(|p| p.to_str()).unwrap_or("."));
+        std::path::PathBuf::from(dir).join(&new_name)
+      }
+      _ => src.parent().map(|p| p.join(&new_name))
+               .unwrap_or_else(|| std::path::PathBuf::from(&new_name)),
+    };
+
+    let r = match convert_single(src, &out_path, &format, quality, &resize_val) {
+      Ok(()) => {
+        if delete_orig && src.to_string_lossy() != out_path.to_string_lossy() {
+          let _ = std::fs::remove_file(src);
+        }
+        serde_json::json!({ "success": true,  "path": file_path, "outPath": out_path.to_string_lossy() })
+      }
+      Err(e) => serde_json::json!({ "success": false, "path": file_path, "error": e }),
+    };
+
+    app.emit("batch-progress", &r).ok();
+    results.push(r);
+  }
+
+  Ok(results)
+}
+
+fn format_ext(fmt: &str) -> &'static str {
+  match fmt { "jpg" | "jpeg" => "jpg", "png" => "png", "webp" => "webp",
+              "bmp" => "bmp", "gif" => "gif", "tiff" | "tif" => "tiff", _ => "png" }
+}
+
+fn convert_single(
+  src: &std::path::Path, dst: &std::path::Path,
+  format: &str, quality: u8, resize: &Option<serde_json::Value>,
+) -> Result<(), String> {
+  let mut img = image::open(src).map_err(|e| format!("無法開啟：{e}"))?;
+
+  if let Some(r) = resize {
+    if let (Some(axis), Some(val)) = (r["axis"].as_str(), r["value"].as_u64()) {
+      img = resize_img(img, axis, val as u32);
+    }
+  }
+
+  if let Some(parent) = dst.parent() {
+    if !parent.as_os_str().is_empty() {
+      std::fs::create_dir_all(parent).map_err(|e| format!("無法建立目錄：{e}"))?;
+    }
+  }
+
+  match format {
+    "jpg" | "jpeg" => {
+      let out = std::fs::File::create(dst).map_err(|e| e.to_string())?;
+      let enc = image::codecs::jpeg::JpegEncoder::new_with_quality(out, quality);
+      img.write_with_encoder(enc).map_err(|e| e.to_string())?;
+    }
+    _ => {
+      let fmt = match format {
+        "png"  => image::ImageFormat::Png,  "webp" => image::ImageFormat::WebP,
+        "bmp"  => image::ImageFormat::Bmp,  "gif"  => image::ImageFormat::Gif,
+        "tiff" | "tif" => image::ImageFormat::Tiff, _ => image::ImageFormat::Png,
+      };
+      img.save_with_format(dst, fmt).map_err(|e| e.to_string())?;
+    }
+  }
+  Ok(())
+}
+
+fn resize_img(img: image::DynamicImage, axis: &str, value: u32) -> image::DynamicImage {
+  let (w, h) = (img.width(), img.height());
+  if w == 0 || h == 0 || value == 0 { return img; }
+  let (nw, nh) = match axis {
+    "width"  => { let nh = ((h as f64 * value as f64) / w as f64).round() as u32; (value, nh.max(1)) }
+    "height" => { let nw = ((w as f64 * value as f64) / h as f64).round() as u32; (nw.max(1), value) }
+    _ => {  // "longest"
+      if w >= h { let nh = ((h as f64 * value as f64) / w as f64).round() as u32; (value, nh.max(1)) }
+      else      { let nw = ((w as f64 * value as f64) / h as f64).round() as u32; (nw.max(1), value) }
+    }
+  };
+  img.resize_exact(nw, nh, image::imageops::FilterType::Lanczos3)
 }
 
 #[tauri::command]

@@ -290,11 +290,15 @@ body {
 
 .modal-overlay {
   position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  top: 68px;   /* 工具列高度，避免 modal header 被壓住 */
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;   /* 透明視窗不需要 scrim */
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  padding-top: 8px;
   z-index: 100;
 }
 
