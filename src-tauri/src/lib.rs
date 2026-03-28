@@ -16,6 +16,18 @@ pub fn run() {
       if let Some(win) = app.get_webview_window("toolbar") {
         let _ = win.set_background_color(Some(Color(0, 0, 0, 0)));
       }
+
+      // macOS: allow CSS :hover without focus — NSWindow must accept mouse moved events
+      #[cfg(target_os = "macos")]
+      if let Some(win) = app.get_webview_window("toolbar") {
+        let _ = win.with_webview(|wv| unsafe {
+          use objc::{msg_send, sel, sel_impl};
+          use objc::runtime::YES;
+          let ns_win = wv.ns_window() as *mut objc::runtime::Object;
+          let _: () = msg_send![ns_win, setAcceptsMouseMovedEvents: YES];
+        });
+      }
+
       Ok(())
     })
     .invoke_handler(tauri::generate_handler![
