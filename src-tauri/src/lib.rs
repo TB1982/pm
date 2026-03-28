@@ -11,6 +11,10 @@ pub fn run() {
             .build(),
         )?;
       }
+      // Explicitly clear WebView background — transparent:true alone is insufficient on macOS
+      if let Some(win) = app.get_webview_window("toolbar") {
+        let _ = win.set_background_color(Some(tauri::Color(0, 0, 0, 0)));
+      }
       Ok(())
     })
     .invoke_handler(tauri::generate_handler![

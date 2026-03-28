@@ -71,6 +71,16 @@ body {
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.40);
   pointer-events: none;
+  transition: background 0.15s;
+}
+
+.tb-drag-handle:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+}
+
+.tb-drag-handle:hover span {
+  background: rgba(255, 255, 255, 0.80);
 }
 
 /* ─── Toolbar buttons ───────────────────────────────────────────────────────── */
