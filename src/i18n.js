@@ -1,7 +1,7 @@
 'use strict'
 
 const lang = (typeof navigator !== 'undefined' && navigator.language)
-  ? (navigator.language.startsWith('zh') ? 'zh' : 'en')
+  ? (navigator.language.startsWith('zh') ? 'zh' : navigator.language.startsWith('ja') ? 'ja' : 'en')
   : 'zh'
 
 const STRINGS = {
@@ -827,6 +827,418 @@ const STRINGS = {
 
     // ── OCR detail ───────────────────────────────────────────
     ocr_fail_detail: (msg) => `Recognition failed: ${msg}`,
+  },
+
+  ja: {
+    // ── Toolbar ──────────────────────────────────────────────────
+    fullscreen: '全画面',
+    window: 'ウィンドウ',
+    region: '矩形',
+    delay: '遅延',
+    open: '開く',
+    whiteboard: 'キャンバス',
+    batch: '一括変換',
+    esc_cancel: 'Esc キャンセル',
+
+    // ── Help modal ───────────────────────────────────────────────
+    help_title: 'キーボードショートカット',
+    help_global: 'グローバルショートカット',
+    help_editor: 'エディタツール',
+    help_general: '一般操作',
+    help_fullscreen_capture: '全画面キャプチャ',
+    help_window_capture: 'ウィンドウキャプチャ',
+    help_region_capture: '矩形選択キャプチャ',
+    help_rect: '矩形',
+    help_line: '線',
+    help_text: 'テキスト',
+    help_number: '番号マーカー',
+    help_overlay: '画像オーバーレイ',
+    help_resize: 'サイズ変更',
+    help_crop: 'トリミング',
+    help_undo: '元に戻す',
+    help_redo: 'やり直し',
+    help_delete: '選択を削除',
+    help_escape: 'キャンセル / ツール終了',
+    help_save: '保存',
+    help_save_as: '名前を付けて保存',
+
+    // ── Window picker ────────────────────────────────────────────
+    picker_title: 'ウィンドウを選択',
+
+    // ── Batch modal ──────────────────────────────────────────────
+    batch_title: '一括フォーマット変換',
+    batch_drop_hint: 'ここに画像をドロップ、または',
+    batch_select_btn: 'ファイルを選択',
+    batch_add_more: '+ ファイルを追加',
+    batch_convert_to: '変換形式',
+    batch_quality: '品質',
+    batch_svg_width: 'SVG 出力幅',
+    batch_resize_all: '一括リサイズ',
+    batch_fix: '固定',
+    batch_width: '幅',
+    batch_height: '高さ',
+    batch_to: 'へ',
+    batch_output: '出力先',
+    batch_same_dir: '元ファイルと同じ場所',
+    batch_custom_dir: 'カスタムフォルダ',
+    batch_choose: '選択…',
+    batch_not_selected: '未選択',
+    batch_delete_orig: '変換後に元ファイルを削除',
+    batch_same_format_title: '以下のファイルはすでに対象形式です：',
+    batch_skip: 'スキップして続行',
+    batch_cancel_all: 'すべてキャンセル',
+    batch_remove: 'リストから削除',
+    batch_dismiss: '閉じる',
+    batch_start: '変換開始',
+    batch_n_files: (n) => `${n} ファイル`,
+    batch_limit_reached: (max) => `一括変換の上限は ${max} ファイルです。超過分はスキップされました`,
+    batch_wm_enable:      '透かしを追加',
+    batch_wm_text:        'テキスト',
+    batch_wm_text_placeholder: '透かしテキストを入力',
+    batch_wm_img:         '画像（ロゴ）',
+    batch_wm_choose_img:  '画像を選択…',
+    batch_wm_size:        'フォントサイズ',
+    batch_wm_opacity:     '不透明度',
+    batch_wm_img_size:    '幅の割合',
+    batch_wm_position:    '位置',
+    batch_wm_margin:      '余白',
+
+    // ── Toast messages (renderer) ────────────────────────────────
+    toast_copied: (w, h) => `クリップボードにコピーしました  ${w} × ${h} px`,
+    toast_capture_fail: 'キャプチャに失敗しました',
+    toast_no_windows: 'キャプチャできるウィンドウが見つかりません',
+    toast_permission: '「画面収録」の権限が必要です  ',
+    toast_open_settings: 'システム設定を開く',
+    toast_select_files: '変換するファイルを選択してください',
+    toast_select_dir: '出力フォルダを選択してください',
+    toast_no_files: '変換するファイルがありません',
+    toast_done: (ok, err) => `完了：${ok} 件成功、${err} 件失敗`,
+    toast_converted: (n) => `${n} ファイルを変換しました`,
+
+    // ── Editor options bar ───────────────────────────────────────
+    opt_color: '色',
+    opt_solid: '単色',
+    opt_gradient: 'グラデーション',
+    opt_opacity: '不透明度',
+    opt_border: 'ボーダー',
+    opt_style: 'スタイル',
+    opt_limit: (n) => `上限：${n}`,
+    opt_size: 'サイズ',
+    opt_small: '小',
+    opt_medium: '中',
+    opt_large: '大',
+    opt_next: '次へ',
+    opt_reset: 'リセット',
+    opt_value: '値',
+    opt_thickness: '太さ',
+    opt_stroke: 'ストローク',
+    opt_line_style: '線',
+    opt_radius: '角丸',
+    opt_start: '始点',
+    opt_end: '終点',
+    opt_stroke_opacity: '不透明度',
+    opt_outline: 'アウトライン',
+    opt_orthogonal: '直角',
+    opt_font: 'フォント',
+    opt_font_system: 'システムデフォルト',
+    opt_font_mono: '等幅 Menlo',
+    opt_bold: '太字',
+    opt_italic: '斜体',
+    opt_underline: '下線',
+    opt_strikethrough: '取り消し線',
+    align_left: '左',
+    align_center: '中',
+    align_right: '右',
+    opt_align_left: '左揃え',
+    opt_align_center: '中央揃え',
+    opt_align_right: '右揃え',
+    opt_text_stroke: 'ストローク',
+    opt_text_bg: '背景',
+    opt_shadow: '影',
+    opt_zoom: 'ズーム',
+    opt_transparent: '透明',
+
+    // ── Line dash styles ─────────────────────────────────────────
+    dash_solid: '────  実線',
+    dash_dash: '╌╌╌╌  破線',
+    'dash_dash-lg': '─ ─ ─  長破線',
+    dash_dot: '······  点線',
+    'dash_dot-dash': '·─·─  点破線',
+    'dash_dash-dot-dot': '─··─··  一点鎖線',
+
+    // ── Crop confirm ─────────────────────────────────────────────
+    crop_confirm: 'トリミング確定',
+    crop_cancel: 'キャンセル',
+    crop_dbl_hint: 'またはダブルクリック',
+
+    // ── Crop / OCR / BoxSelect labels ────────────────────────────
+    crop_drag: '範囲をドラッグして選択',
+    ocr_drag: 'OCR 範囲をドラッグして選択',
+    box_drag: '範囲をドラッグして選択',
+    box_copy: (w, h) => `${w} × ${h} px　Cmd+C でコピー`,
+
+    // ── Mosaic tool ──────────────────────────────────────────────
+    mosaic: 'モザイク',
+    mosaic_blur: 'ぼかし',
+    mosaic_block: 'ブロック：',
+    mosaic_intensity: '強度：',
+
+    // ── Symbol tab titles ────────────────────────────────────────
+    sym_shape: '図形',
+    sym_letter: '文字',
+    sym_arrow: '矢印',
+    sym_misc: 'その他',
+
+    // ── Number style labels (for toast) ─────────────────────────
+    style_dot: '塗りつぶし点',
+    style_circle: '丸囲み①',
+    style_circle_fill: '塗り丸➊',
+    style_roman: 'ローマ数字Ⅰ',
+    style_cjk_paren: '漢数字括弧㈠',
+    style_cjk_circle: '漢数字丸囲㊀',
+
+    // ── Thickness label (dynamic) ────────────────────────────────
+    thickness_stroke: 'ストローク',
+    thickness_line: '太さ',
+
+    // ── Extend canvas direction labels ───────────────────────────
+    extend_left: '左に拡張',
+    extend_right: '右に拡張',
+    extend_up: '上に拡張',
+    extend_down: '下に拡張',
+    extend_all: '四方に拡張',
+
+    // ── Editor tool button titles ────────────────────────────────
+    tool_select: '選択 (V)',
+    tool_boxselect: 'ボックス選択 (M)',
+    tool_pen: 'ペン (P)',
+    tool_line: '線 (L)',
+    tool_rect: '矩形 (R)',
+    tool_fillrect: '塗りつぶし (B)',
+    tool_text: 'テキスト (T)',
+    tool_text_pro: '背景除去（Pro 版）',
+    tool_privacymask: 'プライバシーマスク (K)',
+    privacy_mode_label: 'マスクモード：',
+    privacy_hint: 'K = 全体スキャン　ドラッグ = 範囲指定',
+    toast_privacy_scanning: '機密情報を検出中…',
+    toast_privacy_done: n => `${n} 箇所をマスクしました`,
+    toast_privacy_none: '機密情報は検出されませんでした',
+    toast_privacy_fail: '検出に失敗しました',
+    tool_number: '番号 (N)',
+    tool_symbol: 'スタンプ (U)',
+    tool_ocr: 'OCR (G)',
+    tool_mosaic: 'モザイク/ぼかし (X)',
+    tool_zoom_in: '拡大 (⌘=)',
+    tool_zoom_out: '縮小 (⌘-)',
+    tool_fit: 'ウィンドウに合わせる (⌘0)',
+    tool_crop: 'トリミング (C)',
+    tool_open_menu: '開く / 新規キャンバス',
+    tool_resize: 'サイズ変更 (S)',
+    tool_extend: 'キャンバス拡張 (E)',
+    tool_overlay: '画像オーバーレイ (O)',
+    tool_template: 'テンプレート',
+    tool_undo: '元に戻す (⌘Z)',
+    tool_redo: 'やり直し (⌘⇧Z)',
+
+    // ── Bottom bar ───────────────────────────────────────────────
+    btn_history: '履歴',
+    btn_history_title: 'スクリーンショット履歴',
+    history_title: 'スクリーンショット履歴',
+    history_empty: '履歴なし',
+    history_copied_label: 'コピー済み',
+    history_file_not_found: 'ファイルが移動または削除されました',
+    btn_copy: 'コピー',
+    btn_copy_title: 'クリップボードにコピー (⌘⇧C)',
+    btn_save: '保存',
+
+    // ── Flip ─────────────────────────────────────────────────────
+    opt_flip_h: '水平反転',
+    opt_flip_v: '垂直反転',
+
+    // ── Open menu & New Canvas modal ─────────────────────────────
+    open_menu_new: '新規キャンバス',
+    open_menu_file: 'ファイルを開く',
+    newcanvas_title: '新規キャンバス',
+    newcanvas_preset: 'プリセット',
+    newcanvas_custom: 'カスタム',
+    newcanvas_bg: '背景色',
+    newcanvas_transparent: '透明',
+    newcanvas_create: '作成',
+    toast_new_canvas: (w, h) => `キャンバスを作成しました：${w} × ${h}`,
+
+    // ── Resize modal ─────────────────────────────────────────────
+    resize_title: 'サイズ変更',
+    resize_width: '幅',
+    resize_height: '高さ',
+    resize_height_hint: 'px（縦横比固定）',
+    resize_cancel: 'キャンセル',
+    resize_apply: '適用',
+
+    // ── Extend modal ─────────────────────────────────────────────
+    extend_title: 'キャンバス拡張',
+    extend_direction: '方向',
+    extend_cancel: 'キャンセル',
+    extend_confirm: '確定',
+
+    // ── Save format modal ────────────────────────────────────────
+    save_title: '保存形式',
+    save_png_desc: '可逆圧縮、透明背景対応',
+    save_jpg_desc: '非可逆圧縮、ファイルサイズ小',
+    save_webp_desc: 'モダン形式、透明背景対応',
+    save_cancel: 'キャンセル',
+    save_confirm: '保存',
+
+    // ── OCR download modal ───────────────────────────────────────
+    ocr_dl_title: 'OCR 言語パック',
+    ocr_dl_body: '初回 OCR 使用時に言語データのダウンロードが必要です：\n繁体字中国語（〜18 MB）＋英語（〜4 MB）\nダウンロード後はオフラインで使用可能です。',
+    ocr_dl_cancel: 'キャンセル',
+    ocr_dl_confirm: 'ダウンロードして認識',
+
+    // ── OCR panel ────────────────────────────────────────────────
+    ocr_result_title: 'OCR 結果',
+    ocr_preparing: '準備中...',
+    ocr_recognizing: (pct) => `認識中... ${pct}%`,
+    ocr_downloading: (pct) => `言語パックをダウンロード中 ${pct}%`,
+    ocr_initialized: '初期化完了',
+    ocr_placeholder: 'ここに結果が表示されます...',
+    ocr_copy: 'コピー',
+    ocr_copy_close: 'コピーして閉じる',
+    ocr_recognizing_label: '認識中...',
+
+    // ── Color picker ─────────────────────────────────────────────
+    cpp_standard: '標準カラー',
+    cpp_recent: '最近使用した色',
+    cpp_brand: 'ブランドカラー',
+    cpp_brand_add_title: '現在の色をブランドカラーに追加',
+    cpp_brand_empty: 'ブランドカラーなし',
+    cpp_brand_remove: 'ブランドカラーを削除',
+    cpp_eyedropper: 'スポイト（画面から色を取得）',
+    cpp_hex: '16進数カラーコード',
+
+    // ── Template panel ───────────────────────────────────────────
+    tpl_title: 'テンプレート',
+    tpl_background: '背景',
+    tpl_adjust: '調整',
+    tpl_padding: '余白',
+    tpl_radius: '角丸',
+    tpl_shadow: 'シャドウ',
+    tpl_social: 'SNS サイズ（任意）',
+    tpl_apple_red: 'Apple レッド',
+    tpl_apple_orange: 'Apple オレンジ',
+    tpl_apple_yellow: 'Apple イエロー',
+    tpl_apple_green: 'Apple グリーン',
+    tpl_apple_blue: 'Apple ブルー',
+    tpl_apple_purple: 'Apple パープル',
+
+    // ── Drop overlay ─────────────────────────────────────────────
+    drop_overlay_label: 'ドロップして画像を読み込む',
+
+    // ── Context menu ─────────────────────────────────────────────
+    ctx_to_top: '最前面へ',
+    ctx_move_up: '一つ上へ',
+    ctx_move_down: '一つ下へ',
+    ctx_to_bottom: '最背面へ',
+
+    // ── Float drag export ────────────────────────────────────────
+    float_drag_export_title: 'Line / Slack / Finder などにドラッグして書き出し',
+    float_drag_move_title: 'ドラッグしてボタン位置を変更',
+    float_drag_label: '⬆ ドラッグして書き出し',
+
+    // ── Toast messages (editor) ──────────────────────────────────
+    toast_extended: (w, h) => `拡張しました：${w} × ${h} px`,
+    toast_overlay_exists: '既存のオーバーレイを削除（Delete キー）してから新しい画像を挿入してください',
+    toast_overlay_inserted: 'オーバーレイを挿入しました。ドラッグで移動、コーナーをドラッグで拡縮',
+    toast_num_reset: 'カウンターを 1 にリセットしました',
+    toast_num_limit: (style, limit) => `「${style}」の上限（${limit}）に達しました。1 にリセットします`,
+    toast_saved: (name) => `保存しました：${name}`,
+    toast_save_fail: '保存に失敗しました',
+    toast_save_fail_detail: (msg) => `保存に失敗しました：${msg}`,
+    toast_crop_first: 'トリミング範囲をドラッグして選択してください',
+    toast_crop_oob: 'トリミング範囲が画像の境界を超えています',
+    toast_cropped: (w, h) => `トリミングしました：${w} × ${h} px`,
+    toast_box_copied: (w, h) => `${w} × ${h} px をコピーしました。Cmd+V でレイヤーとして貼り付け`,
+    toast_ocr_no_text: 'テキストが検出されませんでした。より鮮明な範囲を試してください',
+    toast_ocr_fail: 'OCR に失敗しました',
+    toast_text_copied: 'テキストをクリップボードにコピーしました',
+    toast_template_applied: 'テンプレートを適用しました',
+    toast_load_image_first: '先に画像を読み込んでください',
+    toast_resized: (w, h) => `サイズを変更しました：${w} × ${h} px`,
+    toast_no_image: '画像が読み込まれていません',
+    toast_img_copied: '画像をクリップボードにコピーしました',
+    toast_drop_images: '画像ファイルをドロップしてください（PNG / JPG / WebP / GIF）',
+    toast_imported: (name) => `読み込みました：${name}`,
+    qr_toast_msg: (url) => `QR コードを検出しました：${url}`,
+    qr_toast_open: '開く',
+    qr_toast_copied: 'QR コードの内容をクリップボードにコピーしました',
+    action_toast_dismiss: '閉じる',
+
+    // ── Align toolbar ────────────────────────────────────────
+    align_group_label:   '整列',
+    align_btn_left:      '←L',
+    align_btn_hcenter:   '↔C',
+    align_btn_right:     'R→',
+    align_btn_top:       '↑T',
+    align_btn_vcenter:   '↕C',
+    align_btn_bottom:    '↓B',
+    align_btn_dist_h:    'H=',
+    align_btn_dist_v:    'V=',
+    align_to_canvas:     '中央に揃える',
+    align_left_title:    '左揃え',
+    align_hcenter_title: '水平中央揃え',
+    align_right_title:   '右揃え',
+    align_top_title:     '上揃え',
+    align_vcenter_title: '垂直中央揃え',
+    align_bottom_title:  '下揃え',
+    align_dist_h_title:  '水平均等配置',
+    align_dist_v_title:  '垂直均等配置',
+
+    // ── Shape / fill tool tooltips ───────────────────────────
+    shape_rect_title:    '矩形',
+    shape_ellipse_title: '楕円',
+    fill_rect_title:     '塗りつぶし矩形',
+    fill_ellipse_title:  '塗りつぶし楕円',
+
+    // ── Gradient direction ───────────────────────────────────
+    grad_dir_h:  '左→右',
+    grad_dir_v:  '上→下',
+    grad_dir_dr: '左上→右下',
+    grad_dir_ur: '左下→右上',
+
+    // ── Text formatting (title tooltips) ────────────────────
+    opt_bold_title:          '太字',
+    opt_italic_title:        '斜体',
+    opt_underline_title:     '下線',
+    opt_strikethrough_title: '取り消し線',
+
+    // ── Color picker tooltips ────────────────────────────────
+    click_to_pick:              'クリックして色を選択',
+    click_to_pick_transparent:  'クリックして色を選択（透明＝枠なし）',
+    stroke_color_title:         'ストロークカラー',
+    symbol_reopen_title:        'クリックしてパネルを再表示',
+    btn_close_title:            '閉じる',
+
+    // ── Aria labels ──────────────────────────────────────────
+    aria_color_picker:   'カラーピッカー',
+    aria_symbol_picker:  'シンボル選択',
+    aria_template_panel: 'テンプレート',
+    aria_remove_file:    (name) => `${name} を削除`,
+
+    // ── Font names ───────────────────────────────────────────
+    font_pingfang: 'PingFang TC',
+    font_heiti:    'Heiti TC',
+    font_songti:   'Songti TC',
+    font_kaiti:    'Kaiti TC',
+
+    // ── Number style tooltips ────────────────────────────────
+    ns_title_dot:         '塗りつぶし点（無制限）',
+    ns_title_circle:      '丸囲み①②③（上限 50）',
+    ns_title_circle_fill: '塗り丸➊➋➌（上限 10）',
+    ns_title_roman:       'ローマ数字Ⅰ Ⅱ Ⅲ（上限 12）',
+    ns_title_cjk_paren:   '漢数字括弧㈠㈡㈢（上限 10）',
+    ns_title_cjk_circle:  '漢数字丸囲㊀㊁㊂（上限 10）',
+
+    // ── OCR detail ───────────────────────────────────────────
+    ocr_fail_detail: (msg) => `認識に失敗しました：${msg}`,
   }
 }
 
@@ -837,7 +1249,7 @@ function t(key, ...args) {
 }
 
 function applyI18n() {
-  document.documentElement.lang = lang === 'zh' ? 'zh-TW' : 'en'
+  document.documentElement.lang = lang === 'zh' ? 'zh-TW' : lang === 'ja' ? 'ja' : 'en'
   document.querySelectorAll('[data-i18n]').forEach(el => {
     el.textContent = t(el.dataset.i18n)
   })
