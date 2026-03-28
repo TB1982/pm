@@ -607,11 +607,20 @@ async function runConversion(files) {
     return
   }
 
-  // Conflict guard: both watermarks enabled at same position
+  // Watermark validation
   const wmEnabled = document.getElementById('batchWatermarkCheck').checked
   if (wmEnabled) {
     const textOn = document.getElementById('wmTextCheck').checked
     const imgOn  = document.getElementById('wmImgCheck').checked
+
+    if (textOn && !document.getElementById('wmText').value.trim()) {
+      showToast(t('toast_wm_text_empty'), true)
+      return
+    }
+    if (imgOn && !wmImgFilePath) {
+      showToast(t('toast_wm_img_missing'), true)
+      return
+    }
     if (textOn && imgOn && wmTextPosition === wmImgPosition) {
       showToast(t('toast_wm_conflict'), true)
       return

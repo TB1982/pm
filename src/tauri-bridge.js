@@ -11,7 +11,10 @@
     ?? window.__TAURI__?.event?.listen
 
   if (!tauriInvoke) {
-    console.error('[tauri-bridge] Tauri invoke API not found — running outside Tauri?')
+    // Not running inside Tauri — preserve whatever electronAPI the preload injected.
+    // (Overwriting it with a no-op stub would silently break Electron IPC.)
+    console.warn('[tauri-bridge] Tauri invoke API not found — skipping bridge setup')
+    return
   }
 
   const INVOKE_CH = new Set([
