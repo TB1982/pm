@@ -397,7 +397,7 @@ function renderFileList() {
     const removeBtn = document.createElement('button')
     removeBtn.className = 'file-remove'
     removeBtn.dataset.idx = i
-    removeBtn.setAttribute('aria-label', `移除 ${name}`)
+    removeBtn.setAttribute('aria-label', t('aria_remove_file', name))
     removeBtn.textContent = '✕'
     item.append(nameSpan, removeBtn)
     scroll.appendChild(item)

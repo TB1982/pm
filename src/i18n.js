@@ -347,6 +347,74 @@ const STRINGS = {
     qr_toast_open: '開啟',
     qr_toast_copied: 'QR Code 內容已複製到剪貼簿',
     action_toast_dismiss: '略過',
+
+    // ── Align toolbar ────────────────────────────────────────
+    align_group_label:   '對齊',
+    align_btn_left:      '齊左',
+    align_btn_hcenter:   '水中',
+    align_btn_right:     '齊右',
+    align_btn_top:       '齊上',
+    align_btn_vcenter:   '垂中',
+    align_btn_bottom:    '齊下',
+    align_btn_dist_h:    '水均',
+    align_btn_dist_v:    '垂均',
+    align_to_canvas:     '對齊中線',
+    align_left_title:    '靠左',
+    align_hcenter_title: '水平置中',
+    align_right_title:   '靠右',
+    align_top_title:     '靠上',
+    align_vcenter_title: '垂直置中',
+    align_bottom_title:  '靠下',
+    align_dist_h_title:  '水平均分',
+    align_dist_v_title:  '垂直均分',
+
+    // ── Shape / fill tool tooltips ───────────────────────────
+    shape_rect_title:    '矩形框',
+    shape_ellipse_title: '橢圓框',
+    fill_rect_title:     '矩形色塊',
+    fill_ellipse_title:  '橢圓色塊',
+
+    // ── Gradient direction ───────────────────────────────────
+    grad_dir_h:  '左→右',
+    grad_dir_v:  '上→下',
+    grad_dir_dr: '左上→右下',
+    grad_dir_ur: '左下→右上',
+
+    // ── Text formatting (title tooltips) ────────────────────
+    opt_bold_title:          '粗體',
+    opt_italic_title:        '斜體',
+    opt_underline_title:     '底線',
+    opt_strikethrough_title: '刪除線',
+
+    // ── Color picker tooltips ────────────────────────────────
+    click_to_pick:              '點擊選色',
+    click_to_pick_transparent:  '點擊選色（透明=無外框）',
+    stroke_color_title:         '描邊顏色',
+    symbol_reopen_title:        '點擊重開面板',
+    btn_close_title:            '關閉',
+
+    // ── Aria labels ──────────────────────────────────────────
+    aria_color_picker:   '選色面板',
+    aria_symbol_picker:  '符號選取面板',
+    aria_template_panel: '套版選擇',
+    aria_remove_file:    (name) => `移除 ${name}`,
+
+    // ── Font names ───────────────────────────────────────────
+    font_pingfang: '蘋方-繁',
+    font_heiti:    '黑體-繁',
+    font_songti:   '宋體-繁',
+    font_kaiti:    '楷體-繁',
+
+    // ── Number style tooltips ────────────────────────────────
+    ns_title_dot:         '實心圓點（無限）',
+    ns_title_circle:      '空心圓圈 ①②③（上限 50）',
+    ns_title_circle_fill: '實心圓圈 ➊➋➌（上限 10）',
+    ns_title_roman:       '羅馬數字 Ⅰ Ⅱ Ⅲ（上限 12）',
+    ns_title_cjk_paren:   '中文括號 ㈠㈡㈢（上限 10）',
+    ns_title_cjk_circle:  '中文圓圈 ㊀㊁㊂（上限 10）',
+
+    // ── OCR detail ───────────────────────────────────────────
+    ocr_fail_detail: (msg) => `辨識失敗：${msg}`,
   },
 
   en: {
@@ -691,6 +759,74 @@ const STRINGS = {
     qr_toast_open: 'Open',
     qr_toast_copied: 'QR Code content copied to clipboard',
     action_toast_dismiss: 'Dismiss',
+
+    // ── Align toolbar ────────────────────────────────────────
+    align_group_label:   'Align',
+    align_btn_left:      '←L',
+    align_btn_hcenter:   '↔C',
+    align_btn_right:     'R→',
+    align_btn_top:       '↑T',
+    align_btn_vcenter:   '↕C',
+    align_btn_bottom:    '↓B',
+    align_btn_dist_h:    'H=',
+    align_btn_dist_v:    'V=',
+    align_to_canvas:     'Center',
+    align_left_title:    'Align Left',
+    align_hcenter_title: 'Center Horizontal',
+    align_right_title:   'Align Right',
+    align_top_title:     'Align Top',
+    align_vcenter_title: 'Center Vertical',
+    align_bottom_title:  'Align Bottom',
+    align_dist_h_title:  'Distribute Horizontal',
+    align_dist_v_title:  'Distribute Vertical',
+
+    // ── Shape / fill tool tooltips ───────────────────────────
+    shape_rect_title:    'Rectangle',
+    shape_ellipse_title: 'Ellipse',
+    fill_rect_title:     'Fill Rect',
+    fill_ellipse_title:  'Fill Ellipse',
+
+    // ── Gradient direction ───────────────────────────────────
+    grad_dir_h:  'L→R',
+    grad_dir_v:  'T→B',
+    grad_dir_dr: '↘',
+    grad_dir_ur: '↗',
+
+    // ── Text formatting (title tooltips) ────────────────────
+    opt_bold_title:          'Bold',
+    opt_italic_title:        'Italic',
+    opt_underline_title:     'Underline',
+    opt_strikethrough_title: 'Strikethrough',
+
+    // ── Color picker tooltips ────────────────────────────────
+    click_to_pick:             'Click to pick color',
+    click_to_pick_transparent: 'Click to pick (transparent = no outline)',
+    stroke_color_title:        'Stroke color',
+    symbol_reopen_title:       'Click to reopen panel',
+    btn_close_title:           'Close',
+
+    // ── Aria labels ──────────────────────────────────────────
+    aria_color_picker:   'Color Picker',
+    aria_symbol_picker:  'Symbol Picker',
+    aria_template_panel: 'Template',
+    aria_remove_file:    (name) => `Remove ${name}`,
+
+    // ── Font names ───────────────────────────────────────────
+    font_pingfang: 'PingFang TC',
+    font_heiti:    'Heiti TC',
+    font_songti:   'Songti TC',
+    font_kaiti:    'Kaiti TC',
+
+    // ── Number style tooltips ────────────────────────────────
+    ns_title_dot:         'Filled dot (unlimited)',
+    ns_title_circle:      'Circle ①②③ (max 50)',
+    ns_title_circle_fill: 'Filled circle ➊➋➌ (max 10)',
+    ns_title_roman:       'Roman Ⅰ Ⅱ Ⅲ (max 12)',
+    ns_title_cjk_paren:   'CJK paren ㈠㈡㈢ (max 10)',
+    ns_title_cjk_circle:  'CJK circle ㊀㊁㊂ (max 10)',
+
+    // ── OCR detail ───────────────────────────────────────────
+    ocr_fail_detail: (msg) => `Recognition failed: ${msg}`,
   }
 }
 

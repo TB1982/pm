@@ -1,7 +1,14 @@
-# SDD：Mac 截圖與圖片編輯工具
-**版本：** 3.43
+# SDD：Mac 截圖與圖片編輯工具（Electron 版 — 已封存）
+
+> ⚠️ **此文件已於 2026-03-28 凍結。**
+> Electron 版本最終發布為 v3.43，git tag：`electron-final`。
+> 本文件為唯讀歷史紀錄，不再更新。
+> 後續開發請見 `SDD-vas-tauri.md`。
+
+**版本：** 3.43（最終版）
 **日期：** 2026-03-27
-**狀態：** 待審閱
+**封存日期：** 2026-03-28
+**狀態：** 已封存
 **變更紀錄：**
 
 ### v3.43 — 套版搖桿絲滑化（step 0.1） *（2026-03-27）*
@@ -12,10 +19,10 @@
 
 #### TDD 測試案例（v3.43）
 
-- [ ] 拖動「圓角」搖桿 → 顯示值以 0.1 為單位變化（如 4.9 → 5.0 → 5.1）
-- [ ] 拖動「外框」搖桿 → 顯示值以 0.1 為單位變化
-- [ ] 搖桿拖到最左端 → 顯示 0.0；最右端 → 顯示 10.0
-- [ ] 套用後重新開啟套版面板 → 搖桿恢復預設值 5.0
+- [x] 拖動「圓角」搖桿 → 顯示值以 0.1 為單位變化（如 4.9 → 5.0 → 5.1）
+- [x] 拖動「外框」搖桿 → 顯示值以 0.1 為單位變化
+- [x] 搖桿拖到最左端 → 顯示 0.0；最右端 → 顯示 10.0
+- [x] 套用後重新開啟套版面板 → 搖桿恢復預設值 5.0
 
 ---
 
@@ -1095,11 +1102,11 @@ ctx.fillText(str, cx, cy + yOff)
 - [x] 套用「Apple 暖」：橘粉漸層底，圖片有圓角與陰影
 - [x] 套用「Apple 冷」：深藍紫漸層底，圖片有圓角與陰影
 - [x] 套用「Mac 視窗」：頂部灰色標題列，可見紅黃綠三個圓點
-- [ ] 套用「行動裝置」：深色手機外框，上方有膠囊形 Dynamic Island
-- [ ] 套版後現有 annotation 位置正確（不偏移）
-- [ ] 套版後可 Undo 還原（⌘Z 恢復原圖）
-- [ ] 套版後關閉面板，再次開啟並套另一款：以已套版圖片為基底，正確產生新套版
-- [ ] 套版後「完成並儲存」：匯出圖片包含套版效果
+- [x] 套用「行動裝置」：深色手機外框，上方有膠囊形 Dynamic Island
+- [x] 套版後現有 annotation 位置正確（不偏移）
+- [x] 套版後可 Undo 還原（⌘Z 恢復原圖）
+- [x] 套版後關閉面板，再次開啟並套另一款：以已套版圖片為基底，正確產生新套版
+- [x] 套版後「完成並儲存」：匯出圖片包含套版效果
 
 ---
 
@@ -3476,23 +3483,37 @@ Menu.buildFromTemplate([{
 
 ## 7. 後續迭代（Out of Scope for MVP）
 
-| 功能 | 說明 |
-|------|------|
-| 跨螢幕矩形選取 | 矩形選取框可跨越雙螢幕邊界；需處理不同 DPI 螢幕的截圖拼合與座標轉換 |
-| 歷史截圖紀錄 | 自動儲存截圖歷史，可回溯查看 |
-| 並排拼版 | 多圖上下/左右排列成一張 |
-| 自由筆選區截圖 | 不規則形狀截圖 |
-| 固定區域截圖 | 記憶座標的重複截圖 |
-| 動態 GIF 製作 | 多幀合成動畫 |
-| PNG/JPG → SVG | 向量追蹤轉換 |
-| ~~截圖後直接傳送~~ | ~~寄信、傳 Slack 等~~（已升格為 S3 正式功能，v2.7 實作）|
-| 標註樣式預設集 | 儲存常用顏色/樣式組合 |
-| Mac App Store 分發 | S2 已移除，Playwright 不再是障礙；仍需 Sandbox + Notarization |
-| S2 網頁截圖（重新評估） | 若日後 CP 值提升，可考慮以輕量替代方案（非 Chromium）重新實作 |
+> 本節為 Electron 版 MVP 規劃時的「暫緩清單」歷史紀錄。
+> 這些項目已於 2026-03-28 整理至 `SDD-vas-tauri.md` § 4 Product Backlog，以該文件為準。
+
+| 功能 | 說明 | 後續 |
+|------|------|------|
+| 跨螢幕矩形選取 | 矩形選取框可跨越雙螢幕邊界；需處理不同 DPI 螢幕截圖拼合與座標轉換 | 移至 Tauri Wishlist |
+| 歷史截圖紀錄 | 自動儲存截圖歷史，可回溯查看 | 移至 Tauri Sprint Candidates |
+| 並排拼版 | 多圖上下/左右排列成一張 | 移至 Tauri Wishlist |
+| 自由筆選區截圖 | 不規則形狀截圖 | 移至 Tauri Wishlist |
+| 固定區域截圖 | 記憶座標的重複截圖 | 移至 Tauri Wishlist |
+| 動態 GIF 製作 | 多幀合成動畫 | 移至 Tauri Wishlist |
+| PNG/JPG → SVG | 向量追蹤轉換 | 移至 Tauri Wishlist |
+| ~~截圖後直接傳送~~ | ~~寄信、傳 Slack 等~~ | ✅ 已升格：S3 正式功能，v2.7 實作 |
+| 標註樣式預設集 | 儲存常用顏色/樣式組合 | 移至 Tauri Wishlist |
+| Mac App Store 分發 | 仍需 Sandbox + Notarization | 移至 Tauri Wishlist |
+| S2 網頁截圖（重新評估） | 若日後 CP 值提升，可考慮以輕量替代方案重新實作 | 移至 Tauri Wishlist |
 
 ---
 
-## 8. 迭代規劃
+## 8. 原始迭代規劃
+
+> **關於版號的說明**
+>
+> 本節記錄開發期間的功能規劃藍圖（v2.1 起）。實際版本歷史（變更紀錄）見文件開頭，以倒序排列。
+>
+> 版號曾歷經兩次重分配，造成部分版號看起來跳躍或重複：
+> - **v2.9 衝突**：原規劃的 v2.9「選取工具」因臨時插入「鉛筆工具（Pen）」佔用了 v2.9，選取工具版號後移至 v3.0。
+> - **v3.1 / v3.2 連鎖後移**：v3.1「對話框框選工具」插入後，原 v3.1「文字沿路徑排列」後移至 v3.2；v3.3「搜尋/替換」也跟著調整。
+> - **v3.3 實驗性標記**：原規劃為 v2.4，多次版號重分配後移至 v3.3，並標記為 Experimental，最終未實作，移至長期 Backlog。
+>
+> 實際最終實作版本為 v3.43，詳見文件開頭的變更紀錄。
 
 ### v2.1 — 截圖工作流程優化 *（2026-03-22）*
 
@@ -3739,9 +3760,43 @@ Menu.buildFromTemplate([{
 
 ---
 
-## 9. 長期遷移規劃
+## 9. 決策日誌
 
-### 9.1 Electron → Tauri 遷移
+> 記錄開發期間所有重大的設計轉向、功能取捨與架構決策。
+> 每條格式：決策內容 ｜ 版本 ｜ 原因 ｜ 結果
+
+### 9.1 功能取捨
+
+| 決策 | 版本 | 原因 | 結果 |
+|------|------|------|------|
+| **S2 網頁截圖移除** | v2.1 | Playwright 安裝包太大（~150MB），App 體積不可接受 | 移除工具列「網頁」按鈕，改為「延遲截圖」；網頁截圖列為 Tauri Backlog |
+| **截圖後直接傳送升格** | v2.7 | 使用者工作流程需求明確，從 Out of Scope 升為正式功能 | 成為 S3 模組，實作 Line / Slack / Finder 拖曳匯出 |
+| **歷史截圖不列入 MVP** | v2.0 規劃 | Electron 下 temp 檔生命週期不可靠，IPC 時序問題難以解決 | 移至 Tauri Backlog，待 `tauri-plugin-store` 解決生命週期問題後實作 |
+| **去背功能改為隱私遮蔽** | v3.28 | 去背需要 AI 模型，Electron 版不引入雲端依賴；隱私遮蔽 CP 值更高、市場空缺更明顯 | 隱私遮蔽成為 K 工具，支援全圖掃描與指定區域，regex 規則本地執行 |
+| **v3.3 文字沿路徑排列未實作** | v3.3 | 技術挑戰過高（字元旋轉、中文寬度計算、即時重繪），時程無法配合 | 移至長期 Backlog |
+| **移除拖曳匯出浮水印** | Tauri 規劃 | Tauri 版為付費產品，不需要免費版的品牌浮水印 | 列為 Tauri Sprint Candidate |
+
+### 9.2 架構決策
+
+| 決策 | 版本 | 原因 | 結果 |
+|------|------|------|------|
+| **分發方式確認為 .dmg** | v2.0 | Mac App Store 需 Sandbox，與截圖所需的螢幕錄製權限衝突 | .dmg + Apple notarization，S2 模組化封裝供未來替換 |
+| **i18n 架構改為三語（zh/en/ja）** | Tauri 規劃 | Electron 版雙語 audit 在 v3.43 才做，發現 editor.html 大量硬編碼；Tauri 版從 Day 1 三語架構避免重蹈覆轍 | 日文列為 Tauri 開發優先項，須在新功能開發前完成 |
+| **IPC 介面語意不變** | Tauri 規劃 | 前端 UI 全部保留，降低遷移風險 | Rust command 維持與 Electron IPC 相同語意，前端呼叫端改動最小化 |
+
+### 9.3 安全與品質決策
+
+| 決策 | 版本 | 原因 | 結果 |
+|------|------|------|------|
+| **innerHTML 改為 textContent** | v3.40 | XSS 防護，避免使用者輸入的文字被解析為 HTML | 所有動態文字插入改用 textContent 或 createElement |
+| **畫布尺寸上限** | v3.40 | 超大尺寸圖片可能造成 OOM crash | 新增上限檢查，超過直接 return 並提示 |
+| **DMG 簽名必須在公證前** | v3.43 發布 | 連續三次公證卡住，根本原因是 DMG 本身未簽名（只有 .app 內部有簽名），Apple worker 無法驗證 | 在 DMG Release Checklist 步驟 7 加入 codesign + verify，並列為血的教訓 |
+
+---
+
+## 10. 長期遷移規劃
+
+### 10.1 Electron → Tauri 遷移
 
 > **時機：** Electron 版本所有功能模組（含 v2.4 或其評估結果）完成、測試通過後啟動。
 
@@ -3773,12 +3828,25 @@ Menu.buildFromTemplate([{
 | **兩點貝茲曲線（Cubic Bezier）** | 升級為兩個控制點，與免費版單點貝茲做功能區隔；需更新資料模型（cp1/cp2 相對偏移）、渲染（`bezierCurveTo`）、handle 顯示（端點連控制點虛線）、箭頭切線角度計算 |
 | **Share Sheet（系統原生分享）** | 刻意不在 Electron 版實作，作為付費版差異化功能；Tauri 版使用 `tauri-plugin-share` 呼叫 `NSSharingServicePicker` |
 | **線條漸層（Line Gradient Stroke）** | 箭頭 / 曲線支援起點→終點雙色漸層；Canvas 原生 `ctx.createLinearGradient` 即可實作，`strokeStyle` 直接吃 gradient object；貝茲曲線以端點連線方向計算漸層向量 |
-| **日文 UI 在地化（ja）** | 新增第三語系；i18n 架構擴充為 zh / en / ja 三包翻譯；隱私遮蔽規則補充日文場景特化（マイナンバー、電話番号 JP 格式、メールアドレス）；韌性市場拓展 |
+| **日文 UI 在地化（ja）** ⚑ | 新增第三語系；i18n 架構擴充為 zh / en / ja 三包翻譯；隱私遮蔽規則補充日文場景特化（マイナンバー、電話番号 JP 格式、メールアドレス）；韌性市場拓展。**⚑ 優先項：此項須在 Tauri 開發早期完成，早於所有新功能開發。見下方「Tauri 開發順序約束」。** |
 | **批次網頁截圖（Batch Web Capture）** | 使用者貼入多個 URL，VAS 以 Playwright 依序開啟每個頁面並截圖，自動以網域+頁名命名存檔；主要使用者場景：QA 版本比對（確認每頁是否跑版）、RWD 多頁確認、多語系版面核對；市場上無同類輕量 Mac 桌面工具，為差異化功能 |
 | **捲軸截圖（Scrolling / Full-Page Capture）** | 截取超過視窗高度的完整網頁；以 Playwright `page.screenshot({ fullPage: true })` 實作，自動捲動並拼接，處理 sticky header 重疊問題；需求高但實作複雜，列為 Tauri 版研究工項 |
 | **圖片轉 PDF（Image to PDF）** | 將一張或多張圖片（JPG / PNG / WebP）打包為單一 PDF 檔案；使用 Rust `printpdf` crate 實作，無需 Adobe 授權；支援自訂頁面尺寸與排列順序 |
 
 > 旋轉的渲染核心：每個標注新增 `angle` 欄位，選取時顯示旋轉把手，`ctx.save()` → `ctx.translate(cx,cy)` → `ctx.rotate(angle)` → 繪製 → `ctx.restore()`。點擊偵測需將滑鼠座標反向旋轉至物件局部座標系再判斷 hit。
+
+#### Tauri 開發順序約束
+
+日文在地化必須在任何新功能開發之前完成。原因：
+- i18n 架構擴充為三語系後，所有新 UI 字串都要同時寫三份（zh / en / ja）
+- 若新功能先上，日文又落後，會重蹈 Electron 版 v3.43 雙語盤查的覆轍
+- 日文翻譯完成後，術語表（§ 9.2）同步擴充 `ja` 欄，作為後續開發的對照基準
+
+**Tauri 功能開發啟動前，日文 DoD 必須全部打 `[x]`：**
+- [ ] `i18n.js`（或 Tauri 對應的 i18n 模組）加入完整 `ja` 翻譯包
+- [ ] 所有 UI 元素以 ja 語系顯示，目視確認無空白或 fallback key
+- [ ] 隱私遮蔽規則補充日文場景（マイナンバー、JP 電話番号、メールアドレス）
+- [ ] § 9.2 術語對照表新增 `ja` 欄
 
 #### 遷移檢查清單（啟動前確認）
 - [ ] Electron 版本所有 TDD 測試案例全部通過
@@ -3788,7 +3856,7 @@ Menu.buildFromTemplate([{
 
 ---
 
-### 9.2 UI 雙語切換（中 / EN）
+### 10.2 UI 雙語切換（中 / EN）
 
 > **時機：** 在切換至 Tauri 版本時一併實作，Electron 版本以中文介面為唯一語言，不預先內建切換。
 
@@ -3839,18 +3907,270 @@ function applyLang(lang) {
 
 #### 術語統一原則
 - 切換至 Tauri 前，建立一份**術語對照表**（工具名稱、UI 元素、提示文字），確保翻譯一致後再套入 JS 字典。
-- 術語表附於本節末尾（待 Electron 版本完成後補齊）。
+- 術語表以 `src/i18n.js` 為唯一來源，版本同步更新。
+
+#### 術語對照表（中 / EN）
+
+> 來源：`src/i18n.js`　｜　最後同步：v3.43
+
+**工具列（Toolbar）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 全螢幕 | Fullscreen | `fullscreen` |
+| 視窗 | Window | `window` |
+| 矩形 | Region | `region` |
+| 延遲 | Delay | `delay` |
+| 開啟 | Open | `open` |
+| 白板 | Canvas | `whiteboard` |
+| 批次轉 | Batch | `batch` |
+
+**編輯器工具（Editor Tools）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 選取 | Select | `tool_select` |
+| 框型選取 | Box Select | `tool_boxselect` |
+| 筆型 | Pen | `tool_pen` |
+| 線條 | Line | `tool_line` |
+| 矩形框 | Rectangle | `tool_rect` |
+| 色塊 | Fill | `tool_fillrect` |
+| 文字 | Text | `tool_text` |
+| 隱私遮蔽 | Privacy Mask | `tool_privacymask` |
+| 編號 | Number | `tool_number` |
+| 符號印章 | Stamp | `tool_symbol` |
+| OCR 文字辨識 | OCR | `tool_ocr` |
+| 馬賽克/模糊 | Mosaic/Blur | `tool_mosaic` |
+| 裁切 | Crop | `tool_crop` |
+| 調整大小 | Resize | `tool_resize` |
+| 延伸畫布 | Extend Canvas | `tool_extend` |
+| 疊入圖片 | Overlay Image | `tool_overlay` |
+| 一鍵套版 | Template | `tool_template` |
+| 撤銷 | Undo | `tool_undo` |
+| 重做 | Redo | `tool_redo` |
+
+**選項列（Options Bar）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 顏色 | Color | `opt_color` |
+| 實色 | Solid | `opt_solid` |
+| 漸層 | Gradient | `opt_gradient` |
+| 透明度 | Opacity | `opt_opacity` |
+| 邊框 | Border | `opt_border` |
+| 粗細 | Width | `opt_thickness` |
+| 描邊 | Stroke | `opt_stroke` |
+| 圓角 | Radius | `opt_radius` |
+| 字體 | Font | `opt_font` |
+| 系統預設 | System | `opt_font_system` |
+| 等寬 Menlo | Menlo (Mono) | `opt_font_mono` |
+| 蘋方-繁 | PingFang TC | `font_pingfang` |
+| 黑體-繁 | Heiti TC | `font_heiti` |
+| 宋體-繁 | Songti TC | `font_songti` |
+| 楷體-繁 | Kaiti TC | `font_kaiti` |
+| 粗體 | Bold | `opt_bold` |
+| 斜體 | Italic | `opt_italic` |
+| 底線 | Underline | `opt_underline` |
+| 刪除線 | Strikethrough | `opt_strikethrough` |
+| 陰影 | Shadow | `opt_shadow` |
+| 背景 | Background | `opt_text_bg` |
+| 水平鏡射 | Flip Horizontal | `opt_flip_h` |
+| 垂直鏡射 | Flip Vertical | `opt_flip_v` |
+
+**線條樣式（Line Dash Styles）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 實線 | Solid | `dash_solid` |
+| 短虛線 | Dashed | `dash_dash` |
+| 長虛線 | Long Dash | `dash_dash-lg` |
+| 點線 | Dotted | `dash_dot` |
+| 點虛線 | Dot-Dash | `dash_dot-dash` |
+| 長點點 | Dash-Dot-Dot | `dash_dash-dot-dot` |
+
+**數字標記樣式（Number Styles）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 實心圓點 | Filled dot | `style_dot` |
+| 空心圓圈① | Circle ① | `style_circle` |
+| 實心圓圈➊ | Filled circle ➊ | `style_circle_fill` |
+| 羅馬數字Ⅰ | Roman Ⅰ | `style_roman` |
+| 中文括號㈠ | CJK paren ㈠ | `style_cjk_paren` |
+| 中文圓圈㊀ | CJK circle ㊀ | `style_cjk_circle` |
+
+**符號選取分頁（Symbol Tabs）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 形狀 | Shapes | `sym_shape` |
+| 字母 | Letters | `sym_letter` |
+| 箭頭 | Arrows | `sym_arrow` |
+| 其他 | Misc | `sym_misc` |
+
+**對齊工具列（Align Toolbar）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 對齊 | Align | `align_group_label` |
+| 靠左 | Align Left | `align_left_title` |
+| 水平置中 | Center Horizontal | `align_hcenter_title` |
+| 靠右 | Align Right | `align_right_title` |
+| 靠上 | Align Top | `align_top_title` |
+| 垂直置中 | Center Vertical | `align_vcenter_title` |
+| 靠下 | Align Bottom | `align_bottom_title` |
+| 水平均分 | Distribute Horizontal | `align_dist_h_title` |
+| 垂直均分 | Distribute Vertical | `align_dist_v_title` |
+| 對齊中線 | Center | `align_to_canvas` |
+
+**延伸畫布（Extend Canvas）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 向左延伸 | Extend Left | `extend_left` |
+| 向右延伸 | Extend Right | `extend_right` |
+| 向上延伸 | Extend Up | `extend_up` |
+| 向下延伸 | Extend Down | `extend_down` |
+| 四邊延伸 | Extend All | `extend_all` |
+
+**右鍵選單（Context Menu）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 移到最上層 | Bring to Front | `ctx_to_top` |
+| 上移一層 | Move Up | `ctx_move_up` |
+| 下移一層 | Move Down | `ctx_move_down` |
+| 移到最下層 | Send to Back | `ctx_to_bottom` |
+
+**馬賽克工具（Mosaic Tool）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 馬賽克 | Mosaic | `mosaic` |
+| 模糊 | Blur | `mosaic_blur` |
+| 區塊 | Block | `mosaic_block` |
+| 強度 | Intensity | `mosaic_intensity` |
+
+**隱私遮蔽（Privacy Mask）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 遮蔽方式 | Mask mode | `privacy_mode_label` |
+| 偵測敏感資訊中… | Detecting sensitive info… | `toast_privacy_scanning` |
+| 已遮蔽 n 處 | n region(s) masked | `toast_privacy_done` |
+| 未偵測到敏感資訊 | No sensitive info detected | `toast_privacy_none` |
+| 偵測失敗 | Detection failed | `toast_privacy_fail` |
+
+**OCR 面板（OCR Panel）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| OCR 辨識結果 | OCR Result | `ocr_result_title` |
+| 準備中... | Preparing... | `ocr_preparing` |
+| 辨識中... n% | Recognizing... n% | `ocr_recognizing` |
+| 下載語言包 n% | Downloading language pack n% | `ocr_downloading` |
+| 初始化完成 | Initialized | `ocr_initialized` |
+| 複製 | Copy | `ocr_copy` |
+| 複製並關閉 | Copy & Close | `ocr_copy_close` |
+| 辨識失敗：msg | Recognition failed: msg | `ocr_fail_detail` |
+
+**選色器（Color Picker）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 標準色彩 | Standard Colors | `cpp_standard` |
+| 最近使用 | Recent | `cpp_recent` |
+| 品牌色庫 | Brand Colors | `cpp_brand` |
+| 滴管選色 | Eyedropper | `cpp_eyedropper` |
+| 色碼（16 進位） | Hex color code | `cpp_hex` |
+
+**一鍵套版（Template）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 一鍵套版 | Template | `tpl_title` |
+| 背景 | Background | `tpl_background` |
+| 調整 | Adjust | `tpl_adjust` |
+| 留白 | Padding | `tpl_padding` |
+| 圓角 | Radius | `tpl_radius` |
+| 外框 | Shadow | `tpl_shadow` |
+| 社群尺寸 | Social Sizes | `tpl_social` |
+
+**批次轉換（Batch Convert）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 批次格式轉換 | Batch Format Convert | `batch_title` |
+| 開始轉換 | Start Convert | `batch_start` |
+| 轉換為 | Convert to | `batch_convert_to` |
+| 品質 | Quality | `batch_quality` |
+| 輸出位置 | Output | `batch_output` |
+| 同原始檔案目錄 | Same as source | `batch_same_dir` |
+| 指定目錄 | Custom directory | `batch_custom_dir` |
+| 轉換完成後刪除原始檔 | Delete originals after conversion | `batch_delete_orig` |
+| 加入浮水印 | Add Watermark | `batch_wm_enable` |
+| 文字 | Text | `batch_wm_text` |
+| 圖片（Logo） | Image (Logo) | `batch_wm_img` |
+| 位置 | Position | `batch_wm_position` |
+| 邊距 | Margin | `batch_wm_margin` |
+
+**對話框（Modals）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 新開畫布 | New Canvas | `newcanvas_title` |
+| 預設尺寸 | Preset | `newcanvas_preset` |
+| 自訂 | Custom | `newcanvas_custom` |
+| 建立 | Create | `newcanvas_create` |
+| 調整尺寸 | Resize | `resize_title` |
+| 套用 | Apply | `resize_apply` |
+| 延伸畫布 | Extend Canvas | `extend_title` |
+| 確認延伸 | Confirm | `extend_confirm` |
+| 儲存格式 | Save Format | `save_title` |
+| 儲存 | Save | `save_confirm` |
+| 取消 | Cancel | `save_cancel` |
+| OCR 語言包 | OCR Language Pack | `ocr_dl_title` |
+| 確認下載並辨識 | Download & Recognize | `ocr_dl_confirm` |
+
+**底部列（Bottom Bar）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 歷史截圖 | Screenshot History | `history_title` |
+| 尚無紀錄 | No history yet | `history_empty` |
+| 複製最終圖片到剪貼簿 | Copy to Clipboard | `btn_copy_title` |
+| 完成並儲存 | Save | `btn_save` |
+
+**提示訊息（Toast Messages）**
+
+| 中文 | English | i18n key |
+|------|---------|----------|
+| 已複製到剪貼簿 w × h px | Copied to clipboard w × h px | `toast_copied` |
+| 截圖失敗 | Capture failed | `toast_capture_fail` |
+| 已儲存：name | Saved: name | `toast_saved` |
+| 儲存失敗 | Save failed | `toast_save_fail` |
+| 已裁切：w × h px | Cropped: w × h px | `toast_cropped` |
+| 已調整尺寸：w × h px | Resized: w × h px | `toast_resized` |
+| 已延伸：w × h px | Extended: w × h px | `toast_extended` |
+| 已建立 w × h 畫布 | Canvas created: w × h | `toast_new_canvas` |
+| 編號已重置 | Counter reset to 1 | `toast_num_reset` |
+| 套版已套用 | Template applied | `toast_template_applied` |
+| OCR 辨識失敗 | OCR failed | `toast_ocr_fail` |
+| 圖片已複製到剪貼簿 | Image copied to clipboard | `toast_img_copied` |
+| 文字已複製到剪貼簿 | Text copied to clipboard | `toast_text_copied` |
 
 ---
 
-## 8. 開放問題（待決定）
+## 10. 開放問題與確認（MVP 階段）
 
-| # | 問題 | 狀態 |
-|---|------|------|
-| Q1 | App 分發方式 | ✅ 確認：.dmg，S2 模組化封裝供未來替換 |
-| Q2 | 歷史截圖紀錄 | ✅ 確認：不列入 MVP，移至後續迭代 |
-| Q3 | 全域快捷鍵預設值 | ✅ 確認：矩形截圖 Cmd+Ctrl+X，其餘 Cmd+Ctrl+1/2 |
+> 所有問題均已確認，本節為歷史紀錄。
+
+| # | 問題 | 確認結果 |
+|---|------|---------|
+| Q1 | App 分發方式 | .dmg，S2 模組化封裝供未來替換 |
+| Q2 | 歷史截圖紀錄 | 不列入 MVP，移至後續迭代 |
+| Q3 | 全域快捷鍵預設值 | 矩形截圖 Cmd+Ctrl+X，其餘 Cmd+Ctrl+1/2 |
 
 ---
 
-*本文件為 SDD v2.0，所有開放問題已確認，可進入開發環境建置。*
+*原文件版本標記：SDD v2.0（MVP 規劃完成時）。最終版本：v3.43（2026-03-27）。封存：2026-03-28。*

@@ -166,6 +166,70 @@ npm start         # launch the app
 
 ---
 
+## Tauri Migration — Development Constraints
+
+When the Electron → Tauri migration begins:
+
+1. **Japanese localization first** — before any new feature development starts in Tauri, Japanese UI (`ja`) must be complete and all DoD conditions met. This prevents repeating the Electron v3.43 bilingual audit situation with a third language.
+2. **i18n architecture is three-language from day one** — every new UI string added in Tauri must have `zh`, `en`, and `ja` entries simultaneously. The bilingual scope rule (three files) expands to include `ja` in all three.
+3. **§ 10.2 terminology table must include `ja` column** before feature development begins.
+
+See `SDD-mac-screenshot-tool.md` § 10.1 「Tauri 開發順序約束」for the full Japanese DoD checklist.
+
+---
+
+## Feature Development Lifecycle — Electron Tool
+
+Every feature or bug fix must follow this sequence in order. Do not start the next stage until the current one is complete.
+
+```
+DoR → SDD → DoD → TDD → Code → Verify → ✅ Done
+```
+
+### Stage 1 — Definition of Ready (DoR)
+
+Before writing any code or spec, confirm all three questions have clear answers:
+
+1. **What problem does this solve?** (user need or bug description)
+2. **How will we verify it's correct?** (acceptance criteria — becomes the TDD cases)
+3. **What existing features might be affected?** (regression scope)
+
+If any question is unanswered, discuss and resolve first. Do not proceed.
+
+### Stage 2 — SDD + DoD + TDD (written before coding)
+
+Once DoR passes, document first:
+
+1. **Update SDD** — bump version, add 變更紀錄 entry, write the feature spec.
+2. **Write TDD test cases** — add `- [ ]` cases to SDD § 5 covering all acceptance criteria from DoR.
+3. **Confirm DoD** — all four conditions below must be achievable for this feature before coding starts.
+
+### Stage 3 — Code
+
+Implement the feature. Bilingual must be handled in the same session as the code:
+- `src/i18n.js` — add key to **both** `zh` and `en`
+- `src/editor.html` — wire `data-i18n*` attribute; never hardcode Chinese in HTML
+- `src/editor.js` / `src/renderer.js` — use `t('key')`; never interpolate Chinese string literals
+
+### Stage 4 — Verify (TDD sign-off)
+
+Run through every `- [ ]` case added in Stage 2. Mark `[x]` only after passing. Do not move to the next feature until all cases are `[x]`.
+
+### Definition of Done (DoD)
+
+A feature is complete only when **all four** are true:
+
+| # | Condition | How to verify |
+|---|-----------|---------------|
+| 1 | **Code works** | All TDD cases marked `[x]` in SDD § 5 |
+| 2 | **SDD updated** | Version bumped, 變更紀錄 entry written, spec reflects new behaviour |
+| 3 | **Bilingual complete** | `i18n.js` + `editor.html` + JS all updated in same session |
+| 4 | **Committed** | `feat`/`fix` + `docs(SDD)` committed in same session |
+
+> **Rule of thumb:** If you'd feel uncomfortable running the DMG Release Checklist right now, the feature isn't done.
+
+---
+
 ## Document Sync Rules (SDD / TDD) — Mandatory
 
 These rules apply to the Electron screenshot tool sub-project.
@@ -260,16 +324,29 @@ docs(SDD): v0.8 更新文字工具規格與 TDD 測試案例
 
 ## DMG Release Checklist
 
-Before running `npm run build` to produce a distributable DMG, complete all of the following steps in order:
+> Steps 1–5 must be completed **before** `npm run build`. Do not start the build until all pre-build gates pass. Run each step in order — do not skip ahead.
+
+**Pre-build gates (steps 1–5)**
 
 1. **Security audit** — run `npm audit`; resolve any moderate-or-above vulnerabilities before proceeding.
-2. **Bilingual verification** — audit `src/editor.html` and `src/editor.js` for any UI strings, toast messages, tooltips, or labels added since the last release that are missing their English translation. Cross-check against the terminology table in `SDD-mac-screenshot-tool.md` § 9.2.
+2. **Bilingual verification** — audit `src/editor.html` and `src/editor.js` for any UI strings, toast messages, tooltips, or labels added since the last release that are missing their English translation. Cross-check against the terminology table in `SDD-mac-screenshot-tool.md` § 10.2.
 3. **TDD sign-off** — confirm all test cases for the current version in SDD § 5 are marked `[x]`; no open `[ ]` items for shipped features.
 4. **Version sync** — verify that `package.json` version, the SDD `版本：` field, and the `vas.html` version strings (`迭代至 v` / `iterated together to v`) all match.
 5. **Certificate check** — confirm the Developer ID Application certificate is valid in Keychain (`security find-identity -v -p codesigning`). Do not start the build if the certificate is missing or expired.
+
+**Build & sign (steps 6–7)**
+
 6. **Clean dist** — delete `dist/` before building to prevent stale artefacts: `rm -rf dist/`.
-7. **Sign the DMG** — after `npm run build`, sign the DMG explicitly before submitting for notarization: `codesign --sign "Developer ID Application: Ying-Tzu Liu (F7RK8N4U62)" dist/VAS-*.dmg`
-8. **Notarize** — submit via `xcrun notarytool submit … --wait`; wait for `status: Accepted` (re-submit if stuck for > 1 hour).
+7. **Build, then sign the DMG** — run `npm run build`, then immediately sign and verify:
+   ```bash
+   codesign --sign "Developer ID Application: Ying-Tzu Liu (F7RK8N4U62)" dist/VAS-*.dmg
+   codesign --verify --deep --strict --verbose=2 dist/VAS-*.dmg
+   ```
+   Do not proceed to notarization if `--verify` reports "not signed" or any error.
+
+**Notarize & distribute (steps 8–9)**
+
+8. **Notarize** — submit via `xcrun notarytool submit … --wait`; wait for `status: Accepted`. If still `In Progress` after 1 hour, abandon and re-submit once — do not submit multiple times in parallel.
 9. **Staple** — run `xcrun stapler staple dist/VAS-*.dmg` to attach the notarization ticket.
 
 ---
@@ -378,6 +455,11 @@ document.documentElement.lang = isEnglish ? 'en' : 'zh-Hant';
 ## AI Behaviour Rules
 
 - When editing content, **both Chinese and English variants must be updated simultaneously**. Never update one language without updating the other.
+- **Electron tool — bilingual scope:** The bilingual contract covers three files jointly. Any new UI string must be handled in all three at the same time:
+  1. `src/i18n.js` — add the key to **both** `zh` and `en` blocks.
+  2. `src/editor.html` — wire the element with the appropriate `data-i18n`, `data-i18n-title`, `data-i18n-placeholder`, or `data-i18n-aria` attribute. **Never hardcode a Chinese string directly in HTML.**
+  3. `src/editor.js` / `src/renderer.js` — use `t('key')` for any runtime-generated UI text. **Never interpolate a Chinese string literal in JS.**
+  Omitting any one of the three files creates the asymmetry that caused the v3.43 bilingual audit.
 - Do **not** introduce npm packages or local JS files to replace CDN dependencies (static site only).
 - Do **not** propose modifications to any file without reading it first.
 - When working on the Electron tool, follow the **Document Sync Rules** section above.
