@@ -33,7 +33,10 @@
     async invoke(channel, payload) {
       if (!INVOKE_CH.has(channel)) throw new Error(`[bridge] blocked invoke: ${channel}`)
       if (!tauriInvoke) return
-      return tauriInvoke(toCmd(channel), payload ?? {})
+      // batch-convert passes a single `payload` param on the Rust side;
+      // all other commands use flat parameter names matching the args keys.
+      const args = channel === 'batch-convert' ? { payload } : (payload ?? {})
+      return tauriInvoke(toCmd(channel), args)
     },
 
     on(channel, callback) {
