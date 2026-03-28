@@ -1,5 +1,6 @@
 use tauri::Manager;
 use tauri::window::Color;
+use tauri_plugin_dialog::DialogExt;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -45,6 +46,7 @@ pub fn run() {
       batch_convert,
       open_permission_settings,
     ])
+    .plugin(tauri_plugin_dialog::init())
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
@@ -90,7 +92,16 @@ async fn open_overlay() -> Result<(), String> {
 }
 
 #[tauri::command]
-async fn open_image_file() -> Result<(), String> {
+async fn open_image_file(app: tauri::AppHandle) -> Result<(), String> {
+  let (tx, rx) = tokio::sync::oneshot::channel();
+  app.dialog()
+    .file()
+    .add_filter("Images", &["png", "jpg", "jpeg", "gif", "bmp", "webp", "tiff"])
+    .pick_file(move |path| { let _ = tx.send(path); });
+  if let Some(p) = rx.await.map_err(|e| e.to_string())? {
+    // TODO: open editor window — emit event for now
+    app.emit("open-image-result", p.to_string()).ok();
+  }
   Ok(())
 }
 
@@ -100,18 +111,39 @@ async fn new_canvas_create(_width: u32, _height: u32, _bg: String) -> Result<(),
 }
 
 #[tauri::command]
-async fn select_batch_files() -> Result<Vec<String>, String> {
-  Ok(vec![])
+async fn select_batch_files(app: tauri::AppHandle) -> Result<Vec<String>, String> {
+  let (tx, rx) = tokio::sync::oneshot::channel();
+  app.dialog()
+    .file()
+    .add_filter("Images", &["png", "jpg", "jpeg", "gif", "bmp", "webp", "tiff"])
+    .pick_files(move |paths| { let _ = tx.send(paths); });
+  let result = rx.await.map_err(|e| e.to_string())?;
+  Ok(result.unwrap_or_default()
+    .into_iter()
+    .take(100)
+    .map(|p| p.to_string())
+    .collect())
 }
 
 #[tauri::command]
-async fn select_output_dir() -> Result<String, String> {
-  Ok(String::new())
+async fn select_output_dir(app: tauri::AppHandle) -> Result<String, String> {
+  let (tx, rx) = tokio::sync::oneshot::channel();
+  app.dialog()
+    .file()
+    .pick_folder(move |path| { let _ = tx.send(path); });
+  let result = rx.await.map_err(|e| e.to_string())?;
+  Ok(result.map(|p| p.to_string()).unwrap_or_default())
 }
 
 #[tauri::command]
-async fn select_watermark_image() -> Result<String, String> {
-  Ok(String::new())
+async fn select_watermark_image(app: tauri::AppHandle) -> Result<String, String> {
+  let (tx, rx) = tokio::sync::oneshot::channel();
+  app.dialog()
+    .file()
+    .add_filter("Images", &["png", "jpg", "jpeg", "gif", "bmp", "webp"])
+    .pick_file(move |path| { let _ = tx.send(path); });
+  let result = rx.await.map_err(|e| e.to_string())?;
+  Ok(result.map(|p| p.to_string()).unwrap_or_default())
 }
 
 #[tauri::command]
