@@ -39,7 +39,7 @@
     on(channel, callback) {
       if (!ON_CH.has(channel)) throw new Error(`[bridge] blocked on: ${channel}`)
       if (!tauriListen) return
-      tauriListen(channel, event => callback(event.payload)).then(unlisten => {
+      tauriListen(channel, event => callback(null, event.payload)).then(unlisten => {
         if (!unlistenMap.has(channel)) unlistenMap.set(channel, new Map())
         unlistenMap.get(channel).set(callback, unlisten)
       })

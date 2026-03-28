@@ -313,7 +313,7 @@ body {
   width: 480px;
   max-height: 80vh;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.30);
 }
 
 .modal-header {

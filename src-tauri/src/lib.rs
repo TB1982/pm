@@ -161,8 +161,9 @@ async fn batch_convert(app: tauri::AppHandle, payload: serde_json::Value) -> Res
   let resize_val   = payload.get("resize").cloned();
 
   let mut results = Vec::new();
+  let total = files.len();
 
-  for file_path in &files {
+  for (idx, file_path) in files.iter().enumerate() {
     let src  = std::path::Path::new(file_path.as_str());
     let ext  = format_ext(&format);
     let stem = src.file_stem().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
@@ -179,7 +180,7 @@ async fn batch_convert(app: tauri::AppHandle, payload: serde_json::Value) -> Res
                .unwrap_or_else(|| std::path::PathBuf::from(&new_name)),
     };
 
-    let r = match convert_single(src, &out_path, &format, quality, &resize_val) {
+    let mut r = match convert_single(src, &out_path, &format, quality, &resize_val) {
       Ok(()) => {
         if delete_orig && src.to_string_lossy() != out_path.to_string_lossy() {
           let _ = std::fs::remove_file(src);
@@ -189,6 +190,8 @@ async fn batch_convert(app: tauri::AppHandle, payload: serde_json::Value) -> Res
       Err(e) => serde_json::json!({ "success": false, "path": file_path, "error": e }),
     };
 
+    r["done"]  = serde_json::json!(idx + 1);
+    r["total"] = serde_json::json!(total);
     app.emit("batch-progress", &r).ok();
     results.push(r);
   }
