@@ -4874,7 +4874,7 @@ function startOcrRecognition() {
       document.getElementById('btnOcrCopyClose').disabled = false
       if (!result.text) showToast(t('toast_ocr_no_text'))
     } else {
-      document.getElementById('ocrResultText').value = `辨識失敗：${result.error}`
+      document.getElementById('ocrResultText').value = t('ocr_fail_detail', result.error)
       showToast(t('toast_ocr_fail'))
     }
   })
