@@ -750,7 +750,7 @@ kbd {
 /* Image watermark: 3-column — preview | controls | 9-grid */
 .wm-img-layout {
   display: flex;
-  gap: 8px;
+  gap: 16px;
   align-items: flex-start;
   padding: 4px 0 2px;
 }
