@@ -178,7 +178,7 @@ See `SDD-mac-screenshot-tool.md` § 10.1 「Tauri 開發順序約束」for the f
 
 ---
 
-## Feature Development Lifecycle — Electron Tool
+## Feature Development Lifecycle
 
 Every feature or bug fix must follow this sequence in order. Do not start the next stage until the current one is complete.
 
@@ -188,10 +188,10 @@ DoR → SDD → DoD → TDD → Code → Verify → ✅ Done
 
 ### Stage 1 — Definition of Ready (DoR)
 
-Before writing any code or spec, confirm all three questions have clear answers:
+Before writing any code or spec, confirm all three questions have clear answers — **both parties must agree before proceeding**:
 
-1. **What problem does this solve?** (user need or bug description)
-2. **How will we verify it's correct?** (acceptance criteria — becomes the TDD cases)
+1. **What problem does this solve?** (user need or bug description) — told as a **user story**: "As a [user], I want [feature], so that [benefit]."
+2. **How will we verify it's correct?** (acceptance criteria — becomes the TDD cases) — walk through the full usage flow to surface edge cases (quantity limits, size limits, empty input, repeated actions).
 3. **What existing features might be affected?** (regression scope)
 
 If any question is unanswered, discuss and resolve first. Do not proceed.
@@ -206,10 +206,10 @@ Once DoR passes, document first:
 
 ### Stage 3 — Code
 
-Implement the feature. Bilingual must be handled in the same session as the code:
-- `src/i18n.js` — add key to **both** `zh` and `en`
-- `src/editor.html` — wire `data-i18n*` attribute; never hardcode Chinese in HTML
-- `src/editor.js` / `src/renderer.js` — use `t('key')`; never interpolate Chinese string literals
+Implement the feature. Trilingual must be handled in the same session as the code:
+- `src/i18n.js` — add key to **all three**: `zh`, `en`, `ja`
+- `src/editor.html` — wire `data-i18n*` attribute; never hardcode any language string in HTML
+- `src/editor.js` / `src/renderer.js` — use `t('key')`; never interpolate string literals
 
 ### Stage 4 — Verify (TDD sign-off)
 
@@ -217,14 +217,15 @@ Run through every `- [ ]` case added in Stage 2. Mark `[x]` only after passing. 
 
 ### Definition of Done (DoD)
 
-A feature is complete only when **all four** are true:
+A feature is complete only when **all five** are true:
 
 | # | Condition | How to verify |
 |---|-----------|---------------|
-| 1 | **Code works** | All TDD cases marked `[x]` in SDD § 5 |
+| 1 | **Code works** | All TDD cases marked `[x]` in SDD § 6 |
 | 2 | **SDD updated** | Version bumped, 變更紀錄 entry written, spec reflects new behaviour |
-| 3 | **Bilingual complete** | `i18n.js` + `editor.html` + JS all updated in same session |
-| 4 | **Committed** | `feat`/`fix` + `docs(SDD)` committed in same session |
+| 3 | **Trilingual complete** | `i18n.js` (`zh`/`en`/`ja`) + `editor.html` + JS all updated in same session |
+| 4 | **Nova QC passed** | Nova has reviewed the feature and given approval |
+| 5 | **Committed + merged** | `feat`/`fix` + `docs(SDD)` committed; feature branch merged to main |
 
 > **Rule of thumb:** If you'd feel uncomfortable running the DMG Release Checklist right now, the feature isn't done.
 
@@ -452,13 +453,56 @@ document.documentElement.lang = isEnglish ? 'en' : 'zh-Hant';
 
 ---
 
+## Sprint Rules — VAS Tauri
+
+### Team Charter
+
+| Role | Responsibilities |
+|------|-----------------|
+| Nova | Wishlist, QC, UI/UX decisions, feature prioritisation |
+| Claude | Recording, development, technical judgement, Velocity tracking |
+
+### Sprint Cadence
+- **Length:** 1 week (trial); adjust to 2 weeks if pace feels too aggressive
+- **Planning:** Discuss together at Sprint start. Priority order: technical dependencies → complexity → product value
+- **Review:** Per feature — when a feature is complete, not at Sprint end
+- **Retrospective:** At Sprint end, Q&A format (Nova answers, Claude asks)
+
+### Wishlist & New Ideas
+- Nova may raise new ideas at any time during a Sprint
+- Claude records them immediately into SDD Wishlist — no interruption to current Sprint
+- New ideas do **not** enter the current Sprint; they are evaluated at the next Sprint Planning
+
+### Definition of Ready (DoR) Gate
+- Both Nova and Claude must agree before a feature is marked Ready
+- DoR discussion must include a **user story** and a **boundary condition walkthrough**
+- No feature enters development without passing DoR
+
+### Branching & Merging
+- One feature = one branch = one merge
+- Mid-feature commits (bug fixes, tweaks) stay on the feature branch
+- Merge only when the feature passes full DoD (code + QC + docs)
+
+### When Blocked
+1. Claude investigates independently first
+2. If unresolved, Claude reports the blocker and proposes options
+3. Nova and Claude decide together: continue / change approach / defer to Wishlist
+4. Nova may consult other AIs (Gemini, DeepSeek, ChatGPT, Perplexity) and bring findings back
+5. Abandoning a feature is a valid outcome — not every idea is buildable now
+
+### Test Instructions Format
+- Claude provides ready-to-copy terminal commands with **no inline comments**
+- Expected outcome is described in plain text **before** the command block
+
+---
+
 ## AI Behaviour Rules
 
-- When editing content, **both Chinese and English variants must be updated simultaneously**. Never update one language without updating the other.
-- **Electron tool — bilingual scope:** The bilingual contract covers three files jointly. Any new UI string must be handled in all three at the same time:
-  1. `src/i18n.js` — add the key to **both** `zh` and `en` blocks.
-  2. `src/editor.html` — wire the element with the appropriate `data-i18n`, `data-i18n-title`, `data-i18n-placeholder`, or `data-i18n-aria` attribute. **Never hardcode a Chinese string directly in HTML.**
-  3. `src/editor.js` / `src/renderer.js` — use `t('key')` for any runtime-generated UI text. **Never interpolate a Chinese string literal in JS.**
+- When editing content, **all three language variants (zh / en / ja) must be updated simultaneously**. Never update one language without updating the others.
+- **Tauri tool — trilingual scope:** The trilingual contract covers three files jointly. Any new UI string must be handled in all three at the same time:
+  1. `src/i18n.js` — add the key to **all three** `zh`, `en`, and `ja` blocks.
+  2. `src/editor.html` — wire the element with the appropriate `data-i18n`, `data-i18n-title`, `data-i18n-placeholder`, or `data-i18n-aria` attribute. **Never hardcode any language string directly in HTML.**
+  3. `src/editor.js` / `src/renderer.js` — use `t('key')` for any runtime-generated UI text. **Never interpolate a string literal in JS.**
   Omitting any one of the three files creates the asymmetry that caused the v3.43 bilingual audit.
 - Do **not** introduce npm packages or local JS files to replace CDN dependencies (static site only).
 - Do **not** propose modifications to any file without reading it first.
