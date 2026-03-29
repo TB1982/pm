@@ -175,6 +175,26 @@ cargo tauri dev
 
 > **Version clarity:** This repo contains **two separate runtimes** — Electron (`npm start`) and Tauri (`cargo tauri dev`). Always confirm which version you are testing before running. Never use `npm start` to test Tauri behaviour.
 
+### Static Page QC Checklist
+
+**Trigger:** After any change to user-visible content on a static HTML page (text, layout, links, interactive behaviour). Pure metadata or comment-only edits are exempt.
+
+After pushing, Claude provides the following ready-to-run command and asks Nova to verify:
+
+```bash
+python3 -m http.server 8081
+# Then open: http://localhost:8081/<filename>.html
+```
+
+**Nova checks (in order):**
+1. Content is correct and matches intent
+2. Language toggle (中 → EN → 中) — all strings switch, no missing keys
+3. All external links open the correct destination
+4. RWD — narrow browser to ~375 px, confirm no horizontal overflow
+5. EN version — text renders correctly, layout holds
+
+Claude reminds Nova to check **both RWD and EN version** every time, even when the change appears zh-only.
+
 ---
 
 ## Tauri Migration — Development Constraints
@@ -530,6 +550,8 @@ document.documentElement.lang = isEnglish ? 'en' : 'zh-Hant';
 - Do **not** propose modifications to any file without reading it first.
 - When working on the Electron tool, follow the **Document Sync Rules** section above.
 - **Discuss before developing:** If there is any ambiguity about requirements, expected behaviour, or implementation approach, raise all questions and reach agreement with the user *before* writing or modifying code. Do not start implementation until the approach is confirmed.
+- **Finalized content must be written to a file immediately.** Whenever Nova confirms that copy, questions, options, or translations are finalized, Claude must write the complete content (including all options and all language variants) to the relevant md file in the same session — never leave finalized content only in the conversation.
+- **Tauri sprint — Electron commands are blocked.** While the Electron → Tauri migration sprint is active, Claude must not generate Electron launch or test commands (`npm start`, `electron .`, etc.). The default runtime is Tauri (`cargo tauri dev`). The only exception is an explicit Electron-specific bug fix that cannot be reproduced in Tauri. Claude must state the exception reason before issuing any Electron command.
 
 ### Code Removal Policy
 When a feature is removed or replaced:
