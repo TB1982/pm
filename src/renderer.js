@@ -34,8 +34,7 @@ helpModal.addEventListener('click', (e) => {
   if (e.target === helpModal) closeHelp()
 })
 
-document.getElementById('manualLinkBtn').addEventListener('click', async (e) => {
-  e.preventDefault()
+document.getElementById('manualLinkBtn').addEventListener('click', async () => {
   await window.__TAURI__.core.invoke('open_external_url', { url: 'https://tb1982.github.io/pm/vas-guide.html' })
 })
 
