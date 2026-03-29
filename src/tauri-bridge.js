@@ -18,15 +18,23 @@
   }
 
   const INVOKE_CH = new Set([
+    // Toolbar channels
     'resize-for-modal', 'resize-to-toolbar', 'open-permission-settings',
     'capture-fullscreen', 'get-window-sources', 'capture-window',
     'open-overlay', 'open-image-file', 'new-canvas-create',
     'select-batch-files', 'select-output-dir', 'select-watermark-image',
     'batch-convert',
+    // Editor channels
+    'get-editor-init', 'save-image-as',
+    'get-brand-colors', 'save-brand-colors',
+    'ocr-recognize', 'privacy-scan',
   ])
   const ON_CH = new Set([
+    // Toolbar channels
     'shortcut-fullscreen', 'shortcut-window', 'shortcut-rect',
     'capture-result', 'batch-progress',
+    // Editor channels
+    'load-image',
   ])
 
   const toCmd = ch => ch.replace(/-/g, '_')
@@ -57,6 +65,25 @@
         unlisten()
         unlistenMap.get(channel).delete(callback)
       }
+    },
+
+    // editor.js uses ipcSend for close-editor-window and start-drag-export (fire-and-forget)
+    send(channel, _payload) {
+      if (channel === 'close-editor-window') {
+        window.close()
+      }
+      // start-drag-export: no-op in Tauri (drag export handled differently)
+    },
+
+    clipboard: {
+      async writeImage(_dataUrl) {
+        // stub — Tauri clipboard plugin not yet integrated
+      },
+      async writeText(text) {
+        if (navigator.clipboard) {
+          await navigator.clipboard.writeText(text).catch(() => {})
+        }
+      },
     },
 
     getPathForFile: (file) => file?.path ?? ''

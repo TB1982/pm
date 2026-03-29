@@ -354,6 +354,25 @@ Code changes and document updates should be **committed in the same session**. U
 - When editing content, maintain both language variants unless instructed otherwise.
 - **Use `臺` not `台`** — always write `臺灣`, `臺北`, `臺中`, etc. This is the author's explicit preference and the orthographically correct Traditional Chinese form. Never silently substitute `台`.
 
+### data-lang-key — Two Places to Update
+
+Every element with a `data-lang-key` attribute has **two independent sources of text**:
+
+1. **The hardcoded text node inside the HTML element** — what the browser renders before JavaScript runs (and what the user sees if JS is slow or the page is viewed as a static file).
+2. **The matching key in the JS translation map** (`zh` and `en` objects) — what the bilingual toggle swaps in at runtime.
+
+**Both must be updated together.** Updating only the JS map leaves the default (Chinese) display unchanged. Updating only the HTML leaves the English toggle broken.
+
+```html
+<!-- Example: both the HTML text node AND the zh/en map entries must match -->
+<p data-lang-key="cb_rect_desc">拖曳選取任意矩形區域後截圖。</p>
+
+zh: { cb_rect_desc: '拖曳選取任意矩形區域後截圖。' }
+en: { cb_rect_desc: 'Drag to select any rectangular region to capture.' }
+```
+
+> **Root cause of the bug (2026-03-29):** Edited only the `zh`/`en` map entries for `cb_rect_desc` but forgot the HTML text node — the card on screen showed the old text until the fix.
+
 ### Styling
 - **Tailwind CSS utility classes** are the primary styling mechanism.
 - Custom styles are placed in a `<style>` block inside `<head>`.

@@ -2033,6 +2033,56 @@ function setTool(newTool) {
   renderAnnotations()
 }
 
+// ─── Tauri editor init (v1.0) ────────────────────────────────────────────────
+// When running inside Tauri, call get_editor_init to receive the init payload
+// stored by toolbar before opening this window.
+;(async function tauriEditorInit() {
+  if (!window.__TAURI_INTERNALS__) return   // not running in Tauri
+  try {
+    const payload = await ipcInvoke('get-editor-init')
+    if (payload.mode === 'blank') {
+      initBlankCanvas(payload.width, payload.height, payload.bg_color || '#ffffff')
+    } else if (payload.mode === 'file' && payload.file_path) {
+      const img = new Image()
+      img.onload = () => {
+        imgElement = img
+        imgWidth   = img.naturalWidth
+        imgHeight  = img.naturalHeight
+        imgDPR     = 1
+        userZoomed = false
+        document.getElementById('imgInfo').textContent = `${imgWidth} × ${imgHeight} px`
+        fitCanvas()
+        drawBase()
+        setTool('rect')
+      }
+      img.src = `file://${payload.file_path}`
+    }
+  } catch (err) {
+    console.warn('[editor] get-editor-init failed:', err)
+  }
+})()
+
+function initBlankCanvas(w, h, bgColor) {
+  // Create an offscreen canvas filled with bgColor as the imgElement.
+  // drawBase() checks `if (!imgElement) return`, so we must supply one.
+  const offscreen = document.createElement('canvas')
+  offscreen.width  = w
+  offscreen.height = h
+  const ctx2 = offscreen.getContext('2d')
+  ctx2.fillStyle = bgColor
+  ctx2.fillRect(0, 0, w, h)
+
+  imgElement = offscreen
+  imgWidth   = w
+  imgHeight  = h
+  imgDPR     = 1
+  userZoomed = false
+  document.getElementById('imgInfo').textContent = `${w} × ${h} px`
+  fitCanvas()
+  drawBase()
+  setTool('rect')
+}
+
 // ─── Image loading ────────────────────────────────────────────────────────────
 
 ipcOn('load-image', (payload) => {
