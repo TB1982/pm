@@ -2055,7 +2055,7 @@ function setTool(newTool) {
         drawBase()
         setTool('rect')
       }
-      img.src = `file://${payload.file_path}`
+      img.src = window.electronAPI?.fileToSrc(payload.file_path) ?? `file://${payload.file_path}`
     }
   } catch (err) {
     console.warn('[editor] get-editor-init failed:', err)
@@ -2100,7 +2100,7 @@ ipcOn('load-image', (payload) => {
     drawBase()
     setTool('rect')
   }
-  img.src = `file://${filePath}`
+  img.src = window.electronAPI?.fileToSrc(filePath) ?? `file://${filePath}`
 })
 
 function fitCanvas() {

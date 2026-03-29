@@ -1,6 +1,6 @@
 # SDD：VAS — Tauri 版
 
-**版本：** 1.0
+**版本：** 1.1
 **日期：** 2026-03-29
 **狀態：** Sprint 1 進行中
 **前身：** `SDD-mac-screenshot-tool.md`（Electron 版，已封存，git tag `electron-final`）
@@ -21,6 +21,7 @@
 | v0.8 | 2026-03-29 | 新增操作手冊連結（? modal 頂部按鈕）；記錄 WKWebView 開發坑（§ 10）；發現 modal 互斥 bug，補入 S1-01 TDD |
 | v0.9 | 2026-03-30 | § 10 重構為 Lessons Learned Register（KM-001~005）；新增 KM-003 外部 CSS 快取、KM-004 透明視窗黑線框、KM-005 toolbar 接縫圓角；modal 互斥修復（closeAllModals）；白板 modal scrollbar 修復（NC_MODAL_H 420）；toolbar-overlay 視覺一體化（深色背景 + backdrop-filter + 接縫圓角同步）|
 | v1.0 | 2026-03-29 | S1-01/S1-02 編輯器視窗橋接：新增 `new_canvas_create`（實作）、`get_editor_init`（新增）；`open_image_file` 更新為開啟編輯器視窗；`tauri-bridge.js` 擴充編輯器 channels + `send` + `clipboard` stub；`editor.html` 載入 tauri-bridge.js；`editor.js` 新增 `get-editor-init` 初始化 + `initBlankCanvas`；§ 3.1 IPC Contract 填入 |
+| v1.1 | 2026-03-29 | KM-006 修復：啟用 Tauri asset protocol；`tauri.conf.json` 加 `assetProtocol`；`tauri-bridge.js` 新增 `fileToSrc` helper；`editor.js` img.src 改走 asset:// |
 
 ---
 
@@ -291,7 +292,7 @@ pub struct EditorInitPayload {
 - [ ] 點「新開畫布」→ 填入寬高與背景色 → 點確認 → 編輯器視窗開啟，顯示空白畫布（指定尺寸與背景色）
 - [ ] 點「新開畫布」→ 確認 → editor.html 成功載入（不出現 JS 錯誤）
 - [ ] 編輯器開啟後，`get_editor_init` 回傳 `mode=blank`、正確 width / height / bg_color
-- [ ] 點「開啟」→ 選擇圖片 → 編輯器視窗開啟，圖片載入為底圖
+- [ ] 點「開啟」→ 選擇圖片 → 編輯器視窗開啟，圖片載入為底圖（asset:// 協議，非黑屏）
 - [ ] 編輯器開啟後，`get_editor_init` 回傳 `mode=file`、正確 file_path
 - [ ] 同時只能開一個編輯器視窗：再次點「新開畫布」→ 舊編輯器關閉，新編輯器開啟
 - [ ] 關閉編輯器視窗 → 工具列繼續常駐，不影響 toolbar 運作
