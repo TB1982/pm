@@ -1,4 +1,4 @@
-// v1.0
+// v1.5
 use tauri::Manager;
 use tauri::Emitter;
 use tauri::window::Color;
@@ -21,6 +21,43 @@ pub struct EditorInitState(pub Mutex<EditorInitPayload>);
 impl Default for EditorInitState {
   fn default() -> Self {
     EditorInitState(Mutex::new(EditorInitPayload::default()))
+  }
+}
+
+// ── Toolbar position save/restore (KM-007 fix) ────────────────────────────
+// macOS does not reliably restore a hidden window's position on show().
+// We capture outer_position() after set_size(520×68) and restore it on show().
+
+pub struct ToolbarHidePos(pub Mutex<Option<tauri::PhysicalPosition<i32>>>);
+
+impl Default for ToolbarHidePos {
+  fn default() -> Self { ToolbarHidePos(Mutex::new(None)) }
+}
+
+/// Set size → save position → hide.  Call before every toolbar.hide().
+fn toolbar_hide_save_pos(app: &tauri::AppHandle) -> Result<(), String> {
+  if let Some(toolbar) = app.get_webview_window("toolbar") {
+    let _ = toolbar.set_size(tauri::Size::Logical(tauri::LogicalSize { width: 520.0, height: 68.0 }));
+    if let Ok(pos) = toolbar.outer_position() {
+      if let Ok(mut lock) = app.state::<ToolbarHidePos>().0.lock() {
+        *lock = Some(pos);
+      }
+    }
+    toolbar.hide().map_err(|e| e.to_string())?;
+  }
+  Ok(())
+}
+
+/// Set size → restore saved position → show.  Call whenever toolbar should reappear.
+fn toolbar_show_restore_pos(app_handle: &tauri::AppHandle) {
+  if let Some(toolbar) = app_handle.get_webview_window("toolbar") {
+    let _ = toolbar.set_size(tauri::Size::Logical(tauri::LogicalSize { width: 520.0, height: 68.0 }));
+    if let Ok(mut lock) = app_handle.state::<ToolbarHidePos>().0.lock() {
+      if let Some(pos) = lock.take() {
+        let _ = toolbar.set_position(tauri::Position::Physical(pos));
+      }
+    }
+    let _ = toolbar.show();
   }
 }
 
@@ -54,10 +91,13 @@ pub fn run() {
       Ok(())
     })
     .manage(EditorInitState::default())
+    .manage(ToolbarHidePos::default())
     .invoke_handler(tauri::generate_handler![
       resize_for_modal,
       resize_to_toolbar,
+      get_displays,
       capture_fullscreen,
+      capture_rect,
       get_window_sources,
       capture_window,
       open_overlay,
@@ -82,6 +122,65 @@ pub fn run() {
     .expect("error while running tauri application");
 }
 
+// ── Screenshot helpers (v1.4) ─────────────────────────────────────────────────
+// Fullscreen / Rect: macOS screencapture CLI (fast, handles Retina natively).
+// Window: xcap crate — enumerates on-screen windows with thumbnails.
+
+// Encode a DynamicImage as base64 PNG data-URL, store in EditorInitState, open editor.
+// editor.js tauriEditorInit() detects the "data:" prefix and assigns it directly to img.src.
+fn open_editor_with_image(app: &tauri::AppHandle, img: image::DynamicImage) -> Result<(), String> {
+  use base64::Engine as _;
+  let mut buf = std::io::Cursor::new(Vec::new());
+  img.write_to(&mut buf, image::ImageFormat::Png).map_err(|e| e.to_string())?;
+  let encoded = base64::engine::general_purpose::STANDARD.encode(buf.get_ref());
+  let data_url = format!("data:image/png;base64,{}", encoded);
+
+  {
+    let state = app.state::<EditorInitState>();
+    let mut payload = state.0.lock().map_err(|e| e.to_string())?;
+    *payload = EditorInitPayload {
+      mode: "file".into(),
+      width: 0,
+      height: 0,
+      bg_color: String::new(),
+      file_path: data_url,
+    };
+  }
+  open_editor_window(app)
+}
+
+// Fullscreen / Rect still use screencapture CLI then read the file.
+async fn do_capture(app: tauri::AppHandle, capture_args: Vec<String>) -> Result<(), String> {
+  toolbar_hide_save_pos(&app)?;
+  tokio::time::sleep(std::time::Duration::from_millis(300)).await;
+
+  let ts = std::time::SystemTime::now()
+    .duration_since(std::time::UNIX_EPOCH)
+    .unwrap_or_default()
+    .as_millis();
+  let tmp = std::env::temp_dir().join(format!("vas_cap_{ts}.png"));
+
+  let status = tokio::process::Command::new("screencapture")
+    .args(&capture_args)
+    .arg(&tmp)
+    .status()
+    .await
+    .map_err(|e| e.to_string())?;
+
+  if !tmp.exists() {
+    toolbar_show_restore_pos(&app);
+    return if status.success() {
+      Ok(()) // user cancelled (Escape) — not an error
+    } else {
+      Err("screencapture failed — check Screen Recording permission".into())
+    };
+  }
+
+  let img = image::open(&tmp).map_err(|e| e.to_string())?;
+  let _ = std::fs::remove_file(&tmp); // clean up temp file
+  open_editor_with_image(&app, img)
+}
+
 // ── Toolbar IPC stubs ──────────────────────────────────────────────────────
 
 #[tauri::command]
@@ -102,19 +201,124 @@ async fn resize_to_toolbar(app: tauri::AppHandle) -> Result<(), String> {
   Ok(())
 }
 
-#[tauri::command]
-async fn capture_fullscreen() -> Result<serde_json::Value, String> {
-  Ok(serde_json::json!({ "awaitingSelection": false, "error": "not implemented" }))
+// ── Display list (v1.4) ───────────────────────────────────────────────────────
+
+#[derive(serde::Serialize)]
+struct DisplayInfo {
+  index: u32,       // 1-based, matches screencapture -D N
+  name: String,
+  width: u32,
+  height: u32,
+  is_primary: bool,
 }
+
+#[tauri::command]
+async fn get_displays() -> Result<Vec<DisplayInfo>, String> {
+  let monitors = xcap::Monitor::all().map_err(|e| e.to_string())?;
+  let result = monitors.iter().enumerate().map(|(i, m)| DisplayInfo {
+    index: (i + 1) as u32,
+    name: m.name().unwrap_or_default(),
+    width: m.width().unwrap_or(0),
+    height: m.height().unwrap_or(0),
+    is_primary: m.is_primary().unwrap_or(i == 0),
+  }).collect();
+  Ok(result)
+}
+
+// ── Fullscreen capture (v1.4) — screencapture -D N for specific display ───────
+
+#[tauri::command]
+async fn capture_fullscreen(app: tauri::AppHandle, display_index: u32) -> Result<(), String> {
+  // display_index: 1-based (matches screencapture -D N); 0 = primary (default)
+  let d = if display_index == 0 { 1 } else { display_index };
+  do_capture(app, vec!["-x".into(), "-D".into(), d.to_string()]).await
+}
+
+#[tauri::command]
+async fn capture_rect(app: tauri::AppHandle) -> Result<(), String> {
+  do_capture(app, vec!["-x".into(), "-s".into()]).await
+}
+
+// ── Window list + capture (v1.4) — xcap ──────────────────────────────────────
 
 #[tauri::command]
 async fn get_window_sources() -> Result<Vec<serde_json::Value>, String> {
-  Ok(vec![])
+  let windows = xcap::Window::all().map_err(|e| e.to_string())?;
+  let mut sources = Vec::new();
+
+  // System UI app names to exclude from the window picker.
+  const SYSTEM_APPS: &[&str] = &[
+    "Control Center", "控制中心",
+    "Notification Center", "通知中心",
+    "Dock", "WindowServer", "SystemUIServer",
+    "AirPlay Display", "ScreenSaverEngine", "loginwindow", "Spotlight",
+  ];
+
+  for win in windows {
+    let title = win.title().unwrap_or_default();
+    let app_name = win.app_name().unwrap_or_default();
+
+    // Skip windows with no identity
+    if title.is_empty() && app_name.is_empty() { continue; }
+
+    // Skip known system UI processes
+    if SYSTEM_APPS.iter().any(|&s| app_name == s) { continue; }
+
+    // Skip very small windows (system chrome, badges, status items — typically < 200px)
+    let w = win.width().unwrap_or(0);
+    let h = win.height().unwrap_or(0);
+    if w < 200 || h < 100 { continue; }
+
+    let win_id = match win.id() {
+      Ok(id) => id,
+      Err(_) => continue,
+    };
+
+    // Capture a small thumbnail (fail gracefully — skip minimised/off-screen windows)
+    let thumbnail = win.capture_image()
+      .ok()
+      .map(|rgba_img| {
+        // Wrap RgbaImage → DynamicImage so we can call resize
+        let dyn_img = image::DynamicImage::ImageRgba8(rgba_img);
+        let thumb = dyn_img.resize(160, 90, image::imageops::FilterType::Nearest);
+        let mut buf = std::io::Cursor::new(Vec::new());
+        if thumb.write_to(&mut buf, image::ImageFormat::Png).is_ok() {
+          use base64::Engine as _;
+          format!("data:image/png;base64,{}",
+            base64::engine::general_purpose::STANDARD.encode(buf.get_ref()))
+        } else {
+          String::new()
+        }
+      })
+      .unwrap_or_default();
+
+    if thumbnail.is_empty() { continue; } // skip windows that can't be captured
+
+    sources.push(serde_json::json!({
+      "id": win_id.to_string(),
+      "name": if title.is_empty() { app_name } else { format!("{app_name} — {title}") },
+      "thumbnail": thumbnail,
+    }));
+  }
+  Ok(sources)
 }
 
 #[tauri::command]
-async fn capture_window(_source_id: String) -> Result<serde_json::Value, String> {
-  Ok(serde_json::json!({ "error": "not implemented" }))
+async fn capture_window(app: tauri::AppHandle, source_id: String) -> Result<(), String> {
+  toolbar_hide_save_pos(&app)?;
+
+  let target_id: u32 = source_id.parse().map_err(|_| "invalid window id".to_string())?;
+  let windows = xcap::Window::all().map_err(|e| e.to_string())?;
+  let win = windows.into_iter().find(|w| w.id().ok() == Some(target_id))
+    .ok_or_else(|| "window not found".to_string())?;
+
+  let rgba_img = win.capture_image().map_err(|e| {
+    toolbar_show_restore_pos(&app);
+    e.to_string()
+  })?;
+
+  let img = image::DynamicImage::ImageRgba8(rgba_img);
+  open_editor_with_image(&app, img)
 }
 
 #[tauri::command]
@@ -178,10 +382,9 @@ fn open_editor_window(app: &tauri::AppHandle) -> Result<(), String> {
     existing.close().map_err(|e| e.to_string())?;
   }
 
-  // Hide toolbar while editor is open
-  if let Some(toolbar) = app.get_webview_window("toolbar") {
-    toolbar.hide().map_err(|e| e.to_string())?;
-  }
+  // Save position then hide (KM-007: caller may have already hidden for capture;
+  // open_image_file / new_canvas_create go through here directly, so we hide here).
+  toolbar_hide_save_pos(app)?;
 
   let editor = tauri::WebviewWindowBuilder::new(app, "editor", tauri::WebviewUrl::App("editor.html".into()))
     .title("VAS Editor")
@@ -191,13 +394,11 @@ fn open_editor_window(app: &tauri::AppHandle) -> Result<(), String> {
     .build()
     .map_err(|e| e.to_string())?;
 
-  // Restore toolbar when editor is closed
+  // Restore toolbar when editor is closed — restores the exact saved position.
   let app_handle = app.clone();
   editor.on_window_event(move |event| {
     if let tauri::WindowEvent::Destroyed = event {
-      if let Some(toolbar) = app_handle.get_webview_window("toolbar") {
-        let _ = toolbar.show();
-      }
+      toolbar_show_restore_pos(&app_handle);
     }
   });
 
