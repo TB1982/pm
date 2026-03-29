@@ -417,6 +417,8 @@ docs(SDD): v0.8 更新文字工具規格與 TDD 測試案例
 | `SDD-vas-tauri.md` | Full spec + TDD for the Tauri VAS tool (active development) |
 | `SDD-mac-screenshot-tool.md` | Frozen spec for the Electron screenshot tool (v3.43 reference) |
 | `src/editor.js` | Core annotation logic (text, rect, line, number tools) |
+| `vas-guide-popup-draft.md` | Single source of truth for all VAS user guide content (toolbar + editor tools). HTML is generated from this. See update rules below. |
+| `vas-guide.html` | Rendered user guide page. Always update `vas-guide-popup-draft.md` first, then sync to HTML. |
 
 ---
 
@@ -424,6 +426,36 @@ docs(SDD): v0.8 更新文字工具規格與 TDD 測試案例
 - **Remote:** `http://local_proxy@127.0.0.1:36767/git/TB1982/pm` (local proxy)
 - **Main branch:** `main` / `master`
 - **Active dev branch convention:** `claude/<description>-<id>`
+
+---
+
+## VAS User Guide — `vas-guide-popup-draft.md` Update Rules
+
+`vas-guide-popup-draft.md` is the **single source of truth** for all VAS user guide content. `vas-guide.html` is generated from it. Never update the HTML directly without updating the md first.
+
+### When to update
+
+| Trigger | Required action |
+|---------|----------------|
+| New toolbar button added or behaviour changed | Update Section 01 in the md |
+| New editor tool added | Add entry under the relevant group in Section 03 |
+| Existing feature behaviour changes (including hidden features, edge cases) | Update the relevant entry in the md |
+| Any of the above confirmed by Nova (`✅`) | Sync the change to `vas-guide.html` (both HTML text node **and** i18n map) |
+
+### Workflow
+
+1. **Write to md first** — add or update the entry, mark `✅` after Nova confirms
+2. **Sync to HTML** — update `vas-guide.html`: both the hardcoded HTML text node and the `zh`/`en` i18n map entries (see `data-lang-key` rule in Conventions)
+3. **Commit both files together** — md and HTML changes in the same commit
+
+### Structure of the md
+
+| Section | Content |
+|---------|---------|
+| Section 01 | Floating toolbar buttons + Batch Convert detail |
+| Section 03 | Editor left-side tool menu (all annotation tools) |
+
+Section 02 (Editor Interface — the three zones diagram) is documented directly in `vas-guide.html` and does not require a md entry.
 
 ---
 
