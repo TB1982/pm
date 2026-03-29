@@ -158,7 +158,7 @@ python3 -m http.server 8081
 # Then open: http://localhost:8081
 ```
 
-> **Port rule:** Port `8080` is permanently reserved for `cargo tauri dev` (set in `src-tauri/tauri.conf.json`). Never start the static site preview on 8080. If Tauri dev fails with "Address already in use", run `lsof -ti :8080 | xargs kill -9` first.
+> **Port rule:** Port `8085` is permanently reserved for `cargo tauri dev` (set in `src-tauri/tauri.conf.json`). Never start the static site preview on 8085. If Tauri dev fails with "Address already in use", run `pkill -f "http.server 8085"` first.
 
 ### Electron screenshot tool
 ```bash
