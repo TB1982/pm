@@ -259,7 +259,10 @@ Before writing any code or spec, confirm all three questions have clear answers 
 
 1. **What problem does this solve?** (user need or bug description) — told as a **user story**: "As a [user], I want [feature], so that [benefit]."
 2. **How will we verify it's correct?** (acceptance criteria — becomes the TDD cases) — walk through the full usage flow to surface edge cases (quantity limits, size limits, empty input, repeated actions).
-3. **What existing features might be affected?** (regression scope — rough estimate at feature level)
+3. **Regression Impact Analysis** — must produce three concrete outputs before entering Sprint:
+   - **a) Shared code path inventory** — which event listeners, state variables, or functions does this change touch that are also used by other features?
+   - **b) Regression test list** — cite existing TDD cases (by SDD version + case description) that must be re-verified after implementation.
+   - **c) Regression cost estimate** — how much additional testing time does the regression scope add? This affects the true story point of the feature and Sprint capacity planning.
 
 If any question is unanswered, discuss and resolve first. Do not proceed.
 
