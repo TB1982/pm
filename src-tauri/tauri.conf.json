@@ -6,7 +6,7 @@
   "build": {
     "frontendDist": "../src",
     "devUrl": "http://localhost:8085",
-    "beforeDevCommand": "python3 dev-server.py ../src 8085"
+    "beforeDevCommand": "python3 src-tauri/dev-server.py src 8085"
   },
   "app": {
     "macOSPrivateApi": true,
