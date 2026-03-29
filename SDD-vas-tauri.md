@@ -1,6 +1,6 @@
 # SDD：VAS — Tauri 版
 
-**版本：** 1.1
+**版本：** 1.2
 **日期：** 2026-03-29
 **狀態：** Sprint 1 進行中
 **前身：** `SDD-mac-screenshot-tool.md`（Electron 版，已封存，git tag `electron-final`）
@@ -21,7 +21,8 @@
 | v0.8 | 2026-03-29 | 新增操作手冊連結（? modal 頂部按鈕）；記錄 WKWebView 開發坑（§ 10）；發現 modal 互斥 bug，補入 S1-01 TDD |
 | v0.9 | 2026-03-29 | § 10 重構為 Lessons Learned Register（KM-001~005）；新增 KM-003 外部 CSS 快取、KM-004 透明視窗黑線框、KM-005 toolbar 接縫圓角；modal 互斥修復（closeAllModals）；白板 modal scrollbar 修復（NC_MODAL_H 420）；toolbar-overlay 視覺一體化（深色背景 + backdrop-filter + 接縫圓角同步）|
 | v1.0 | 2026-03-29 | S1-01/S1-02 編輯器視窗橋接：新增 `new_canvas_create`（實作）、`get_editor_init`（新增）；`open_image_file` 更新為開啟編輯器視窗；`tauri-bridge.js` 擴充編輯器 channels + `send` + `clipboard` stub；`editor.html` 載入 tauri-bridge.js；`editor.js` 新增 `get-editor-init` 初始化 + `initBlankCanvas`；§ 3.1 IPC Contract 填入 |
-| v1.1 | 2026-03-29 | KM-006 修復：啟用 Tauri asset protocol；`tauri.conf.json` 加 `assetProtocol`；`tauri-bridge.js` 新增 `fileToSrc` helper；`editor.js` img.src 改走 asset:// |
+| v1.1 | 2026-03-29 | KM-006 修復嘗試（asset protocol）；toolbar hide/show（open_editor_window）；SDD 文件修正六項；CLAUDE.md Sprint Velocity 規則 |
+| v1.2 | 2026-03-29 | KM-006 最終解法：asset protocol 在 devUrl HTTP origin 無效（追加記錄）；改用 Rust `read_image_as_data_url`（base64 data URL）；圖片載入 Nova QC 通過 ✅ |
 
 ---
 
@@ -149,7 +150,7 @@ pub struct EditorInitPayload {
 
 | Sprint | 期間 | 完成功能 | 備註 |
 |--------|------|---------|------|
-| Sprint 1 | 2026-03-28 – 2026-03-29 | S1-01 浮動工具列（done）；S1-02 檔案對話框（done，圖片引入待 KM-006 完全解決）；S1-03 批次轉換 + 浮水印（done）；編輯器橋接（done，空白畫布可用）；Toolbar hide/show（done） | 兩天完成 Sprint 1 主體；截圖→編輯器列為 Sprint 2 開頭 |
+| Sprint 1 | 2026-03-28 – 2026-03-29 | S1-01 浮動工具列（done）；S1-02 檔案對話框 + 圖片引入編輯器（done）；S1-03 批次轉換 + 浮水印（done）；編輯器橋接：空白畫布 + 開圖（done）；Toolbar hide/show（done） | 兩天完成 Sprint 1；截圖→編輯器列為 Sprint 2 開頭 |
 
 ---
 
@@ -302,7 +303,7 @@ pub struct EditorInitPayload {
 - [x] 點「新開畫布」→ 填入寬高與背景色 → 點確認 → 編輯器視窗開啟，顯示空白畫布（指定尺寸與背景色）
 - [x] 點「新開畫布」→ 確認 → editor.html 成功載入（不出現 JS 錯誤）
 - [ ] 編輯器開啟後，`get_editor_init` 回傳 `mode=blank`、正確 width / height / bg_color
-- [ ] 點「開啟」→ 選擇圖片 → 編輯器視窗開啟，圖片載入為底圖（進行中：KM-006）
+- [x] 點「開啟」→ 選擇圖片 → 編輯器視窗開啟，圖片載入為底圖
 - [ ] 編輯器開啟後，`get_editor_init` 回傳 `mode=file`、正確 file_path
 - [x] 同時只能開一個編輯器視窗：再次點「新開畫布」→ 舊編輯器關閉，新編輯器開啟
 - [x] 關閉編輯器視窗 → 工具列繼續常駐，不影響 toolbar 運作
@@ -336,7 +337,7 @@ pub struct EditorInitPayload {
 
 #### 開啟（open-image-file）
 - [x] 點「開啟」→ macOS 原生圖片選擇對話框彈出
-- [ ] 選擇圖片後對話框關閉 → 編輯器視窗開啟，圖片載入為底圖（進行中：KM-006）
+- [x] 選擇圖片後對話框關閉 → 編輯器視窗開啟，圖片載入為底圖
 - [ ] 取消對話框 → 工具列無反應，不報錯，編輯器視窗不出現
 
 #### 批次轉 — 選擇檔案（select-batch-files）
@@ -598,10 +599,14 @@ Tauri dev 模式的頁面來源為 `http://localhost:8085`（HTTP origin）。WK
 | **A — Asset Protocol** | `tauri.conf.json` security 啟用 `assetProtocol`，設定 scope；JS 改用 `asset://localhost/絕對路徑` | 省記憶體，符合 Tauri 官方設計 | 需設定 scope 白名單，路徑必須在允許範圍內 |
 | **B — Base64 from Rust** | 新增 Rust command `read_image_as_data_url(path)`，讀檔後回傳 `data:image/...;base64,...`；JS 直接用作 `img.src` | 零 config 修改，邏輯集中在 Rust | 大圖（4K 截圖）記憶體佔用高；base64 比原始資料大 ~33% |
 
+**已採用解法（v1.2 驗證通過）：**
+
+方案 B（Rust base64）已實作並經 Nova QC 通過。方案 A（asset protocol）嘗試後發現：`assetProtocol` 在 `devUrl`（`http://localhost`）origin 的 WebView 中**無效**——asset:// 協議只被 Tauri 自己的 `tauri://localhost` origin 信任，與 HTTP devUrl 搭配時 WKWebView 仍阻擋。生產環境亦建議使用方案 B 以維持 dev/prod 行為一致。
+
 **未來指引：**
-- S1-04+（截圖引入編輯器）啟動前必須先選定方案 A 或 B，並在 DoR 時確認。
-- 兩個場景（file picker 開啟圖片 + 截圖結果載入）須使用**同一套解法**，不可各自實作不同的載入方式，避免維護分歧。
-- 若選方案 A，`tauri.conf.json` scope 建議設為 `["$APPDATA/**", "$HOME/Pictures/**", "$TEMP/**"]`（截圖暫存通常寫入 `$TEMP`）。
+- 截圖引入編輯器（S1-04+）直接沿用 `read_image_as_data_url` 指令，不需額外方案評估。
+- 大圖（4K、8MB+）base64 約 11MB 字串，記憶體佔用可接受（一次載入、非長期持有）；如日後出現效能問題，可在 Rust 端先 resize 再回傳。
+- 不要再嘗試 asset protocol 搭配 devUrl — 已驗證無效，記錄於此以節省後人排查時間。
 
 ---
 
