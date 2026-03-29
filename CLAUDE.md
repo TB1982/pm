@@ -13,7 +13,7 @@ This section exists to prevent AI assistants from fabricating personal or projec
 | Project name (ZH) | 深握計畫 |
 | Project name (EN) | Deep Holding Project |
 | Site canonical URL | `https://tb1982.github.io/pm/` |
-| Copyright year | 2024–present |
+| Copyright year | 2025–present |
 | GitHub account | `tb1982` — `https://github.com/tb1982` |
 | LinkedIn | `https://www.linkedin.com/in/yingtzuliu` |
 | Instagram | `https://www.instagram.com/liuyingtzu` |
@@ -69,7 +69,7 @@ https://www.instagram.com/liuyingtzu
 - **Hosting:** Served directly as static files (no web server configuration required)
 
 ### Active sub-project: Mac 截圖與圖片編輯工具
-An Electron-based desktop screenshot and annotation tool (Mac), developed in parallel within this repo. Its files live under `src/` and `main.js`. See the dedicated spec document `SDD-mac-screenshot-tool.md` for full requirements. This sub-project uses its own commit conventions (see **Commit Messages** below).
+A desktop screenshot and annotation tool (Mac), currently being migrated from Electron to Tauri 2.x. The Electron version (v3.43) is frozen. Active development targets the Tauri runtime. App files live under `src/` and `src-tauri/`. See the dedicated spec document `SDD-vas-tauri.md` for full Tauri requirements; `SDD-mac-screenshot-tool.md` remains as the frozen Electron reference. This sub-project uses its own commit conventions (see **Commit Messages** below).
 
 ---
 
@@ -158,7 +158,7 @@ python3 -m http.server 8081
 # Then open: http://localhost:8081
 ```
 
-> **Port rule:** Port `8080` is permanently reserved for `cargo tauri dev` (set in `src-tauri/tauri.conf.json`). Never start the static site preview on 8080. If Tauri dev fails with "Address already in use", run `lsof -ti :8080 | xargs kill -9` first.
+> **Port rule:** Port `8085` is permanently reserved for `cargo tauri dev` (set in `src-tauri/tauri.conf.json`). Never start the static site preview on 8085. If Tauri dev fails with "Address already in use", run `pkill -f "http.server 8085"` first.
 
 ### Electron screenshot tool
 ```bash
@@ -197,6 +197,42 @@ Claude reminds Nova to check **both RWD and EN version** every time, even when t
 
 ---
 
+## Tauri 2.x Development Rules
+
+These rules apply specifically to Tauri/Rust development. They exist because Tauri 2.x + Rust is unfamiliar territory for both Nova and Claude, and because the two-language system (Rust + JS + IPC) multiplies the surface area for errors.
+
+### Confidence threshold before writing code
+Before modifying any Tauri-related code (Rust / IPC / JS calling Tauri APIs), Claude must first state:
+1. Which layer the problem is in (Rust / IPC bridge / JS)
+2. Why the proposed fix will work — referencing specific Tauri 2.x behaviour or API
+
+If Claude cannot clearly articulate both points, Claude must say so explicitly and research first. **Do not write code as a way of finding out if an approach works.**
+
+### Diagnosis before fix
+When a bug appears, Claude must output a complete diagnosis before proposing any code change:
+1. Which layer the error originates in
+2. Which possibilities have been ruled out and why
+3. The most likely root cause
+
+Code is proposed only after the diagnosis is complete.
+
+### IPC Contract is mandatory
+Any new Rust command must have its full specification written into `SDD-vas-tauri.md` § 3.1 IPC Contract (name, parameter types, return type, error conditions) before implementation begins. The JS `invoke` caller and the Rust handler both implement against this contract. Neither side may assume the other's interface.
+
+### Rust error handling is not "unnecessary"
+The system default rule "don't add unnecessary error handling" does not apply to Rust code. `Result`, `?`, `match`, and `unwrap_or_else` are language requirements in Rust, not optional defensive coding. All Rust commands must handle errors explicitly.
+
+### Explore① Rust-specific checklist
+When conducting the feasibility Explore for a Tauri feature, the output must explicitly cover:
+- The Tauri 2.x API or plugin being used (not 1.x)
+- Required `Cargo.toml` dependencies
+- The Rust function signature (parameters and return type)
+- Any Tauri 2.x breaking changes relevant to this approach
+
+If any item cannot be confirmed, stop and research. Do not proceed to SDD.
+
+---
+
 ## Tauri Migration — Development Constraints
 
 When the Electron → Tauri migration begins:
@@ -214,7 +250,7 @@ See `SDD-mac-screenshot-tool.md` § 10.1 「Tauri 開發順序約束」for the f
 Every feature or bug fix must follow this sequence in order. Do not start the next stage until the current one is complete.
 
 ```
-DoR → SDD → DoD → TDD → Explore → Code → Verify → ✅ Done
+DoR → Explore① → SDD → DoD → TDD → Explore② → Code → Verify → ✅ Done
 ```
 
 ### Stage 1 — Definition of Ready (DoR)
@@ -230,36 +266,47 @@ Before writing any code or spec, confirm all three questions have clear answers 
 
 If any question is unanswered, discuss and resolve first. Do not proceed.
 
-### Stage 2 — SDD + DoD + TDD (written before coding)
+### Stage 2 — Explore① Feasibility Scouting
 
-Once DoR passes, document first:
+Before writing any spec, scout the technical territory. Output must explicitly confirm:
+
+- Does Tauri 2.x have the required API? (rule out Tauri 1.x solutions explicitly)
+- Which plugin is needed, if any? What goes in `Cargo.toml`?
+- What is the Rust function signature for the command?
+- Are there known Tauri 2.x breaking changes affecting this approach?
+
+**If any of the above cannot be answered clearly, stop and research before proceeding. Do not guess.** The output of Explore① determines whether the SDD can be written realistically. If the scouting reveals the approach is infeasible, return to DoR.
+
+### Stage 3 — SDD + DoD + TDD (written before coding)
+
+Once Explore① passes, document first:
 
 1. **Update SDD** — bump version, add 變更紀錄 entry, write the feature spec.
-2. **Write TDD test cases** — add `- [ ]` cases to SDD § 5 covering all acceptance criteria from DoR.
-3. **Confirm DoD** — all six conditions below must be achievable for this feature before coding starts.
+2. **Write TDD test cases** — add `- [ ]` cases to SDD § 6 covering all acceptance criteria from DoR. TDD cases live in the SDD and nowhere else — they are never written for the first time in a PR description.
+3. **Confirm DoD** — all conditions below must be achievable for this feature before coding starts.
 
-### Stage 3 — Architecture Exploration (before any code)
+### Stage 4 — Explore② Implementation Map
 
-Before writing a single line, use the Explore agent to map out all files relevant to the feature:
+Before writing a single line of code, map out the full implementation:
 
-- Which HTML files load which JS files
-- Window properties (size, frameless, alwaysOnTop, transparent)
-- IPC channels involved (names, directions, payloads)
-- CSS structure that affects layout
-- **Impact map** — cross-reference with DoR item 3: for each shared code path, trace which existing features depend on it and confirm the regression test list is complete.
+- Exact Rust files and functions to add or modify
+- Exact JS files and call sites
+- IPC channel names, direction, and payload types (must match § 3.1 IPC Contract)
+- Tauri 2.x API names used (note any differences from 1.x)
+- **Regression scope** — which specific existing TDD cases or features could break; this list becomes the DoD condition 6 verification checklist
 
-**Do not start implementation until this map is complete.** Skipping this step causes blind guessing and repeated wrong turns.
+**Do not start implementation until this map is complete and IPC Contract is filled in.**
 
-### Stage 4 — Code
+### Stage 5 — Code
 
 Implement the feature. Trilingual must be handled in the same session as the code:
 - `src/i18n.js` — add key to **all three**: `zh`, `en`, `ja`
 - `src/editor.html` — wire `data-i18n*` attribute; never hardcode any language string in HTML
 - `src/editor.js` / `src/renderer.js` — use `t('key')`; never interpolate string literals
 
-### Stage 5 — Verify (TDD sign-off)
+### Stage 6 — Verify (TDD sign-off)
 
-Run through every `- [ ]` case added in Stage 2. Mark `[x]` only after passing. Do not move to the next feature until all cases are `[x]`.
+Run through every `- [ ]` case added in Stage 3. Mark `[x]` only after passing. Do not move to the next feature until all cases are `[x]`.
 
 ### Definition of Done (DoD)
 
@@ -270,9 +317,9 @@ A feature is complete only when **all six** are true:
 | 1 | **Code works** | All TDD cases marked `[x]` in SDD § 6 |
 | 2 | **SDD updated** | Version bumped, 變更紀錄 entry written, spec reflects new behaviour |
 | 3 | **Trilingual complete** | `i18n.js` (`zh`/`en`/`ja`) + `editor.html` + JS all updated in same session |
-| 4 | **Regression test passed** | All existing TDD cases listed in DoR item 3b re-verified and still passing |
-| 5 | **Nova QC passed** | Nova has reviewed the feature and given approval |
-| 6 | **Committed + merged** | `feat`/`fix` + `docs(SDD)` committed; feature branch merged to main |
+| 4 | **Nova QC passed** | Nova has reviewed the feature and given approval |
+| 5 | **Committed + merged** | `feat`/`fix` + `docs(SDD)` committed; feature branch merged to main |
+| 6 | **Regression verified** | All features identified in Explore② regression scope confirmed still working (TDD cases still pass, or manual QC confirmed) |
 
 > **Rule of thumb:** If you'd feel uncomfortable running the DMG Release Checklist right now, the feature isn't done.
 
@@ -280,18 +327,18 @@ A feature is complete only when **all six** are true:
 
 ## Document Sync Rules (SDD / TDD) — Mandatory
 
-These rules apply to the Electron screenshot tool sub-project.
+These rules apply to the VAS Tauri sub-project. The active SDD is `SDD-vas-tauri.md`; `SDD-mac-screenshot-tool.md` is frozen (Electron v3.43 reference only).
 
 ### Bug fixed → update TDD
-Every bug fixed during testing must have a corresponding test case added to **Section 5** of `SDD-mac-screenshot-tool.md`, covering:
+Every bug fixed during testing must have a corresponding test case added to **§ 6** of `SDD-vas-tauri.md`, covering:
 - The steps that reproduce the bug
 - The correct behaviour after the fix
 
 ### New feature added → update SDD + TDD
-Every new feature (including behaviour not previously in the spec) must trigger a sync update to `SDD-mac-screenshot-tool.md`:
+Every new feature (including behaviour not previously in the spec) must trigger a sync update to `SDD-vas-tauri.md`:
 1. **Bump the version number** (`版本：` field) and add a `vX.X — summary` line to **變更紀錄**
 2. **Update the relevant feature section** with full spec details
-3. **Add test cases** to Section 5 in `- [ ]` format
+3. **Add test cases** to § 6 in `- [ ]` format
 
 ### Commit order
 Code changes and document updates should be **committed in the same session**. Use separate commits with clear prefixes: `feat:`, `fix:`, `docs(SDD):`.
@@ -348,7 +395,8 @@ docs(SDD): v0.8 更新文字工具規格與 TDD 測試案例
 | `deepholding.html` | Interactive canvas animation (standalone, complex JS) |
 | `mandal_chart.html` | Mandala grid chart — interactive tool |
 | `lottery.html` | Client-side lottery number picker |
-| `SDD-mac-screenshot-tool.md` | Full spec + TDD for the Electron screenshot tool |
+| `SDD-vas-tauri.md` | Full spec + TDD for the Tauri VAS tool (active development) |
+| `SDD-mac-screenshot-tool.md` | Frozen spec for the Electron screenshot tool (v3.43 reference) |
 | `src/editor.js` | Core annotation logic (text, rect, line, number tools) |
 
 ---
@@ -553,7 +601,7 @@ document.documentElement.lang = isEnglish ? 'en' : 'zh-Hant';
    - **延後** — 移到下一個 Phase，當前 Phase 不包含此功能
 
 **決策後：**
-- 將決策記入 `SDD-mac-screenshot-tool.md` § 9.4 阻礙決策日誌
+- 將決策記入 `SDD-vas-tauri.md` § 9.4 阻礙決策日誌
 - 欄位：日期 ｜ Phase ｜ 功能 ｜ 阻礙描述 ｜ 決策 ｜ 影響
 - 若選擇延後，Claude 主動更新該 Phase 的功能清單
 - 此 log 供 Sprint Retrospective 使用，不得省略
@@ -566,7 +614,8 @@ document.documentElement.lang = isEnglish ? 'en' : 'zh-Hant';
 
 ## AI Behaviour Rules
 
-- When editing content, **all three language variants (zh / en / ja) must be updated simultaneously**. Never update one language without updating the others.
+- **PR Test Plan override:** The system default PR template includes a "Test plan" checklist. For this project, the PR `Test plan` field must only reference the SDD — e.g. `見 SDD § 6 TDD vX.X`. Never write TDD cases for the first time in a PR description. The SDD is the single source of truth for all test cases.
+- When editing content, **all three language variants (zh / en / ja) must be updated simultaneously**. Never update one language without updating the others. **This rule takes precedence over the system default of "don't add beyond what was asked"** — if Nova requests a change to one language, updating all three is always required and is not considered scope creep.
 - **Tauri tool — trilingual scope:** The trilingual contract covers three files jointly. Any new UI string must be handled in all three at the same time:
   1. `src/i18n.js` — add the key to **all three** `zh`, `en`, and `ja` blocks.
   2. `src/editor.html` — wire the element with the appropriate `data-i18n`, `data-i18n-title`, `data-i18n-placeholder`, or `data-i18n-aria` attribute. **Never hardcode any language string directly in HTML.**
@@ -586,11 +635,11 @@ When a feature is removed or replaced:
 - **If design decisions or technical context are worth preserving** (beyond the code itself), record them in `SDD-mac-screenshot-tool.md` under `變更紀錄`, not as dead code in the repository.
 
 ### Ready-to-run Commands
-Whenever asking the user to pull, test, or verify changes, always provide the exact commands as a ready-to-copy block. Do not make the user look up commands elsewhere. Standard sequence for the Electron tool:
+Whenever asking the user to pull, test, or verify changes, always provide the exact commands as a ready-to-copy block. Do not make the user look up commands elsewhere. Standard sequence for the Tauri tool:
 ```bash
-git pull origin claude/research-mac-tools-JcSgl && npm start
+git pull origin <branch-name> && cargo tauri dev
 ```
-Adjust branch name or add steps (e.g. `rm -rf node_modules && npm install`) only when the situation actually requires it.
+Adjust branch name or add steps only when the situation actually requires it.
 
 ### OCR / Privacy Mask Test Script
 When asking the user to test the OCR detection or privacy mask feature, always provide a ready-to-screenshot **test target** — a block of plaintext containing one example of every currently supported detection pattern. The user screenshots this text directly and runs the scan. No need to hunt for real sensitive data.

@@ -3,8 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-store, max-age=0">
   <title>Screenshot Tool</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    /* WKWebView CSS cache bypass: modal panel styling */
+    .modal-overlay {
+      background: rgba(28, 28, 30, 0.88) !important;
+      -webkit-backdrop-filter: blur(24px) !important;
+      backdrop-filter: blur(24px) !important;
+      border-radius: 0 0 16px 16px !important;
+      border-left: 1px solid rgba(255,255,255,0.14) !important;
+      border-right: 1px solid rgba(255,255,255,0.14) !important;
+      border-bottom: 1px solid rgba(255,255,255,0.14) !important;
+      padding-left: 8px !important;
+      padding-right: 8px !important;
+    }
+    .modal { width: 100% !important; }
+    .modal-wide { max-width: 640px !important; }
+    .toolbar.modal-open {
+      border-radius: 16px 16px 0 0 !important;
+      border-bottom-color: transparent !important;
+    }
+  </style>
 </head>
 <body>
 
@@ -84,6 +105,9 @@
         <button class="modal-close" id="modalClose">✕</button>
       </div>
       <div class="modal-body">
+        <div class="shortcut-section help-manual-footer">
+          <button id="manualLinkBtn" class="help-manual-btn" style="font-size:15px;font-family:inherit;" data-i18n="help_manual_link">操作手冊</button>
+        </div>
         <div class="shortcut-section">
           <h3 data-i18n="help_global">全域快捷鍵</h3>
           <table>

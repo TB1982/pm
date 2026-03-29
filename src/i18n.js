@@ -37,6 +37,7 @@ const STRINGS = {
     help_escape: '取消 / 離開工具',
     help_save: '儲存',
     help_save_as: '另存新檔',
+    help_manual_link: '📖 開啟操作手冊',
 
     // ── Window picker ────────────────────────────────────────────
     picker_title: '選擇視窗',
@@ -453,6 +454,7 @@ const STRINGS = {
     help_escape: 'Cancel / Exit Tool',
     help_save: 'Save',
     help_save_as: 'Save As',
+    help_manual_link: '📖 Open User Guide',
 
     // ── Window picker ────────────────────────────────────────────
     picker_title: 'Select Window',
@@ -869,6 +871,7 @@ const STRINGS = {
     help_escape: 'キャンセル / ツール終了',
     help_save: '保存',
     help_save_as: '名前を付けて保存',
+    help_manual_link: '📖 操作マニュアルを開く',
 
     // ── Window picker ────────────────────────────────────────────
     picker_title: 'ウィンドウを選択',

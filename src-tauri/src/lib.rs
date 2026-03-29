@@ -1,3 +1,4 @@
+// v0.8.1
 use tauri::Manager;
 use tauri::Emitter;
 use tauri::window::Color;
@@ -46,6 +47,7 @@ pub fn run() {
       select_watermark_image,
       batch_convert,
       open_permission_settings,
+      open_external_url,
     ])
     .plugin(tauri_plugin_dialog::init())
     .run(tauri::generate_context!())
@@ -446,5 +448,14 @@ fn resize_img(img: image::DynamicImage, axis: &str, value: u32) -> image::Dynami
 
 #[tauri::command]
 async fn open_permission_settings() -> Result<(), String> {
+  Ok(())
+}
+
+#[tauri::command]
+async fn open_external_url(url: String) -> Result<(), String> {
+  std::process::Command::new("open")
+    .arg(&url)
+    .spawn()
+    .map_err(|e| e.to_string())?;
   Ok(())
 }

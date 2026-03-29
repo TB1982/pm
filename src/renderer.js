@@ -11,6 +11,15 @@ async function expandForModal(width, height) {
 
 function collapseToToolbar() {
   ipcInvoke('resize-to-toolbar')
+  document.querySelector('.toolbar').classList.remove('modal-open')
+}
+
+function closeAllModals() {
+  batchModal.classList.add('hidden')
+  newCanvasModal.classList.add('hidden')
+  helpModal.classList.add('hidden')
+  windowPickerModal.classList.add('hidden')
+  document.querySelector('.toolbar').classList.add('modal-open')
 }
 
 // ─── Help modal ───────────────────────────────────────────────────────────────
@@ -20,7 +29,8 @@ const helpModal  = document.getElementById('helpModal')
 const modalClose = document.getElementById('modalClose')
 
 helpBtn.addEventListener('click', async () => {
-  await expandForModal(520, 480)
+  closeAllModals()
+  await expandForModal(520, 530)
   helpModal.classList.remove('hidden')
 })
 
@@ -32,6 +42,10 @@ function closeHelp() {
 modalClose.addEventListener('click', closeHelp)
 helpModal.addEventListener('click', (e) => {
   if (e.target === helpModal) closeHelp()
+})
+
+document.getElementById('manualLinkBtn').addEventListener('click', async () => {
+  await window.__TAURI__.core.invoke('open_external_url', { url: 'https://tb1982.github.io/pm/vas-guide.html' })
 })
 
 document.addEventListener('keydown', (e) => {
@@ -139,6 +153,7 @@ async function doWindow() {
     windowPickerGrid.appendChild(card)
   })
 
+  closeAllModals()
   await expandForModal(760, 540)
   windowPickerModal.classList.remove('hidden')
 }
@@ -228,7 +243,7 @@ document.getElementById('btnWhiteboard').addEventListener('click', e => {
 
 // ─── New canvas modal (toolbar) ────────────────────────────────────────────────
 const NC_MODAL_W = 520
-const NC_MODAL_H = 360
+const NC_MODAL_H = 420
 
 const newCanvasModal      = document.getElementById('newCanvasModal')
 const newCanvasPreset     = document.getElementById('newCanvasPreset')
@@ -243,6 +258,7 @@ const newCanvasModalClose = document.getElementById('newCanvasModalClose')
 let ncTransparent = false
 
 async function showNewCanvasModal() {
+  closeAllModals()
   await expandForModal(NC_MODAL_W, NC_MODAL_H)
   newCanvasModal.classList.remove('hidden')
 }
@@ -293,6 +309,7 @@ const batchModal = document.getElementById('batchModal')
 
 document.getElementById('btnBatch').addEventListener('click', async e => {
   setToolbarActive(e.currentTarget)
+  closeAllModals()
   await expandForModal(520, 620)
   batchModal.classList.remove('hidden')
 })
