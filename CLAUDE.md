@@ -532,6 +532,27 @@ document.documentElement.lang = isEnglish ? 'en' : 'zh-Hant';
 4. Nova may consult other AIs (Gemini, DeepSeek, ChatGPT, Perplexity) and bring findings back
 5. Abandoning a feature is a valid outcome — not every idea is buildable now
 
+### 重大推進困難處理流程（Major Blocker Protocol）
+
+**觸發條件（任一即觸發）：**
+- 同一個功能在同一個 session 內嘗試超過兩種方向仍無法取得明確進展
+- 移植一個功能意外牽動 3 個以上其他模組（地雷連環）
+- 實際複雜度估算超出原預期 3 倍以上
+
+**觸發後，Claude 執行：**
+1. **立即停止實作**，不繼續往下挖
+2. **產出阻礙摘要**：卡在哪、根本原因、已嘗試的方向
+3. **提出三個選項讓 Nova 決策：**
+   - **繼續** — 有新的技術方向，附上估算說明
+   - **降級** — 先做 80% 可用版，降級範圍明確列出，剩下記入 Wishlist
+   - **延後** — 移到下一個 Phase，當前 Phase 不包含此功能
+
+**決策後：**
+- 將決策記入 `SDD-mac-screenshot-tool.md` § 9.4 阻礙決策日誌
+- 欄位：日期 ｜ Phase ｜ 功能 ｜ 阻礙描述 ｜ 決策 ｜ 影響
+- 若選擇延後，Claude 主動更新該 Phase 的功能清單
+- 此 log 供 Sprint Retrospective 使用，不得省略
+
 ### Test Instructions Format
 - Claude provides ready-to-copy terminal commands with **no inline comments**
 - Expected outcome is described in plain text **before** the command block

@@ -3792,6 +3792,19 @@ Menu.buildFromTemplate([{
 | **畫布尺寸上限** | v3.40 | 超大尺寸圖片可能造成 OOM crash | 新增上限檢查，超過直接 return 並提示 |
 | **DMG 簽名必須在公證前** | v3.43 發布 | 連續三次公證卡住，根本原因是 DMG 本身未簽名（只有 .app 內部有簽名），Apple worker 無法驗證 | 在 DMG Release Checklist 步驟 7 加入 codesign + verify，並列為血的教訓 |
 
+### 9.4 阻礙決策日誌（Tauri Sprint）
+
+> 記錄 Tauri 遷移 Sprint 期間遭遇的重大推進困難及其決策。
+> 供 Sprint Retrospective 使用，可回溯「當時為什麼這樣決定」及「這個決策的品質如何」。
+>
+> **決策欄只有三種值：** 繼續（＋新方向說明）／ 降級（＋降級範圍）／ 延後到 Phase X
+
+| 日期 | Phase | 功能 | 阻礙描述 | 決策 | 影響 |
+|------|-------|------|---------|------|------|
+| 2026-03-29 | 前期 | 工具列顏色選取器 | WKWebView 不支援 `::webkit-color-swatch` pseudo-element，原生 `<input type="color">` 顯示為細白條 | 繼續（改用 custom div swatch + hidden input + `position: relative` containing block） | 無，當 session 解決 |
+| 2026-03-29 | 前期 | 批次轉檔浮水印 | IPC payload 格式不一致：Electron `main.js` 讀 `watermark.position`，但前端已改為 `watermark.text.position` / `watermark.img.position`，觸發 TypeError crash | 繼續（修正 `main.js` 欄位存取路徑） | 無，當 session 解決 |
+| 2026-03-29 | 前期 | 文字浮水印邊距 | `ab_glyph` `h_advance` 包含末字元 right bearing，導致文字實際像素位置與計算偏移不符 | 繼續（改用兩段式 `outline_glyph().px_bounds()` 取得實際像素邊界） | 無，當 session 解決 |
+
 ---
 
 ## 10. 長期遷移規劃
