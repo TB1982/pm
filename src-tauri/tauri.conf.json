@@ -5,15 +5,15 @@
   "identifier": "com.tb1982.vas",
   "build": {
     "frontendDist": "../src",
-    "devUrl": "http://localhost:8080",
-    "beforeDevCommand": "python3 -m http.server 8080 --directory src"
+    "devUrl": "http://localhost:8085",
+    "beforeDevCommand": "python3 -m http.server 8085 --directory src"
   },
   "app": {
     "macOSPrivateApi": true,
     "windows": [
       {
         "label": "toolbar",
-        "url": "http://localhost:8080/index.html",
+        "url": "http://localhost:8085/index.html",
         "title": "VAS",
         "width": 520,
         "height": 68,
