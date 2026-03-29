@@ -176,7 +176,7 @@ fn open_editor_window(app: &tauri::AppHandle) -> Result<(), String> {
   if let Some(existing) = app.get_webview_window("editor") {
     existing.close().map_err(|e| e.to_string())?;
   }
-  tauri::WebviewWindowBuilder::new(app, "editor", tauri::WebviewUrl::App("src/editor.html".into()))
+  tauri::WebviewWindowBuilder::new(app, "editor", tauri::WebviewUrl::App("editor.html".into()))
     .title("VAS Editor")
     .inner_size(1200.0, 800.0)
     .min_inner_size(800.0, 600.0)
