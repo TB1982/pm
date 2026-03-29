@@ -182,7 +182,7 @@ cargo tauri dev
 After pushing, Claude provides the following ready-to-run command and asks Nova to verify:
 
 ```bash
-python3 -m http.server 8081
+git pull origin <branch-name> && python3 -m http.server 8081
 # Then open: http://localhost:8081/<filename>.html
 ```
 
