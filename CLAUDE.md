@@ -153,16 +153,27 @@ An Electron-based desktop screenshot and annotation tool (Mac), developed in par
 4. **Push** to the appropriate branch.
 
 ```bash
-# Python 3 local preview
-python3 -m http.server 8080
-# Then open: http://localhost:8080
+# Python 3 local preview — always use port 8081 (8080 is reserved for Tauri dev)
+python3 -m http.server 8081
+# Then open: http://localhost:8081
 ```
+
+> **Port rule:** Port `8080` is permanently reserved for `cargo tauri dev` (set in `src-tauri/tauri.conf.json`). Never start the static site preview on 8080. If Tauri dev fails with "Address already in use", run `lsof -ti :8080 | xargs kill -9` first.
 
 ### Electron screenshot tool
 ```bash
 npm install       # first time only
-npm start         # launch the app
+npm start         # launch the app (Electron)
 ```
+
+### Tauri screenshot tool (Sprint 1 migration target)
+```bash
+# Kill port 8080 first if a static site preview was running there
+lsof -ti :8080 | xargs kill -9
+cargo tauri dev
+```
+
+> **Version clarity:** This repo contains **two separate runtimes** — Electron (`npm start`) and Tauri (`cargo tauri dev`). Always confirm which version you are testing before running. Never use `npm start` to test Tauri behaviour.
 
 ---
 
