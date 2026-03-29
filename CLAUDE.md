@@ -68,8 +68,7 @@ https://www.instagram.com/liuyingtzu
 - **Primary language:** Traditional Chinese (zh-Hant), with English alternatives via JS toggle
 - **Hosting:** Served directly as static files (no web server configuration required)
 
-### Active sub-project: Mac 截圖與圖片編輯工具
-A desktop screenshot and annotation tool (Mac), currently being migrated from Electron to Tauri 2.x. The Electron version (v3.43) is frozen. Active development targets the Tauri runtime. App files live under `src/` and `src-tauri/`. See the dedicated spec document `SDD-vas-tauri.md` for full Tauri requirements; `SDD-mac-screenshot-tool.md` remains as the frozen Electron reference. This sub-project uses its own commit conventions (see **Commit Messages** below).
+> **VAS sub-project:** The Mac screenshot and annotation tool (VAS) has been migrated to a separate private repository at `https://github.com/TB1982/vas-desktop`. All VAS development happens there. This repo retains `vas.html` and `vas-guide.html` as public-facing product pages only.
 
 ---
 
@@ -100,16 +99,12 @@ A desktop screenshot and annotation tool (Mac), currently being migrated from El
 ├── pmpro.html              # PM Pro version
 ├── libraryflashnew.html    # Library (new flash style)
 ├── libraryflashold.html    # Library (old flash style)
+├── vas.html                # VAS product page (public-facing)
+├── vas-guide.html          # VAS user guide (public-facing)
 │
-├── SDD-mac-screenshot-tool.md  # Spec + TDD for the Electron screenshot tool
-├── main.js                 # Electron main process (screenshot tool)
-├── src/
-│   ├── editor.js           # Editor annotation logic
-│   ├── editor.html         # Editor UI
-│   ├── editor.css          # Editor styles
-│   ├── renderer.js         # Renderer process helpers
-│   └── overlay.js          # Capture overlay
-│
+├── img/                    # Shared image assets
+│   ├── vas-guide-*.png     # VAS guide screenshots (used by vas-guide.html)
+│   └── ...
 ├── pmchatgptpro_files/     # Resource bundle for pmchatgptpro.html
 ├── libraryflashold_files/  # Resource bundle for libraryflashold.html (CSS/JS)
 ├── pmpro_files/            # Resource bundle for pmpro.html
@@ -121,7 +116,6 @@ A desktop screenshot and annotation tool (Mac), currently being migrated from El
 
 ## Tech Stack
 
-### Static site (深握計畫)
 | Layer      | Technology                                       |
 |------------|--------------------------------------------------|
 | Markup     | HTML5                                            |
@@ -133,47 +127,20 @@ A desktop screenshot and annotation tool (Mac), currently being migrated from El
 
 **No build tools. No package manager. No TypeScript. No testing framework.**
 
-### Electron screenshot tool
-| Layer      | Technology                                       |
-|------------|--------------------------------------------------|
-| App shell  | Electron                                         |
-| UI         | HTML / CSS / Vanilla JavaScript                  |
-| Image I/O  | Sharp (Node.js)                                  |
-| Web capture| Playwright (Chromium)                            |
-| Annotation | HTML5 Canvas                                     |
-
 ---
 
 ## Development Workflow
 
-### Static site
 1. **Edit** the relevant `.html` file directly.
 2. **Preview** by opening the file in a browser (`file://` or local HTTP server).
 3. **Commit** changes with a descriptive message (in Traditional Chinese).
 4. **Push** to the appropriate branch.
 
 ```bash
-# Python 3 local preview — always use port 8081 (8080 is reserved for Tauri dev)
+# Python 3 local preview — always use port 8081
 python3 -m http.server 8081
 # Then open: http://localhost:8081
 ```
-
-> **Port rule:** Port `8085` is permanently reserved for `cargo tauri dev` (set in `src-tauri/tauri.conf.json`). Never start the static site preview on 8085. If Tauri dev fails with "Address already in use", run `pkill -f "http.server 8085"` first.
-
-### Electron screenshot tool
-```bash
-npm install       # first time only
-npm start         # launch the app (Electron)
-```
-
-### Tauri screenshot tool (Sprint 1 migration target)
-```bash
-# Kill port 8080 first if a static site preview was running there
-lsof -ti :8080 | xargs kill -9
-cargo tauri dev
-```
-
-> **Version clarity:** This repo contains **two separate runtimes** — Electron (`npm start`) and Tauri (`cargo tauri dev`). Always confirm which version you are testing before running. Never use `npm start` to test Tauri behaviour.
 
 ### Static Page QC Checklist
 
@@ -194,154 +161,6 @@ git pull origin <branch-name> && python3 -m http.server 8081
 5. EN version — text renders correctly, layout holds
 
 Claude reminds Nova to check **both RWD and EN version** every time, even when the change appears zh-only.
-
----
-
-## Tauri 2.x Development Rules
-
-These rules apply specifically to Tauri/Rust development. They exist because Tauri 2.x + Rust is unfamiliar territory for both Nova and Claude, and because the two-language system (Rust + JS + IPC) multiplies the surface area for errors.
-
-### Confidence threshold before writing code
-Before modifying any Tauri-related code (Rust / IPC / JS calling Tauri APIs), Claude must first state:
-1. Which layer the problem is in (Rust / IPC bridge / JS)
-2. Why the proposed fix will work — referencing specific Tauri 2.x behaviour or API
-
-If Claude cannot clearly articulate both points, Claude must say so explicitly and research first. **Do not write code as a way of finding out if an approach works.**
-
-### Diagnosis before fix
-When a bug appears, Claude must output a complete diagnosis before proposing any code change:
-1. Which layer the error originates in
-2. Which possibilities have been ruled out and why
-3. The most likely root cause
-
-Code is proposed only after the diagnosis is complete.
-
-### IPC Contract is mandatory
-Any new Rust command must have its full specification written into `SDD-vas-tauri.md` § 3.1 IPC Contract (name, parameter types, return type, error conditions) before implementation begins. The JS `invoke` caller and the Rust handler both implement against this contract. Neither side may assume the other's interface.
-
-### Rust error handling is not "unnecessary"
-The system default rule "don't add unnecessary error handling" does not apply to Rust code. `Result`, `?`, `match`, and `unwrap_or_else` are language requirements in Rust, not optional defensive coding. All Rust commands must handle errors explicitly.
-
-### Explore① Rust-specific checklist
-When conducting the feasibility Explore for a Tauri feature, the output must explicitly cover:
-- The Tauri 2.x API or plugin being used (not 1.x)
-- Required `Cargo.toml` dependencies
-- The Rust function signature (parameters and return type)
-- Any Tauri 2.x breaking changes relevant to this approach
-
-If any item cannot be confirmed, stop and research. Do not proceed to SDD.
-
----
-
-## Tauri Migration — Development Constraints
-
-When the Electron → Tauri migration begins:
-
-1. **Japanese localization first** — before any new feature development starts in Tauri, Japanese UI (`ja`) must be complete and all DoD conditions met. This prevents repeating the Electron v3.43 bilingual audit situation with a third language.
-2. **i18n architecture is three-language from day one** — every new UI string added in Tauri must have `zh`, `en`, and `ja` entries simultaneously. The bilingual scope rule (three files) expands to include `ja` in all three.
-3. **§ 10.2 terminology table must include `ja` column** before feature development begins.
-
-See `SDD-mac-screenshot-tool.md` § 10.1 「Tauri 開發順序約束」for the full Japanese DoD checklist.
-
----
-
-## Feature Development Lifecycle
-
-Every feature or bug fix must follow this sequence in order. Do not start the next stage until the current one is complete.
-
-```
-DoR → Explore① → SDD → DoD → TDD → Explore② → Code → Verify → ✅ Done
-```
-
-### Stage 1 — Definition of Ready (DoR)
-
-Before writing any code or spec, confirm all three questions have clear answers — **both parties must agree before proceeding**:
-
-1. **What problem does this solve?** (user need or bug description) — told as a **user story**: "As a [user], I want [feature], so that [benefit]."
-2. **How will we verify it's correct?** (acceptance criteria — becomes the TDD cases) — walk through the full usage flow to surface edge cases (quantity limits, size limits, empty input, repeated actions).
-3. **Regression Impact Analysis** — must produce three concrete outputs before entering Sprint:
-   - **a) Shared code path inventory** — which event listeners, state variables, or functions does this change touch that are also used by other features?
-   - **b) Regression test list** — cite existing TDD cases (by SDD version + case description) that must be re-verified after implementation.
-   - **c) Regression cost estimate** — how much additional testing time does the regression scope add? This affects the true story point of the feature and Sprint capacity planning.
-
-If any question is unanswered, discuss and resolve first. Do not proceed.
-
-### Stage 2 — Explore① Feasibility Scouting
-
-Before writing any spec, scout the technical territory. Output must explicitly confirm:
-
-- Does Tauri 2.x have the required API? (rule out Tauri 1.x solutions explicitly)
-- Which plugin is needed, if any? What goes in `Cargo.toml`?
-- What is the Rust function signature for the command?
-- Are there known Tauri 2.x breaking changes affecting this approach?
-
-**If any of the above cannot be answered clearly, stop and research before proceeding. Do not guess.** The output of Explore① determines whether the SDD can be written realistically. If the scouting reveals the approach is infeasible, return to DoR.
-
-### Stage 3 — SDD + DoD + TDD (written before coding)
-
-Once Explore① passes, document first:
-
-1. **Update SDD** — bump version, add 變更紀錄 entry, write the feature spec.
-2. **Write TDD test cases** — add `- [ ]` cases to SDD § 6 covering all acceptance criteria from DoR. TDD cases live in the SDD and nowhere else — they are never written for the first time in a PR description.
-3. **Confirm DoD** — all conditions below must be achievable for this feature before coding starts.
-
-### Stage 4 — Explore② Implementation Map
-
-Before writing a single line of code, map out the full implementation:
-
-- Exact Rust files and functions to add or modify
-- Exact JS files and call sites
-- IPC channel names, direction, and payload types (must match § 3.1 IPC Contract)
-- Tauri 2.x API names used (note any differences from 1.x)
-- **Regression scope** — which specific existing TDD cases or features could break; this list becomes the DoD condition 6 verification checklist
-
-**Do not start implementation until this map is complete and IPC Contract is filled in.**
-
-### Stage 5 — Code
-
-Implement the feature. Trilingual must be handled in the same session as the code:
-- `src/i18n.js` — add key to **all three**: `zh`, `en`, `ja`
-- `src/editor.html` — wire `data-i18n*` attribute; never hardcode any language string in HTML
-- `src/editor.js` / `src/renderer.js` — use `t('key')`; never interpolate string literals
-
-### Stage 6 — Verify (TDD sign-off)
-
-Run through every `- [ ]` case added in Stage 3. Mark `[x]` only after passing. Do not move to the next feature until all cases are `[x]`.
-
-### Definition of Done (DoD)
-
-A feature is complete only when **all six** are true:
-
-| # | Condition | How to verify |
-|---|-----------|---------------|
-| 1 | **Code works** | All TDD cases marked `[x]` in SDD § 6 |
-| 2 | **SDD updated** | Version bumped, 變更紀錄 entry written, spec reflects new behaviour |
-| 3 | **Trilingual complete** | `i18n.js` (`zh`/`en`/`ja`) + `editor.html` + JS all updated in same session |
-| 4 | **Nova QC passed** | Nova has reviewed the feature and given approval |
-| 5 | **Committed + merged** | `feat`/`fix` + `docs(SDD)` committed; feature branch merged to main |
-| 6 | **Regression verified** | All features identified in Explore② regression scope confirmed still working (TDD cases still pass, or manual QC confirmed) |
-
-> **Rule of thumb:** If you'd feel uncomfortable running the DMG Release Checklist right now, the feature isn't done.
-
----
-
-## Document Sync Rules (SDD / TDD) — Mandatory
-
-These rules apply to the VAS Tauri sub-project. The active SDD is `SDD-vas-tauri.md`; `SDD-mac-screenshot-tool.md` is frozen (Electron v3.43 reference only).
-
-### Bug fixed → update TDD
-Every bug fixed during testing must have a corresponding test case added to **§ 6** of `SDD-vas-tauri.md`, covering:
-- The steps that reproduce the bug
-- The correct behaviour after the fix
-
-### New feature added → update SDD + TDD
-Every new feature (including behaviour not previously in the spec) must trigger a sync update to `SDD-vas-tauri.md`:
-1. **Bump the version number** (`版本：` field) and add a `vX.X — summary` line to **變更紀錄**
-2. **Update the relevant feature section** with full spec details
-3. **Add test cases** to § 6 in `- [ ]` format
-
-### Commit order
-Code changes and document updates should be **committed in the same session**. Use separate commits with clear prefixes: `feat:`, `fix:`, `docs(SDD):`.
 
 ---
 
@@ -389,16 +208,10 @@ en: { cb_rect_desc: 'Drag to select any rectangular region to capture.' }
 
 ### Commit Messages
 
-**Static site:** Traditional Chinese, action-oriented.
+Traditional Chinese, action-oriented.
 ```
 更新手機版顯示數字大小
-```
-
-**Electron tool:** Conventional Commits with English prefix + Chinese description.
-```
-feat(E2): 新增文字多行換行支持
-fix(text): 修正選取範圍計算
-docs(SDD): v0.8 更新文字工具規格與 TDD 測試案例
+新增 vas-guide.html OCR 段落說明
 ```
 
 ---
@@ -414,11 +227,8 @@ docs(SDD): v0.8 更新文字工具規格與 TDD 測試案例
 | `deepholding.html` | Interactive canvas animation (standalone, complex JS) |
 | `mandal_chart.html` | Mandala grid chart — interactive tool |
 | `lottery.html` | Client-side lottery number picker |
-| `SDD-vas-tauri.md` | Full spec + TDD for the Tauri VAS tool (active development) |
-| `SDD-mac-screenshot-tool.md` | Frozen spec for the Electron screenshot tool (v3.43 reference) |
-| `src/editor.js` | Core annotation logic (text, rect, line, number tools) |
-| `vas-guide-popup-draft.md` | Single source of truth for all VAS user guide content (toolbar + editor tools). HTML is generated from this. See update rules below. |
-| `vas-guide.html` | Rendered user guide page. Always update `vas-guide-popup-draft.md` first, then sync to HTML. |
+| `vas.html` | VAS product page — version string: search `迭代至 v` / `iterated together to v` |
+| `vas-guide.html` | VAS user guide — public-facing; screenshots in `img/vas-guide-*.png` |
 
 ---
 
@@ -426,36 +236,6 @@ docs(SDD): v0.8 更新文字工具規格與 TDD 測試案例
 - **Remote:** `http://local_proxy@127.0.0.1:36767/git/TB1982/pm` (local proxy)
 - **Main branch:** `main` / `master`
 - **Active dev branch convention:** `claude/<description>-<id>`
-
----
-
-## VAS User Guide — `vas-guide-popup-draft.md` Update Rules
-
-`vas-guide-popup-draft.md` is the **single source of truth** for all VAS user guide content. `vas-guide.html` is generated from it. Never update the HTML directly without updating the md first.
-
-### When to update
-
-| Trigger | Required action |
-|---------|----------------|
-| New toolbar button added or behaviour changed | Update Section 01 in the md |
-| New editor tool added | Add entry under the relevant group in Section 03 |
-| Existing feature behaviour changes (including hidden features, edge cases) | Update the relevant entry in the md |
-| Any of the above confirmed by Nova (`✅`) | Sync the change to `vas-guide.html` (both HTML text node **and** i18n map) |
-
-### Workflow
-
-1. **Write to md first** — add or update the entry, mark `✅` after Nova confirms
-2. **Sync to HTML** — update `vas-guide.html`: both the hardcoded HTML text node and the `zh`/`en` i18n map entries (see `data-lang-key` rule in Conventions)
-3. **Commit both files together** — md and HTML changes in the same commit
-
-### Structure of the md
-
-| Section | Content |
-|---------|---------|
-| Section 01 | Floating toolbar buttons + Batch Convert detail |
-| Section 03 | Editor left-side tool menu (all annotation tools) |
-
-Section 02 (Editor Interface — the three zones diagram) is documented directly in `vas-guide.html` and does not require a md entry.
 
 ---
 
@@ -467,34 +247,6 @@ Section 02 (Editor Interface — the three zones diagram) is documented directly
 - **Image assets** in `修正方式/` and `預覽圖/` are reference screenshots only; do not delete them.
 - **No minification or asset hashing** — filenames are stable, caching is not a concern.
 - **Canvas page** (`deepholding.html`) contains complex standalone JavaScript; test carefully after any edits.
-- **VAS version string in `vas.html`** — whenever `package.json` version is bumped, update the version number in both the Chinese and English story strings in `vas.html` (search for `迭代至 v` and `iterated together to v`).
-
-## DMG Release Checklist
-
-> Steps 1–5 must be completed **before** `npm run build`. Do not start the build until all pre-build gates pass. Run each step in order — do not skip ahead.
-
-**Pre-build gates (steps 1–5)**
-
-1. **Security audit** — run `npm audit`; resolve any moderate-or-above vulnerabilities before proceeding.
-2. **Bilingual verification** — audit `src/editor.html` and `src/editor.js` for any UI strings, toast messages, tooltips, or labels added since the last release that are missing their English translation. Cross-check against the terminology table in `SDD-mac-screenshot-tool.md` § 10.2.
-3. **TDD sign-off** — confirm all test cases for the current version in SDD § 5 are marked `[x]`; no open `[ ]` items for shipped features.
-4. **Version sync** — verify that `package.json` version, the SDD `版本：` field, and the `vas.html` version strings (`迭代至 v` / `iterated together to v`) all match.
-5. **Certificate check** — confirm the Developer ID Application certificate is valid in Keychain (`security find-identity -v -p codesigning`). Do not start the build if the certificate is missing or expired.
-
-**Build & sign (steps 6–7)**
-
-6. **Clean dist** — delete `dist/` before building to prevent stale artefacts: `rm -rf dist/`.
-7. **Build, then sign the DMG** — run `npm run build`, then immediately sign and verify:
-   ```bash
-   codesign --sign "Developer ID Application: Ying-Tzu Liu (F7RK8N4U62)" dist/VAS-*.dmg
-   codesign --verify --deep --strict --verbose=2 dist/VAS-*.dmg
-   ```
-   Do not proceed to notarization if `--verify` reports "not signed" or any error.
-
-**Notarize & distribute (steps 8–9)**
-
-8. **Notarize** — submit via `xcrun notarytool submit … --wait`; wait for `status: Accepted`. If still `In Progress` after 1 hour, abandon and re-submit once — do not submit multiple times in parallel.
-9. **Staple** — run `xcrun stapler staple dist/VAS-*.dmg` to attach the notarization ticket.
 
 ---
 
@@ -507,12 +259,12 @@ Every `.html` file must include the following inside `<head>`:
 ```html
 <!-- Basic SEO -->
 <meta name="description" content="頁面摘要，100–160字元">
-<link rel="canonical" href="https://example.com/page.html">
+<link rel="canonical" href="https://tb1982.github.io/pm/page.html">
 <!-- Open Graph (social / AI preview) -->
 <meta property="og:title" content="頁面標題">
 <meta property="og:description" content="頁面摘要">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://example.com/page.html">
+<meta property="og:url" content="https://tb1982.github.io/pm/page.html">
 <meta property="og:locale" content="zh_TW">
 ```
 
@@ -528,7 +280,8 @@ Add a `<script type="application/ld+json">` block before `</body>` on key pages:
   "inLanguage": "zh-Hant",
   "author": {
     "@type": "Person",
-    "name": "作者名稱"
+    "name": "Nova",
+    "email": "babelon1882@gmail.com"
   }
 }
 </script>
@@ -599,144 +352,6 @@ document.documentElement.lang = isEnglish ? 'en' : 'zh-Hant';
 
 ---
 
-## Sprint Rules — VAS Tauri
-
-### Team Charter
-
-| Role | Responsibilities |
-|------|-----------------|
-| Nova | Wishlist, QC, UI/UX decisions, feature prioritisation |
-| Claude | Recording, development, technical judgement, Velocity tracking |
-
-### Sprint Cadence
-- **Length:** 1 week (trial); adjust to 2 weeks if pace feels too aggressive
-- **Planning:** Discuss together at Sprint start. Priority order: technical dependencies → complexity → product value
-- **Review:** Per feature — when a feature is complete, not at Sprint end
-- **Retrospective:** At Sprint end, Q&A format (Nova answers, Claude asks)
-
-### Sprint Velocity Tracking
-- Update `SDD-vas-tauri.md` § 3.3 Sprint Velocity table **at Sprint close** (when the last feature of the Sprint merges to main).
-- Record: Sprint number, date range, completed features (with done/in-progress status), and a brief note on scope changes.
-- TDD cases: mark `[x]` as each case is verified by Nova during QC. Do **not** pre-mark cases that have not been manually confirmed.
-
-### Wishlist & New Ideas
-- Nova may raise new ideas at any time during a Sprint
-- Claude records them immediately into SDD Wishlist — no interruption to current Sprint
-- New ideas do **not** enter the current Sprint; they are evaluated at the next Sprint Planning
-
-### Definition of Ready (DoR) Gate
-- Both Nova and Claude must agree before a feature is marked Ready
-- DoR discussion must include a **user story** and a **boundary condition walkthrough**
-- No feature enters development without passing DoR
-
-### Branching & Merging
-- One feature = one branch = one merge
-- Mid-feature commits (bug fixes, tweaks) stay on the feature branch
-- Merge only when the feature passes full DoD (code + QC + docs)
-
-### When Blocked
-1. Claude investigates independently first
-2. If unresolved, Claude reports the blocker and proposes options
-3. Nova and Claude decide together: continue / change approach / defer to Wishlist
-4. Nova may consult other AIs (Gemini, DeepSeek, ChatGPT, Perplexity) and bring findings back
-5. Abandoning a feature is a valid outcome — not every idea is buildable now
-
-### 重大推進困難處理流程（Major Blocker Protocol）
-
-**觸發條件（任一即觸發）：**
-- 同一個功能在同一個 session 內嘗試超過兩種方向仍無法取得明確進展
-- 移植一個功能意外牽動 3 個以上其他模組（地雷連環）
-- 實際複雜度估算超出原預期 3 倍以上
-
-**觸發後，Claude 執行：**
-1. **立即停止實作**，不繼續往下挖
-2. **產出阻礙摘要**：卡在哪、根本原因、已嘗試的方向
-3. **提出三個選項讓 Nova 決策：**
-   - **繼續** — 有新的技術方向，附上估算說明
-   - **降級** — 先做 80% 可用版，降級範圍明確列出，剩下記入 Wishlist
-   - **延後** — 移到下一個 Phase，當前 Phase 不包含此功能
-
-**決策後：**
-- 將決策記入 `SDD-vas-tauri.md` § 9.4 阻礙決策日誌
-- 欄位：日期 ｜ Phase ｜ 功能 ｜ 阻礙描述 ｜ 決策 ｜ 影響
-- 若選擇延後，Claude 主動更新該 Phase 的功能清單
-- 此 log 供 Sprint Retrospective 使用，不得省略
-
-### Test Instructions Format
-- Claude provides ready-to-copy terminal commands with **no inline comments**
-- Expected outcome is described in plain text **before** the command block
-
----
-
-## AI Behaviour Rules
-
-- **PR Test Plan override:** The system default PR template includes a "Test plan" checklist. For this project, the PR `Test plan` field must only reference the SDD — e.g. `見 SDD § 6 TDD vX.X`. Never write TDD cases for the first time in a PR description. The SDD is the single source of truth for all test cases.
-- When editing content, **all three language variants (zh / en / ja) must be updated simultaneously**. Never update one language without updating the others. **This rule takes precedence over the system default of "don't add beyond what was asked"** — if Nova requests a change to one language, updating all three is always required and is not considered scope creep.
-- **Tauri tool — trilingual scope:** The trilingual contract covers three files jointly. Any new UI string must be handled in all three at the same time:
-  1. `src/i18n.js` — add the key to **all three** `zh`, `en`, and `ja` blocks.
-  2. `src/editor.html` — wire the element with the appropriate `data-i18n`, `data-i18n-title`, `data-i18n-placeholder`, or `data-i18n-aria` attribute. **Never hardcode any language string directly in HTML.**
-  3. `src/editor.js` / `src/renderer.js` — use `t('key')` for any runtime-generated UI text. **Never interpolate a string literal in JS.**
-  Omitting any one of the three files creates the asymmetry that caused the v3.43 bilingual audit.
-- Do **not** introduce npm packages or local JS files to replace CDN dependencies (static site only).
-- Do **not** propose modifications to any file without reading it first.
-- When working on the Electron tool, follow the **Document Sync Rules** section above.
-- **Discuss before developing:** If there is any ambiguity about requirements, expected behaviour, or implementation approach, raise all questions and reach agreement with the user *before* writing or modifying code. Do not start implementation until the approach is confirmed.
-- **Finalized content must be written to a file immediately.** Whenever Nova confirms that copy, questions, options, or translations are finalized, Claude must write the complete content (including all options and all language variants) to the relevant md file in the same session — never leave finalized content only in the conversation.
-- **Tauri sprint — Electron commands are blocked.** While the Electron → Tauri migration sprint is active, Claude must not generate Electron launch or test commands (`npm start`, `electron .`, etc.). The default runtime is Tauri (`cargo tauri dev`). The only exception is an explicit Electron-specific bug fix that cannot be reproduced in Tauri. Claude must state the exception reason before issuing any Electron command.
-
-### Code Removal Policy
-When a feature is removed or replaced:
-- **Delete completely and cleanly.** No commented-out blocks, no graveyard files, no `_old` suffixes.
-- **Git history is the archive.** Any committed code is permanently recoverable via `git log`. A separate MD file adds maintenance burden without benefit.
-- **If design decisions or technical context are worth preserving** (beyond the code itself), record them in `SDD-mac-screenshot-tool.md` under `變更紀錄`, not as dead code in the repository.
-
-### Ready-to-run Commands
-Whenever asking the user to pull, test, or verify changes, always provide the exact commands as a ready-to-copy block. Do not make the user look up commands elsewhere. Standard sequence for the Tauri tool:
-```bash
-git pull origin <branch-name> && cargo tauri dev
-```
-Adjust branch name or add steps only when the situation actually requires it.
-
-### OCR / Privacy Mask Test Script
-When asking the user to test the OCR detection or privacy mask feature, always provide a ready-to-screenshot **test target** — a block of plaintext containing one example of every currently supported detection pattern. The user screenshots this text directly and runs the scan. No need to hunt for real sensitive data.
-
-**Standard test target (update whenever detection rules change):**
-
-```
-【隱私遮蔽功能測試靶紙】
-
-姓名：王小明　聯絡電話：0912-345-678
-名字：陳小花　Email：wang.ming@example-corp.com
-身分證：A123456789　統一編號：12345678
-信用卡：4111 1111 1111 1111
-負責人：林志偉　承辦人：黃美玲
-聯絡人：吳建宏　收件人：張雅琪　寄件人：李明德
-密碼：P@ssw0rd123　通行碼：secret99
-Name: Alice　Contact: Bob Chen　Recipient: Carol Wang
-Password: hunter2　PIN: 8842
-地址：台北市信義區松壽路12號3樓　新北市板橋區文化路一段5巷8號
-統一編號：12345678　（應遮）　日期：20260326　（不應遮）
-
-伺服器 IPv4：192.168.1.100　備援：10.0.0.254
-IPv6：2001:0db8:85a3:0000:0000:8a2e:0370:7334
-API Token：ghp_AbCdEfGhIjKlMnOpQrStUvWxYz9999
-
-以下不應被遮蔽：
-今天天氣很好。版本號 v1.2.3。編號 A-007。日期：20260326。
-```
-
-- Each line tests one or more detection rules.
-- The "不應遮蔽" block validates that normal text is not over-detected.
-- When detection rules are added or removed, update this test target to match.
-
----
-
-## Interaction Language
-- Communicate with the user in **Traditional Chinese**.
-- CLAUDE.md itself is written and maintained in **English**.
-
----
-
 ## Safety Rules — Destructive Actions
 
 **STOP and explicitly ask the user before executing any of the following:**
@@ -747,4 +362,8 @@ API Token：ghp_AbCdEfGhIjKlMnOpQrStUvWxYz9999
 - Dropping or truncating data of any kind
 - Running any command that cannot be undone in a single step
 
-**General principle:** If an action is **irreversible** or has a **blast radius beyond the current file**, pause and confirm with the user first. The cost of asking is zero. The cost of not asking can be everything.
+---
+
+## Interaction Language
+- Communicate with the user in **Traditional Chinese**.
+- CLAUDE.md itself is written and maintained in **English**.
