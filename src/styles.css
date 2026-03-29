@@ -321,7 +321,11 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: transparent;   /* 透明視窗不需要 scrim */
+  background: rgba(28, 28, 30, 0.96);
+  border-left: 1px solid rgba(255, 255, 255, 0.14);
+  border-right: 1px solid rgba(255, 255, 255, 0.14);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 0 0 16px 16px;
   display: flex;
   align-items: flex-start;
   justify-content: center;
