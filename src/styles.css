@@ -11,6 +11,7 @@
 
 html {
   background: transparent;
+  overflow: hidden;
 }
 
 body {
