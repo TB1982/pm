@@ -19,7 +19,7 @@
 | v0.6 | 2026-03-28 | 浮水印 UI 重構：文字 / 圖片各自獨立 9-grid 位置；同位置衝突偵測（toast + 阻擋）；圖片預覽空間保留 |
 | v0.7 | 2026-03-29 | S1-03 浮水印 TDD 全部完工（[x]）；工具列拖曳把手 hover 移入 Wishlist（WKWebView non-key window 限制）；Sprint 1 範疇收斂為「完全恢復 Toolbar」（S1-01 / S1-02 / S1-03）；新增 § 9.4 阻礙決策日誌 |
 | v0.8 | 2026-03-29 | 新增操作手冊連結（? modal 頂部按鈕）；記錄 WKWebView 開發坑（§ 10）；發現 modal 互斥 bug，補入 S1-01 TDD |
-| v0.9 | 2026-03-30 | § 10 重構為 Lessons Learned Register（KM-001~005）；新增 KM-003 外部 CSS 快取、KM-004 透明視窗黑線框、KM-005 toolbar 接縫圓角；modal 互斥修復（closeAllModals）；白板 modal scrollbar 修復（NC_MODAL_H 420）；toolbar-overlay 視覺一體化（深色背景 + backdrop-filter + 接縫圓角同步）|
+| v0.9 | 2026-03-29 | § 10 重構為 Lessons Learned Register（KM-001~005）；新增 KM-003 外部 CSS 快取、KM-004 透明視窗黑線框、KM-005 toolbar 接縫圓角；modal 互斥修復（closeAllModals）；白板 modal scrollbar 修復（NC_MODAL_H 420）；toolbar-overlay 視覺一體化（深色背景 + backdrop-filter + 接縫圓角同步）|
 | v1.0 | 2026-03-29 | S1-01/S1-02 編輯器視窗橋接：新增 `new_canvas_create`（實作）、`get_editor_init`（新增）；`open_image_file` 更新為開啟編輯器視窗；`tauri-bridge.js` 擴充編輯器 channels + `send` + `clipboard` stub；`editor.html` 載入 tauri-bridge.js；`editor.js` 新增 `get-editor-init` 初始化 + `initBlankCanvas`；§ 3.1 IPC Contract 填入 |
 | v1.1 | 2026-03-29 | KM-006 修復：啟用 Tauri asset protocol；`tauri.conf.json` 加 `assetProtocol`；`tauri-bridge.js` 新增 `fileToSrc` helper；`editor.js` img.src 改走 asset:// |
 
@@ -135,13 +135,21 @@ pub struct EditorInitPayload {
 
 **日文在地化為開發優先項**，須在所有新功能開發之前完成。見 § 4 Backlog 優先佇列。
 
+#### 操作手冊連動規則
+
+每當新增或修改工具的 UI 文字、行為說明時，必須同步更新 `vas-guide-popup-draft.md`：
+- 新工具 → 在對應 Section 新增條目（打 `✅` 後方可寫入 `vas-guide.html`）
+- 現有工具行為改變（含隱藏功能、邊界條件）→ 更新對應條目
+- `vas-guide.html` 依 `data-lang-key` 規則同步（HTML 本體 + zh/en i18n map 雙處）
+- 見 CLAUDE.md「VAS User Guide — `vas-guide-popup-draft.md` Update Rules」
+
 ---
 
 ## 3.3 Sprint Velocity 追蹤
 
 | Sprint | 期間 | 完成功能 | 備註 |
 |--------|------|---------|------|
-| Sprint 1 | 2026-03-28 – 進行中 | S1-03 批次轉換 + 浮水印（done）；S1-01、S1-02 進行中 | 範疇收斂：完全恢復 Toolbar |
+| Sprint 1 | 2026-03-28 – 2026-03-29 | S1-01 浮動工具列（done）；S1-02 檔案對話框（done，圖片引入待 KM-006 完全解決）；S1-03 批次轉換 + 浮水印（done）；編輯器橋接（done，空白畫布可用）；Toolbar hide/show（done） | 兩天完成 Sprint 1 主體；截圖→編輯器列為 Sprint 2 開頭 |
 
 ---
 
@@ -183,6 +191,7 @@ pub struct EditorInitPayload {
 | **捲軸截圖（Scrolling / Full-Page Capture）** | `page.screenshot({ fullPage: true })`；處理 sticky header 重疊 | Tauri |
 | **圖片轉 PDF（Image to PDF）** | 一張或多張圖片打包為 PDF；Rust `printpdf` crate；支援自訂頁面尺寸與排列順序 | Tauri |
 | **移除拖曳匯出浮水印** | 付費版不需 VAS 浮水印；移除匯出時的浮水印疊加邏輯 | Tauri |
+| **符號印章漸層色** | 符號印章工具支援雙色漸層填色（方向：上下 / 左右 / 斜角）；`ctx.createLinearGradient`；顏色選取 UI 擴充為起點色 + 終點色 | Tauri |
 
 ---
 
@@ -252,19 +261,19 @@ pub struct EditorInitPayload {
 ### S1-01　浮動工具列架構遷移
 
 #### 視窗行為
-- [ ] 啟動 app → 只出現工具列視窗，編輯器視窗不出現
-- [ ] 工具列視窗無標準 title bar（無邊框）
-- [ ] 工具列視窗永遠在其他視窗上層（always-on-top）
-- [ ] 工具列高度約 44px
+- [x] 啟動 app → 只出現工具列視窗，編輯器視窗不出現
+- [x] 工具列視窗無標準 title bar（無邊框）
+- [x] 工具列視窗永遠在其他視窗上層（always-on-top）
+- [x] 工具列高度約 44px
 - [ ] 關閉工具列 → 整個 app 結束
 
 #### 拖動把手
-- [ ] 拖動把手（⠿）可拖動工具列到螢幕任意位置
-- [ ] 拖動把手 hover → 發光效果出現
-- [ ] 拖動把手 hover 離開 → 效果消失
+- [x] 拖動把手（⠿）可拖動工具列到螢幕任意位置
+- [ ] 拖動把手 hover → 發光效果出現（WKWebView non-key window 限制，移入 Wishlist）
+- [ ] 拖動把手 hover 離開 → 效果消失（同上）
 
 #### Icon 與 Tooltip
-- [ ] 工具列只顯示 icon，無常駐文字標籤
+- [x] 工具列只顯示 icon，無常駐文字標籤
 - [ ] Hover 任一 icon → tooltip 出現（顯示正確工具名稱）
 - [ ] Tooltip 文字對應 i18n（zh / en / ja 切換正確）
 
@@ -282,20 +291,21 @@ pub struct EditorInitPayload {
 - [ ] 編輯器已開啟時截圖 → 截完後複寫編輯器內容
 
 #### 編輯器視窗
-- [ ] 同時只能開一個編輯器視窗
-- [ ] 關閉編輯器 → 工具列繼續常駐
+- [x] 開啟編輯器 → 工具列隱藏
+- [x] 同時只能開一個編輯器視窗
+- [x] 關閉編輯器 → 工具列恢復常駐
 
 #### Modal 互斥行為（bug 發現於 2026-03-29）
-- [x] 批次轉換 modal 開啟中，點擊 `?` → 批次 modal 關閉，快捷鍵 modal 開啟（目前行為：停留在批次 modal，快捷鍵 modal 不出現）
+- [x] 批次轉換 modal 開啟中，點擊 `?` → 批次 modal 關閉，快捷鍵 modal 開啟
 
 #### 編輯器視窗橋接（v1.0 新增）
-- [ ] 點「新開畫布」→ 填入寬高與背景色 → 點確認 → 編輯器視窗開啟，顯示空白畫布（指定尺寸與背景色）
-- [ ] 點「新開畫布」→ 確認 → editor.html 成功載入（不出現 JS 錯誤）
+- [x] 點「新開畫布」→ 填入寬高與背景色 → 點確認 → 編輯器視窗開啟，顯示空白畫布（指定尺寸與背景色）
+- [x] 點「新開畫布」→ 確認 → editor.html 成功載入（不出現 JS 錯誤）
 - [ ] 編輯器開啟後，`get_editor_init` 回傳 `mode=blank`、正確 width / height / bg_color
-- [ ] 點「開啟」→ 選擇圖片 → 編輯器視窗開啟，圖片載入為底圖（asset:// 協議，非黑屏）
+- [ ] 點「開啟」→ 選擇圖片 → 編輯器視窗開啟，圖片載入為底圖（進行中：KM-006）
 - [ ] 編輯器開啟後，`get_editor_init` 回傳 `mode=file`、正確 file_path
-- [ ] 同時只能開一個編輯器視窗：再次點「新開畫布」→ 舊編輯器關閉，新編輯器開啟
-- [ ] 關閉編輯器視窗 → 工具列繼續常駐，不影響 toolbar 運作
+- [x] 同時只能開一個編輯器視窗：再次點「新開畫布」→ 舊編輯器關閉，新編輯器開啟
+- [x] 關閉編輯器視窗 → 工具列繼續常駐，不影響 toolbar 運作
 
 ### S1-02　檔案選擇對話框
 
@@ -325,8 +335,8 @@ pub struct EditorInitPayload {
 ### S1-02　檔案選擇對話框
 
 #### 開啟（open-image-file）
-- [ ] 點「開啟」→ macOS 原生圖片選擇對話框彈出
-- [ ] 選擇圖片後對話框關閉 → 編輯器視窗開啟，圖片載入為底圖
+- [x] 點「開啟」→ macOS 原生圖片選擇對話框彈出
+- [ ] 選擇圖片後對話框關閉 → 編輯器視窗開啟，圖片載入為底圖（進行中：KM-006）
 - [ ] 取消對話框 → 工具列無反應，不報錯，編輯器視窗不出現
 
 #### 批次轉 — 選擇檔案（select-batch-files）
