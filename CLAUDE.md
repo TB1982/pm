@@ -223,7 +223,10 @@ Before writing any code or spec, confirm all three questions have clear answers 
 
 1. **What problem does this solve?** (user need or bug description) — told as a **user story**: "As a [user], I want [feature], so that [benefit]."
 2. **How will we verify it's correct?** (acceptance criteria — becomes the TDD cases) — walk through the full usage flow to surface edge cases (quantity limits, size limits, empty input, repeated actions).
-3. **What existing features might be affected?** (regression scope)
+3. **Regression Impact Analysis** — must produce three concrete outputs before entering Sprint:
+   - **a) Shared code path inventory** — which event listeners, state variables, or functions does this change touch that are also used by other features?
+   - **b) Regression test list** — cite existing TDD cases (by SDD version + case description) that must be re-verified after implementation.
+   - **c) Regression cost estimate** — how much additional testing time does the regression scope add? This affects the true story point of the feature and Sprint capacity planning.
 
 If any question is unanswered, discuss and resolve first. Do not proceed.
 
@@ -233,7 +236,7 @@ Once DoR passes, document first:
 
 1. **Update SDD** — bump version, add 變更紀錄 entry, write the feature spec.
 2. **Write TDD test cases** — add `- [ ]` cases to SDD § 5 covering all acceptance criteria from DoR.
-3. **Confirm DoD** — all four conditions below must be achievable for this feature before coding starts.
+3. **Confirm DoD** — all six conditions below must be achievable for this feature before coding starts.
 
 ### Stage 3 — Architecture Exploration (before any code)
 
@@ -243,6 +246,7 @@ Before writing a single line, use the Explore agent to map out all files relevan
 - Window properties (size, frameless, alwaysOnTop, transparent)
 - IPC channels involved (names, directions, payloads)
 - CSS structure that affects layout
+- **Impact map** — cross-reference with DoR item 3: for each shared code path, trace which existing features depend on it and confirm the regression test list is complete.
 
 **Do not start implementation until this map is complete.** Skipping this step causes blind guessing and repeated wrong turns.
 
@@ -259,15 +263,16 @@ Run through every `- [ ]` case added in Stage 2. Mark `[x]` only after passing. 
 
 ### Definition of Done (DoD)
 
-A feature is complete only when **all five** are true:
+A feature is complete only when **all six** are true:
 
 | # | Condition | How to verify |
 |---|-----------|---------------|
 | 1 | **Code works** | All TDD cases marked `[x]` in SDD § 6 |
 | 2 | **SDD updated** | Version bumped, 變更紀錄 entry written, spec reflects new behaviour |
 | 3 | **Trilingual complete** | `i18n.js` (`zh`/`en`/`ja`) + `editor.html` + JS all updated in same session |
-| 4 | **Nova QC passed** | Nova has reviewed the feature and given approval |
-| 5 | **Committed + merged** | `feat`/`fix` + `docs(SDD)` committed; feature branch merged to main |
+| 4 | **Regression test passed** | All existing TDD cases listed in DoR item 3b re-verified and still passing |
+| 5 | **Nova QC passed** | Nova has reviewed the feature and given approval |
+| 6 | **Committed + merged** | `feat`/`fix` + `docs(SDD)` committed; feature branch merged to main |
 
 > **Rule of thumb:** If you'd feel uncomfortable running the DMG Release Checklist right now, the feature isn't done.
 
