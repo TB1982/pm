@@ -369,6 +369,36 @@ PNG / JPG / WebP / GIF / BMP / TIFF
 
 ---
 
+## 10. Tauri 血淚開發紀錄
+
+> 本節記錄 Tauri + WKWebView 開發中踩過的坑，供未來 Sprint 參考。每條附根本原因與解法。
+
+### 坑 1 — WKWebView HTTP 快取極度頑固（2026-03-29）
+
+**症狀：** CSS / JS / HTML 改完推上去，重啟 `cargo tauri dev` 後 WebView 仍顯示舊版內容，`curl` 確認 server 有新版，但 WebView 就是不更新。
+
+**根本原因：** WKWebView 對 HTTP 資源做持久快取，存活於 app 重啟之間。清除 `~/Library/Application Support/com.tb1982.vas`、`~/Library/Caches/com.tb1982.vas`、`~/Library/WebKit` 均無效。
+
+**解法：**
+1. **換 port**：WKWebView 快取以 URL origin 為 key，換 port 就等於全新 origin，舊快取完全無效。目前 Tauri dev 固定使用 port 8085。
+2. **自製 no-cache dev server**（`src-tauri/dev-server.py`）：每個 HTTP 回應加上 `Cache-Control: no-store`，根治快取問題。前者是一次性繞過，後者是永久解法。
+
+**教訓：** Python 內建 `http.server` 會送 `Last-Modified` 並接受 `If-Modified-Since`，WKWebView 會據此回 304，不重新抓檔。必須用自製 server 強制送 no-store。
+
+---
+
+### 坑 2 — WebKit `<button>` 預設樣式鎖死字型（2026-03-29）
+
+**症狀：** `<button>` 套了 CSS class，`font-size`、`font-family` 完全無效，`-webkit-appearance: none` 也救不了。
+
+**根本原因：** WKWebView 的 user-agent stylesheet 對 `<button>` 的字型設定優先度高於 author stylesheet，即使加了 `-webkit-appearance: none` 仍部分保留。
+
+**解法：** 在 HTML 元素上直接加 `style="font-size:15px;font-family:inherit;"` inline style。inline style 優先度高於 user-agent stylesheet，一定有效。
+
+**教訓：** 凡是原生表單元素（`<button>`, `<input>`, `<select>`），字型相關屬性一律用 inline style 設定，不要只靠 CSS class。
+
+---
+
 ## 9. 決策紀錄
 
 ### 9.4 阻礙決策日誌
