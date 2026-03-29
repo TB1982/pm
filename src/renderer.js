@@ -11,6 +11,7 @@ async function expandForModal(width, height) {
 
 function collapseToToolbar() {
   ipcInvoke('resize-to-toolbar')
+  document.querySelector('.toolbar').classList.remove('modal-open')
 }
 
 function closeAllModals() {
@@ -18,6 +19,7 @@ function closeAllModals() {
   newCanvasModal.classList.add('hidden')
   helpModal.classList.add('hidden')
   windowPickerModal.classList.add('hidden')
+  document.querySelector('.toolbar').classList.add('modal-open')
 }
 
 // ─── Help modal ───────────────────────────────────────────────────────────────
