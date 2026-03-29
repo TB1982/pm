@@ -25,7 +25,7 @@
     'select-batch-files', 'select-output-dir', 'select-watermark-image',
     'batch-convert',
     // Editor channels
-    'get-editor-init', 'save-image-as',
+    'get-editor-init', 'read-image-as-data-url', 'save-image-as',
     'get-brand-colors', 'save-brand-colors',
     'ocr-recognize', 'privacy-scan',
   ])
@@ -86,6 +86,14 @@
       },
     },
 
-    getPathForFile: (file) => file?.path ?? ''
+    getPathForFile: (file) => file?.path ?? '',
+
+    // Convert a local file path to a URL that WKWebView can load.
+    // Tauri asset protocol (asset://localhost/path) is allowed from http:// origin;
+    // plain file:// is blocked by WebKit cross-protocol restriction (KM-006).
+    fileToSrc(filePath) {
+      if (!filePath) return ''
+      return `asset://localhost${filePath}`
+    },
   }
 })()

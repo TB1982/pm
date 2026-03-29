@@ -614,6 +614,11 @@ document.documentElement.lang = isEnglish ? 'en' : 'zh-Hant';
 - **Review:** Per feature — when a feature is complete, not at Sprint end
 - **Retrospective:** At Sprint end, Q&A format (Nova answers, Claude asks)
 
+### Sprint Velocity Tracking
+- Update `SDD-vas-tauri.md` § 3.3 Sprint Velocity table **at Sprint close** (when the last feature of the Sprint merges to main).
+- Record: Sprint number, date range, completed features (with done/in-progress status), and a brief note on scope changes.
+- TDD cases: mark `[x]` as each case is verified by Nova during QC. Do **not** pre-mark cases that have not been manually confirmed.
+
 ### Wishlist & New Ideas
 - Nova may raise new ideas at any time during a Sprint
 - Claude records them immediately into SDD Wishlist — no interruption to current Sprint

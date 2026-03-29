@@ -64,6 +64,7 @@ pub fn run() {
       open_image_file,
       new_canvas_create,
       get_editor_init,
+      read_image_as_data_url,
       save_image_as,
       get_brand_colors,
       save_brand_colors,
@@ -172,17 +173,34 @@ async fn new_canvas_create(
 }
 
 fn open_editor_window(app: &tauri::AppHandle) -> Result<(), String> {
-  // If an editor window is already open, close it first (only one editor at a time)
+  // Close any existing editor first (only one editor at a time)
   if let Some(existing) = app.get_webview_window("editor") {
     existing.close().map_err(|e| e.to_string())?;
   }
-  tauri::WebviewWindowBuilder::new(app, "editor", tauri::WebviewUrl::App("editor.html".into()))
+
+  // Hide toolbar while editor is open
+  if let Some(toolbar) = app.get_webview_window("toolbar") {
+    toolbar.hide().map_err(|e| e.to_string())?;
+  }
+
+  let editor = tauri::WebviewWindowBuilder::new(app, "editor", tauri::WebviewUrl::App("editor.html".into()))
     .title("VAS Editor")
     .inner_size(1200.0, 800.0)
     .min_inner_size(800.0, 600.0)
     .resizable(true)
     .build()
     .map_err(|e| e.to_string())?;
+
+  // Restore toolbar when editor is closed
+  let app_handle = app.clone();
+  editor.on_window_event(move |event| {
+    if let tauri::WindowEvent::Destroyed = event {
+      if let Some(toolbar) = app_handle.get_webview_window("toolbar") {
+        let _ = toolbar.show();
+      }
+    }
+  });
+
   Ok(())
 }
 
@@ -195,6 +213,31 @@ async fn get_editor_init(
     return Err("Editor init state not set".into());
   }
   Ok(payload.clone())
+}
+
+// ── Image loading (v1.1) ──────────────────────────────────────────────────
+// asset:// protocol is blocked from http://localhost devUrl origin (KM-006).
+// Read file in Rust and return as base64 data URL — works in dev and production.
+
+#[tauri::command]
+async fn read_image_as_data_url(path: String) -> Result<String, String> {
+  let bytes = std::fs::read(&path).map_err(|e| e.to_string())?;
+  let ext = std::path::Path::new(&path)
+    .extension()
+    .and_then(|e| e.to_str())
+    .unwrap_or("png")
+    .to_lowercase();
+  let mime = match ext.as_str() {
+    "jpg" | "jpeg" => "image/jpeg",
+    "gif"          => "image/gif",
+    "webp"         => "image/webp",
+    "bmp"          => "image/bmp",
+    "tiff" | "tif" => "image/tiff",
+    _              => "image/png",
+  };
+  use base64::Engine as _;
+  let encoded = base64::engine::general_purpose::STANDARD.encode(&bytes);
+  Ok(format!("data:{};base64,{}", mime, encoded))
 }
 
 // ── Editor IPC stubs (v1.0) ────────────────────────────────────────────────
