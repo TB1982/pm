@@ -2,7 +2,7 @@
 
 **版本：** 1.5
 **日期：** 2026-03-29
-**狀態：** Sprint 1 進行中
+**狀態：** Sprint 1 完結 ✅　｜　Sprint 2 待規劃
 **前身：** `SDD-mac-screenshot-tool.md`（Electron 版，已封存，git tag `electron-final`）
 
 ---
@@ -153,7 +153,7 @@ pub struct EditorInitPayload {
 
 | Sprint | 期間 | 完成功能 | 備註 |
 |--------|------|---------|------|
-| Sprint 1 | 2026-03-28 – 2026-03-29 | S1-01 浮動工具列（done）；S1-02 檔案對話框 + 圖片引入編輯器（done）；S1-03 批次轉換 + 浮水印（done）；編輯器橋接：空白畫布 + 開圖（done）；Toolbar hide/show（done） | 兩天完成 Sprint 1；截圖→編輯器列為 Sprint 2 開頭 |
+| Sprint 1 | 2026-03-28 – 2026-03-29 | S1-01 浮動工具列（done）；S1-02 檔案對話框 + 圖片引入編輯器（done）；S1-03 批次轉換 + 浮水印（done）；編輯器橋接：空白畫布 + 開圖（done）；Toolbar hide/show（done）；截圖三兄弟：全螢幕（含多螢幕）/ 矩形 / 視窗（xcap Method B）（done）；KM-008 toolbar 飄移根治（done） | 兩天完成 Sprint 1；PR #81 merged 2026-03-29；截圖三兄弟列入 Sprint 1 延伸範疇並全數完工 |
 
 ---
 
