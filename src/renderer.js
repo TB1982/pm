@@ -241,7 +241,7 @@ document.getElementById('btnWhiteboard').addEventListener('click', e => {
 
 // ─── New canvas modal (toolbar) ────────────────────────────────────────────────
 const NC_MODAL_W = 520
-const NC_MODAL_H = 360
+const NC_MODAL_H = 420
 
 const newCanvasModal      = document.getElementById('newCanvasModal')
 const newCanvasPreset     = document.getElementById('newCanvasPreset')
