@@ -20,7 +20,7 @@ const helpModal  = document.getElementById('helpModal')
 const modalClose = document.getElementById('modalClose')
 
 helpBtn.addEventListener('click', async () => {
-  await expandForModal(520, 480)
+  await expandForModal(520, 530)
   helpModal.classList.remove('hidden')
 })
 
