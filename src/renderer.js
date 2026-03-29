@@ -20,6 +20,9 @@ const helpModal  = document.getElementById('helpModal')
 const modalClose = document.getElementById('modalClose')
 
 helpBtn.addEventListener('click', async () => {
+  if (!batchRunning) batchModal.classList.add('hidden')
+  newCanvasModal.classList.add('hidden')
+  windowPickerModal.classList.add('hidden')
   await expandForModal(520, 530)
   helpModal.classList.remove('hidden')
 })
