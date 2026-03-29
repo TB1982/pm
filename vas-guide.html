@@ -132,120 +132,10 @@
       <p class="text-white/45 text-sm max-w-lg mx-auto" data-lang-key="heroSub">工具列、編輯器介面與浮動工作列功能說明</p>
     </header>
 
-    <!-- Section 1: Editor Interface -->
+    <!-- Section 1: Capture Toolbar -->
     <section>
       <div class="mb-6">
-        <p class="section-label mb-2" data-lang-key="s1Label">Section 01</p>
-        <h2 class="text-xl font-semibold" data-lang-key="s1Title">編輯器介面</h2>
-        <p class="text-white/45 text-sm mt-1" data-lang-key="s1Sub">三個主要操作區域</p>
-      </div>
-      <img id="editorImg" src="img/vas-guide-editor-zh.png" alt="VAS 編輯器介面說明圖" class="guide-img" loading="lazy">
-      <div class="grid md:grid-cols-3 gap-4 mt-6">
-        <div class="glass-card rounded-xl p-4">
-          <div class="text-sm font-semibold text-purple-300 mb-1" data-lang-key="zone1Name">主要功能選單</div>
-          <p class="text-white/50 text-xs leading-relaxed" data-lang-key="zone1Desc">左側垂直工具列。點選工具後，畫布上的操作會對應切換。目前使用中的工具以藍色高亮標示。</p>
-        </div>
-        <div class="glass-card rounded-xl p-4">
-          <div class="text-sm font-semibold text-orange-300 mb-1" data-lang-key="zone2Name">子屬性調整選單</div>
-          <p class="text-white/50 text-xs leading-relaxed" data-lang-key="zone2Desc">頂部工具列。依所選工具動態更換內容，可調整顏色、粗細、不透明度、線條樣式等屬性。</p>
-        </div>
-        <div class="glass-card rounded-xl p-4">
-          <div class="text-sm font-semibold text-green-300 mb-1" data-lang-key="zone3Name">動態匯出按鈕</div>
-          <p class="text-white/50 text-xs leading-relaxed" data-lang-key="zone3Desc">右下角浮動按鈕。可拖曳移動位置，對應左右撇子不同使用習慣。完成後拖曳至目標應用程式即可匯出。</p>
-        </div>
-      </div>
-    </section>
-
-    <hr class="section-divider">
-
-    <!-- Section 2: Sidebar Tools -->
-    <section>
-      <div class="mb-6">
-        <p class="section-label mb-2" data-lang-key="s2Label">Section 02</p>
-        <h2 class="text-xl font-semibold" data-lang-key="s2Title">左側工具列</h2>
-        <p class="text-white/45 text-sm mt-1" data-lang-key="s2Sub">所有標注工具一覽，括號內為快捷鍵</p>
-      </div>
-
-      <div class="flex flex-col md:flex-row gap-8 items-start">
-        <div class="flex-shrink-0">
-          <img src="img/vas-guide-sidebar.png" alt="VAS 左側工具列圖示" class="sidebar-img" loading="lazy">
-        </div>
-        <div class="flex-1 space-y-6">
-
-          <!-- Group: Select -->
-          <div>
-            <p class="text-xs text-white/30 font-semibold mb-2 uppercase tracking-widest" data-lang-key="grpSelect">選取</p>
-            <div class="flex flex-wrap gap-2">
-              <span class="tool-chip"><span class="tool-icon">↖</span><span data-lang-key="t_select">選取</span><span class="key">V</span></span>
-              <span class="tool-chip"><span class="tool-icon">⬚</span><span data-lang-key="t_boxselect">框型選取</span><span class="key">M</span></span>
-            </div>
-          </div>
-
-          <!-- Group: Draw -->
-          <div>
-            <p class="text-xs text-white/30 font-semibold mb-2 uppercase tracking-widest" data-lang-key="grpDraw">繪圖</p>
-            <div class="flex flex-wrap gap-2">
-              <span class="tool-chip"><span class="tool-icon">✒</span><span data-lang-key="t_pen">筆型</span><span class="key">P</span></span>
-              <span class="tool-chip"><span class="tool-icon">╱</span><span data-lang-key="t_line">線條</span><span class="key">L</span></span>
-              <span class="tool-chip"><span class="tool-icon">▭</span><span data-lang-key="t_rect">矩形框</span><span class="key">R</span></span>
-              <span class="tool-chip"><span class="tool-icon">■</span><span data-lang-key="t_fillrect">色塊</span><span class="key">B</span></span>
-            </div>
-          </div>
-
-          <!-- Group: Annotate -->
-          <div>
-            <p class="text-xs text-white/30 font-semibold mb-2 uppercase tracking-widest" data-lang-key="grpAnnotate">標注</p>
-            <div class="flex flex-wrap gap-2">
-              <span class="tool-chip"><span class="tool-icon">T</span><span data-lang-key="t_text">文字</span><span class="key">T</span></span>
-              <span class="tool-chip"><span class="tool-icon">①</span><span data-lang-key="t_number">編號</span><span class="key">N</span></span>
-              <span class="tool-chip"><span class="tool-icon">☺</span><span data-lang-key="t_symbol">符號印章</span><span class="key">U</span></span>
-            </div>
-          </div>
-
-          <!-- Group: Privacy -->
-          <div>
-            <p class="text-xs text-white/30 font-semibold mb-2 uppercase tracking-widest" data-lang-key="grpPrivacy">隱私與遮蔽</p>
-            <div class="flex flex-wrap gap-2">
-              <span class="tool-chip"><span class="tool-icon">文</span><span data-lang-key="t_ocr">OCR 文字辨識</span><span class="key">G</span></span>
-              <span class="tool-chip"><span class="tool-icon">⊞</span><span data-lang-key="t_mosaic">馬賽克／模糊</span><span class="key">X</span></span>
-              <span class="tool-chip"><span class="tool-icon">文̶</span><span data-lang-key="t_privacy">隱私遮蔽</span><span class="key">K</span></span>
-            </div>
-          </div>
-
-          <!-- Group: Canvas -->
-          <div>
-            <p class="text-xs text-white/30 font-semibold mb-2 uppercase tracking-widest" data-lang-key="grpCanvas">畫布操作</p>
-            <div class="flex flex-wrap gap-2">
-              <span class="tool-chip"><span class="tool-icon">⊕</span><span data-lang-key="t_zoomin">放大</span><span class="key">⌘=</span></span>
-              <span class="tool-chip"><span class="tool-icon">⊖</span><span data-lang-key="t_zoomout">縮小</span><span class="key">⌘-</span></span>
-              <span class="tool-chip"><span class="tool-icon">⊡</span><span data-lang-key="t_fit">適合視窗</span><span class="key">⌘0</span></span>
-              <span class="tool-chip"><span class="tool-icon">✂</span><span data-lang-key="t_crop">裁切</span><span class="key">C</span></span>
-              <span class="tool-chip"><span class="tool-icon">⤢</span><span data-lang-key="t_resize">調整大小</span><span class="key">S</span></span>
-              <span class="tool-chip"><span class="tool-icon">⬜</span><span data-lang-key="t_extend">延伸畫布</span><span class="key">E</span></span>
-            </div>
-          </div>
-
-          <!-- Group: Other -->
-          <div>
-            <p class="text-xs text-white/30 font-semibold mb-2 uppercase tracking-widest" data-lang-key="grpOther">其他</p>
-            <div class="flex flex-wrap gap-2">
-              <span class="tool-chip"><span class="tool-icon">⧉</span><span data-lang-key="t_overlay">疊入圖片</span><span class="key">O</span></span>
-              <span class="tool-chip"><span class="tool-icon">⬚</span><span data-lang-key="t_open">開啟／新畫布</span></span>
-              <span class="tool-chip"><span class="tool-icon">↩</span><span data-lang-key="t_undo">撤銷</span><span class="key">⌘Z</span></span>
-              <span class="tool-chip"><span class="tool-icon">↪</span><span data-lang-key="t_redo">重做</span><span class="key">⌘⇧Z</span></span>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </section>
-
-    <hr class="section-divider">
-
-    <!-- Section 3: Capture Toolbar -->
-    <section>
-      <div class="mb-6">
-        <p class="section-label mb-2" data-lang-key="s3Label">Section 03</p>
+        <p class="section-label mb-2" data-lang-key="s3Label">Section 01</p>
         <h2 class="text-xl font-semibold" data-lang-key="s3Title">浮動工作列</h2>
         <p class="text-white/45 text-sm mt-1" data-lang-key="s3Sub">懸浮在桌面上的截圖與工具入口</p>
       </div>
@@ -285,7 +175,124 @@
         </div>
         <div class="glass-card rounded-xl p-4">
           <p class="text-sm font-semibold text-white/80 mb-1" data-lang-key="cb_help">?</p>
-          <p class="text-white/40 text-xs leading-relaxed" data-lang-key="cb_help_desc">開啟本操作手冊。</p>
+          <p class="text-white/40 text-xs leading-relaxed" data-lang-key="cb_help_desc">顯示快捷鍵一覽，並提供操作手冊連結。</p>
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- Section 2: Editor Interface -->
+    <section>
+      <div class="mb-6">
+        <p class="section-label mb-2" data-lang-key="s1Label">Section 02</p>
+        <h2 class="text-xl font-semibold" data-lang-key="s1Title">編輯器介面</h2>
+        <p class="text-white/45 text-sm mt-1" data-lang-key="s1Sub">三個主要操作區域</p>
+      </div>
+      <img id="editorImg" src="img/vas-guide-editor-zh.png" alt="VAS 編輯器介面說明圖" class="guide-img" loading="lazy">
+      <div class="grid md:grid-cols-3 gap-4 mt-6">
+        <div class="glass-card rounded-xl p-4">
+          <div class="text-sm font-semibold text-purple-300 mb-1" data-lang-key="zone1Name">主要功能選單</div>
+          <p class="text-white/50 text-xs leading-relaxed" data-lang-key="zone1Desc">左側垂直工具列。點選工具後，畫布上的操作會對應切換。目前使用中的工具以藍色高亮標示。</p>
+        </div>
+        <div class="glass-card rounded-xl p-4">
+          <div class="text-sm font-semibold text-orange-300 mb-1" data-lang-key="zone2Name">子屬性調整選單</div>
+          <p class="text-white/50 text-xs leading-relaxed" data-lang-key="zone2Desc">頂部工具列。依所選工具動態更換內容，可調整顏色、粗細、不透明度、線條樣式等屬性。</p>
+        </div>
+        <div class="glass-card rounded-xl p-4">
+          <div class="text-sm font-semibold text-green-300 mb-1" data-lang-key="zone3Name">動態匯出按鈕</div>
+          <p class="text-white/50 text-xs leading-relaxed" data-lang-key="zone3Desc">右下角浮動按鈕。可拖曳移動位置，對應左右撇子不同使用習慣。完成後拖曳至目標應用程式即可匯出。</p>
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- Section 3: Sidebar Tools -->
+    <section>
+      <div class="mb-6">
+        <p class="section-label mb-2" data-lang-key="s2Label">Section 03</p>
+        <h2 class="text-xl font-semibold" data-lang-key="s2Title">左側工具列</h2>
+        <p class="text-white/45 text-sm mt-1" data-lang-key="s2Sub">所有標注工具一覽，括號內為快捷鍵</p>
+      </div>
+
+      <div class="flex flex-col md:flex-row gap-8 items-start">
+        <div class="flex-shrink-0">
+          <img src="img/vas-guide-sidebar.png" alt="VAS 左側工具列圖示" class="sidebar-img" loading="lazy">
+        </div>
+        <div class="flex-1 space-y-6">
+
+          <!-- Group: Select -->
+          <div>
+            <p class="text-xs text-white/30 font-semibold mb-2 uppercase tracking-widest" data-lang-key="grpSelect">選取</p>
+            <div class="flex flex-wrap gap-2">
+              <span class="tool-chip"><span class="tool-icon">↖</span><span data-lang-key="t_select">選取</span><span class="key">V</span></span>
+              <span class="tool-chip"><span class="tool-icon">⬚</span><span data-lang-key="t_boxselect">框型選取</span><span class="key">M</span></span>
+            </div>
+          </div>
+
+          <!-- Group: Draw -->
+          <div>
+            <p class="text-xs text-white/30 font-semibold mb-2 uppercase tracking-widest" data-lang-key="grpDraw">繪圖</p>
+            <div class="flex flex-wrap gap-2">
+              <span class="tool-chip"><span class="tool-icon">✒</span><span data-lang-key="t_pen">筆型</span><span class="key">P</span></span>
+              <span class="tool-chip"><span class="tool-icon">╱</span><span data-lang-key="t_line">線條</span><span class="key">L</span></span>
+              <span class="tool-chip"><span class="tool-icon">▭</span><span data-lang-key="t_rect">矩形框</span><span class="key">R</span></span>
+              <span class="tool-chip"><span class="tool-icon">■</span><span data-lang-key="t_fillrect">色塊</span><span class="key">B</span></span>
+            </div>
+          </div>
+
+          <!-- Group: Annotate -->
+          <div>
+            <p class="text-xs text-white/30 font-semibold mb-2 uppercase tracking-widest" data-lang-key="grpAnnotate">標注</p>
+            <div class="flex flex-wrap gap-2">
+              <span class="tool-chip"><span class="tool-icon">T</span><span data-lang-key="t_text">文字</span><span class="key">T</span></span>
+              <span class="tool-chip"><span class="tool-icon">①</span><span data-lang-key="t_number">編號</span><span class="key">N</span></span>
+              <span class="tool-chip"><span class="tool-icon">☺</span><span data-lang-key="t_symbol">符號印章</span><span class="key">U</span></span>
+              <span class="tool-chip"><span class="tool-icon">⬜</span><span data-lang-key="t_mosaic">馬賽克／模糊</span><span class="key">X</span></span>
+            </div>
+          </div>
+
+          <!-- Group: Privacy -->
+          <div>
+            <p class="text-xs text-white/30 font-semibold mb-2 uppercase tracking-widest" data-lang-key="grpPrivacy">隱私與遮蔽</p>
+            <div class="flex flex-wrap gap-2">
+              <span class="tool-chip"><span class="tool-icon">文</span><span data-lang-key="t_ocr">OCR 文字辨識</span><span class="key">G</span></span>
+              <span class="tool-chip"><span class="tool-icon" style="text-decoration:line-through">文</span><span data-lang-key="t_privacy">隱私遮蔽</span><span class="key">K</span></span>
+            </div>
+          </div>
+
+          <!-- Group: Canvas -->
+          <div>
+            <p class="text-xs text-white/30 font-semibold mb-2 uppercase tracking-widest" data-lang-key="grpCanvas">畫布操作</p>
+            <div class="flex flex-wrap gap-2">
+              <span class="tool-chip"><span class="tool-icon">⊕</span><span data-lang-key="t_zoomin">放大</span><span class="key">⌘=</span></span>
+              <span class="tool-chip"><span class="tool-icon">⊖</span><span data-lang-key="t_zoomout">縮小</span><span class="key">⌘-</span></span>
+              <span class="tool-chip"><span class="tool-icon">⊡</span><span data-lang-key="t_fit">適合視窗</span><span class="key">⌘0</span></span>
+            </div>
+          </div>
+
+          <!-- Group: Layout -->
+          <div>
+            <p class="text-xs text-white/30 font-semibold mb-2 uppercase tracking-widest" data-lang-key="grpLayout">版面功能</p>
+            <div class="flex flex-wrap gap-2">
+              <span class="tool-chip"><span class="tool-icon">✂</span><span data-lang-key="t_crop">裁切</span><span class="key">C</span></span>
+              <span class="tool-chip"><span class="tool-icon">↔</span><span data-lang-key="t_resize">調整大小</span><span class="key">S</span></span>
+              <span class="tool-chip"><span class="tool-icon">⊞</span><span data-lang-key="t_extend">延伸畫布</span><span class="key">E</span></span>
+              <span class="tool-chip"><span class="tool-icon">⧉</span><span data-lang-key="t_overlay">疊入圖片</span><span class="key">O</span></span>
+              <span class="tool-chip"><span class="tool-icon">◱</span><span data-lang-key="t_open">一鍵套版</span></span>
+            </div>
+          </div>
+
+          <!-- Group: Other -->
+          <div>
+            <p class="text-xs text-white/30 font-semibold mb-2 uppercase tracking-widest" data-lang-key="grpOther">其他</p>
+            <div class="flex flex-wrap gap-2">
+              <span class="tool-chip"><span class="tool-icon">↩</span><span data-lang-key="t_undo">撤銷</span><span class="key">⌘Z</span></span>
+              <span class="tool-chip"><span class="tool-icon">↪</span><span data-lang-key="t_redo">重做</span><span class="key">⌘⇧Z</span></span>
+            </div>
+          </div>
+
         </div>
       </div>
     </section>
@@ -303,8 +310,8 @@
         backLabel: 'VAS',
         heroLabel: '操作手冊',
         heroTitle: 'VAS 操作手冊',
-        heroSub: '工具列、編輯器介面與浮動工作列功能說明',
-        s1Label: 'Section 01',
+        heroSub: '浮動工作列、編輯器介面與左側工具列功能說明',
+        s1Label: 'Section 02',
         s1Title: '編輯器介面',
         s1Sub: '三個主要操作區域',
         zone1Name: '主要功能選單',
@@ -313,7 +320,7 @@
         zone2Desc: '頂部工具列。依所選工具動態更換內容，可調整顏色、粗細、不透明度、線條樣式等屬性。',
         zone3Name: '動態匯出按鈕',
         zone3Desc: '右下角浮動按鈕。可拖曳移動位置，對應左右撇子不同使用習慣。完成後拖曳至目標應用程式即可匯出。',
-        s2Label: 'Section 02',
+        s2Label: 'Section 03',
         s2Title: '左側工具列',
         s2Sub: '所有標注工具一覽，括號內為快捷鍵',
         grpSelect: '選取',
@@ -321,14 +328,15 @@
         grpAnnotate: '標注',
         grpPrivacy: '隱私與遮蔽',
         grpCanvas: '畫布操作',
+        grpLayout: '版面功能',
         grpOther: '其他',
         t_select: '選取', t_boxselect: '框型選取', t_pen: '筆型', t_line: '線條',
         t_rect: '矩形框', t_fillrect: '色塊', t_text: '文字', t_number: '編號',
         t_symbol: '符號印章', t_ocr: 'OCR 文字辨識', t_mosaic: '馬賽克／模糊',
         t_privacy: '隱私遮蔽', t_zoomin: '放大', t_zoomout: '縮小', t_fit: '適合視窗',
         t_crop: '裁切', t_resize: '調整大小', t_extend: '延伸畫布',
-        t_overlay: '疊入圖片', t_open: '開啟／新畫布', t_undo: '撤銷', t_redo: '重做',
-        s3Label: 'Section 03',
+        t_overlay: '疊入圖片', t_open: '一鍵套版', t_undo: '撤銷', t_redo: '重做',
+        s3Label: 'Section 01',
         s3Title: '浮動工作列',
         s3Sub: '懸浮在桌面上的截圖與工具入口',
         cb_fullscreen: '全螢幕', cb_fullscreen_desc: '截取整個螢幕畫面，立即進入編輯器。',
@@ -338,15 +346,15 @@
         cb_open: '開啟', cb_open_desc: '從本機開啟現有圖片，或建立指定尺寸的新畫布。',
         cb_whiteboard: '白板', cb_whiteboard_desc: '開啟空白畫布，從零開始建立圖像內容。',
         cb_batch: '批次轉', cb_batch_desc: '拖入多張圖片，一次轉換為 JPG、PNG、WebP 等格式，支援浮水印與尺寸調整。',
-        cb_help: '說明', cb_help_desc: '開啟本操作手冊。',
+        cb_help: '說明', cb_help_desc: '顯示快捷鍵一覽，並提供操作手冊連結。',
         footer: '由 GitHub 部署　｜　Claude Code 傾力打造　｜　<a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a> 最後更新於 2026'
       },
       en: {
         backLabel: 'VAS',
         heroLabel: 'User Guide',
         heroTitle: 'VAS User Guide',
-        heroSub: 'Editor interface, toolbar, and capture bar explained',
-        s1Label: 'Section 01',
+        heroSub: 'Capture toolbar, editor interface, and tool menu explained',
+        s1Label: 'Section 02',
         s1Title: 'Editor Interface',
         s1Sub: 'Three main working areas',
         zone1Name: 'Main Tool Menu',
@@ -355,7 +363,7 @@
         zone2Desc: 'The top toolbar. Updates dynamically based on the selected tool — adjust colour, stroke width, opacity, line style, and more.',
         zone3Name: 'Floating Export Button',
         zone3Desc: 'The floating button in the bottom-right corner. Drag it to reposition for left- or right-handed use. When finished, drag it to any target app to export.',
-        s2Label: 'Section 02',
+        s2Label: 'Section 03',
         s2Title: 'Tool Menu',
         s2Sub: 'All annotation tools at a glance — keyboard shortcut in parentheses',
         grpSelect: 'Select',
@@ -363,14 +371,15 @@
         grpAnnotate: 'Annotate',
         grpPrivacy: 'Privacy & Masking',
         grpCanvas: 'Canvas',
+        grpLayout: 'Layout',
         grpOther: 'Other',
         t_select: 'Select', t_boxselect: 'Box Select', t_pen: 'Pen', t_line: 'Line',
         t_rect: 'Rectangle', t_fillrect: 'Fill', t_text: 'Text', t_number: 'Number',
         t_symbol: 'Stamp', t_ocr: 'OCR', t_mosaic: 'Mosaic / Blur',
         t_privacy: 'Privacy Mask', t_zoomin: 'Zoom In', t_zoomout: 'Zoom Out', t_fit: 'Fit to Window',
         t_crop: 'Crop', t_resize: 'Resize', t_extend: 'Extend Canvas',
-        t_overlay: 'Overlay Image', t_open: 'Open / New Canvas', t_undo: 'Undo', t_redo: 'Redo',
-        s3Label: 'Section 03',
+        t_overlay: 'Overlay Image', t_open: 'One-click Template', t_undo: 'Undo', t_redo: 'Redo',
+        s3Label: 'Section 01',
         s3Title: 'Capture Toolbar',
         s3Sub: 'The floating toolbar that lives on your desktop',
         cb_fullscreen: 'Fullscreen', cb_fullscreen_desc: 'Capture the entire screen and open it directly in the editor.',
@@ -380,7 +389,7 @@
         cb_open: 'Open', cb_open_desc: 'Open an existing image from disk, or create a new canvas at a custom size.',
         cb_whiteboard: 'Whiteboard', cb_whiteboard_desc: 'Open a blank canvas to build visuals from scratch.',
         cb_batch: 'Batch', cb_batch_desc: 'Drop multiple images to convert them all at once to JPG, PNG, WebP, and more — with watermark and resize support.',
-        cb_help: 'Help', cb_help_desc: 'Open this user guide.',
+        cb_help: 'Help', cb_help_desc: 'Show keyboard shortcuts and link to this user guide.',
         footer: 'Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by <a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a>'
       }
     };
