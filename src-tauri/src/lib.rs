@@ -1,8 +1,28 @@
-// v0.8.1
+// v1.0
 use tauri::Manager;
 use tauri::Emitter;
 use tauri::window::Color;
 use tauri_plugin_dialog::DialogExt;
+use std::sync::Mutex;
+
+// ── Shared state ───────────────────────────────────────────────────────────
+
+#[derive(Clone, serde::Serialize, serde::Deserialize, Default)]
+pub struct EditorInitPayload {
+  pub mode: String,       // "blank" | "file"
+  pub width: u32,
+  pub height: u32,
+  pub bg_color: String,   // CSS hex e.g. "#FFFFFF"
+  pub file_path: String,
+}
+
+pub struct EditorInitState(pub Mutex<EditorInitPayload>);
+
+impl Default for EditorInitState {
+  fn default() -> Self {
+    EditorInitState(Mutex::new(EditorInitPayload::default()))
+  }
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -33,6 +53,7 @@ pub fn run() {
 
       Ok(())
     })
+    .manage(EditorInitState::default())
     .invoke_handler(tauri::generate_handler![
       resize_for_modal,
       resize_to_toolbar,
@@ -42,6 +63,12 @@ pub fn run() {
       open_overlay,
       open_image_file,
       new_canvas_create,
+      get_editor_init,
+      save_image_as,
+      get_brand_colors,
+      save_brand_colors,
+      ocr_recognize,
+      privacy_scan,
       select_batch_files,
       select_output_dir,
       select_watermark_image,
@@ -95,22 +122,106 @@ async fn open_overlay() -> Result<(), String> {
 }
 
 #[tauri::command]
-async fn open_image_file(app: tauri::AppHandle) -> Result<(), String> {
+async fn open_image_file(
+  app: tauri::AppHandle,
+  state: tauri::State<'_, EditorInitState>,
+) -> Result<(), String> {
   let (tx, rx) = tokio::sync::oneshot::channel();
   app.dialog()
     .file()
     .add_filter("Images", &["png", "jpg", "jpeg", "gif", "bmp", "webp", "tiff"])
     .pick_file(move |path| { let _ = tx.send(path); });
   if let Some(p) = rx.await.map_err(|e| e.to_string())? {
-    // TODO: open editor window — emit event for now
-    app.emit("open-image-result", p.to_string()).ok();
+    {
+      let mut payload = state.0.lock().map_err(|e| e.to_string())?;
+      *payload = EditorInitPayload {
+        mode: "file".into(),
+        width: 0,
+        height: 0,
+        bg_color: String::new(),
+        file_path: p.to_string(),
+      };
+    }
+    open_editor_window(&app)?;
   }
   Ok(())
 }
 
 #[tauri::command]
-async fn new_canvas_create(_width: u32, _height: u32, _bg: String) -> Result<(), String> {
+async fn new_canvas_create(
+  app: tauri::AppHandle,
+  state: tauri::State<'_, EditorInitState>,
+  width: u32,
+  height: u32,
+  bg_color: String,
+) -> Result<(), String> {
+  if width == 0 || width > 8192 || height == 0 || height > 8192 {
+    return Err(format!("Invalid canvas size: {}x{}", width, height));
+  }
+  {
+    let mut payload = state.0.lock().map_err(|e| e.to_string())?;
+    *payload = EditorInitPayload {
+      mode: "blank".into(),
+      width,
+      height,
+      bg_color,
+      file_path: String::new(),
+    };
+  }
+  open_editor_window(&app)
+}
+
+fn open_editor_window(app: &tauri::AppHandle) -> Result<(), String> {
+  // If an editor window is already open, close it first (only one editor at a time)
+  if let Some(existing) = app.get_webview_window("editor") {
+    existing.close().map_err(|e| e.to_string())?;
+  }
+  tauri::WebviewWindowBuilder::new(app, "editor", tauri::WebviewUrl::App("src/editor.html".into()))
+    .title("VAS Editor")
+    .inner_size(1200.0, 800.0)
+    .min_inner_size(800.0, 600.0)
+    .resizable(true)
+    .build()
+    .map_err(|e| e.to_string())?;
   Ok(())
+}
+
+#[tauri::command]
+async fn get_editor_init(
+  state: tauri::State<'_, EditorInitState>,
+) -> Result<EditorInitPayload, String> {
+  let payload = state.0.lock().map_err(|e| e.to_string())?;
+  if payload.mode.is_empty() {
+    return Err("Editor init state not set".into());
+  }
+  Ok(payload.clone())
+}
+
+// ── Editor IPC stubs (v1.0) ────────────────────────────────────────────────
+
+#[tauri::command]
+async fn save_image_as(_app: tauri::AppHandle) -> Result<String, String> {
+  Ok(String::new())
+}
+
+#[tauri::command]
+async fn get_brand_colors() -> Result<Vec<String>, String> {
+  Ok(vec![])
+}
+
+#[tauri::command]
+async fn save_brand_colors(_colors: Vec<String>) -> Result<(), String> {
+  Ok(())
+}
+
+#[tauri::command]
+async fn ocr_recognize(_image_path: String) -> Result<String, String> {
+  Ok(String::new())
+}
+
+#[tauri::command]
+async fn privacy_scan(_image_path: String) -> Result<Vec<serde_json::Value>, String> {
+  Ok(vec![])
 }
 
 #[tauri::command]
