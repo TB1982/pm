@@ -1150,8 +1150,10 @@ ipcMain.handle('privacy-scan', (_, { dataURL }) => {
 
 ipcMain.on('start-drag-export', (event, { dataURL }) => {
   try {
-    const base64  = dataURL.replace(/^data:image\/\w+;base64,/, '')
-    const tmpPath = path.join(os.tmpdir(), `export-${Date.now()}.png`)
+    const mimeMatch = dataURL.match(/^data:image\/(\w+);base64,/)
+    const ext      = mimeMatch ? mimeMatch[1].replace('jpeg', 'jpg') : 'png'
+    const base64   = dataURL.replace(/^data:image\/\w+;base64,/, '')
+    const tmpPath  = path.join(os.tmpdir(), `export-${Date.now()}.${ext}`)
     fs.writeFileSync(tmpPath, Buffer.from(base64, 'base64'))
     const icon = nativeImage.createFromPath(tmpPath).resize({ width: 64, height: 64 })
     event.sender.startDrag({ file: tmpPath, icon })
