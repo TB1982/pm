@@ -25,7 +25,7 @@
     'select-batch-files', 'select-output-dir', 'select-watermark-image',
     'batch-convert',
     // Editor channels
-    'get-editor-init', 'save-image-as',
+    'get-editor-init', 'read-image-as-data-url', 'save-image-as',
     'get-brand-colors', 'save-brand-colors',
     'ocr-recognize', 'privacy-scan',
   ])

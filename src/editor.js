@@ -2055,7 +2055,9 @@ function setTool(newTool) {
         drawBase()
         setTool('rect')
       }
-      img.src = window.electronAPI?.fileToSrc(payload.file_path) ?? `file://${payload.file_path}`
+      const src = await ipcInvoke('read-image-as-data-url', { path: payload.file_path })
+        .catch(() => `file://${payload.file_path}`)
+      img.src = src
     }
   } catch (err) {
     console.warn('[editor] get-editor-init failed:', err)
@@ -2100,7 +2102,13 @@ ipcOn('load-image', (payload) => {
     drawBase()
     setTool('rect')
   }
-  img.src = window.electronAPI?.fileToSrc(filePath) ?? `file://${filePath}`
+  if (window.__TAURI_INTERNALS__) {
+    ipcInvoke('read-image-as-data-url', { path: filePath })
+      .then(src => { img.src = src })
+      .catch(() => { img.src = `file://${filePath}` })
+  } else {
+    img.src = `file://${filePath}`
+  }
 })
 
 function fitCanvas() {

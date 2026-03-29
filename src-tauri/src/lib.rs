@@ -64,6 +64,7 @@ pub fn run() {
       open_image_file,
       new_canvas_create,
       get_editor_init,
+      read_image_as_data_url,
       save_image_as,
       get_brand_colors,
       save_brand_colors,
@@ -212,6 +213,31 @@ async fn get_editor_init(
     return Err("Editor init state not set".into());
   }
   Ok(payload.clone())
+}
+
+// ── Image loading (v1.1) ──────────────────────────────────────────────────
+// asset:// protocol is blocked from http://localhost devUrl origin (KM-006).
+// Read file in Rust and return as base64 data URL — works in dev and production.
+
+#[tauri::command]
+async fn read_image_as_data_url(path: String) -> Result<String, String> {
+  let bytes = std::fs::read(&path).map_err(|e| e.to_string())?;
+  let ext = std::path::Path::new(&path)
+    .extension()
+    .and_then(|e| e.to_str())
+    .unwrap_or("png")
+    .to_lowercase();
+  let mime = match ext.as_str() {
+    "jpg" | "jpeg" => "image/jpeg",
+    "gif"          => "image/gif",
+    "webp"         => "image/webp",
+    "bmp"          => "image/bmp",
+    "tiff" | "tif" => "image/tiff",
+    _              => "image/png",
+  };
+  use base64::Engine as _;
+  let encoded = base64::engine::general_purpose::STANDARD.encode(&bytes);
+  Ok(format!("data:{};base64,{}", mime, encoded))
 }
 
 // ── Editor IPC stubs (v1.0) ────────────────────────────────────────────────
