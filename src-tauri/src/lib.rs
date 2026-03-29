@@ -1,3 +1,4 @@
+// v0.8.1
 use tauri::Manager;
 use tauri::Emitter;
 use tauri::window::Color;
