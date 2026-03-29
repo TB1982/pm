@@ -153,16 +153,27 @@ An Electron-based desktop screenshot and annotation tool (Mac), developed in par
 4. **Push** to the appropriate branch.
 
 ```bash
-# Python 3 local preview
-python3 -m http.server 8080
-# Then open: http://localhost:8080
+# Python 3 local preview — always use port 8081 (8080 is reserved for Tauri dev)
+python3 -m http.server 8081
+# Then open: http://localhost:8081
 ```
+
+> **Port rule:** Port `8080` is permanently reserved for `cargo tauri dev` (set in `src-tauri/tauri.conf.json`). Never start the static site preview on 8080. If Tauri dev fails with "Address already in use", run `lsof -ti :8080 | xargs kill -9` first.
 
 ### Electron screenshot tool
 ```bash
 npm install       # first time only
-npm start         # launch the app
+npm start         # launch the app (Electron)
 ```
+
+### Tauri screenshot tool (Sprint 1 migration target)
+```bash
+# Kill port 8080 first if a static site preview was running there
+lsof -ti :8080 | xargs kill -9
+cargo tauri dev
+```
+
+> **Version clarity:** This repo contains **two separate runtimes** — Electron (`npm start`) and Tauri (`cargo tauri dev`). Always confirm which version you are testing before running. Never use `npm start` to test Tauri behaviour.
 
 ---
 
@@ -183,7 +194,7 @@ See `SDD-mac-screenshot-tool.md` § 10.1 「Tauri 開發順序約束」for the f
 Every feature or bug fix must follow this sequence in order. Do not start the next stage until the current one is complete.
 
 ```
-DoR → SDD → DoD → TDD → Code → Verify → ✅ Done
+DoR → SDD → DoD → TDD → Explore → Code → Verify → ✅ Done
 ```
 
 ### Stage 1 — Definition of Ready (DoR)
@@ -204,14 +215,25 @@ Once DoR passes, document first:
 2. **Write TDD test cases** — add `- [ ]` cases to SDD § 5 covering all acceptance criteria from DoR.
 3. **Confirm DoD** — all four conditions below must be achievable for this feature before coding starts.
 
-### Stage 3 — Code
+### Stage 3 — Architecture Exploration (before any code)
+
+Before writing a single line, use the Explore agent to map out all files relevant to the feature:
+
+- Which HTML files load which JS files
+- Window properties (size, frameless, alwaysOnTop, transparent)
+- IPC channels involved (names, directions, payloads)
+- CSS structure that affects layout
+
+**Do not start implementation until this map is complete.** Skipping this step causes blind guessing and repeated wrong turns.
+
+### Stage 4 — Code
 
 Implement the feature. Trilingual must be handled in the same session as the code:
 - `src/i18n.js` — add key to **all three**: `zh`, `en`, `ja`
 - `src/editor.html` — wire `data-i18n*` attribute; never hardcode any language string in HTML
 - `src/editor.js` / `src/renderer.js` — use `t('key')`; never interpolate string literals
 
-### Stage 4 — Verify (TDD sign-off)
+### Stage 5 — Verify (TDD sign-off)
 
 Run through every `- [ ]` case added in Stage 2. Mark `[x]` only after passing. Do not move to the next feature until all cases are `[x]`.
 

@@ -20,7 +20,7 @@ const helpModal  = document.getElementById('helpModal')
 const modalClose = document.getElementById('modalClose')
 
 helpBtn.addEventListener('click', async () => {
-  await expandForModal(560, 480)
+  await expandForModal(520, 480)
   helpModal.classList.remove('hidden')
 })
 
@@ -227,7 +227,7 @@ document.getElementById('btnWhiteboard').addEventListener('click', e => {
 })
 
 // ─── New canvas modal (toolbar) ────────────────────────────────────────────────
-const NC_MODAL_W = 480
+const NC_MODAL_W = 520
 const NC_MODAL_H = 360
 
 const newCanvasModal      = document.getElementById('newCanvasModal')
@@ -286,13 +286,14 @@ let selectedOutputDir = null
 let batchRunning     = false
 let warnPreemptive   = false   // true = warning shown before "開始轉換" was clicked
 let wmImgFilePath    = null
-let wmPosition       = 'southeast'
+let wmTextPosition   = 'southeast'
+let wmImgPosition    = 'southeast'
 
 const batchModal = document.getElementById('batchModal')
 
 document.getElementById('btnBatch').addEventListener('click', async e => {
   setToolbarActive(e.currentTarget)
-  await expandForModal(560, 620)
+  await expandForModal(520, 620)
   batchModal.classList.remove('hidden')
 })
 
@@ -480,12 +481,28 @@ document.getElementById('wmImgSelectBtn').addEventListener('click', async () => 
   }
 })
 
-document.getElementById('wmGrid').addEventListener('click', (e) => {
+// 色塊按鈕：點擊色塊 → 觸發隱藏的 color input；顏色變更 → 同步色塊背景
+const wmTextColorSwatch = document.getElementById('wmTextColorSwatch')
+const wmTextColorInput  = document.getElementById('wmTextColor')
+wmTextColorSwatch.addEventListener('click', () => wmTextColorInput.click())
+wmTextColorInput.addEventListener('input', () => {
+  wmTextColorSwatch.style.background = wmTextColorInput.value
+})
+
+document.getElementById('wmTextGrid').addEventListener('click', (e) => {
   const cell = e.target.closest('.wm-cell')
   if (!cell) return
-  document.querySelectorAll('.wm-cell').forEach(c => c.classList.remove('active'))
+  document.querySelectorAll('#wmTextGrid .wm-cell').forEach(c => c.classList.remove('active'))
   cell.classList.add('active')
-  wmPosition = cell.dataset.pos
+  wmTextPosition = cell.dataset.pos
+})
+
+document.getElementById('wmImgGrid').addEventListener('click', (e) => {
+  const cell = e.target.closest('.wm-cell')
+  if (!cell) return
+  document.querySelectorAll('#wmImgGrid .wm-cell').forEach(c => c.classList.remove('active'))
+  cell.classList.add('active')
+  wmImgPosition = cell.dataset.pos
 })
 
 // ── Same-format warning ─────────────────────────────────────────────────────
@@ -590,6 +607,26 @@ async function runConversion(files) {
     return
   }
 
+  // Watermark validation
+  const wmEnabled = document.getElementById('batchWatermarkCheck').checked
+  if (wmEnabled) {
+    const textOn = document.getElementById('wmTextCheck').checked
+    const imgOn  = document.getElementById('wmImgCheck').checked
+
+    if (textOn && !document.getElementById('wmText').value.trim()) {
+      showToast(t('toast_wm_text_empty'), true)
+      return
+    }
+    if (imgOn && !wmImgFilePath) {
+      showToast(t('toast_wm_img_missing'), true)
+      return
+    }
+    if (textOn && imgOn && wmTextPosition === wmImgPosition) {
+      showToast(t('toast_wm_conflict'), true)
+      return
+    }
+  }
+
   batchRunning = true
   const startBtn = document.getElementById('batchStartBtn')
   startBtn.disabled = true
@@ -636,23 +673,24 @@ async function runConversion(files) {
   const outputMode      = document.querySelector('input[name="outputMode"]:checked').value
   const deleteOriginals = document.getElementById('batchDeleteCheck').checked
 
-  const wmEnabled = document.getElementById('batchWatermarkCheck').checked
-  const watermark = wmEnabled ? {
+  const wmEnabledFinal = document.getElementById('batchWatermarkCheck').checked
+  const watermark = wmEnabledFinal ? {
     text: {
       enabled:  document.getElementById('wmTextCheck').checked,
       content:  document.getElementById('wmText').value.trim(),
       size:     parseInt(document.getElementById('wmTextSize').value, 10) || 32,
       color:    document.getElementById('wmTextColor').value,
-      opacity:  parseInt(document.getElementById('wmTextOpacity').value, 10) || 80
+      opacity:  parseInt(document.getElementById('wmTextOpacity').value, 10) || 80,
+      position: wmTextPosition
     },
     img: {
       enabled:     document.getElementById('wmImgCheck').checked,
       path:        wmImgFilePath,
       sizePercent: parseInt(document.getElementById('wmImgSize').value, 10) || 20,
-      opacity:     parseInt(document.getElementById('wmImgOpacity').value, 10) || 80
+      opacity:     parseInt(document.getElementById('wmImgOpacity').value, 10) || 80,
+      position:    wmImgPosition
     },
-    position: wmPosition,
-    margin:   parseInt(document.getElementById('wmMargin').value, 10) || 20
+    margin: parseInt(document.getElementById('wmMargin').value, 10) || 20
   } : null
 
   const results = await ipcInvoke('batch-convert', {

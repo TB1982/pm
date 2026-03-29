@@ -394,7 +394,7 @@ ipcMain.handle('batch-convert', async (event, {
 
         // 文字浮水印
         if (watermark.text?.enabled && watermark.text.content) {
-          const { x, y, anchor } = wmCalcTextPos(watermark.position, imgW, imgH, watermark.margin, watermark.text.size)
+          const { x, y, anchor } = wmCalcTextPos(watermark.text.position, imgW, imgH, watermark.margin, watermark.text.size)
           const opacity = (watermark.text.opacity / 100).toFixed(2)
           const svgText = `<svg xmlns="http://www.w3.org/2000/svg" width="${imgW}" height="${imgH}"><text x="${x}" y="${y}" font-size="${watermark.text.size}" fill="${escapeXml(watermark.text.color)}" opacity="${opacity}" text-anchor="${anchor}" font-family="Arial,sans-serif" font-weight="bold">${escapeXml(watermark.text.content)}</text></svg>`
           overlays.push({ input: Buffer.from(svgText), top: 0, left: 0 })
@@ -417,7 +417,7 @@ ipcMain.handle('batch-convert', async (event, {
             raw: { width: rawInfo.width, height: rawInfo.height, channels: 4 }
           }).png().toBuffer()
           const logoMeta = await sharp(logoBuf).metadata()
-          const { top, left } = wmCalcImgOffset(watermark.position, imgW, imgH, logoMeta.width, logoMeta.height, watermark.margin)
+          const { top, left } = wmCalcImgOffset(watermark.img.position, imgW, imgH, logoMeta.width, logoMeta.height, watermark.margin)
           overlays.push({ input: logoBuf, top, left, blend: 'over' })
         }
 
@@ -1150,8 +1150,10 @@ ipcMain.handle('privacy-scan', (_, { dataURL }) => {
 
 ipcMain.on('start-drag-export', (event, { dataURL }) => {
   try {
-    const base64  = dataURL.replace(/^data:image\/\w+;base64,/, '')
-    const tmpPath = path.join(os.tmpdir(), `export-${Date.now()}.png`)
+    const mimeMatch = dataURL.match(/^data:image\/(\w+);base64,/)
+    const ext      = mimeMatch ? mimeMatch[1].replace('jpeg', 'jpg') : 'png'
+    const base64   = dataURL.replace(/^data:image\/\w+;base64,/, '')
+    const tmpPath  = path.join(os.tmpdir(), `export-${Date.now()}.${ext}`)
     fs.writeFileSync(tmpPath, Buffer.from(base64, 'base64'))
     const icon = nativeImage.createFromPath(tmpPath).resize({ width: 64, height: 64 })
     event.sender.startDrag({ file: tmpPath, icon })

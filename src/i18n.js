@@ -78,6 +78,10 @@ const STRINGS = {
     batch_wm_img_size:    '寬度佔比',
     batch_wm_position:    '位置',
     batch_wm_margin:      '邊距',
+    batch_wm_preview:     '預覽圖片',
+    toast_wm_conflict:    '文字與圖片浮水印位置相同，請各自選擇不同位置',
+    toast_wm_text_empty:  '已勾選文字浮水印，但尚未輸入文字',
+    toast_wm_img_missing: '已勾選圖片浮水印，但尚未選取圖片',
 
     // ── Toast messages (renderer) ────────────────────────────────
     toast_copied: (w, h) => `已複製到剪貼簿  ${w} × ${h} px`,
@@ -490,6 +494,10 @@ const STRINGS = {
     batch_wm_img_size:    'Width %',
     batch_wm_position:    'Position',
     batch_wm_margin:      'Margin',
+    batch_wm_preview:     'Image Preview',
+    toast_wm_conflict:    'Text and image watermarks share the same position — please choose different positions',
+    toast_wm_text_empty:  'Text watermark is enabled but no text has been entered',
+    toast_wm_img_missing: 'Image watermark is enabled but no image has been selected',
 
     // ── Toast messages (renderer) ────────────────────────────────
     toast_copied: (w, h) => `Copied to clipboard  ${w} × ${h} px`,
@@ -902,6 +910,10 @@ const STRINGS = {
     batch_wm_img_size:    '幅の割合',
     batch_wm_position:    '位置',
     batch_wm_margin:      '余白',
+    batch_wm_preview:     '画像プレビュー',
+    toast_wm_conflict:    'テキストと画像の透かし位置が同じです。それぞれ異なる位置を選択してください',
+    toast_wm_text_empty:  'テキスト透かしが有効ですが、テキストが入力されていません',
+    toast_wm_img_missing: '画像透かしが有効ですが、画像が選択されていません',
 
     // ── Toast messages (renderer) ────────────────────────────────
     toast_copied: (w, h) => `クリップボードにコピーしました  ${w} × ${h} px`,
