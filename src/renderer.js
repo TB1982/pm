@@ -13,6 +13,13 @@ function collapseToToolbar() {
   ipcInvoke('resize-to-toolbar')
 }
 
+function closeAllModals() {
+  batchModal.classList.add('hidden')
+  newCanvasModal.classList.add('hidden')
+  helpModal.classList.add('hidden')
+  windowPickerModal.classList.add('hidden')
+}
+
 // ─── Help modal ───────────────────────────────────────────────────────────────
 
 const helpBtn    = document.getElementById('helpBtn')
@@ -20,9 +27,7 @@ const helpModal  = document.getElementById('helpModal')
 const modalClose = document.getElementById('modalClose')
 
 helpBtn.addEventListener('click', async () => {
-  if (!batchRunning) batchModal.classList.add('hidden')
-  newCanvasModal.classList.add('hidden')
-  windowPickerModal.classList.add('hidden')
+  closeAllModals()
   await expandForModal(520, 530)
   helpModal.classList.remove('hidden')
 })
@@ -146,6 +151,7 @@ async function doWindow() {
     windowPickerGrid.appendChild(card)
   })
 
+  closeAllModals()
   await expandForModal(760, 540)
   windowPickerModal.classList.remove('hidden')
 }
@@ -250,6 +256,7 @@ const newCanvasModalClose = document.getElementById('newCanvasModalClose')
 let ncTransparent = false
 
 async function showNewCanvasModal() {
+  closeAllModals()
   await expandForModal(NC_MODAL_W, NC_MODAL_H)
   newCanvasModal.classList.remove('hidden')
 }
@@ -300,6 +307,7 @@ const batchModal = document.getElementById('batchModal')
 
 document.getElementById('btnBatch').addEventListener('click', async e => {
   setToolbarActive(e.currentTarget)
+  closeAllModals()
   await expandForModal(520, 620)
   batchModal.classList.remove('hidden')
 })
