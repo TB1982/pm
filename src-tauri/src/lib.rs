@@ -172,17 +172,34 @@ async fn new_canvas_create(
 }
 
 fn open_editor_window(app: &tauri::AppHandle) -> Result<(), String> {
-  // If an editor window is already open, close it first (only one editor at a time)
+  // Close any existing editor first (only one editor at a time)
   if let Some(existing) = app.get_webview_window("editor") {
     existing.close().map_err(|e| e.to_string())?;
   }
-  tauri::WebviewWindowBuilder::new(app, "editor", tauri::WebviewUrl::App("editor.html".into()))
+
+  // Hide toolbar while editor is open
+  if let Some(toolbar) = app.get_webview_window("toolbar") {
+    toolbar.hide().map_err(|e| e.to_string())?;
+  }
+
+  let editor = tauri::WebviewWindowBuilder::new(app, "editor", tauri::WebviewUrl::App("editor.html".into()))
     .title("VAS Editor")
     .inner_size(1200.0, 800.0)
     .min_inner_size(800.0, 600.0)
     .resizable(true)
     .build()
     .map_err(|e| e.to_string())?;
+
+  // Restore toolbar when editor is closed
+  let app_handle = app.clone();
+  editor.on_window_event(move |event| {
+    if let tauri::WindowEvent::Destroyed = event {
+      if let Some(toolbar) = app_handle.get_webview_window("toolbar") {
+        let _ = toolbar.show();
+      }
+    }
+  });
+
   Ok(())
 }
 
