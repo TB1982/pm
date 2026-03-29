@@ -19,6 +19,7 @@
 | v0.6 | 2026-03-28 | 浮水印 UI 重構：文字 / 圖片各自獨立 9-grid 位置；同位置衝突偵測（toast + 阻擋）；圖片預覽空間保留 |
 | v0.7 | 2026-03-29 | S1-03 浮水印 TDD 全部完工（[x]）；工具列拖曳把手 hover 移入 Wishlist（WKWebView non-key window 限制）；Sprint 1 範疇收斂為「完全恢復 Toolbar」（S1-01 / S1-02 / S1-03）；新增 § 9.4 阻礙決策日誌 |
 | v0.8 | 2026-03-29 | 新增操作手冊連結（? modal 頂部按鈕）；記錄 WKWebView 開發坑（§ 10）；發現 modal 互斥 bug，補入 S1-01 TDD |
+| v0.9 | 2026-03-30 | § 10 重構為 Lessons Learned Register（KM-001~005）；新增 KM-003 外部 CSS 快取、KM-004 透明視窗黑線框、KM-005 toolbar 接縫圓角；modal 互斥修復（closeAllModals）；白板 modal scrollbar 修復（NC_MODAL_H 420）；toolbar-overlay 視覺一體化（深色背景 + backdrop-filter + 接縫圓角同步）|
 
 ---
 
@@ -373,33 +374,142 @@ PNG / JPG / WebP / GIF / BMP / TIFF
 
 ---
 
-## 10. Tauri 血淚開發紀錄
+## 10. Tauri / WKWebView 開發 Lessons Learned Register
 
-> 本節記錄 Tauri + WKWebView 開發中踩過的坑，供未來 Sprint 參考。每條附根本原因與解法。
-
-### 坑 1 — WKWebView HTTP 快取極度頑固（2026-03-29）
-
-**症狀：** CSS / JS / HTML 改完推上去，重啟 `cargo tauri dev` 後 WebView 仍顯示舊版內容，`curl` 確認 server 有新版，但 WebView 就是不更新。
-
-**根本原因：** WKWebView 對 HTTP 資源做持久快取，存活於 app 重啟之間。清除 `~/Library/Application Support/com.tb1982.vas`、`~/Library/Caches/com.tb1982.vas`、`~/Library/WebKit` 均無效。
-
-**解法：**
-1. **換 port**：WKWebView 快取以 URL origin 為 key，換 port 就等於全新 origin，舊快取完全無效。目前 Tauri dev 固定使用 port 8085。
-2. **自製 no-cache dev server**（`src-tauri/dev-server.py`）：每個 HTTP 回應加上 `Cache-Control: no-store`，根治快取問題。前者是一次性繞過，後者是永久解法。
-
-**教訓：** Python 內建 `http.server` 會送 `Last-Modified` 並接受 `If-Modified-Since`，WKWebView 會據此回 304，不重新抓檔。必須用自製 server 強制送 no-store。
+> **本節定位：** 記錄 Tauri + WKWebView 開發中已驗證的技術知識，供未來 Sprint 的 Claude 快速取得前人經驗。每條記錄均經過實際踩雷與修復驗證，非推測性內容。
+>
+> **閱讀對象：** 接手本專案開發的 AI 助理（Claude 或其他）。假設讀者具備基礎 Web 開發知識，但對 WKWebView / macOS 視窗系統可能不熟悉。
 
 ---
 
-### 坑 2 — WebKit `<button>` 預設樣式鎖死字型（2026-03-29）
+### KM-001 — WKWebView HTTP 快取持久化
 
-**症狀：** `<button>` 套了 CSS class，`font-size`、`font-family` 完全無效，`-webkit-appearance: none` 也救不了。
+| 欄位 | 內容 |
+|------|------|
+| 日期 | 2026-03-29 |
+| 類別 | Tauri / WKWebView 環境行為 |
+| 影響範圍 | dev 模式下所有前端資源（HTML / CSS / JS）|
 
-**根本原因：** WKWebView 的 user-agent stylesheet 對 `<button>` 的字型設定優先度高於 author stylesheet，即使加了 `-webkit-appearance: none` 仍部分保留。
+**情境：**
+Tauri dev 模式下修改前端資源後重啟 `cargo tauri dev`，WKWebView 仍顯示舊版內容。`curl http://localhost:8085/styles.css` 確認 server 已回傳新版，但 WebView 視而不見。手動清除 `~/Library/Application Support/com.tb1982.vas`、`~/Library/Caches/com.tb1982.vas`、`~/Library/WebKit` 均無效。
 
-**解法：** 在 HTML 元素上直接加 `style="font-size:15px;font-family:inherit;"` inline style。inline style 優先度高於 user-agent stylesheet，一定有效。
+**根因：**
+WKWebView 對 HTTP 資源做持久快取，以 **URL origin（scheme + host + port）** 為 key，存活於 app 程序重啟之間。Python 內建 `http.server` 會送 `Last-Modified` 並接受 `If-Modified-Since`，WKWebView 據此回 304 Not Modified，不重新抓檔。
 
-**教訓：** 凡是原生表單元素（`<button>`, `<input>`, `<select>`），字型相關屬性一律用 inline style 設定，不要只靠 CSS class。
+**解法：**
+1. **一次性繞過**：換 port（8080 → 8085）。新 origin = 全新快取空間，立即生效。
+2. **永久解法**：自製 no-cache dev server（`src-tauri/dev-server.py`），每個 HTTP 回應強制加上 `Cache-Control: no-store`，從根本阻止快取寫入。
+
+**未來指引：**
+- 修改前端資源後發現 WebView 不更新，**第一步先確認是否為快取問題**，不要花時間找 code bug。
+- 開發環境應始終使用 `dev-server.py` 啟動（已寫入 `tauri.conf.json` 的 `beforeDevCommand`），正常情況下不應再遇到此問題。
+- 若 `dev-server.py` 意外未啟動，症狀是 WebView 載入失敗（非顯示舊版），兩者可區分。
+
+---
+
+### KM-002 — WebKit 原生表單元素字型鎖死
+
+| 欄位 | 內容 |
+|------|------|
+| 日期 | 2026-03-29 |
+| 類別 | WKWebView CSS 渲染 |
+| 影響範圍 | `<button>`、`<input>`、`<select>` 等原生表單元素 |
+
+**情境：**
+為 `<button>` 套用 CSS class 設定 `font-size` 與 `font-family`，完全無效。加上 `-webkit-appearance: none` 後仍無改善。
+
+**根因：**
+WKWebView 的 user-agent stylesheet 對原生表單元素的字型屬性優先度高於 author stylesheet。`-webkit-appearance: none` 可移除元素的原生外觀，但**無法解除字型屬性的繼承鎖定**。
+
+**解法：**
+在 HTML 元素上直接加 inline style：`style="font-size:15px;font-family:inherit;"`。Inline style 的優先度（specificity）高於 user-agent stylesheet，必定生效。
+
+**未來指引：**
+- 凡原生表單元素（`<button>`、`<input>`、`<select>`）的字型相關屬性（`font-size`、`font-family`、`font-weight`），**一律用 inline style 設定**，CSS class 不可靠。
+- 其他視覺屬性（background、border、padding）用 CSS class 仍然正常，只有字型有此限制。
+
+---
+
+### KM-003 — 外部 CSS 修改不被 WKWebView 載入
+
+| 欄位 | 內容 |
+|------|------|
+| 日期 | 2026-03-30 |
+| 類別 | WKWebView CSS 渲染 |
+| 影響範圍 | `<link rel="stylesheet">` 載入的外部 CSS 檔案 |
+
+**情境：**
+修改 `styles.css`，加入新 CSS 規則，重啟 `cargo tauri dev` 後規則完全沒有出現。同一次 commit 中的 JS 修改（`renderer.js`）正常生效，HTML 也正常，只有 CSS 不動。`dev-server.py` 已送 `Cache-Control: no-store`。
+
+**根因：**
+WKWebView 對 **CSS stylesheet 有獨立的渲染快取層**，與 HTTP 快取分開。即使 HTTP 層不快取（no-store），WKWebView 內部的 style sheet compiler 仍可能重用已解析的 stylesheet，導致新規則不生效。此現象在 CSS 規則為「修改既有屬性值」（如 `background: transparent` 改為 `background: rgba(...)`）時尤其明顯。
+
+**解法：**
+將需要修改的 CSS 規則改寫為 HTML `<head>` 內的 inline `<style>` block，並加上 `!important`。HTML 文件本身不受 stylesheet 快取影響，inline style 優先度也高於外部 stylesheet。
+
+```html
+<style>
+  /* WKWebView CSS cache bypass */
+  .affected-class { property: value !important; }
+</style>
+```
+
+**未來指引：**
+- 修改 `styles.css` 後發現無效，**不要繼續反覆調整 styles.css**。改用 inline `<style>` + `!important` 驗證，確認正確後再決定是否回寫 styles.css。
+- 長期解法（尚未實作）：`<link rel="stylesheet" href="styles.css?v=N">` 版本號 cache busting，每次修改 CSS 時遞增 `N`，強制 WKWebView 視為全新資源。
+- Rust 原始碼有異動時，Rust recompile 會建立全新 WKWebView 實例，此時 CSS 快取確定清除。純 CSS 修改不會觸發 Rust recompile，是問題根源。
+
+---
+
+### KM-004 — macOS 透明視窗展開時出現矩形黑線框
+
+| 欄位 | 內容 |
+|------|------|
+| 日期 | 2026-03-30 |
+| 類別 | macOS / Tauri 視窗渲染 |
+| 影響範圍 | 所有 modal 展開（視窗高度從 68px 增加時）|
+
+**情境：**
+工具列本身（68px）顯示正常，無黑線。當任何 modal 展開使視窗高度增加（如 420px）後，視窗上方與下方出現細黑線框，視窗縮回 68px 後消失。
+
+**根因：**
+`tauri.conf.json` 設定 `"macOSPrivateApi": true` 使視窗真正透明，`"shadow": true` 使 macOS 的系統陰影沿 **alpha channel 邊界**繪製（而非矩形邊界）。展開後 modal-overlay 預設為 `background: transparent`，造成視窗的不透明區域只有 toolbar（68px），其餘透明。macOS 系統在透明區域的視窗邊界仍會繪製極細的 window outline，成為可見的黑線。
+
+**解法：**
+給 modal-overlay 加上與 toolbar 相同的深色背景（`rgba(28, 28, 30, 0.88)`）及 `backdrop-filter: blur(24px)`，使展開區域同樣為不透明，macOS 系統陰影隨之沿整體輪廓繪製，黑線消失。
+
+注意：此 CSS 修改需透過 inline `<style>` 方式生效（見 KM-003）。
+
+**未來指引：**
+- 透明 Tauri 視窗展開時出現邊框或黑線，**優先排查 alpha channel**：是否有大面積透明區域在視窗邊界？
+- 解法方向：讓展開區域有深色背景（不透明），而非嘗試用 CSS 消除系統繪製的邊框——後者屬於 macOS 系統行為，CSS 無法干預。
+- `macOSPrivateApi: true` + `shadow: true` 是目前工具列膠囊形陰影正常顯示的必要設定，**不要修改這兩個值**。
+
+---
+
+### KM-005 — Toolbar 與 Modal Overlay 接縫圓角不連續
+
+| 欄位 | 內容 |
+|------|------|
+| 日期 | 2026-03-30 |
+| 類別 | UI 組合 / CSS 渲染 |
+| 影響範圍 | 任何 modal 展開時 toolbar 底部接縫 |
+
+**情境：**
+toolbar 有 `border-radius: 16px`（四角皆圓），modal-overlay 緊接在 toolbar 正下方。overlay 的頂部是直角，與 toolbar 圓角底部之間的三角透明缺口露出桌面，視覺上像「沒接好」。
+
+**根因：**
+toolbar 的 `border-radius: 16px` 在底部兩角產生向內裁切的透明三角區域。overlay 從 `top: 68px` 開始，頂部邊緣是直角，無法填滿 toolbar 圓角裁切出的三角空隙。兩個獨立元素的圓角方向在接縫處衝突。
+
+**解法：**
+用 JS 在 modal 開啟 / 關閉時同步切換 toolbar 的 `border-radius`：
+
+- modal 開啟（`closeAllModals()` 內）：`toolbar.classList.add('modal-open')` → CSS `.toolbar.modal-open { border-radius: 16px 16px 0 0 }` 使底部變直角
+- modal 關閉（`collapseToToolbar()` 內）：`toolbar.classList.remove('modal-open')` → 還原膠囊形
+
+**未來指引：**
+- 任何需要「兩個獨立元素視覺連續」的場景（如 panel 展開、drawer 打開），都應考慮用 JS class toggling 同步調整邊界元素的圓角，而非純 CSS 靜態定義。
+- `closeAllModals()` 與 `collapseToToolbar()` 是所有 modal 開關的唯一出入口，未來新增 modal 只需確保呼叫這兩個函式，接縫邏輯自動覆蓋。
 
 ---
 
