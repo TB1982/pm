@@ -225,7 +225,7 @@
 
             <div class="mt-8">
                 <h2 class="text-sm font-semibold tracking-widest text-white/30 uppercase mb-4" data-lang-key="toolbarLabel">Capture Toolbar</h2>
-                <img src="img/vastoolbar.png" alt="VAS 截圖工具列：全螢幕、視窗、矩形、延遲、開啟、批次轉等功能按鈕" class="mx-auto rounded-2xl shadow-xl max-w-[85%] md:max-w-[50%]" loading="lazy" style="box-shadow: 0 8px 40px rgba(0,0,0,0.4); margin-bottom: -24px;">
+                <img id="toolbarImg" src="img/vastoolbar.png" alt="VAS 截圖工具列：全螢幕、視窗、矩形、延遲、開啟、批次轉等功能按鈕" class="mx-auto rounded-2xl shadow-xl max-w-[85%] md:max-w-[50%]" loading="lazy" style="box-shadow: 0 8px 40px rgba(0,0,0,0.4); margin-bottom: -24px;">
             </div>
 
         </section>
@@ -591,6 +591,9 @@
                 if (trans[key] !== undefined) el.innerHTML = trans[key];
             });
             document.getElementById('surveyFormLink').href = surveyLinks[lang];
+            const toolbarImg = document.getElementById('toolbarImg');
+            toolbarImg.src = lang === 'zh' ? 'img/vastoolbar.png' : 'img/vastoolbar-en.png';
+            toolbarImg.alt = lang === 'zh' ? 'VAS 截圖工具列：全螢幕、視窗、矩形、延遲、開啟、批次轉等功能按鈕' : 'VAS capture toolbar: fullscreen, window, rectangle, delay, open, batch convert buttons';
             langZhBtn.classList.toggle('active', lang === 'zh');
             langEnBtn.classList.toggle('active', lang === 'en');
             langZhBtn.setAttribute('aria-pressed', lang === 'zh');

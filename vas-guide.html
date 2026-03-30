@@ -216,7 +216,7 @@
       </div>
 
       <div class="flex justify-center mb-6">
-        <img src="img/vastoolbar.png" alt="VAS 浮動工作列" class="capturebar-img" loading="lazy">
+        <img id="toolbarImg" src="img/vastoolbar.png" alt="VAS 浮動工作列" class="capturebar-img" loading="lazy">
       </div>
 
       <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-3">
@@ -265,7 +265,7 @@
         <p class="text-white/45 text-sm mt-1" data-lang-key="s1Sub">三個主要操作區域</p>
       </div>
       <img id="editorImg" src="img/vas-guide-editor-zh.png" alt="VAS 編輯器介面說明圖" class="guide-img" loading="lazy">
-      <div class="grid md:grid-cols-3 gap-4 mt-6">
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
         <div class="glass-card rounded-xl p-4">
           <div class="text-sm font-semibold text-purple-300 mb-1" data-lang-key="zone1Name">主要功能選單</div>
           <p class="text-white/50 text-xs leading-relaxed" data-lang-key="zone1Desc">左側垂直工具列。點選工具後，畫布上的操作會對應切換。目前使用中的工具以藍色高亮標示。</p>
@@ -275,8 +275,12 @@
           <p class="text-white/50 text-xs leading-relaxed" data-lang-key="zone2Desc">頂部工具列。依所選工具動態更換內容，可調整顏色、粗細、不透明度、線條樣式等屬性。</p>
         </div>
         <div class="glass-card rounded-xl p-4">
-          <div class="text-sm font-semibold text-green-300 mb-1" data-lang-key="zone3Name">動態匯出按鈕</div>
+          <div class="text-sm font-semibold text-cyan-300 mb-1" data-lang-key="zone3Name">動態匯出按鈕</div>
           <p class="text-white/50 text-xs leading-relaxed" data-lang-key="zone3Desc">右下角浮動按鈕。可拖曳移動位置，對應左右撇子不同使用習慣。完成後拖曳至目標應用程式即可匯出。</p>
+        </div>
+        <div class="glass-card rounded-xl p-4">
+          <div class="text-sm font-semibold text-green-300 mb-1" data-lang-key="zone4Name">狀態列與磁吸工具開關</div>
+          <p class="text-white/50 text-xs leading-relaxed" data-lang-key="zone4Desc">左下角狀態列。顯示目前縮放比例與畫布尺寸，並提供磁吸對齊開關，可快速啟用或關閉智慧磁吸功能。</p>
         </div>
       </div>
     </section>
@@ -403,13 +407,15 @@
         heroSub: '浮動工作列、編輯器介面與左側工具列功能說明',
         s1Label: 'Section 02',
         s1Title: '編輯器介面',
-        s1Sub: '三個主要操作區域',
+        s1Sub: '四個主要操作區域',
         zone1Name: '主要功能選單',
         zone1Desc: '左側垂直工具列。點選工具後，畫布上的操作會對應切換。目前使用中的工具以藍色高亮標示。',
         zone2Name: '子屬性調整選單',
         zone2Desc: '頂部工具列。依所選工具動態更換內容，可調整顏色、粗細、不透明度、線條樣式等屬性。',
         zone3Name: '動態匯出按鈕',
         zone3Desc: '右下角浮動按鈕。可拖曳移動位置，對應左右撇子不同使用習慣。完成後拖曳至目標應用程式即可匯出。',
+        zone4Name: '狀態列與磁吸工具開關',
+        zone4Desc: '左下角狀態列。顯示目前縮放比例與畫布尺寸，並提供磁吸對齊開關，可快速啟用或關閉智慧磁吸功能。',
         s2Label: 'Section 03',
         s2Title: '左側工具列',
         s2Sub: '所有標注工具一覽，括號內為快捷鍵',
@@ -446,13 +452,15 @@
         heroSub: 'Capture toolbar, editor interface, and tool menu explained',
         s1Label: 'Section 02',
         s1Title: 'Editor Interface',
-        s1Sub: 'Three main working areas',
+        s1Sub: 'Four main working areas',
         zone1Name: 'Main Tool Menu',
         zone1Desc: 'The vertical toolbar on the left. Select a tool to switch the canvas interaction mode. The active tool is highlighted in blue.',
         zone2Name: 'Property Options Panel',
         zone2Desc: 'The top toolbar. Updates dynamically based on the selected tool — adjust colour, stroke width, opacity, line style, and more.',
         zone3Name: 'Floating Export Button',
         zone3Desc: 'The floating button in the bottom-right corner. Drag it to reposition for left- or right-handed use. When finished, drag it to any target app to export.',
+        zone4Name: 'Status Bar & Smart Guides Toggle',
+        zone4Desc: 'The status bar in the bottom-left corner. Displays current zoom level and canvas size, with a toggle to enable or disable smart magnetic snapping.',
         s2Label: 'Section 03',
         s2Title: 'Tool Menu',
         s2Sub: 'All annotation tools at a glance — keyboard shortcut in parentheses',
@@ -500,6 +508,9 @@
       document.getElementById('editorImg').alt = lang === 'zh'
         ? 'VAS 編輯器介面說明圖'
         : 'VAS editor interface diagram';
+      const toolbarImg = document.getElementById('toolbarImg');
+      toolbarImg.src = lang === 'zh' ? 'img/vastoolbar.png' : 'img/vastoolbar-en.png';
+      toolbarImg.alt = lang === 'zh' ? 'VAS 浮動工作列' : 'VAS capture toolbar';
       langZhBtn.classList.toggle('active', lang === 'zh');
       langEnBtn.classList.toggle('active', lang === 'en');
       langZhBtn.setAttribute('aria-pressed', lang === 'zh');
