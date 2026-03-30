@@ -261,7 +261,7 @@
                 transition: transform .4s ease, filter .4s ease;
             " onmouseenter="this.style.transform='perspective(1400px) rotateX(1deg)'; this.style.filter='drop-shadow(0 0 64px rgba(196,113,245,0.35)) drop-shadow(0 0 120px rgba(79,172,254,0.18)) drop-shadow(0 56px 90px rgba(0,0,0,0.8))';"
                onmouseleave="this.style.transform='perspective(1400px) rotateX(4deg)'; this.style.filter='drop-shadow(0 0 48px rgba(196,113,245,0.22)) drop-shadow(0 0 96px rgba(79,172,254,0.12)) drop-shadow(0 48px 80px rgba(0,0,0,0.75))';">
-                <img src="img/vasframe.png" alt="VAS 編輯器介面：深色工作區，左側工具列，頂部選項列，中央為圖片標注畫布" class="w-full block" loading="lazy">
+                <img id="vasframeImg" src="img/vasframe-zh.png" alt="VAS 編輯器介面：深色工作區，左側工具列，頂部選項列，中央為圖片標注畫布" class="w-full block" loading="lazy">
             </div>
         </section>
 
@@ -411,6 +411,46 @@
             </div>
         </section>
 
+        <!-- Changelog -->
+        <section class="container mx-auto px-6 py-16 max-w-2xl" aria-labelledby="changelog-heading">
+            <div class="divider mx-auto mb-8"></div>
+            <h2 id="changelog-heading" class="text-xl font-bold mb-2 text-white/60 tracking-widest uppercase text-sm text-center" data-lang-key="changelogTitle">Changelog</h2>
+            <p class="text-white/40 text-sm text-center mb-10" data-lang-key="changelogSub">一萬次迭代而非一萬個小時</p>
+
+            <div class="space-y-6">
+                <!-- v3.44.0 -->
+                <div class="glass-section rounded-2xl p-6 border border-white/10">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-xs font-bold bg-green-400 text-black px-2 py-0.5 rounded-full">NEW</span>
+                        <span class="text-white font-bold">v3.44.0</span>
+                        <span class="text-white/30 text-xs" data-lang-key="cl44date">2026-03-31</span>
+                    </div>
+                    <ul class="space-y-2 text-white/60 text-sm" data-lang-key="cl44items">
+                        <li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>工具列 Modal 位置跳動與累積偏移根治</span></li>
+                        <li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>修復三種截圖模式（全螢幕 / 視窗 / 矩形）全部失效</span></li>
+                        <li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>OCR 與隱私掃描功能修復</span></li>
+                        <li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>標號與文字工具尺寸縮放一致性修正</span></li>
+                        <li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">⌨️</span><span>方向鍵微調物件位置（Arrow nudge）</span></li>
+                        <li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🧹</span><span>拖曳匯出暫存檔 60 秒後自動清除</span></li>
+                        <li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🔒</span><span>安全性修補（brace-expansion 漏洞）</span></li>
+                    </ul>
+                </div>
+
+                <!-- v3.43.0 -->
+                <div class="glass-section rounded-2xl p-6 border border-white/10">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-white font-bold">v3.43.0</span>
+                        <span class="text-white/30 text-xs" data-lang-key="cl43date">2026-03-29</span>
+                    </div>
+                    <ul class="space-y-2 text-white/60 text-sm" data-lang-key="cl43items">
+                        <li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>首次公開發布</span></li>
+                        <li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>截圖 + 標注 + OCR + 隱私掃描 + 批次轉檔全功能收錄</span></li>
+                        <li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>智慧磁吸、物件旋轉、QR Code 掃描、貝茲曲線箭頭</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <!-- Footer -->
@@ -496,7 +536,13 @@
                 surveyTitle: '填問卷，換早鳥優惠碼',
                 surveyDesc: '6 道題，每一道都值得好好想想。你的答案直接影響 Tauri 版的功能優先順序——Tauri 版推出時，我們會同步以 E-mail 寄送早鳥優惠碼。',
                 surveyBtn: '前往填寫問卷',
-                surveyNote: 'E-mail 僅用於 Tauri 版推出時寄送優惠碼，不作其他用途。'
+                surveyNote: 'E-mail 僅用於 Tauri 版推出時寄送優惠碼，不作其他用途。',
+                changelogTitle: 'Changelog',
+                changelogSub: '一萬次迭代而非一萬個小時',
+                cl44date: '2026-03-31',
+                cl44items: '<li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>工具列 Modal 位置跳動與累積偏移根治</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>修復三種截圖模式（全螢幕 / 視窗 / 矩形）全部失效</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>OCR 與隱私掃描功能修復</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>標號與文字工具尺寸縮放一致性修正</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">⌨️</span><span>方向鍵微調物件位置（Arrow nudge）</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🧹</span><span>拖曳匯出暫存檔 60 秒後自動清除</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🔒</span><span>安全性修補（brace-expansion 漏洞）</span></li>',
+                cl43date: '2026-03-29',
+                cl43items: '<li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>首次公開發布</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>截圖 + 標注 + OCR + 隱私掃描 + 批次轉檔全功能收錄</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>智慧磁吸、物件旋轉、QR Code 掃描、貝茲曲線箭頭</span></li>'
             },
             en: {
                 backLabel: 'Deep Holding Project',
@@ -574,7 +620,13 @@
                 surveyTitle: 'Fill the Survey, Get Early Bird Code',
                 surveyDesc: '6 questions — each one worth a moment of thought. Your answers directly shape what lands in the Tauri version first. When Tauri launches, we\'ll send your early bird discount code by email.',
                 surveyBtn: 'Take the Survey',
-                surveyNote: 'Your email will only be used to send the discount code when Tauri launches — nothing else.'
+                surveyNote: 'Your email will only be used to send the discount code when Tauri launches — nothing else.',
+                changelogTitle: 'Changelog',
+                changelogSub: '10,000 iterations, not 10,000 hours.',
+                cl44date: '2026-03-31',
+                cl44items: '<li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>Toolbar modal position drift & accumulation — fixed</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>All three capture modes (fullscreen / window / rectangle) restored</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>OCR and privacy scan fixed</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>Number stamp & text tool scale consistency fixed</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">⌨️</span><span>Arrow key nudge for selected objects</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🧹</span><span>Drag export temp files auto-deleted after 60 seconds</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🔒</span><span>Security patch (brace-expansion vulnerability)</span></li>',
+                cl43date: '2026-03-29',
+                cl43items: '<li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>Initial public release</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>Full feature set: capture, annotation, OCR, privacy scan, batch convert</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>Smart snap, object rotation, QR Code scan, Bezier curve arrows</span></li>'
             }
         };
 
@@ -597,6 +649,9 @@
             const toolbarImg = document.getElementById('toolbarImg');
             toolbarImg.src = lang === 'zh' ? 'img/vastoolbar.png' : 'img/vastoolbar-en.png';
             toolbarImg.alt = lang === 'zh' ? 'VAS 截圖工具列：全螢幕、視窗、矩形、延遲、開啟、批次轉等功能按鈕' : 'VAS capture toolbar: fullscreen, window, rectangle, delay, open, batch convert buttons';
+            const vasframeImg = document.getElementById('vasframeImg');
+            vasframeImg.src = lang === 'zh' ? 'img/vasframe-zh.png' : 'img/vasframe-en.png';
+            vasframeImg.alt = lang === 'zh' ? 'VAS 編輯器介面：深色工作區，左側工具列，頂部選項列，中央為圖片標注畫布' : 'VAS editor interface: dark workspace with left toolbar, top options bar, and annotation canvas';
             langZhBtn.classList.toggle('active', lang === 'zh');
             langEnBtn.classList.toggle('active', lang === 'en');
             langZhBtn.setAttribute('aria-pressed', lang === 'zh');
