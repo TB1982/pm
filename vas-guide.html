@@ -177,6 +177,42 @@
       padding: 4px 8px;
     }
 
+    /* ── Version Badges ── */
+    .badge-tauri {
+      flex-shrink: 0;
+      font-size: 0.55rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: linear-gradient(135deg, rgba(139,92,246,0.35), rgba(196,113,245,0.25));
+      border: 1px solid rgba(139,92,246,0.45);
+      color: #d4aaff;
+      text-transform: uppercase;
+    }
+    .badge-section-coming {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.4);
+    }
+    .modal-tauri-notice {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: rgba(139,92,246,0.12);
+      border: 1px solid rgba(139,92,246,0.25);
+      margin-bottom: 4px;
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: 0.01ms !important;
@@ -315,7 +351,7 @@
             <p class="text-xs text-white/30 font-semibold mb-2 uppercase tracking-widest" data-lang-key="grpDraw">繪圖</p>
             <div class="flex flex-wrap gap-2">
               <span class="tool-chip" data-tool="pen" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">✒</span><span data-lang-key="t_pen">筆型</span><span class="key">P</span></span>
-              <span class="tool-chip" data-tool="line" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">╱</span><span data-lang-key="t_line">線條</span><span class="key">L</span></span>
+              <span class="tool-chip" data-tool="line" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">╱</span><span data-lang-key="t_line">線條</span><span class="badge-tauri">Tauri</span><span class="key">L</span></span>
               <span class="tool-chip" data-tool="rect" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">▭</span><span data-lang-key="t_rect">矩形框</span><span class="key">R</span></span>
               <span class="tool-chip" data-tool="fillrect" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">■</span><span data-lang-key="t_fillrect">色塊</span><span class="key">B</span></span>
             </div>
@@ -327,7 +363,7 @@
             <div class="flex flex-wrap gap-2">
               <span class="tool-chip" data-tool="text" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">T</span><span data-lang-key="t_text">文字</span><span class="key">T</span></span>
               <span class="tool-chip" data-tool="number" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">①</span><span data-lang-key="t_number">編號</span><span class="key">N</span></span>
-              <span class="tool-chip" data-tool="stamp" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">☺</span><span data-lang-key="t_symbol">符號印章</span><span class="key">U</span></span>
+              <span class="tool-chip" data-tool="stamp" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">☺</span><span data-lang-key="t_symbol">符號印章</span><span class="badge-tauri">Tauri</span><span class="key">U</span></span>
               <span class="tool-chip" data-tool="mosaic" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">⬜</span><span data-lang-key="t_mosaic">馬賽克／模糊</span><span class="key">X</span></span>
             </div>
           </div>
@@ -337,7 +373,7 @@
             <p class="text-xs text-white/30 font-semibold mb-2 uppercase tracking-widest" data-lang-key="grpPrivacy">隱私與遮蔽</p>
             <div class="flex flex-wrap gap-2">
               <span class="tool-chip" data-tool="ocr" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">文</span><span data-lang-key="t_ocr">OCR 文字辨識</span><span class="key">G</span></span>
-              <span class="tool-chip" data-tool="privacy" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon" style="text-decoration:line-through">文</span><span data-lang-key="t_privacy">隱私遮蔽</span><span class="key">K</span></span>
+              <span class="tool-chip" data-tool="privacy" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon" style="text-decoration:line-through">文</span><span data-lang-key="t_privacy">隱私遮蔽</span><span class="badge-tauri">Tauri</span><span class="key">K</span></span>
             </div>
           </div>
 
@@ -372,6 +408,60 @@
             </div>
           </div>
 
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- Section 4: Custom Global Shortcuts -->
+    <section aria-labelledby="s4-heading">
+      <div class="mb-6">
+        <p class="section-label mb-2" data-lang-key="s4Label">Section 04</p>
+        <div class="flex items-center gap-3 flex-wrap mb-1">
+          <h2 id="s4-heading" class="text-xl font-semibold" data-lang-key="s4Title">自定義全域快捷鍵</h2>
+          <span class="badge-section-coming">🔒 <span data-lang-key="s4ComingBadge">即將推出 · Tauri 版</span></span>
+        </div>
+        <p class="text-white/45 text-sm" data-lang-key="s4Sub">在偏好設定中為每個工具指定專屬的全域快捷鍵</p>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 opacity-70">
+        <p class="text-white/60 text-sm mb-6 leading-relaxed" data-lang-key="kb_intro">
+          開啟偏好設定 → 快捷鍵，點選工具後直接按下目標按鍵組合即可錄製。不合規的組合會即時反白提示。
+        </p>
+
+        <p class="modal-section-label mb-3" data-lang-key="kb_rules_title">按鍵接受規則</p>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs">
+            <thead>
+              <tr class="border-b border-white/10">
+                <th class="text-left py-2 pr-6 font-semibold text-white/35 w-2/5" data-lang-key="kb_col_input">輸入</th>
+                <th class="text-left py-2 font-semibold text-white/35" data-lang-key="kb_col_result">結果</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-b border-white/5">
+                <td class="py-2.5 pr-6 font-mono text-white/65">F1 … F12</td>
+                <td class="py-2.5 text-white/55"><span class="text-green-400 mr-1.5" aria-hidden="true">✓</span><span data-lang-key="kb_r1">F 鍵不需修飾鍵</span></td>
+              </tr>
+              <tr class="border-b border-white/5">
+                <td class="py-2.5 pr-6 font-mono text-white/65">⇧F5、⌘⌃A</td>
+                <td class="py-2.5 text-white/55"><span class="text-green-400 mr-1.5" aria-hidden="true">✓</span><span data-lang-key="kb_r2">含修飾鍵的組合</span></td>
+              </tr>
+              <tr class="border-b border-white/5">
+                <td class="py-2.5 pr-6 font-mono text-white/65">A、1、X</td>
+                <td class="py-2.5 text-white/55"><span class="text-red-400 mr-1.5" aria-hidden="true">✕</span><span data-lang-key="kb_r3">裸字母或數字</span></td>
+              </tr>
+              <tr class="border-b border-white/5">
+                <td class="py-2.5 pr-6 font-mono text-white/65">⌘Q、⌘W、⌘H、⌘,</td>
+                <td class="py-2.5 text-white/55"><span class="text-red-400 mr-1.5" aria-hidden="true">✕</span><span data-lang-key="kb_r4">系統保留快捷鍵</span></td>
+              </tr>
+              <tr>
+                <td class="py-2.5 pr-6 font-mono text-white/65">單獨 ⌘ / ⌃ / ⌥</td>
+                <td class="py-2.5 text-white/55"><span class="text-red-400 mr-1.5" aria-hidden="true">✕</span><span data-lang-key="kb_r5">單獨修飾鍵</span></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </section>
@@ -443,6 +533,18 @@
         cb_whiteboard: '白板', cb_whiteboard_desc: '開啟空白畫布，從零開始建立圖像內容。',
         cb_batch: '批次轉', cb_batch_desc: '拖入多張圖片，一次轉換為 JPG、PNG、WebP 等格式，支援浮水印與尺寸調整。',
         cb_help: '說明', cb_help_desc: '顯示快捷鍵一覽，並提供操作手冊連結。',
+        s4Label: 'Section 04',
+        s4Title: '自定義全域快捷鍵',
+        s4ComingBadge: '即將推出 · Tauri 版',
+        s4Sub: '在偏好設定中為每個工具指定專屬的全域快捷鍵',
+        kb_intro: '開啟偏好設定 → 快捷鍵，點選工具後直接按下目標按鍵組合即可錄製。不合規的組合會即時反白提示。',
+        kb_rules_title: '按鍵接受規則',
+        kb_col_input: '輸入', kb_col_result: '結果',
+        kb_r1: 'F 鍵不需修飾鍵',
+        kb_r2: '含修飾鍵的組合',
+        kb_r3: '裸字母或數字',
+        kb_r4: '系統保留快捷鍵',
+        kb_r5: '單獨修飾鍵',
         footer: '由 GitHub 部署　｜　Claude Code 傾力打造　｜　<a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a> 最後更新於 2026'
       },
       en: {
@@ -488,6 +590,18 @@
         cb_whiteboard: 'Whiteboard', cb_whiteboard_desc: 'Open a blank canvas to build visuals from scratch.',
         cb_batch: 'Batch', cb_batch_desc: 'Drop multiple images to convert them all at once to JPG, PNG, WebP, and more — with watermark and resize support.',
         cb_help: 'Help', cb_help_desc: 'Show keyboard shortcuts and link to this user guide.',
+        s4Label: 'Section 04',
+        s4Title: 'Custom Global Shortcuts',
+        s4ComingBadge: 'Coming Soon · Tauri',
+        s4Sub: 'Assign a dedicated global shortcut to any tool in Preferences',
+        kb_intro: 'Open Preferences → Shortcuts, select a tool, then press your desired key combination to record it. Invalid combinations are highlighted immediately.',
+        kb_rules_title: 'Key Acceptance Rules',
+        kb_col_input: 'Input', kb_col_result: 'Result',
+        kb_r1: 'F-keys require no modifier',
+        kb_r2: 'Any combination with a modifier key',
+        kb_r3: 'Bare letter or number',
+        kb_r4: 'System-reserved shortcut',
+        kb_r5: 'Modifier key alone',
         footer: 'Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by <a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a>'
       }
     };
@@ -572,8 +686,9 @@
             </div>`
         },
         line: {
-          icon: '╱', title: '線條', shortcut: 'L',
+          icon: '╱', title: '線條', shortcut: 'L', tauri: true,
           body: `
+            <div class="modal-tauri-notice"><span class="badge-tauri">Tauri</span><span class="text-white/50 text-xs">兩點貝茲曲線為 Tauri 版獨有功能</span></div>
             <div>
               <p class="modal-section-label">操作方式</p>
               <ul class="space-y-1 text-white/55 text-xs leading-relaxed list-disc list-inside">
@@ -667,8 +782,9 @@
             </div>`
         },
         stamp: {
-          icon: '☺', title: '符號印章', shortcut: 'U',
+          icon: '☺', title: '符號印章', shortcut: 'U', tauri: true,
           body: `
+            <div class="modal-tauri-notice"><span class="badge-tauri">Tauri</span><span class="text-white/50 text-xs">漸層色填充為 Tauri 版獨有功能</span></div>
             <div>
               <p class="modal-section-label">操作方式</p>
               <p class="text-white/55 text-xs leading-relaxed">點選畫布放置符號；從浮動面板挑選符號類別與圖案。</p>
@@ -719,8 +835,9 @@
             </div>`
         },
         privacy: {
-          icon: '文', title: '隱私遮蔽', shortcut: 'K',
+          icon: '文', title: '隱私遮蔽', shortcut: 'K', tauri: true,
           body: `
+            <div class="modal-tauri-notice"><span class="badge-tauri">Tauri</span><span class="text-white/50 text-xs">五層偵測（含日文）為 Tauri 版獨有功能</span></div>
             <div>
               <p class="modal-section-label">操作方式</p>
               <ul class="space-y-1 text-white/55 text-xs leading-relaxed list-disc list-inside">
@@ -934,8 +1051,9 @@
             </div>`
         },
         line: {
-          icon: '╱', title: 'Line', shortcut: 'L',
+          icon: '╱', title: 'Line', shortcut: 'L', tauri: true,
           body: `
+            <div class="modal-tauri-notice"><span class="badge-tauri">Tauri</span><span class="text-white/50 text-xs">Two-point Bézier curve is a Tauri-exclusive feature</span></div>
             <div>
               <p class="modal-section-label">How to use</p>
               <ul class="space-y-1 text-white/55 text-xs leading-relaxed list-disc list-inside">
@@ -1029,8 +1147,9 @@
             </div>`
         },
         stamp: {
-          icon: '☺', title: 'Symbol Stamp', shortcut: 'U',
+          icon: '☺', title: 'Symbol Stamp', shortcut: 'U', tauri: true,
           body: `
+            <div class="modal-tauri-notice"><span class="badge-tauri">Tauri</span><span class="text-white/50 text-xs">Gradient fill is a Tauri-exclusive feature</span></div>
             <div>
               <p class="modal-section-label">How to use</p>
               <p class="text-white/55 text-xs leading-relaxed">Click canvas to place a symbol; choose category and glyph from the floating panel.</p>
@@ -1081,8 +1200,9 @@
             </div>`
         },
         privacy: {
-          icon: '文', title: 'Privacy Mask', shortcut: 'K',
+          icon: '文', title: 'Privacy Mask', shortcut: 'K', tauri: true,
           body: `
+            <div class="modal-tauri-notice"><span class="badge-tauri">Tauri</span><span class="text-white/50 text-xs">5-layer detection (incl. Japanese) is a Tauri-exclusive feature</span></div>
             <div>
               <p class="modal-section-label">How to use</p>
               <ul class="space-y-1 text-white/55 text-xs leading-relaxed list-disc list-inside">
