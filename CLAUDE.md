@@ -13,7 +13,7 @@ This section exists to prevent AI assistants from fabricating personal or projec
 | Project name (ZH) | 深握計畫 |
 | Project name (EN) | Deep Holding Project |
 | Site canonical URL | `https://tb1982.github.io/pm/` |
-| Copyright year | 2024–present |
+| Copyright year | 2025–present |
 | GitHub account | `tb1982` — `https://github.com/tb1982` |
 | LinkedIn | `https://www.linkedin.com/in/yingtzuliu` |
 | Instagram | `https://www.instagram.com/liuyingtzu` |
@@ -68,8 +68,7 @@ https://www.instagram.com/liuyingtzu
 - **Primary language:** Traditional Chinese (zh-Hant), with English alternatives via JS toggle
 - **Hosting:** Served directly as static files (no web server configuration required)
 
-### Active sub-project: Mac 截圖與圖片編輯工具
-An Electron-based desktop screenshot and annotation tool (Mac), developed in parallel within this repo. Its files live under `src/` and `main.js`. See the dedicated spec document `SDD-mac-screenshot-tool.md` for full requirements. This sub-project uses its own commit conventions (see **Commit Messages** below).
+> **VAS sub-project:** The Mac screenshot and annotation tool (VAS) has been migrated to a separate private repository at `https://github.com/TB1982/vas-desktop`. All VAS development happens there. This repo retains `vas.html` and `vas-guide.html` as public-facing product pages only.
 
 ---
 
@@ -100,16 +99,12 @@ An Electron-based desktop screenshot and annotation tool (Mac), developed in par
 ├── pmpro.html              # PM Pro version
 ├── libraryflashnew.html    # Library (new flash style)
 ├── libraryflashold.html    # Library (old flash style)
+├── vas.html                # VAS product page (public-facing)
+├── vas-guide.html          # VAS user guide (public-facing)
 │
-├── SDD-mac-screenshot-tool.md  # Spec + TDD for the Electron screenshot tool
-├── main.js                 # Electron main process (screenshot tool)
-├── src/
-│   ├── editor.js           # Editor annotation logic
-│   ├── editor.html         # Editor UI
-│   ├── editor.css          # Editor styles
-│   ├── renderer.js         # Renderer process helpers
-│   └── overlay.js          # Capture overlay
-│
+├── img/                    # Shared image assets
+│   ├── vas-guide-*.png     # VAS guide screenshots (used by vas-guide.html)
+│   └── ...
 ├── pmchatgptpro_files/     # Resource bundle for pmchatgptpro.html
 ├── libraryflashold_files/  # Resource bundle for libraryflashold.html (CSS/JS)
 ├── pmpro_files/            # Resource bundle for pmpro.html
@@ -121,7 +116,6 @@ An Electron-based desktop screenshot and annotation tool (Mac), developed in par
 
 ## Tech Stack
 
-### Static site (深握計畫)
 | Layer      | Technology                                       |
 |------------|--------------------------------------------------|
 | Markup     | HTML5                                            |
@@ -133,56 +127,40 @@ An Electron-based desktop screenshot and annotation tool (Mac), developed in par
 
 **No build tools. No package manager. No TypeScript. No testing framework.**
 
-### Electron screenshot tool
-| Layer      | Technology                                       |
-|------------|--------------------------------------------------|
-| App shell  | Electron                                         |
-| UI         | HTML / CSS / Vanilla JavaScript                  |
-| Image I/O  | Sharp (Node.js)                                  |
-| Web capture| Playwright (Chromium)                            |
-| Annotation | HTML5 Canvas                                     |
-
 ---
 
 ## Development Workflow
 
-### Static site
 1. **Edit** the relevant `.html` file directly.
 2. **Preview** by opening the file in a browser (`file://` or local HTTP server).
 3. **Commit** changes with a descriptive message (in Traditional Chinese).
 4. **Push** to the appropriate branch.
 
 ```bash
-# Python 3 local preview
-python3 -m http.server 8080
-# Then open: http://localhost:8080
+# Python 3 local preview — always use port 8081
+python3 -m http.server 8081
+# Then open: http://localhost:8081
 ```
 
-### Electron screenshot tool
+### Static Page QC Checklist
+
+**Trigger:** After any change to user-visible content on a static HTML page (text, layout, links, interactive behaviour). Pure metadata or comment-only edits are exempt.
+
+After pushing, Claude provides the following ready-to-run command and asks Nova to verify:
+
 ```bash
-npm install       # first time only
-npm start         # launch the app
+git pull origin <branch-name> && python3 -m http.server 8081
+# Then open: http://localhost:8081/<filename>.html
 ```
 
----
+**Nova checks (in order):**
+1. Content is correct and matches intent
+2. Language toggle (中 → EN → 中) — all strings switch, no missing keys
+3. All external links open the correct destination
+4. RWD — narrow browser to ~375 px, confirm no horizontal overflow
+5. EN version — text renders correctly, layout holds
 
-## Document Sync Rules (SDD / TDD) — Mandatory
-
-These rules apply to the Electron screenshot tool sub-project.
-
-### Bug fixed → update TDD
-Every bug fixed during testing must have a corresponding test case added to **Section 5** of `SDD-mac-screenshot-tool.md`, covering:
-- The steps that reproduce the bug
-- The correct behaviour after the fix
-
-### New feature added → update SDD + TDD
-Every new feature (including behaviour not previously in the spec) must trigger a sync update to `SDD-mac-screenshot-tool.md`:
-1. **Bump the version number** (`版本：` field) and add a `vX.X — summary` line to **變更紀錄**
-2. **Update the relevant feature section** with full spec details
-3. **Add test cases** to Section 5 in `- [ ]` format
-
-### Commit order
-Code changes and document updates should be **committed in the same session**. Use separate commits with clear prefixes: `feat:`, `fix:`, `docs(SDD):`.
+Claude reminds Nova to check **both RWD and EN version** every time, even when the change appears zh-only.
 
 ---
 
@@ -193,6 +171,26 @@ Code changes and document updates should be **committed in the same session**. U
 - Most pages implement a **bilingual toggle** (`中` / `EN`) via JavaScript.
 - Translation strings are stored inline using `data-lang-key` attributes and a JS translation map.
 - When editing content, maintain both language variants unless instructed otherwise.
+- **Use `臺` not `台`** — always write `臺灣`, `臺北`, `臺中`, etc. This is the author's explicit preference and the orthographically correct Traditional Chinese form. Never silently substitute `台`.
+
+### data-lang-key — Two Places to Update
+
+Every element with a `data-lang-key` attribute has **two independent sources of text**:
+
+1. **The hardcoded text node inside the HTML element** — what the browser renders before JavaScript runs (and what the user sees if JS is slow or the page is viewed as a static file).
+2. **The matching key in the JS translation map** (`zh` and `en` objects) — what the bilingual toggle swaps in at runtime.
+
+**Both must be updated together.** Updating only the JS map leaves the default (Chinese) display unchanged. Updating only the HTML leaves the English toggle broken.
+
+```html
+<!-- Example: both the HTML text node AND the zh/en map entries must match -->
+<p data-lang-key="cb_rect_desc">拖曳選取任意矩形區域後截圖。</p>
+
+zh: { cb_rect_desc: '拖曳選取任意矩形區域後截圖。' }
+en: { cb_rect_desc: 'Drag to select any rectangular region to capture.' }
+```
+
+> **Root cause of the bug (2026-03-29):** Edited only the `zh`/`en` map entries for `cb_rect_desc` but forgot the HTML text node — the card on screen showed the old text until the fix.
 
 ### Styling
 - **Tailwind CSS utility classes** are the primary styling mechanism.
@@ -210,16 +208,10 @@ Code changes and document updates should be **committed in the same session**. U
 
 ### Commit Messages
 
-**Static site:** Traditional Chinese, action-oriented.
+Traditional Chinese, action-oriented.
 ```
 更新手機版顯示數字大小
-```
-
-**Electron tool:** Conventional Commits with English prefix + Chinese description.
-```
-feat(E2): 新增文字多行換行支持
-fix(text): 修正選取範圍計算
-docs(SDD): v0.8 更新文字工具規格與 TDD 測試案例
+新增 vas-guide.html OCR 段落說明
 ```
 
 ---
@@ -235,8 +227,8 @@ docs(SDD): v0.8 更新文字工具規格與 TDD 測試案例
 | `deepholding.html` | Interactive canvas animation (standalone, complex JS) |
 | `mandal_chart.html` | Mandala grid chart — interactive tool |
 | `lottery.html` | Client-side lottery number picker |
-| `SDD-mac-screenshot-tool.md` | Full spec + TDD for the Electron screenshot tool |
-| `src/editor.js` | Core annotation logic (text, rect, line, number tools) |
+| `vas.html` | VAS product page — version string: search `迭代至 v` / `iterated together to v` |
+| `vas-guide.html` | VAS user guide — public-facing; screenshots in `img/vas-guide-*.png` |
 
 ---
 
@@ -267,12 +259,12 @@ Every `.html` file must include the following inside `<head>`:
 ```html
 <!-- Basic SEO -->
 <meta name="description" content="頁面摘要，100–160字元">
-<link rel="canonical" href="https://example.com/page.html">
+<link rel="canonical" href="https://tb1982.github.io/pm/page.html">
 <!-- Open Graph (social / AI preview) -->
 <meta property="og:title" content="頁面標題">
 <meta property="og:description" content="頁面摘要">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://example.com/page.html">
+<meta property="og:url" content="https://tb1982.github.io/pm/page.html">
 <meta property="og:locale" content="zh_TW">
 ```
 
@@ -288,7 +280,8 @@ Add a `<script type="application/ld+json">` block before `</body>` on key pages:
   "inLanguage": "zh-Hant",
   "author": {
     "@type": "Person",
-    "name": "作者名稱"
+    "name": "Nova",
+    "email": "babelon1882@gmail.com"
   }
 }
 </script>
@@ -359,22 +352,6 @@ document.documentElement.lang = isEnglish ? 'en' : 'zh-Hant';
 
 ---
 
-## AI Behaviour Rules
-
-- When editing content, **both Chinese and English variants must be updated simultaneously**. Never update one language without updating the other.
-- Do **not** introduce npm packages or local JS files to replace CDN dependencies (static site only).
-- Do **not** propose modifications to any file without reading it first.
-- When working on the Electron tool, follow the **Document Sync Rules** section above.
-- **Discuss before developing:** If there is any ambiguity about requirements, expected behaviour, or implementation approach, raise all questions and reach agreement with the user *before* writing or modifying code. Do not start implementation until the approach is confirmed.
-
----
-
-## Interaction Language
-- Communicate with the user in **Traditional Chinese**.
-- CLAUDE.md itself is written and maintained in **English**.
-
----
-
 ## Safety Rules — Destructive Actions
 
 **STOP and explicitly ask the user before executing any of the following:**
@@ -385,4 +362,8 @@ document.documentElement.lang = isEnglish ? 'en' : 'zh-Hant';
 - Dropping or truncating data of any kind
 - Running any command that cannot be undone in a single step
 
-**General principle:** If an action is **irreversible** or has a **blast radius beyond the current file**, pause and confirm with the user first. The cost of asking is zero. The cost of not asking can be everything.
+---
+
+## Interaction Language
+- Communicate with the user in **Traditional Chinese**.
+- CLAUDE.md itself is written and maintained in **English**.

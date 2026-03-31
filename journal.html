@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>一頁式好工作日誌</title>
+  <meta
+    name="description"
+    content="以逐題引導的方式完成每日反思，最後輸出成一頁式好工作日誌。"
+  >
+  <link rel="stylesheet" href="journal.css">
+</head>
+<body>
+  <main class="app-shell">
+    <section class="journal-experience">
+      <header class="topbar">
+        <div class="topbar-left">
+          <p class="kicker">One-Page Work Journal</p>
+          <div class="title-row">
+            <h1>一頁式好工作日誌</h1>
+            <a class="header-home-link" href="./index.html">返回首頁</a>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <label class="field field-date">
+            <span>日期</span>
+            <input id="journal-date" type="date">
+          </label>
+
+          <label class="field field-name">
+            <span>名字</span>
+            <input id="journal-name" type="text" placeholder="輸入名字">
+          </label>
+
+          <div class="presence-widget" aria-label="當下時間">
+            <span class="breathing-light" aria-hidden="true"></span>
+            <span class="clock" id="clock">00:00</span>
+          </div>
+
+          <button class="theme-toggle" id="theme-toggle" type="button" aria-label="切換深淺模式">
+            <span class="theme-toggle-track">
+              <span class="theme-toggle-thumb"></span>
+            </span>
+          </button>
+        </div>
+      </header>
+
+      <section class="scene">
+        <div class="lake-backdrop" aria-hidden="true">
+          <div class="firefly-field" id="firefly-field"></div>
+          <span class="lake-ring ring-a"></span>
+          <span class="lake-ring ring-b"></span>
+          <span class="lake-ring ring-c"></span>
+          <span class="lake-glow"></span>
+        </div>
+
+        <section class="stage is-active" id="intro-stage" data-stage="intro">
+          <div class="floating-card intro-card">
+            <p class="stage-label">今日反思儀式</p>
+            <h2>把今天交給四個問題，慢慢浮出答案。</h2>
+            <p class="stage-copy">
+              不用一次面對全部。每次只回答一題，讓今天的線索、推進、幫助與卡點，安靜地被看見。
+            </p>
+            <button class="primary-action" id="start-journal" type="button">開始</button>
+          </div>
+        </section>
+
+        <section class="stage" id="question-stage" data-stage="question" aria-live="polite">
+          <article class="floating-card question-card" id="question-card">
+            <div class="question-head">
+              <div>
+                <p class="stage-label" id="question-progress">1 / 4</p>
+                <h2 id="question-title">今天學到什麼？</h2>
+              </div>
+              <label class="image-button">
+                <input class="image-input" id="active-image-input" type="file" accept="image/*" multiple>
+                <span>加入圖片</span>
+              </label>
+            </div>
+
+            <textarea
+              class="question-text"
+              id="question-text"
+              placeholder="寫下今天新增的理解、發現或提醒。"
+            ></textarea>
+
+            <div class="question-images" id="question-images" aria-live="polite"></div>
+
+            <footer class="question-actions">
+              <button class="secondary-action" id="prev-question" type="button">上一題</button>
+              <div class="question-dots" id="question-dots" aria-hidden="true"></div>
+              <button class="primary-action" id="next-question" type="button">下一題</button>
+            </footer>
+          </article>
+        </section>
+
+        <section class="stage" id="summary-stage" data-stage="summary">
+          <div class="summary-shell">
+            <button class="close-summary-btn" id="close-summary" type="button" aria-label="收起總覽，欣賞背景">×</button>
+            <article class="floating-card summary-card">
+              <div class="summary-head">
+                <div>
+                  <p class="stage-label">完成總覽</p>
+                  <h2>今天的答案，已經浮成一頁。</h2>
+                </div>
+                <button class="secondary-action" id="back-to-questions" type="button">回去修改</button>
+              </div>
+
+              <section class="summary-board" id="journal-board" aria-label="一頁式好工作日誌總覽">
+                <header class="summary-meta">
+                  <div>
+                    <p class="summary-meta-label">日期</p>
+                    <p class="summary-meta-value" id="summary-date"></p>
+                  </div>
+                  <div>
+                    <p class="summary-meta-label">名字</p>
+                    <p class="summary-meta-value" id="summary-name"></p>
+                  </div>
+                  <div class="summary-presence">
+                    <span class="breathing-light" aria-hidden="true"></span>
+                    <span class="clock" id="summary-clock">00:00</span>
+                  </div>
+                </header>
+
+                <div class="summary-grid" id="summary-grid"></div>
+              </section>
+            </article>
+          </div>
+          <button class="reopen-summary-btn" id="reopen-summary" type="button" aria-label="重新展開總覽">
+            <span aria-hidden="true">◎</span> 重新打開
+          </button>
+        </section>
+      </section>
+    </section>
+
+    <button class="export-button" id="export-button" type="button">輸出 PNG</button>
+  </main>
+
+  <script src="journal.js"></script>
+
+  <footer style="margin-top: 2rem; padding: 2rem; text-align: center; font-size: 0.75rem; color: var(--muted); border-top: 1px solid var(--border); line-height: 2;">
+    <span style="white-space: nowrap;">由 GitHub 部署</span>　｜　<span style="white-space: nowrap;">Codex × Claude Code 傾力打造</span>　｜　<span style="white-space: nowrap;"><a href="mailto:babelon1882@gmail.com" style="color: inherit; text-decoration: none; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.6'" onmouseout="this.style.opacity='1'">Nova</a> 最後更新於 2026</span>
+  </footer>
+</body>
+</html>

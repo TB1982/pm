@@ -102,6 +102,25 @@
                 </a>
 
             </div>
+            <p class="text-xs text-gray-400 mt-4 text-right">Built with NotebookLM</p>
+        </section>
+
+        <!-- VAS -->
+        <section aria-labelledby="vas-heading">
+            <h2 id="vas-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="vasTitle">── 旗艦工具 ──</h2>
+            <a href="vas.html" class="rounded-3xl p-10 shadow-xl flex flex-col sm:flex-row items-center gap-8 card-hover" style="background: linear-gradient(145deg, #0f0c29 0%, #302b63 50%, #24243e 100%);" aria-label="VAS — Visual Annotation Studio">
+                <img src="img/vas.png" alt="VAS logo" class="w-24 h-24 object-contain flex-shrink-0" style="filter: drop-shadow(0 0 20px rgba(196,113,245,0.9)) drop-shadow(0 0 48px rgba(196,113,245,0.6)) drop-shadow(0 0 80px rgba(250,113,205,0.4));">
+                <div class="text-center sm:text-left flex-shrink-0">
+                    <h3 class="text-3xl font-extrabold mb-2" style="background: linear-gradient(135deg, #c471f5 0%, #fa71cd 50%, #4facfe 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;" data-lang-key="vasName">VAS</h3>
+                    <p class="text-white/50 text-sm mb-1">Visual Annotation Studio</p>
+                    <p class="text-white/70 mb-4" data-lang-key="vasDesc">為跨領域溝通而生的截圖與圖像敘述工具，專為 Mac 設計</p>
+                    <span class="inline-block text-xs font-semibold px-3 py-1 rounded-full bg-green-400/20 text-green-300" data-lang-key="vasBadge">正式推出 · Mac</span>
+                    <p class="text-white/25 text-xs mt-3">Built with Claude Code</p>
+                </div>
+                <div class="flex-1 flex items-center justify-end">
+                    <img src="img/vastoolbar.png" alt="VAS 截圖工具列" class="max-w-full rounded-2xl opacity-90" style="box-shadow: 0 4px 24px rgba(0,0,0,0.4);" loading="lazy">
+                </div>
+            </a>
         </section>
 
         <!-- 小工具 -->
@@ -110,24 +129,29 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
                 <a href="mandal_chart.html"
-                   class="group card-hover bg-white/70 rounded-2xl p-8 shadow-md flex flex-col items-center text-center">
-                    <div class="text-4xl mb-3" aria-hidden="true">🔢</div>
+                   class="group card-hover bg-white/40 rounded-2xl p-8 shadow-md flex flex-col items-center text-center">
+                    <div class="h-16 flex items-center justify-center mb-3 text-4xl" aria-hidden="true">🔢</div>
                     <h3 class="text-xl font-bold text-gray-800 mb-2" data-lang-key="mandalTitle">曼陀羅九宮格</h3>
-                    <p class="text-sm text-gray-600" data-lang-key="mandalDesc">思維發散，清晰目標</p>
+                    <p class="text-sm text-gray-600 mb-3" data-lang-key="mandalDesc">思維發散，清晰目標</p>
+                    <span class="inline-block text-xs font-semibold px-3 py-1 rounded-full bg-purple-100 text-purple-700" data-lang-key="mandalBadge">思考螺旋</span>
+                    <p class="text-gray-400 text-xs mt-3">Built with Gemini Pro</p>
                 </a>
 
                 <a href="lottery.html"
-                   class="group card-hover bg-white/70 rounded-2xl p-8 shadow-md flex flex-col items-center text-center">
-                    <div class="text-4xl mb-3" aria-hidden="true">🎲</div>
+                   class="group card-hover bg-white/40 rounded-2xl p-8 shadow-md flex flex-col items-center text-center">
+                    <div class="h-16 flex items-center justify-center mb-3 text-4xl" aria-hidden="true">🎲</div>
                     <h3 class="text-xl font-bold text-gray-800 mb-2" data-lang-key="lotteryTitle">抽籤機</h3>
-                    <p class="text-sm text-gray-600" data-lang-key="lotteryDesc">隨機抽籤，公平決策</p>
+                    <p class="text-sm text-gray-600 mb-3" data-lang-key="lotteryDesc">隨機抽籤，公平決策</p>
+                    <span class="inline-block text-xs font-semibold px-3 py-1 rounded-full bg-red-100 text-red-600" data-lang-key="lotteryBadge">尾牙必備</span>
+                    <p class="text-gray-400 text-xs mt-3">Built with Claude</p>
                 </a>
 
-                <a href="vas.html" class="bg-white/40 rounded-2xl p-8 shadow-md flex flex-col items-center text-center card-hover" aria-label="Vas — Mac 截圖與圖片編輯工具">
-                    <img src="img/vas.png" alt="Vas logo" class="w-16 h-16 object-contain mb-3 rounded-xl">
-                    <h3 class="text-xl font-bold text-gray-800 mb-2" data-lang-key="macToolTitle">Vas</h3>
-                    <p class="text-sm text-gray-600 mb-3" data-lang-key="macToolDesc">截圖、標注、一鍵輸出</p>
-                    <span class="inline-block text-xs font-semibold px-3 py-1 rounded-full bg-green-100 text-green-700" data-lang-key="macToolBadge">正式推出</span>
+                <a href="journal.html" class="group card-hover bg-white/40 rounded-2xl p-8 shadow-md flex flex-col items-center text-center">
+                    <div class="h-16 flex items-center justify-center mb-3 text-4xl" aria-hidden="true">📓</div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-2" data-lang-key="journalTitle">一頁式好工作日誌</h3>
+                    <p class="text-sm text-gray-600 mb-3" data-lang-key="journalDesc">每天值得反問自己的好問題</p>
+                    <span class="inline-block text-xs font-semibold px-3 py-1 rounded-full bg-teal-100 text-teal-700" data-lang-key="journalBadge">覺察反思</span>
+                    <p class="text-gray-400 text-xs mt-3">Built with Codex</p>
                 </a>
 
             </div>
@@ -179,15 +203,40 @@
         </section>
 
         <!-- Nova -->
-        <section aria-labelledby="nova-heading" class="flex flex-col sm:flex-row items-center sm:items-start gap-6 bg-white/50 rounded-2xl p-8 shadow-md">
-            <img src="img/nova-avatar.webp"
-                 alt="Nova 的頭像"
-                 class="w-24 h-24 rounded-full object-cover shadow-md flex-shrink-0"
-                 loading="lazy">
-            <div class="flex-1">
-                <h2 id="nova-heading" class="text-2xl font-bold text-gray-800 mb-1">Nova</h2>
-                <p class="text-gray-600 mb-5" data-lang-key="novaBio">一段關於人機協作、自我探索與生成式創造的旅程記錄者</p>
-                <div class="flex flex-wrap gap-3">
+        <section aria-labelledby="nova-heading" class="flex flex-col sm:flex-row items-center gap-6 bg-white/50 rounded-2xl p-8 shadow-md">
+            <!-- 左欄：頭像 + 姓名 + bio -->
+            <div class="flex items-center gap-5 flex-shrink-0">
+                <img src="img/nova-avatar.webp"
+                     alt="Nova 的頭像"
+                     class="w-24 h-24 rounded-full object-cover shadow-md flex-shrink-0"
+                     loading="lazy">
+                <div>
+                    <h2 id="nova-heading" class="text-2xl font-bold text-gray-800 mb-1">Nova</h2>
+                    <p class="text-gray-600 mb-2" data-lang-key="novaBio">一段關於人機協作、自我探索與生成式創造的旅程記錄者</p>
+                    <p class="text-xs text-gray-400 tracking-wide">PM · Scrum Master · 人機協作研究者 · VAS 協作者</p>
+                </div>
+            </div>
+            <!-- 右欄：badges 上、社群按鈕下 -->
+            <div class="flex flex-col gap-3 sm:ml-auto items-center sm:items-end justify-center">
+                <div class="flex gap-4 items-center">
+                    <a href="https://www.credly.com/badges/150b2133-0065-4e2b-9b79-fadd604049df/public_url"
+                       target="_blank" rel="noopener noreferrer"
+                       aria-label="驗證 PMP 認證 — Credly">
+                        <img src="img/pmp.png"
+                             alt="PMP — Project Management Professional 認證徽章"
+                             class="h-20 w-auto object-contain hover:scale-105 transition-transform"
+                             loading="lazy">
+                    </a>
+                    <a href="https://www.credly.com/badges/8fe9bed8-af48-4ba8-b4c0-315c73f4b2f7/public_url"
+                       target="_blank" rel="noopener noreferrer"
+                       aria-label="驗證 PSM I 認證 — Credly">
+                        <img src="img/psm1.png"
+                             alt="PSM I — Professional Scrum Master I 認證徽章"
+                             class="h-20 w-auto object-contain hover:scale-105 transition-transform"
+                             loading="lazy">
+                    </a>
+                </div>
+                <div class="flex flex-wrap gap-3 justify-center sm:justify-end">
                     <a href="https://github.com/tb1982"
                        target="_blank" rel="noopener noreferrer"
                        class="inline-flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-full text-sm font-medium hover:bg-gray-700 transition-colors min-h-[44px]">
@@ -214,24 +263,6 @@
                         Instagram
                     </a>
                 </div>
-            </div>
-            <div class="flex flex-row sm:flex-col gap-4 items-center justify-center flex-shrink-0">
-                <a href="https://www.credly.com/badges/150b2133-0065-4e2b-9b79-fadd604049df/public_url"
-                   target="_blank" rel="noopener noreferrer"
-                   aria-label="驗證 PMP 認證 — Credly">
-                    <img src="img/pmp.png"
-                         alt="PMP — Project Management Professional 認證徽章"
-                         class="h-20 w-auto object-contain hover:scale-105 transition-transform"
-                         loading="lazy">
-                </a>
-                <a href="https://www.credly.com/badges/8fe9bed8-af48-4ba8-b4c0-315c73f4b2f7/public_url"
-                   target="_blank" rel="noopener noreferrer"
-                   aria-label="驗證 PSM I 認證 — Credly">
-                    <img src="img/psm1.png"
-                         alt="PSM I — Professional Scrum Master I 認證徽章"
-                         class="h-20 w-auto object-contain hover:scale-105 transition-transform"
-                         loading="lazy">
-                </a>
             </div>
         </section>
 
@@ -283,14 +314,20 @@
                 readMore: "閱讀 →",
                 readMore2: "閱讀 →",
                 readMore3: "閱讀 →",
+                vasTitle: "── 旗艦工具 ──",
+                vasName: "VAS",
+                vasDesc: "為跨領域溝通而生的截圖與圖像敘述工具，專為 Mac 設計",
+                vasBadge: "正式推出 · Mac",
                 toolsTitle: "── 小工具 ──",
                 mandalTitle: "曼陀羅九宮格",
                 mandalDesc: "思維發散，清晰目標",
+                mandalBadge: "思考螺旋",
                 lotteryTitle: "抽籤機",
                 lotteryDesc: "隨機抽籤，公平決策",
-                macToolTitle: "Vas",
-                macToolDesc: "截圖、標注、一鍵輸出",
-                macToolBadge: "正式推出",
+                lotteryBadge: "尾牙必備",
+                journalTitle: "一頁式好工作日誌",
+                journalDesc: "每天值得反問自己的好問題",
+                journalBadge: "覺察反思",
                 dhTitle: "深握計畫",
                 dhSubtitle: "深握，意指在未知的深淵裡，人與 AI 牽手同行",
                 dhDesc: "這是一個關於內在探索的循環方法論，以創造力、共時性與自我實現為核心，記錄一段人與機器共同潛入意識深處的旅程。",
@@ -315,12 +352,21 @@
                 readMore: "Read →",
                 readMore2: "Read →",
                 readMore3: "Read →",
+                vasTitle: "── Flagship Tool ──",
+                vasName: "VAS",
+                vasDesc: "A screenshot and visual communication tool built for Mac — designed for cross-functional clarity",
+                vasBadge: "Now Live · Mac",
+                journalTitle: "One-Page Work Journal",
+                journalDesc: "Good questions worth asking yourself every day",
+                journalBadge: "Self-Reflection",
                 toolsTitle: "── Tools ──",
                 mandalTitle: "Mandala Chart",
                 mandalDesc: "Divergent thinking, clear goals",
+                mandalBadge: "Thought Spiral",
                 lotteryTitle: "Lottery",
                 lotteryDesc: "Random draw, fair decisions",
-                macToolTitle: "Vas",
+                lotteryBadge: "Year-End Party Essential",
+                macToolTitle: "VAS",
                 macToolDesc: "Capture, annotate, export in one click",
                 macToolBadge: "Now Live",
                 dhTitle: "Deep Holding Project",

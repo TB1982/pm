@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VAS — Visual Annotation Studio</title>
+    <link rel="icon" href="img/vas.ico" type="image/x-icon">
     <meta name="description" content="VAS 是一款專為 Mac 設計的截圖與圖像敘述工具。一站式匯聚標注、套版、OCR、批次轉檔，為跨領域溝通而生。">
     <link rel="canonical" href="https://tb1982.github.io/pm/vas.html">
     <meta property="og:title" content="VAS — Visual Annotation Studio">
@@ -70,6 +71,76 @@
             background: linear-gradient(90deg, #c471f5, #fa71cd);
             border-radius: 2px;
         }
+        /* ── Persona Tabs ── */
+        .tab-bar {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: none;
+        }
+        .tab-bar::-webkit-scrollbar { display: none; }
+        .tab-btn {
+            flex-shrink: 0;
+            padding: 10px 20px;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.10);
+            color: rgba(255,255,255,0.55);
+            white-space: nowrap;
+        }
+        .tab-btn:hover { background: rgba(255,255,255,0.10); color: rgba(255,255,255,0.80); }
+        .tab-btn.active {
+            background: linear-gradient(135deg, rgba(196,113,245,0.28), rgba(250,113,205,0.20));
+            border-color: rgba(196,113,245,0.45);
+            color: #e8b4ff;
+            font-weight: 600;
+        }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+        .persona-badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 14px;
+            border-radius: 999px;
+            margin-bottom: 16px;
+            background: rgba(196,113,245,0.15);
+            color: #d9a0ff;
+            border: 1px solid rgba(196,113,245,0.25);
+        }
+        .feat-item {
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            padding: 14px 16px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.07);
+            transition: background 0.2s;
+        }
+        .feat-item:hover { background: rgba(255,255,255,0.07); }
+        .feat-icon {
+            font-size: 1.4rem;
+            line-height: 1;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .feat-name {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.88);
+            margin-bottom: 3px;
+        }
+        .feat-desc {
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.42);
+            line-height: 1.5;
+        }
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
                 animation-duration: 0.01ms !important;
@@ -83,17 +154,17 @@
     <!-- Header -->
     <header class="sticky top-0 z-50 border-b border-white/10" style="background: rgba(15,12,41,0.85); backdrop-filter: blur(16px);">
         <div class="container mx-auto px-6 py-4 flex items-center justify-between">
-            <a href="index.html" class="text-white/60 hover:text-white transition-colors text-sm flex items-center gap-2" aria-label="返回深握計畫首頁">
+            <a href="index.html" class="flex-1 text-white/60 hover:text-white transition-colors text-sm flex items-center gap-2" aria-label="返回深握計畫首頁">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
                     <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
                 </svg>
                 <span data-lang-key="backLabel">深握計畫</span>
             </a>
             <div class="text-lg font-bold tracking-widest gradient-text">VAS</div>
-            <div class="lang-switcher flex items-center rounded-full p-1" style="background: rgba(255,255,255,0.08);" role="group" aria-label="語言切換">
+            <div class="flex-1 flex justify-end"><div class="lang-switcher flex items-center rounded-full p-1" style="background: rgba(255,255,255,0.08);" role="group" aria-label="語言切換">
                 <button id="lang-zh" class="active" aria-pressed="true">中</button>
                 <button id="lang-en" aria-pressed="false">EN</button>
-            </div>
+            </div></div>
         </div>
     </header>
 
@@ -106,7 +177,7 @@
             </div>
 
             <div class="flex justify-center mb-6">
-                <img src="img/vas.png" alt="VAS app icon" width="120" height="120" class="drop-shadow-2xl" style="filter: drop-shadow(0 0 32px rgba(196,113,245,0.5));">
+                <img src="img/vasweb.png" alt="VAS app icon" width="120" height="120" class="drop-shadow-2xl" style="filter: drop-shadow(0 0 32px rgba(196,113,245,0.5));">
             </div>
 
             <h1 id="hero-heading" class="text-5xl md:text-7xl font-extrabold tracking-tight mb-4">
@@ -120,16 +191,26 @@
             </p>
 
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <a href="https://github.com/TB1982/pm/releases/download/v0.1.0/Vas-0.1.0-arm64.dmg"
+                <div class="relative inline-block">
+                  <span class="absolute -top-2 -right-2 bg-green-400 text-black text-xs font-bold px-2 py-0.5 rounded-full z-10">NEW</span>
+                <a href="https://github.com/TB1982/pm/releases/download/v3.44.0/VAS-3.44.0-arm64.dmg"
                    class="download-btn inline-flex items-center gap-3 px-8 py-4 rounded-2xl font-semibold text-white text-lg min-h-[52px]"
-                   aria-label="下載 VAS v0.1.0 for Mac (Apple Silicon, DMG 格式)">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                        <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-                        <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                   download>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="27" height="27" fill="currentColor" aria-hidden="true">
+                        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
                     </svg>
-                    <span data-lang-key="downloadBtn">下載 for Mac</span>
+                    <span data-lang-key="downloadBtn">免費下載</span>
                 </a>
-                <a href="https://github.com/TB1982/pm/releases/tag/v0.1.0"
+                </div>
+                <a href="vas-guide.html"
+                   class="inline-flex items-center gap-2 px-6 py-4 rounded-2xl font-medium text-white min-h-[52px] min-w-[44px] transition-all"
+                   style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); border-radius: 1rem;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                        <path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811V2.828zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492V2.687zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783z"/>
+                    </svg>
+                    <span data-lang-key="guideBtn">操作手冊</span>
+                </a>
+                <a href="https://github.com/TB1982/pm/releases/tag/v3.44.0"
                    target="_blank" rel="noopener noreferrer"
                    class="inline-flex items-center gap-2 px-6 py-4 rounded-2xl font-medium text-white/70 hover:text-white transition-colors min-h-[52px]"
                    style="border: 1px solid rgba(255,255,255,0.15);">
@@ -141,25 +222,19 @@
                 </a>
             </div>
 
-            <p class="mt-5 text-xs text-white/30" data-lang-key="sysReq">
-                需要 macOS · Apple Silicon (arm64) · 113 MB
+            <p class="mt-5 text-xs font-medium" style="color: #c084fc;" data-lang-key="sysReq">
+                Electron 先行首發版 · 需要 macOS · Apple Silicon (arm64) · 已通過 Apple notarize 驗證
             </p>
 
-            <!-- Gatekeeper Notice -->
-            <div class="mt-8 mx-auto max-w-lg rounded-2xl px-6 py-5 text-left" style="background: rgba(196,113,245,0.08); border: 1px solid rgba(196,113,245,0.2);">
-                <p class="text-sm font-semibold text-white/70 mb-3" data-lang-key="gkTitle">⚠️ 第一次開啟 VAS</p>
-                <p class="text-xs text-white/45 mb-3" data-lang-key="gkDesc">
-                    macOS 可能顯示「無法開啟」。這是正常的安全機制，不代表檔案有問題。按照以下任一方式即可解決：
-                </p>
-                <ol class="text-xs text-white/55 space-y-1.5 list-decimal list-inside" data-lang-key="gkSteps">
-                    <li><strong class="text-white/70">右鍵開啟：</strong>在 Finder 找到 Vas.app → 按住 Control 點一下 → 選「開啟」→ 再點「開啟」確認</li>
-                    <li><strong class="text-white/70">終端機指令：</strong>執行 <code class="bg-white/10 px-1.5 py-0.5 rounded text-white/80">xattr -cr /Applications/Vas.app</code></li>
-                </ol>
+            <div class="mt-8">
+                <h2 class="text-sm font-semibold tracking-widest text-white/30 uppercase mb-4" data-lang-key="toolbarLabel">Capture Toolbar</h2>
+                <img id="toolbarImg" src="img/vastoolbar.png" alt="VAS 截圖工具列：全螢幕、視窗、矩形、延遲、開啟、批次轉等功能按鈕" class="mx-auto rounded-2xl shadow-xl max-w-[85%] md:max-w-[50%]" loading="lazy" style="box-shadow: 0 8px 40px rgba(0,0,0,0.4); margin-bottom: -24px;">
             </div>
+
         </section>
 
         <!-- About -->
-        <section class="container mx-auto px-6 py-16 max-w-3xl" aria-labelledby="about-heading">
+        <section class="container mx-auto px-6 pt-2 pb-16 max-w-3xl" aria-labelledby="about-heading">
             <div class="divider mx-auto mb-8"></div>
             <h2 id="about-heading" class="text-2xl md:text-3xl font-bold text-center mb-10 text-white/90" data-lang-key="aboutTitle">關於 VAS</h2>
 
@@ -176,61 +251,93 @@
         <!-- App Preview -->
         <section class="container mx-auto px-4 md:px-6 py-8 max-w-5xl" aria-labelledby="preview-heading">
             <h2 id="preview-heading" class="sr-only">VAS 編輯器介面預覽</h2>
-            <div class="rounded-2xl overflow-hidden shadow-2xl" style="border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 32px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06);">
-                <img src="img/vasframe.jpg" alt="VAS 編輯器介面：深色工作區，左側工具列，頂部選項列，中央為圖片標注畫布" class="w-full block" loading="lazy">
+            <div style="
+                transform: perspective(1400px) rotateX(4deg);
+                transform-origin: center bottom;
+                filter:
+                    drop-shadow(0 0 48px rgba(196,113,245,0.22))
+                    drop-shadow(0 0 96px rgba(79,172,254,0.12))
+                    drop-shadow(0 48px 80px rgba(0,0,0,0.75));
+                transition: transform .4s ease, filter .4s ease;
+            " onmouseenter="this.style.transform='perspective(1400px) rotateX(1deg)'; this.style.filter='drop-shadow(0 0 64px rgba(196,113,245,0.35)) drop-shadow(0 0 120px rgba(79,172,254,0.18)) drop-shadow(0 56px 90px rgba(0,0,0,0.8))';"
+               onmouseleave="this.style.transform='perspective(1400px) rotateX(4deg)'; this.style.filter='drop-shadow(0 0 48px rgba(196,113,245,0.22)) drop-shadow(0 0 96px rgba(79,172,254,0.12)) drop-shadow(0 48px 80px rgba(0,0,0,0.75))';">
+                <img id="vasframeImg" src="img/vasframe-zh.png" alt="VAS 編輯器介面：深色工作區，左側工具列，頂部選項列，中央為圖片標注畫布" class="w-full block" loading="lazy">
             </div>
         </section>
 
-        <!-- Features -->
+        <!-- Features (Persona Tabs) -->
         <section class="container mx-auto px-6 py-16 max-w-4xl" aria-labelledby="features-heading">
-            <h2 id="features-heading" class="text-2xl md:text-3xl font-bold text-center mb-3 text-white/90" data-lang-key="featuresTitle">核心功能</h2>
-            <p class="text-center text-white/40 text-sm mb-12" data-lang-key="featuresSub">第一性原理，從底層打造</p>
+            <h2 id="features-heading" class="text-2xl md:text-3xl font-bold text-center mb-3 text-white/90" data-lang-key="featuresTitle">找到你的使用方式</h2>
+            <p class="text-center text-white/40 text-sm mb-10" data-lang-key="featuresSub">不同身份，不同切入點，同一個工具</p>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-
-                <div class="feature-card rounded-2xl p-6">
-                    <div class="text-3xl mb-4" aria-hidden="true">✏️</div>
-                    <h3 class="font-semibold text-white mb-2" data-lang-key="f1Title">點・線・面・文字</h3>
-                    <p class="text-white/50 text-sm" data-lang-key="f1Desc">專注第一性原理打造的標注工具組，矩形、直線、箭頭、自由文字，精準乘載你的每一個想法。</p>
-                </div>
-
-                <div class="feature-card rounded-2xl p-6">
-                    <div class="text-3xl mb-4" aria-hidden="true">🔢</div>
-                    <h3 class="font-semibold text-white mb-2" data-lang-key="f2Title">圖像式語言</h3>
-                    <p class="text-white/50 text-sm" data-lang-key="f2Desc">加疊編號步驟、符號標記與 emoji，讓跨語言、跨背景的閱讀者都能一眼讀懂你的意圖。</p>
-                </div>
-
-                <div class="feature-card rounded-2xl p-6">
-                    <div class="text-3xl mb-4" aria-hidden="true">🎨</div>
-                    <h3 class="font-semibold text-white mb-2" data-lang-key="f3Title">一鍵套版</h3>
-                    <p class="text-white/50 text-sm" data-lang-key="f3Desc">六款 Apple 漸層 mesh 背景，秒轉社群媒體規格（LinkedIn / Instagram / X），輸出即展示級。</p>
-                </div>
-
-                <div class="feature-card rounded-2xl p-6">
-                    <div class="text-3xl mb-4" aria-hidden="true">🔍</div>
-                    <h3 class="font-semibold text-white mb-2" data-lang-key="f4Title">OCR 文字辨識</h3>
-                    <p class="text-white/50 text-sm" data-lang-key="f4Desc">中英文圖片取字，截圖裡的文字不再只是圖片，直接複製、貼上、轉發。</p>
-                </div>
-
-                <div class="feature-card rounded-2xl p-6">
-                    <div class="text-3xl mb-4" aria-hidden="true">📦</div>
-                    <h3 class="font-semibold text-white mb-2" data-lang-key="f5Title">圖片批次轉檔</h3>
-                    <p class="text-white/50 text-sm" data-lang-key="f5Desc">一次選取多張，PNG / JPG / GIF 三格互轉，省去繁瑣的逐張操作。</p>
-                </div>
-
-                <div class="feature-card rounded-2xl p-6">
-                    <div class="text-3xl mb-4" aria-hidden="true">📐</div>
-                    <h3 class="font-semibold text-white mb-2" data-lang-key="f6Title">示意圖繪製</h3>
-                    <p class="text-white/50 text-sm" data-lang-key="f6Desc">不需要 Figma、不需要 Keynote，在截圖上直接完成流程說明與架構示意。</p>
-                </div>
-
+            <!-- Tab buttons -->
+            <div class="tab-bar justify-center mb-8" role="tablist" aria-label="使用者族群">
+                <button class="tab-btn active" role="tab" aria-selected="true"  aria-controls="tab-qa"     data-tab="qa"     data-lang-key="tabQA">🔬 QA / 測試工程師</button>
+                <button class="tab-btn"        role="tab" aria-selected="false" aria-controls="tab-design" data-tab="design" data-lang-key="tabDesign">🎨 設計師 / 學生</button>
+                <button class="tab-btn"        role="tab" aria-selected="false" aria-controls="tab-pm"     data-tab="pm"     data-lang-key="tabPM">📋 PM / 跨職能協作</button>
+                <button class="tab-btn"        role="tab" aria-selected="false" aria-controls="tab-dev"    data-tab="dev"    data-lang-key="tabDev">💻 開發者 / DevOps</button>
             </div>
-        </section>
 
-        <!-- Toolbar Preview -->
-        <section class="container mx-auto px-6 pb-4 max-w-3xl text-center" aria-labelledby="toolbar-heading">
-            <h2 id="toolbar-heading" class="text-sm font-semibold tracking-widest text-white/30 uppercase mb-6" data-lang-key="toolbarLabel">Capture Toolbar</h2>
-            <img src="img/vastoolbar.png" alt="VAS 截圖工具列：全螢幕、視窗、矩形、延遲、開啟、批次轉等功能按鈕" class="mx-auto max-w-full rounded-2xl shadow-xl" loading="lazy" style="box-shadow: 0 8px 40px rgba(0,0,0,0.4);">
+            <!-- QA -->
+            <div id="tab-qa" class="tab-panel active" role="tabpanel">
+                <p class="persona-badge" data-lang-key="qaTagline">截圖要給人看，但截圖裡有不能給人看的東西</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">🛡️</span><div><div class="feat-name" data-lang-key="qa1n">隱私遮蔽</div><div class="feat-desc" data-lang-key="qa1d">自動偵測並遮蔽 IP、Email、電話、身分證、信用卡、API Token、密碼等十餘種敏感資料</div></div></div>
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">▦</span><div><div class="feat-name" data-lang-key="qa2n">馬賽克 / 模糊</div><div class="feat-desc" data-lang-key="qa2d">手動框選任意區域打碼，區塊大小可調，支援模糊模式</div></div></div>
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">①</span><div><div class="feat-name" data-lang-key="qa3n">編號步驟印章</div><div class="feat-desc" data-lang-key="qa3d">替截圖貼上序號，Bug Report 的步驟說明一目了然</div></div></div>
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">□</span><div><div class="feat-name" data-lang-key="qa4n">矩形紅框標注</div><div class="feat-desc" data-lang-key="qa4d">老牌必備，圈出問題區域；支援圓角、描邊顏色、陰影</div></div></div>
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">文</span><div><div class="feat-name" data-lang-key="qa5n">OCR 文字辨識</div><div class="feat-desc" data-lang-key="qa5d">截圖裡的錯誤訊息一鍵掃成可編輯文字，直接貼進 Jira</div></div></div>
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">📋</span><div><div class="feat-name" data-lang-key="qa6n">一鍵複製 + 拖曳匯出</div><div class="feat-desc" data-lang-key="qa6d">標注完畢直接貼進 Slack、Notion、Confluence，或拖入附件區</div></div></div>
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">✂️</span><div><div class="feat-name" data-lang-key="qa7n">區域 / 視窗截圖</div><div class="feat-desc" data-lang-key="qa7d">精準框選問題區域，或只截特定視窗，不含桌面雜訊</div></div></div>
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">⏱</span><div><div class="feat-name" data-lang-key="qa8n">延遲截圖</div><div class="feat-desc" data-lang-key="qa8d">設定 1–3 秒延遲，補抓 tooltip、dropdown、hover 狀態等稍縱即逝的 UI 畫面</div></div></div>
+                </div>
+            </div>
+
+            <!-- Design -->
+            <div id="tab-design" class="tab-panel" role="tabpanel">
+                <p class="persona-badge" data-lang-key="designTagline">截圖只是素材，我還要在上面做事</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">⊞</span><div><div class="feat-name" data-lang-key="d1n">新開畫布</div><div class="feat-desc" data-lang-key="d1d">A4、Full HD、IG 貼文、YouTube 縮圖等預設尺寸一鍵開啟，不用再手動計算像素</div></div></div>
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">🎨</span><div><div class="feat-name" data-lang-key="d2n">填色塊（漸層 / 透明）</div><div class="feat-desc" data-lang-key="d2d">矩形 / 橢圓色塊，支援雙色漸層、透明度，快速鋪底色</div></div></div>
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">T</span><div><div class="feat-name" data-lang-key="d3n">文字工具</div><div class="feat-desc" data-lang-key="d3d">粗體、斜體、底線、刪除線、描邊、背景色、多行換行，排版基本需求全覆蓋</div></div></div>
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">✦</span><div><div class="feat-name" data-lang-key="d4n">符號印章</div><div class="feat-desc" data-lang-key="d4d">表情、箭頭、幾何符號快速貼上，不需要另開圖庫</div></div></div>
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">⊟</span><div><div class="feat-name" data-lang-key="d5n">智慧磁吸對齊</div><div class="feat-desc" data-lang-key="d5d">拖曳時自動吸附邊緣、中線、均分間距，參考線即時顯示</div></div></div>
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">↔</span><div><div class="feat-name" data-lang-key="d6n">多選對齊 + 鏡射</div><div class="feat-desc" data-lang-key="d6d">6 方向對齊、水平 / 垂直均分、水平 / 垂直鏡射，一次套用到所有選取物件</div></div></div>
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">▣</span><div><div class="feat-name" data-lang-key="d7n">一鍵套版</div><div class="feat-desc" data-lang-key="d7d">六款 Apple mesh 漸層背景，秒轉 LinkedIn / Instagram / X 社群規格</div></div></div>
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">⊞</span><div><div class="feat-name" data-lang-key="d8n">裁切 / 延伸 / 縮放畫布</div><div class="feat-desc" data-lang-key="d8d">完整畫布操作，不需要另開影像編輯軟體</div></div></div>
+                </div>
+            </div>
+
+            <!-- PM -->
+            <div id="tab-pm" class="tab-panel" role="tabpanel">
+                <p class="persona-badge" data-lang-key="pmTagline">截圖是溝通媒介，要清楚、要快、要能傳</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">文</span><div><div class="feat-name" data-lang-key="pm1n">OCR 文字辨識</div><div class="feat-desc" data-lang-key="pm1d">截圖裡的文字直接掃成可編輯文字，一鍵複製給設計師製圖，不用手抄</div></div></div>
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">⬛</span><div><div class="feat-name" data-lang-key="pm2n">QR Code 智慧掃描</div><div class="feat-desc" data-lang-key="pm2d">框住 QR 直接開網頁；佔比 70% 以上自動開啟，21–69% 詢問確認，不用拿手機掃</div></div></div>
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">╱</span><div><div class="feat-name" data-lang-key="pm3n">箭頭 / 貝茲曲線</div><div class="feat-desc" data-lang-key="pm3d">畫流程、指向、標示關係；曲線控制點讓箭頭繞過障礙物</div></div></div>
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">T</span><div><div class="feat-name" data-lang-key="pm4n">文字標注</div><div class="feat-desc" data-lang-key="pm4d">在截圖上直接寫說明文字，省去回到文件補充的來回</div></div></div>
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">⬚</span><div><div class="feat-name" data-lang-key="pm5n">視窗截圖</div><div class="feat-desc" data-lang-key="pm5d">只截特定應用程式視窗，畫面乾淨，不含桌面和其他視窗</div></div></div>
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">📋</span><div><div class="feat-name" data-lang-key="pm6n">複製 + 拖曳匯出</div><div class="feat-desc" data-lang-key="pm6d">截完即貼，無縫進 Notion、Confluence、Slack，或拖進任何附件欄位</div></div></div>
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">📦</span><div><div class="feat-name" data-lang-key="pm7n">批次轉檔</div><div class="feat-desc" data-lang-key="pm7d">一次將多張圖片轉換格式，支援 JPG、PNG、WebP、GIF</div></div></div>
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">⧉</span><div><div class="feat-name" data-lang-key="pm8n">疊入圖片</div><div class="feat-desc" data-lang-key="pm8d">把 wireframe、設計稿或 logo 疊進截圖，一張圖說清楚</div></div></div>
+                </div>
+            </div>
+
+            <!-- Dev -->
+            <div id="tab-dev" class="tab-panel" role="tabpanel">
+                <p class="persona-badge" data-lang-key="devTagline">截圖含伺服器資訊，對外分享前需要清理</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">🛡️</span><div><div class="feat-name" data-lang-key="dev1n">隱私遮蔽（伺服器資訊）</div><div class="feat-desc" data-lang-key="dev1d">自動偵測 IPv4 / IPv6、API Token、伺服器路徑、統一編號，截圖對外安全</div></div></div>
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">文</span><div><div class="feat-name" data-lang-key="dev2n">OCR 文字辨識</div><div class="feat-desc" data-lang-key="dev2d">把 terminal log 截圖轉成可搜尋文字，方便貼進 issue 或 ticket</div></div></div>
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">▦</span><div><div class="feat-name" data-lang-key="dev3n">馬賽克 / 模糊</div><div class="feat-desc" data-lang-key="dev3d">手動遮蔽自動偵測沒抓到的特定欄位或自訂格式敏感資料</div></div></div>
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">⬛</span><div><div class="feat-name" data-lang-key="dev4n">QR Code 掃描</div><div class="feat-desc" data-lang-key="dev4d">截 deploy 產出的 QR code 直接驗證跳轉，不需要拿手機</div></div></div>
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">①</span><div><div class="feat-name" data-lang-key="dev5n">編號步驟印章</div><div class="feat-desc" data-lang-key="dev5d">替 reproduce 步驟截圖編號，讓 bug report 的操作流程一目了然</div></div></div>
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">✂️</span><div><div class="feat-name" data-lang-key="dev6n">區域截圖</div><div class="feat-desc" data-lang-key="dev6d">只截 console 或特定視窗區域，不截入桌面其他視窗的機密資訊</div></div></div>
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">⏱</span><div><div class="feat-name" data-lang-key="dev7n">延遲截圖</div><div class="feat-desc" data-lang-key="dev7d">設定 1–3 秒延遲，補抓 toast、loading spinner、hover dropdown 等稍縱即逝的 UI 狀態——那個「點下去才出現」的畫面終於截得到了</div></div></div>
+                    <div class="feat-item"><span class="feat-icon" aria-hidden="true">📋</span><div><div class="feat-name" data-lang-key="dev8n">一鍵複製 + 拖曳匯出</div><div class="feat-desc" data-lang-key="dev8d">截完直接貼進 GitHub issue、PR comment、Slack 頻道，不需存檔再附加；截圖變附件，動作少一半</div></div></div>
+                </div>
+            </div>
+
         </section>
 
         <!-- Origin Story -->
@@ -246,6 +353,104 @@
             </blockquote>
         </section>
 
+        <!-- Roadmap & Pricing -->
+        <section class="container mx-auto px-6 py-16 max-w-3xl" aria-labelledby="roadmap-heading">
+            <div class="divider mx-auto mb-8"></div>
+            <h2 id="roadmap-heading" class="text-xl font-bold mb-2 text-white/60 tracking-widest uppercase text-sm text-center" data-lang-key="roadmapTitle">Roadmap &amp; Pricing</h2>
+            <p class="text-white/40 text-sm text-center mb-10" data-lang-key="roadmapSub">兩個版本，一個故事</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Electron — current free -->
+                <div class="glass-section rounded-3xl p-7 flex flex-col gap-4 border border-white/10">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl" aria-hidden="true">📦</span>
+                        <div>
+                            <div class="text-white font-bold text-base" data-lang-key="planElectronName">Electron 版（現行）</div>
+                            <div class="text-white/40 text-xs mt-0.5" data-lang-key="planElectronPriceBadge">免費 · 完整功能</div>
+                        </div>
+                    </div>
+                    <ul class="space-y-2 text-white/65 text-sm flex-1" data-lang-key="planElectronFeatures">
+                        <li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>所有現有功能完整收錄</span></li>
+                        <li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>無使用期限，永久免費</span></li>
+                        <li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">△</span><span>安裝包體積較大（~113 MB）</span></li>
+                        <li class="flex gap-2"><span class="text-white/30 mt-0.5" aria-hidden="true">—</span><span>發布後不再新增功能</span></li>
+                    </ul>
+                    <div class="text-white/25 text-xs border-t border-white/10 pt-4" data-lang-key="planElectronNote">首發版本，功能完整，歡迎久用。</div>
+                </div>
+
+                <!-- Tauri — coming paid -->
+                <div class="glass-section rounded-3xl p-7 flex flex-col gap-4 border border-purple-400/25" style="background: linear-gradient(135deg, rgba(139,92,246,0.08) 0%, rgba(59,130,246,0.08) 100%);">
+                    <div class="flex items-center gap-3">
+                        <span class="text-2xl" aria-hidden="true">🚀</span>
+                        <div>
+                            <div class="text-white font-bold text-base" data-lang-key="planTauriName">Tauri 版（開發中）</div>
+                            <div class="text-purple-300/70 text-xs mt-0.5" data-lang-key="planTauriPriceBadge">付費 · 持續更新</div>
+                        </div>
+                    </div>
+                    <ul class="space-y-2 text-white/65 text-sm flex-1" data-lang-key="planTauriFeatures">
+                        <li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>全新輕量架構，體積大幅縮小</span></li>
+                        <li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>所有後續新功能優先上線</span></li>
+                        <li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>旋轉、截圖歷史等進階工具</span></li>
+                        <li class="flex gap-2"><span class="text-purple-300/80 mt-0.5" aria-hidden="true">★</span><span>Electron 早鳥用戶享升級優惠</span></li>
+                    </ul>
+                    <div class="text-purple-300/40 text-xs border-t border-purple-400/15 pt-4" data-lang-key="planTauriNote">現在使用 Electron 版，等 Tauri 版推出時享有早鳥優惠。</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Early Bird Survey CTA -->
+        <section class="max-w-2xl mx-auto px-6 mt-16 mb-4">
+            <div class="rounded-2xl border border-purple-400/20 bg-white/5 backdrop-blur-sm p-8 text-center">
+                <div class="inline-block text-xs font-semibold tracking-widest text-purple-300/70 uppercase mb-4 px-3 py-1 rounded-full border border-purple-400/20 bg-purple-400/10" data-lang-key="surveyBadge">早鳥專區</div>
+                <h2 class="text-2xl font-bold text-white mb-3" data-lang-key="surveyTitle">填問卷，換早鳥優惠碼</h2>
+                <p class="text-white/55 text-sm leading-relaxed mb-6 max-w-md mx-auto" data-lang-key="surveyDesc">6 道題，每一道都值得好好想想。你的答案直接影響 Tauri 版的功能優先順序——Tauri 版推出時，我們會同步以 E-mail 寄送早鳥優惠碼。</p>
+                <a id="surveyFormLink" href="https://forms.gle/5xWyyvehF1HSAyDu7" target="_blank" rel="noopener noreferrer"
+                   class="inline-block px-8 py-3 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-semibold text-sm hover:from-purple-400 hover:to-indigo-400 transition-all duration-200 shadow-lg shadow-purple-900/30"
+                   data-lang-key="surveyBtn">前往填寫問卷</a>
+                <p class="text-white/25 text-xs mt-4" data-lang-key="surveyNote">E-mail 僅用於 Tauri 版推出時寄送優惠碼，不作其他用途。</p>
+            </div>
+        </section>
+
+        <!-- Changelog -->
+        <section class="container mx-auto px-6 py-16 max-w-2xl" aria-labelledby="changelog-heading">
+            <div class="divider mx-auto mb-8"></div>
+            <h2 id="changelog-heading" class="text-xl font-bold mb-2 text-white/60 tracking-widest uppercase text-sm text-center" data-lang-key="changelogTitle">Changelog</h2>
+            <p class="text-white/40 text-sm text-center mb-10" data-lang-key="changelogSub">一萬次迭代而非一萬個小時</p>
+
+            <div class="space-y-6">
+                <!-- v3.44.0 -->
+                <div class="glass-section rounded-2xl p-6 border border-white/10">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-xs font-bold bg-green-400 text-black px-2 py-0.5 rounded-full">NEW</span>
+                        <span class="text-white font-bold">v3.44.0</span>
+                        <span class="text-white/30 text-xs" data-lang-key="cl44date">2026-03-31</span>
+                    </div>
+                    <ul class="space-y-2 text-white/60 text-sm" data-lang-key="cl44items">
+                        <li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>工具列 Modal 位置跳動與累積偏移根治</span></li>
+                        <li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>修復三種截圖模式（全螢幕 / 視窗 / 矩形）全部失效</span></li>
+                        <li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>OCR 與隱私掃描功能修復</span></li>
+                        <li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>標號與文字工具尺寸縮放一致性修正</span></li>
+                        <li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">⌨️</span><span>方向鍵微調物件位置（Arrow nudge）</span></li>
+                        <li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🧹</span><span>拖曳匯出暫存檔 60 秒後自動清除</span></li>
+                        <li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🔒</span><span>安全性修補（brace-expansion 漏洞）</span></li>
+                    </ul>
+                </div>
+
+                <!-- v3.43.0 -->
+                <div class="glass-section rounded-2xl p-6 border border-white/10">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-white font-bold">v3.43.0</span>
+                        <span class="text-white/30 text-xs" data-lang-key="cl43date">2026-03-29</span>
+                    </div>
+                    <ul class="space-y-2 text-white/60 text-sm" data-lang-key="cl43items">
+                        <li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>首次公開發布</span></li>
+                        <li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>截圖 + 標注 + OCR + 隱私掃描 + 批次轉檔全功能收錄</span></li>
+                        <li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>智慧磁吸、物件旋轉、QR Code 掃描、貝茲曲線箭頭</span></li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <!-- Footer -->
@@ -257,63 +462,142 @@
         const translations = {
             zh: {
                 backLabel: '深握計畫',
-                badge: 'Mac 專屬 · v0.1.0 正式發布',
+                badge: 'Mac 專屬 · v3.44.0 正式發布',
                 heroSubtitle: 'Visual Annotation Studio',
                 heroTagline: '為跨領域溝通而生的截圖與圖像敘述工具',
-                downloadBtn: '下載 for Mac',
+                downloadBtn: '免費下載',
                 releaseNotesBtn: 'Release Notes',
-                sysReq: '需要 macOS · Apple Silicon (arm64) · 113 MB',
+                guideBtn: '操作手冊',
+                sysReq: 'Electron 先行首發版 · 需要 macOS · Apple Silicon (arm64) · 已通過 Apple notarize 驗證',
                 aboutTitle: '關於 VAS',
                 about1: '它最特別的地方不在對標哪個產品，而在於它試圖成為<strong class="text-white/95">傳遞資訊的煉金容器</strong>。',
                 about2: '資訊用順勢的方式滑入 VAS，再由各式工具乘載思緒，無痛傳遞到任何你想讓它去的地方。一站式匯聚所有你想像得到的常用工具，讓每個人都能在這個容器裡找到屬於自己的溝通方式。',
-                featuresTitle: '核心功能',
-                featuresSub: '第一性原理，從底層打造',
-                f1Title: '點・線・面・文字',
-                f1Desc: '專注第一性原理打造的標注工具組，矩形、直線、箭頭、自由文字，精準乘載你的每一個想法。',
-                f2Title: '圖像式語言',
-                f2Desc: '加疊編號步驟、符號標記與 emoji，讓跨語言、跨背景的閱讀者都能一眼讀懂你的意圖。',
-                f3Title: '一鍵套版',
-                f3Desc: '六款 Apple 漸層 mesh 背景，秒轉社群媒體規格（LinkedIn / Instagram / X），輸出即展示級。',
-                f4Title: 'OCR 文字辨識',
-                f4Desc: '中英文圖片取字，截圖裡的文字不再只是圖片，直接複製、貼上、轉發。',
-                f5Title: '圖片批次轉檔',
-                f5Desc: '一次選取多張，PNG / JPG / GIF 三格互轉，省去繁瑣的逐張操作。',
-                f6Title: '示意圖繪製',
-                f6Desc: '不需要 Figma、不需要 Keynote，在截圖上直接完成流程說明與架構示意。',
+                featuresTitle: '找到你的使用方式',
+                featuresSub: '不同身份，不同切入點，同一個工具',
+                tabQA: '🔬 QA / 測試工程師',
+                tabDesign: '🎨 設計師 / 學生',
+                tabPM: '📋 PM / 跨職能協作',
+                tabDev: '💻 開發者 / DevOps',
+                qaTagline: '截圖要給人看，但截圖裡有不能給人看的東西',
+                qa1n: '隱私遮蔽', qa1d: '自動偵測並遮蔽 IP、Email、電話、身分證、信用卡、API Token、密碼等十餘種敏感資料；已完成繁體中文場景特化（姓名、中華民國格式電話、身分證字號等）',
+                qa2n: '馬賽克 / 模糊', qa2d: '手動框選任意區域打碼，區塊大小可調，支援模糊模式。<strong class="text-white/80">貼上後仍可移動、縮放、局部調整</strong>——不像多數工具打碼即燒死，遮錯了直接拉回來重擺。搭配 OCR 隱私遮蔽使用效果最佳：自動偵測先標出敏感位置，浮動馬賽克精準補位',
+                qa3n: '編號步驟印章', qa3d: '替截圖貼上序號，Bug Report 的步驟說明一目了然',
+                qa4n: '矩形紅框標注', qa4d: '老牌必備，圈出問題區域；支援圓角、描邊顏色、陰影',
+                qa5n: 'OCR 文字辨識', qa5d: '截圖裡的錯誤訊息一鍵掃成可編輯文字，直接貼進 Jira',
+                qa6n: '一鍵複製 + 拖曳匯出', qa6d: '標注完畢直接貼進 Slack、Notion、Confluence，或拖入附件區',
+                qa7n: '區域 / 視窗截圖', qa7d: '精準框選問題區域，或只截特定視窗，不含桌面雜訊',
+                qa8n: '延遲截圖', qa8d: '設定 1–3 秒延遲，補抓 tooltip、dropdown、hover 狀態等稍縱即逝的 UI 畫面',
+                designTagline: '截圖只是素材，我還要在上面做事',
+                d1n: '新開畫布', d1d: 'A4、Full HD、IG 貼文、YouTube 縮圖等預設尺寸一鍵開啟，不用再手動計算像素',
+                d2n: '填色塊（漸層 / 透明）', d2d: '矩形 / 橢圓色塊，支援雙色漸層、透明度，快速鋪底色',
+                d3n: '文字工具', d3d: '粗體、斜體、底線、刪除線、描邊、背景色、透明字、多行換行，排版基本需求全覆蓋',
+                d4n: '符號印章', d4d: '表情、箭頭、幾何符號快速貼上，不需要另開圖庫',
+                d5n: '智慧磁吸對齊', d5d: '拖曳時自動吸附邊緣、中線、均分間距，參考線即時顯示',
+                d6n: '多選對齊 + 鏡射', d6d: '6 方向對齊、水平 / 垂直均分、水平 / 垂直鏡射，一次套用到所有選取物件',
+                d7n: '一鍵套版', d7d: '六款 Apple mesh 漸層背景，秒轉 LinkedIn / Instagram / X 社群規格',
+                d8n: '裁切 / 延伸 / 縮放畫布', d8d: '完整畫布操作，不需要另開影像編輯軟體',
+                pmTagline: '截圖是溝通媒介，要清楚、要快、要能傳',
+                pm1n: 'OCR 文字辨識', pm1d: '截圖裡的文字直接掃成可編輯文字，一鍵複製給設計師製圖，不用手抄',
+                pm2n: 'QR Code 智慧掃描', pm2d: '框住 QR 直接開網頁；佔比 70% 以上自動開啟，21–69% 詢問確認，不用拿手機掃',
+                pm3n: '箭頭 / 貝茲曲線', pm3d: '畫流程、指向、標示關係；曲線控制點讓箭頭繞過障礙物',
+                pm4n: '文字標注', pm4d: '在截圖上直接寫說明文字，省去回到文件補充的來回',
+                pm5n: '視窗截圖', pm5d: '只截特定應用程式視窗，畫面乾淨，不含桌面和其他視窗',
+                pm6n: '複製 + 拖曳匯出', pm6d: '截完即貼，無縫進 Notion、Confluence、Slack，或拖進任何附件欄位',
+                pm7n: '批次轉檔', pm7d: '一次將多張圖片轉換格式，支援 JPG、PNG、WebP、GIF',
+                pm8n: '疊入圖片 / 自製 Prototype', pm8d: '把 wireframe、設計稿或 logo 疊進截圖；或直接截下既有畫面的 UI 元件，重新排列組合成示意圖——輕鬆打造屬於自己的 Prototype，不需要另開設計工具',
+                devTagline: '截圖含伺服器資訊，對外分享前需要清理',
+                dev1n: '隱私遮蔽（伺服器資訊）', dev1d: '自動偵測 IPv4 / IPv6、API Token、伺服器路徑、統一編號，截圖對外安全；已完成繁體中文場景特化',
+                dev2n: 'OCR 文字辨識', dev2d: '把 terminal log 截圖轉成可搜尋文字，方便貼進 issue 或 ticket',
+                dev3n: '馬賽克 / 模糊', dev3d: '手動遮蔽自動偵測沒抓到的特定欄位；<strong class="text-white/80">打碼後仍可移動與調整範圍</strong>，不需要重截整張圖。與 OCR 隱私遮蔽搭配：自動偵測先掃，浮動馬賽克補漏，兩層保護一次到位',
+                dev4n: 'QR Code 掃描', dev4d: '截 deploy 產出的 QR code 直接驗證跳轉，不需要拿手機',
+                dev5n: '編號步驟印章', dev5d: '替 reproduce 步驟截圖編號，讓 bug report 的操作流程一目了然',
+                dev6n: '區域截圖', dev6d: '只截 console 或特定視窗區域，不截入桌面其他視窗的機密資訊',
+                dev7n: '延遲截圖', dev7d: '設定 1–3 秒延遲，補抓 toast、loading spinner、hover dropdown 等稍縱即逝的 UI 狀態——那個「點下去才出現」的畫面終於截得到了',
+                dev8n: '一鍵複製 + 拖曳匯出', dev8d: '截完直接貼進 GitHub issue、PR comment、Slack 頻道，不需存檔再附加；截圖變附件，動作少一半',
                 toolbarLabel: '截圖工具列',
                 storyTitle: 'Origin',
-                storyBody: '來自一位<strong class="text-white">一行程式碼都不會寫的 PM</strong>，<br>以及 Claude Code 的 Claude，<br>人機協作 <strong class="gradient-text text-2xl font-bold">一週</strong>內迭代至 v3.43 而誕生的作品。',
+                storyBody: '來自一位<strong class="text-white">一行程式碼都不會寫的 PM</strong>，<br>以及 Claude Code 的 Claude，<br>人機協作 <strong class="gradient-text text-2xl font-bold">一週</strong> 內迭代至 v3.43 而誕生的作品。',
                 storyByline: '— Nova & Claude，2026',
                 footer: '由 GitHub 部署　｜　Claude Code 傾力打造　｜　<a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a> 最後更新於 2026',
                 gkTitle: '⚠️ 第一次開啟 VAS',
                 gkDesc: 'macOS 可能顯示「無法開啟」。這是正常的安全機制，不代表檔案有問題。按照以下任一方式即可解決：',
-                gkSteps: '<li><strong class="text-white/70">右鍵開啟：</strong>在 Finder 找到 Vas.app → 按住 Control 點一下 → 選「開啟」→ 再點「開啟」確認</li><li><strong class="text-white/70">終端機指令：</strong>執行 <code class="bg-white/10 px-1.5 py-0.5 rounded text-white/80">xattr -cr /Applications/Vas.app</code></li>'
+                gkSteps: '<li><strong class="text-white/70">右鍵開啟：</strong>在 Finder 找到 Vas.app → 按住 Control 點一下 → 選「開啟」→ 再點「開啟」確認</li><li><strong class="text-white/70">終端機指令：</strong>執行 <code class="bg-white/10 px-1.5 py-0.5 rounded text-white/80">xattr -cr /Applications/Vas.app</code></li>',
+                roadmapTitle: 'Roadmap &amp; Pricing',
+                roadmapSub: '兩個版本，一個故事',
+                planElectronName: 'Electron 版（現行）',
+                planElectronPriceBadge: '免費 · 完整功能',
+                planElectronFeatures: '<li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>所有現有功能完整收錄</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>無使用期限，永久免費</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">△</span><span>安裝包體積較大（~113 MB）</span></li><li class="flex gap-2"><span class="text-white/30 mt-0.5" aria-hidden="true">—</span><span>發布後不再新增功能</span></li>',
+                planElectronNote: '首發版本，功能完整，歡迎久用。',
+                planTauriName: 'Tauri 版（開發中）',
+                planTauriPriceBadge: '付費 · 持續更新',
+                planTauriFeatures: '<li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>全新輕量架構，體積大幅縮小</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>所有後續新功能優先上線</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>旋轉、截圖歷史等進階工具</span></li><li class="flex gap-2"><span class="text-purple-300/80 mt-0.5" aria-hidden="true">★</span><span>Electron 早鳥用戶享升級優惠</span></li>',
+                planTauriNote: '現在使用 Electron 版，等 Tauri 版推出時享有早鳥優惠。',
+                surveyBadge: '早鳥專區',
+                surveyTitle: '填問卷，換早鳥優惠碼',
+                surveyDesc: '6 道題，每一道都值得好好想想。你的答案直接影響 Tauri 版的功能優先順序——Tauri 版推出時，我們會同步以 E-mail 寄送早鳥優惠碼。',
+                surveyBtn: '前往填寫問卷',
+                surveyNote: 'E-mail 僅用於 Tauri 版推出時寄送優惠碼，不作其他用途。',
+                changelogTitle: 'Changelog',
+                changelogSub: '一萬次迭代而非一萬個小時',
+                cl44date: '2026-03-31',
+                cl44items: '<li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>工具列 Modal 位置跳動與累積偏移根治</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>修復三種截圖模式（全螢幕 / 視窗 / 矩形）全部失效</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>OCR 與隱私掃描功能修復</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>標號與文字工具尺寸縮放一致性修正</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">⌨️</span><span>方向鍵微調物件位置（Arrow nudge）</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🧹</span><span>拖曳匯出暫存檔 60 秒後自動清除</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🔒</span><span>安全性修補（brace-expansion 漏洞）</span></li>',
+                cl43date: '2026-03-29',
+                cl43items: '<li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>首次公開發布</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>截圖 + 標注 + OCR + 隱私掃描 + 批次轉檔全功能收錄</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>智慧磁吸、物件旋轉、QR Code 掃描、貝茲曲線箭頭</span></li>'
             },
             en: {
                 backLabel: 'Deep Holding Project',
-                badge: 'Mac Only · v0.1.0 Now Available',
+                badge: 'Mac Only · v3.44.0 Now Available',
                 heroSubtitle: 'Visual Annotation Studio',
                 heroTagline: 'A screenshot and visual communication tool, built for Mac.',
-                downloadBtn: 'Download for Mac',
+                downloadBtn: 'Free Download',
                 releaseNotesBtn: 'Release Notes',
-                sysReq: 'Requires macOS · Apple Silicon (arm64) · 113 MB',
+                guideBtn: 'User Guide',
+                sysReq: 'Electron Edition · Requires macOS · Apple Silicon (arm64) · Apple Notarized',
                 aboutTitle: 'About VAS',
                 about1: 'What makes it special isn\'t what it competes with — it\'s that VAS aspires to be an <strong class="text-white/95">alchemical vessel for information</strong>.',
                 about2: 'Ideas flow naturally in, get shaped by its tools, and move — without friction — to wherever you need them to go. Every essential communication tool, gathered in one place, so that anyone can find their own way to be understood.',
-                featuresTitle: 'Features',
-                featuresSub: 'Built on first principles, from the ground up',
-                f1Title: 'Points · Lines · Shapes · Text',
-                f1Desc: 'A complete annotation toolkit built on first principles — rectangles, lines, arrows, free text. Precise, expressive, yours.',
-                f2Title: 'Visual Language',
-                f2Desc: 'Layer in step numbers, symbols, and emoji. Cross-language, cross-background — readers get it at a glance.',
-                f3Title: 'One-Click Templates',
-                f3Desc: 'Six Apple mesh gradient backgrounds. Instant social media sizing (LinkedIn / Instagram / X). Presentation-quality output.',
-                f4Title: 'OCR Text Recognition',
-                f4Desc: 'Extract text from screenshots in Chinese and English. Copy, paste, share — no more retyping.',
-                f5Title: 'Batch Image Conversion',
-                f5Desc: 'Select multiple files, convert between PNG / JPG / GIF in one go.',
-                f6Title: 'Diagram Sketching',
-                f6Desc: 'No Figma. No Keynote. Draw flowcharts and architecture diagrams directly on your screenshots.',
+                featuresTitle: 'Find your workflow',
+                featuresSub: 'Different roles, different entry points — one tool',
+                tabQA: '🔬 QA / Testers',
+                tabDesign: '🎨 Designers / Students',
+                tabPM: '📋 PMs / Cross-team',
+                tabDev: '💻 Developers / DevOps',
+                qaTagline: 'Screenshots go out, but some things in them can\'t',
+                qa1n: 'Privacy Mask', qa1d: 'Auto-detect and redact IPs, emails, phone numbers, IDs, credit cards, API tokens, passwords, and more — with Traditional Chinese locale support (TW ID format, phone patterns, names)',
+                qa2n: 'Mosaic / Blur', qa2d: 'Manually redact any region; adjustable block size, supports blur mode. <strong class="text-white/80">Still movable and resizable after placing</strong> — unlike most tools that burn the redaction in permanently, you can reposition it any time. Pairs best with OCR Privacy Mask: auto-detection flags sensitive areas, floating mosaic lets you fine-tune placement',
+                qa3n: 'Numbered Step Stamps', qa3d: 'Label screenshots with step numbers — make bug reports self-explanatory',
+                qa4n: 'Rectangle Annotation', qa4d: 'The classic red box; supports rounded corners, border colour, drop shadow',
+                qa5n: 'OCR Text Recognition', qa5d: 'Scan error messages in screenshots into copyable text — paste straight into Jira',
+                qa6n: 'Copy + Drag Export', qa6d: 'Paste annotated screenshots into Slack, Notion, or Confluence, or drag to any attachment field',
+                qa7n: 'Region / Window Capture', qa7d: 'Precisely select an area, or capture a specific window — no desktop clutter',
+                qa8n: 'Delayed Capture', qa8d: 'Set a 1–3 second delay to capture tooltips, dropdowns, hover states, and other transient UI moments',
+                designTagline: 'A screenshot is just raw material — I need to work on it',
+                d1n: 'New Canvas', d1d: 'One-click presets for A4, Full HD, IG posts, YouTube thumbnails — no pixel math needed',
+                d2n: 'Fill Shapes (Gradient / Alpha)', d2d: 'Rect and ellipse fills with dual-colour gradients and opacity control',
+                d3n: 'Text Tool', d3d: 'Bold, italic, underline, strikethrough, stroke, background colour, transparent text, multi-line — full layout basics covered',
+                d4n: 'Symbol Stamps', d4d: 'Emoji, arrows, geometric symbols — no external asset library needed',
+                d5n: 'Smart Snap Alignment', d5d: 'Auto-snap to edges, centre lines, and equal spacing while dragging, with live guide lines',
+                d6n: 'Multi-select Align + Flip', d6d: '6-direction align, H/V distribute, H/V flip — applied to all selected objects at once',
+                d7n: 'One-Click Templates', d7d: 'Six Apple mesh gradient backgrounds; instant LinkedIn / Instagram / X sizing',
+                d8n: 'Crop / Extend / Resize Canvas', d8d: 'Full canvas operations — no need to open a separate image editor',
+                pmTagline: 'Screenshots are communication — they need to be clear, fast, and shareable',
+                pm1n: 'OCR Text Recognition', pm1d: 'Scan text out of screenshots and copy straight to designers — no more retyping specs',
+                pm2n: 'QR Code Smart Scan', pm2d: 'Frame a QR code and VAS opens the URL — ≥70% auto-opens, 21–69% prompts first',
+                pm3n: 'Arrows / Bézier Curves', pm3d: 'Draw flows, pointers, and relationships; curved control points let arrows navigate around obstacles',
+                pm4n: 'Text Annotations', pm4d: 'Write explanations directly on screenshots — no round-trips to a separate document',
+                pm5n: 'Window Capture', pm5d: 'Capture a specific app window, clean and isolated from the rest of the desktop',
+                pm6n: 'Copy + Drag Export', pm6d: 'Instant paste into Notion, Confluence, Slack, or drag to any attachment field',
+                pm7n: 'Batch Convert', pm7d: 'Convert multiple images at once — supports JPG, PNG, WebP, and GIF',
+                pm8n: 'Overlay Image / DIY Prototype', pm8d: 'Drop wireframes, mockups, or logos into screenshots — or lift UI elements from any capture and rearrange them into your own diagram. Build a lightweight Prototype without opening a separate design tool',
+                devTagline: 'Screenshots contain server info — clean them before sharing',
+                dev1n: 'Privacy Mask (Server Info)', dev1d: 'Auto-detect IPv4 / IPv6, API tokens, server paths, and registration numbers — safe to share externally; Traditional Chinese locale support included',
+                dev2n: 'OCR Text Recognition', dev2d: 'Convert terminal log screenshots into searchable text — paste straight into issues or tickets',
+                dev3n: 'Mosaic / Blur', dev3d: 'Manually redact fields that auto-detection misses or custom-format sensitive data. <strong class="text-white/80">Stays movable after placing</strong> — pairs with OCR Privacy Mask for two-layer coverage: auto-scan first, floating mosaic patches the gaps',
+                dev4n: 'QR Code Scan', dev4d: 'Frame a deployment QR code and jump straight to the URL — no phone needed',
+                dev5n: 'Numbered Step Stamps', dev5d: 'Label reproduce-steps screenshots with sequence numbers — bug reports become self-explanatory',
+                dev6n: 'Region Capture', dev6d: 'Capture only the console or a specific window — no other windows\' confidential data in frame',
+                dev7n: 'Delayed Capture', dev7d: 'Set a 1–3 second delay to catch toasts, loading spinners, hover dropdowns, and other transient UI states — that "only appears after clicking" moment is finally capturable',
+                dev8n: 'Copy + Drag Export', dev8d: 'Paste directly into GitHub issues, PR comments, or Slack — no save-then-attach dance; screenshot becomes attachment in one move',
                 toolbarLabel: 'Capture Toolbar',
                 storyTitle: 'Origin',
                 storyBody: 'Born from a collaboration between <strong class="text-white">a PM who can\'t write a single line of code</strong> and Claude from Claude Code —<br>iterated together to v3.43 in <strong class="gradient-text text-2xl font-bold">one week</strong>.',
@@ -321,12 +605,38 @@
                 footer: 'Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by <a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a>',
                 gkTitle: '⚠️ First time opening VAS',
                 gkDesc: 'macOS may show "cannot be opened". This is a normal security check — not a problem with the file. Fix it with either method below:',
-                gkSteps: '<li><strong class="text-white/70">Right-click to open:</strong> Find Vas.app in Finder → Control-click → select "Open" → click "Open" to confirm</li><li><strong class="text-white/70">Terminal command:</strong> Run <code class="bg-white/10 px-1.5 py-0.5 rounded text-white/80">xattr -cr /Applications/Vas.app</code></li>'
+                gkSteps: '<li><strong class="text-white/70">Right-click to open:</strong> Find Vas.app in Finder → Control-click → select "Open" → click "Open" to confirm</li><li><strong class="text-white/70">Terminal command:</strong> Run <code class="bg-white/10 px-1.5 py-0.5 rounded text-white/80">xattr -cr /Applications/Vas.app</code></li>',
+                roadmapTitle: 'Roadmap &amp; Pricing',
+                roadmapSub: 'Two versions, one story',
+                planElectronName: 'Electron (Current)',
+                planElectronPriceBadge: 'Free · Full-featured',
+                planElectronFeatures: '<li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>All current features included</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>No expiry — free forever</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">△</span><span>Larger install size (~113 MB)</span></li><li class="flex gap-2"><span class="text-white/30 mt-0.5" aria-hidden="true">—</span><span>No new features after initial release</span></li>',
+                planElectronNote: 'The launch version — fully capable. Keep using it as long as you like.',
+                planTauriName: 'Tauri (Coming Soon)',
+                planTauriPriceBadge: 'Paid · Continuously updated',
+                planTauriFeatures: '<li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>New lightweight architecture — much smaller footprint</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>All future features land here first</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>Rotation, capture history, and more advanced tools</span></li><li class="flex gap-2"><span class="text-purple-300/80 mt-0.5" aria-hidden="true">★</span><span>Electron early adopters get an upgrade discount</span></li>',
+                planTauriNote: 'Use the Electron version now — early adopter pricing awaits when Tauri launches.',
+                surveyBadge: 'Early Bird',
+                surveyTitle: 'Fill the Survey, Get Early Bird Code',
+                surveyDesc: '6 questions — each one worth a moment of thought. Your answers directly shape what lands in the Tauri version first. When Tauri launches, we\'ll send your early bird discount code by email.',
+                surveyBtn: 'Take the Survey',
+                surveyNote: 'Your email will only be used to send the discount code when Tauri launches — nothing else.',
+                changelogTitle: 'Changelog',
+                changelogSub: '10,000 iterations, not 10,000 hours.',
+                cl44date: '2026-03-31',
+                cl44items: '<li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>Toolbar modal position drift & accumulation — fixed</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>All three capture modes (fullscreen / window / rectangle) restored</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>OCR and privacy scan fixed</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>Number stamp & text tool scale consistency fixed</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">⌨️</span><span>Arrow key nudge for selected objects</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🧹</span><span>Drag export temp files auto-deleted after 60 seconds</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🔒</span><span>Security patch (brace-expansion vulnerability)</span></li>',
+                cl43date: '2026-03-29',
+                cl43items: '<li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>Initial public release</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>Full feature set: capture, annotation, OCR, privacy scan, batch convert</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>Smart snap, object rotation, QR Code scan, Bezier curve arrows</span></li>'
             }
         };
 
         const langZhBtn = document.getElementById('lang-zh');
         const langEnBtn = document.getElementById('lang-en');
+
+        const surveyLinks = {
+            zh: 'https://forms.gle/5xWyyvehF1HSAyDu7',
+            en: 'https://forms.gle/qgzfrBA9MbHK1fb4A'
+        };
 
         function switchLanguage(lang) {
             document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
@@ -335,6 +645,13 @@
                 const key = el.dataset.langKey;
                 if (trans[key] !== undefined) el.innerHTML = trans[key];
             });
+            document.getElementById('surveyFormLink').href = surveyLinks[lang];
+            const toolbarImg = document.getElementById('toolbarImg');
+            toolbarImg.src = lang === 'zh' ? 'img/vastoolbar.png' : 'img/vastoolbar-en.png';
+            toolbarImg.alt = lang === 'zh' ? 'VAS 截圖工具列：全螢幕、視窗、矩形、延遲、開啟、批次轉等功能按鈕' : 'VAS capture toolbar: fullscreen, window, rectangle, delay, open, batch convert buttons';
+            const vasframeImg = document.getElementById('vasframeImg');
+            vasframeImg.src = lang === 'zh' ? 'img/vasframe-zh.png' : 'img/vasframe-en.png';
+            vasframeImg.alt = lang === 'zh' ? 'VAS 編輯器介面：深色工作區，左側工具列，頂部選項列，中央為圖片標注畫布' : 'VAS editor interface: dark workspace with left toolbar, top options bar, and annotation canvas';
             langZhBtn.classList.toggle('active', lang === 'zh');
             langEnBtn.classList.toggle('active', lang === 'en');
             langZhBtn.setAttribute('aria-pressed', lang === 'zh');
@@ -343,6 +660,23 @@
 
         langZhBtn.addEventListener('click', () => switchLanguage('zh'));
         langEnBtn.addEventListener('click', () => switchLanguage('en'));
+
+        switchLanguage('zh'); // 初始化：套用 zh i18n key，確保硬寫內容與翻譯一致
+
+        // ── Persona Tab switching ──────────────────────────────────────────────
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const target = btn.dataset.tab;
+                document.querySelectorAll('.tab-btn').forEach(b => {
+                    b.classList.remove('active');
+                    b.setAttribute('aria-selected', 'false');
+                });
+                document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+                btn.classList.add('active');
+                btn.setAttribute('aria-selected', 'true');
+                document.getElementById('tab-' + target).classList.add('active');
+            });
+        });
     </script>
 
     <script type="application/ld+json">
