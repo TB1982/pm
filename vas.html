@@ -340,6 +340,59 @@
 
         </section>
 
+        <!-- Flagship Moments -->
+        <section class="container mx-auto px-6 py-16 max-w-4xl" aria-labelledby="moments-heading">
+            <div class="divider mx-auto mb-8"></div>
+            <p class="text-center text-xs font-bold tracking-widest text-white/30 uppercase mb-2" data-lang-key="momentsLabel">Thoughtful by Design</p>
+            <h2 id="moments-heading" class="text-2xl md:text-3xl font-bold text-center mb-16 text-white/90" data-lang-key="momentsTitle">細節裡的貼心</h2>
+
+            <!-- Moment 1: 捕蠅草 -->
+            <div class="flex flex-col lg:flex-row items-center gap-10 mb-20">
+                <div class="flex-1 order-2 lg:order-1">
+                    <p class="text-xs font-bold tracking-widest text-purple-400/70 uppercase mb-3" data-lang-key="m1Label">Capture Toolbar</p>
+                    <h3 class="text-xl md:text-2xl font-bold text-white mb-4" data-lang-key="m1Title">不需要你的時候，它消失</h3>
+                    <p class="text-white/55 leading-relaxed" data-lang-key="m1Desc">工具列縮成一條呼吸燈，待在桌面角落。拖著檔案靠近，它自己張開。放開，直接進編輯器。走了，它縮回去，繼續等。</p>
+                </div>
+                <div class="flex-1 order-1 lg:order-2">
+                    <video src="img/brethlight.mov" autoplay loop muted playsinline
+                           class="w-full rounded-2xl shadow-2xl"
+                           style="border: 1px solid rgba(255,255,255,0.08);"
+                           aria-label="VAS 工具列捕蠅草模式：縮成呼吸燈後感應檔案靠近自動展開"></video>
+                </div>
+            </div>
+
+            <!-- Moment 2: 工作流 -->
+            <div class="flex flex-col lg:flex-row items-center gap-10 mb-20">
+                <div class="flex-1">
+                    <div class="relative" style="min-height: 320px;">
+                        <img id="workflowImg0" src="img/in.png" alt="VAS 延遲截圖：抓住 dropdown 展開的瞬間" class="w-full rounded-2xl shadow-2xl workflow-img" style="border: 1px solid rgba(255,255,255,0.08); transition: opacity 0.5s ease;" loading="lazy">
+                        <img id="workflowImg1" src="img/out.png" alt="VAS 編輯器：截圖後直接進入標注與匯出流程" class="w-full rounded-2xl shadow-2xl workflow-img absolute inset-0" style="border: 1px solid rgba(255,255,255,0.08); transition: opacity 0.5s ease; opacity: 0;" loading="lazy">
+                    </div>
+                    <div class="flex justify-center gap-2 mt-4" aria-hidden="true">
+                        <span id="wfDot0" class="w-1.5 h-1.5 rounded-full bg-white/60"></span>
+                        <span id="wfDot1" class="w-1.5 h-1.5 rounded-full bg-white/20"></span>
+                    </div>
+                </div>
+                <div class="flex-1">
+                    <p class="text-xs font-bold tracking-widest text-purple-400/70 uppercase mb-3" data-lang-key="m2Label">Delay Capture</p>
+                    <h3 class="text-xl md:text-2xl font-bold text-white mb-4" data-lang-key="m2Title">那個截不到的瞬間，截到了</h3>
+                    <p class="text-white/55 leading-relaxed" data-lang-key="m2Desc">設好延遲，dropdown、tooltip、hover 狀態——點下去才出現的畫面，終於不再溜走。截完直接進編輯器，標注、匯出，一個流程。</p>
+                </div>
+            </div>
+
+            <!-- Moment 3: 設計火力 -->
+            <div class="flex flex-col lg:flex-row items-center gap-10">
+                <div class="flex-1 order-2 lg:order-1">
+                    <p class="text-xs font-bold tracking-widest text-purple-400/70 uppercase mb-3" data-lang-key="m3Label">Annotation Tools</p>
+                    <h3 class="text-xl md:text-2xl font-bold text-white mb-4" data-lang-key="m3Title">比你以為的更多可能</h3>
+                    <p class="text-white/55 leading-relaxed" data-lang-key="m3Desc">漸層色塊、透明疊加、符號印章、貝茲曲線——不只是標注工具，是一個輕量設計環境。你能想到的表達方式，它都有。</p>
+                </div>
+                <div class="flex-1 order-1 lg:order-2">
+                    <img src="img/paint.png" alt="VAS 設計工具展示：漸層色塊、透明文字、符號印章、貝茲曲線等標注工具成果" class="w-full rounded-2xl shadow-2xl" style="border: 1px solid rgba(255,255,255,0.08);" loading="lazy">
+                </div>
+            </div>
+        </section>
+
         <!-- Origin Story -->
         <section class="container mx-auto px-6 py-16 max-w-2xl text-center" aria-labelledby="story-heading">
             <div class="divider mx-auto mb-8"></div>
@@ -347,7 +400,7 @@
             <blockquote class="glass-section rounded-3xl p-8 md:p-10">
                 <p class="text-white/80 text-base md:text-lg leading-loose mb-6" data-lang-key="storyBody">
                     來自一位<strong class="text-white">一行程式碼都不會寫的 PM</strong>，<br>以及 Claude Code 的 Claude，<br>
-                    人機協作 <strong class="gradient-text text-2xl font-bold">36 小時</strong>內迭代至 v3.26 而誕生的作品。
+                    人機協作 <strong class="gradient-text text-2xl font-bold">一週</strong>內迭代至 v3.43 而誕生的作品。
                 </p>
                 <footer class="text-white/35 text-sm" data-lang-key="storyByline">— Nova &amp; Claude，2026</footer>
             </blockquote>
@@ -515,6 +568,14 @@
                 dev7n: '延遲截圖', dev7d: '設定 1–3 秒延遲，補抓 toast、loading spinner、hover dropdown 等稍縱即逝的 UI 狀態——那個「點下去才出現」的畫面終於截得到了',
                 dev8n: '一鍵複製 + 拖曳匯出', dev8d: '截完直接貼進 GitHub issue、PR comment、Slack 頻道，不需存檔再附加；截圖變附件，動作少一半',
                 toolbarLabel: '截圖工具列',
+                momentsLabel: 'Thoughtful by Design',
+                momentsTitle: '細節裡的貼心',
+                m1Label: 'Capture Toolbar', m1Title: '不需要你的時候，它消失',
+                m1Desc: '工具列縮成一條呼吸燈，待在桌面角落。拖著檔案靠近，它自己張開。放開，直接進編輯器。走了，它縮回去，繼續等。',
+                m2Label: 'Delay Capture', m2Title: '那個截不到的瞬間，截到了',
+                m2Desc: '設好延遲，dropdown、tooltip、hover 狀態——點下去才出現的畫面，終於不再溜走。截完直接進編輯器，標注、匯出，一個流程。',
+                m3Label: 'Annotation Tools', m3Title: '比你以為的更多可能',
+                m3Desc: '漸層色塊、透明疊加、符號印章、貝茲曲線——不只是標注工具，是一個輕量設計環境。你能想到的表達方式，它都有。',
                 storyTitle: 'Origin',
                 storyBody: '來自一位<strong class="text-white">一行程式碼都不會寫的 PM</strong>，<br>以及 Claude Code 的 Claude，<br>人機協作 <strong class="gradient-text text-2xl font-bold">一週</strong> 內迭代至 v3.43 而誕生的作品。',
                 storyByline: '— Nova & Claude，2026',
@@ -599,6 +660,14 @@
                 dev7n: 'Delayed Capture', dev7d: 'Set a 1–3 second delay to catch toasts, loading spinners, hover dropdowns, and other transient UI states — that "only appears after clicking" moment is finally capturable',
                 dev8n: 'Copy + Drag Export', dev8d: 'Paste directly into GitHub issues, PR comments, or Slack — no save-then-attach dance; screenshot becomes attachment in one move',
                 toolbarLabel: 'Capture Toolbar',
+                momentsLabel: 'Thoughtful by Design',
+                momentsTitle: 'Thoughtful by Design',
+                m1Label: 'Capture Toolbar', m1Title: 'When you don\'t need it, it disappears',
+                m1Desc: 'The toolbar shrinks to a breathing light, sitting quietly in a corner of your desktop. Drag a file near it — it opens by itself. Drop, and you\'re straight into the editor. Walk away, it folds back and waits.',
+                m2Label: 'Delay Capture', m2Title: 'That moment you could never capture — captured',
+                m2Desc: 'Set a delay. Dropdowns, tooltips, hover states — the UI that vanishes the moment you click, caught at last. Right into the editor. Annotate, export, done.',
+                m3Label: 'Annotation Tools', m3Title: 'More than you expected',
+                m3Desc: 'Gradient fills, transparent overlays, symbol stamps, Bézier curves — not just an annotation tool, but a lightweight design environment. If you can picture it, VAS can draw it.',
                 storyTitle: 'Origin',
                 storyBody: 'Born from a collaboration between <strong class="text-white">a PM who can\'t write a single line of code</strong> and Claude from Claude Code —<br>iterated together to v3.43 in <strong class="gradient-text text-2xl font-bold">one week</strong>.',
                 storyByline: '— Nova & Claude, 2026',
@@ -659,6 +728,21 @@
         }
 
         langZhBtn.addEventListener('click', () => switchLanguage('zh'));
+
+        // ── Workflow image carousel ──────────────────────────────
+        (function() {
+            const imgs = [document.getElementById('workflowImg0'), document.getElementById('workflowImg1')];
+            const dots = [document.getElementById('wfDot0'), document.getElementById('wfDot1')];
+            if (!imgs[0]) return;
+            let cur = 0;
+            setInterval(() => {
+                imgs[cur].style.opacity = '0';
+                dots[cur].style.background = 'rgba(255,255,255,0.2)';
+                cur = (cur + 1) % 2;
+                imgs[cur].style.opacity = '1';
+                dots[cur].style.background = 'rgba(255,255,255,0.6)';
+            }, 2800);
+        })();
         langEnBtn.addEventListener('click', () => switchLanguage('en'));
 
         switchLanguage('zh'); // 初始化：套用 zh i18n key，確保硬寫內容與翻譯一致
