@@ -141,6 +141,34 @@
             color: rgba(255,255,255,0.42);
             line-height: 1.5;
         }
+        .badge-tauri {
+            display: inline-flex;
+            align-items: center;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, rgba(139,92,246,0.35), rgba(196,113,245,0.25));
+            border: 1px solid rgba(139,92,246,0.45);
+            color: #d4aaff;
+            text-transform: uppercase;
+            vertical-align: middle;
+        }
+        .badge-all {
+            display: inline-flex;
+            align-items: center;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: rgba(74,222,128,0.12);
+            border: 1px solid rgba(74,222,128,0.3);
+            color: rgba(134,239,172,0.9);
+            text-transform: uppercase;
+            vertical-align: middle;
+        }
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
                 animation-duration: 0.01ms !important;
@@ -349,7 +377,7 @@
             <!-- Moment 1: 捕蠅草 -->
             <div class="flex flex-col lg:flex-row items-center gap-10 mb-20">
                 <div class="flex-1 order-2 lg:order-1">
-                    <p class="text-xs font-bold tracking-widest text-purple-400/70 uppercase mb-3" data-lang-key="m1Label">Capture Toolbar</p>
+                    <p class="text-xs font-bold tracking-widest text-purple-400/70 uppercase mb-3"><span data-lang-key="m1Label">Capture Toolbar</span> <span class="badge-tauri">Tauri</span></p>
                     <h3 class="text-xl md:text-2xl font-bold text-white mb-4" data-lang-key="m1Title">不需要你的時候，它消失</h3>
                     <p class="text-white/55 leading-relaxed" data-lang-key="m1Desc">工具列縮成一條呼吸燈，待在桌面角落。拖著檔案靠近，它自己張開。放開，直接進編輯器。走了，它縮回去，繼續等。</p>
                 </div>
@@ -374,23 +402,37 @@
                     </div>
                 </div>
                 <div class="flex-1">
-                    <p class="text-xs font-bold tracking-widest text-purple-400/70 uppercase mb-3" data-lang-key="m2Label">Delay Capture</p>
+                    <p class="text-xs font-bold tracking-widest text-purple-400/70 uppercase mb-3"><span data-lang-key="m2Label">Delay Capture</span> <span class="badge-tauri">Tauri</span></p>
                     <h3 class="text-xl md:text-2xl font-bold text-white mb-4" data-lang-key="m2Title">那個截不到的瞬間，截到了</h3>
-                    <p class="text-white/55 leading-relaxed" data-lang-key="m2Desc">設好延遲，dropdown、tooltip、hover 狀態——點下去才出現的畫面，終於不再溜走。截完直接進編輯器，標注、匯出，一個流程。</p>
+                    <p class="text-white/55 leading-relaxed" data-lang-key="m2Desc">設好延遲，dropdown、tooltip、hover 狀態——點下去才出現的畫面，終於不再溜走。截完直接進編輯器，標注、匯出，Workflow 不再有任何「選擇開啟資料夾」或「確定鍵」卡住你。</p>
                 </div>
             </div>
 
             <!-- Moment 3: 設計火力 -->
             <div class="flex flex-col lg:flex-row items-center gap-10">
                 <div class="flex-1 order-2 lg:order-1">
-                    <p class="text-xs font-bold tracking-widest text-purple-400/70 uppercase mb-3" data-lang-key="m3Label">Annotation Tools</p>
+                    <p class="text-xs font-bold tracking-widest text-purple-400/70 uppercase mb-3"><span data-lang-key="m3Label">Annotation Tools</span> <span class="badge-all" data-lang-key="badgeAllVersions">全版本</span></p>
                     <h3 class="text-xl md:text-2xl font-bold text-white mb-4" data-lang-key="m3Title">比你以為的更多可能</h3>
-                    <p class="text-white/55 leading-relaxed" data-lang-key="m3Desc">漸層色塊、透明疊加、符號印章、貝茲曲線——不只是標注工具，是一個輕量設計環境。你能想到的表達方式，它都有。</p>
+                    <p class="text-white/55 leading-relaxed" data-lang-key="m3Desc">漸層色塊、透明疊加、符號印章、貝茲曲線、疊圖、複製物件、複數字型選擇——不只是標注工具，也是一個輕量設計環境。你能想到的表達方式，它都有。</p>
                 </div>
                 <div class="flex-1 order-1 lg:order-2">
                     <img src="img/paint.png" alt="VAS 設計工具展示：漸層色塊、透明文字、符號印章、貝茲曲線等標注工具成果" class="w-full rounded-2xl shadow-2xl" style="border: 1px solid rgba(255,255,255,0.08);" loading="lazy">
                 </div>
             </div>
+        </section>
+
+            <!-- Moment 4: 自定義快捷鍵 -->
+            <div class="flex flex-col lg:flex-row items-center gap-10 mt-20">
+                <div class="flex-1">
+                    <img src="img/fast.png" alt="VAS 自定義全域快捷鍵：在偏好設定中為工具錄製專屬快捷鍵組合" class="w-full rounded-2xl shadow-2xl" style="border: 1px solid rgba(255,255,255,0.08);" loading="lazy">
+                </div>
+                <div class="flex-1">
+                    <p class="text-xs font-bold tracking-widest text-purple-400/70 uppercase mb-3"><span data-lang-key="m4Label">Global Shortcuts</span> <span class="badge-tauri">Tauri</span></p>
+                    <h3 class="text-xl md:text-2xl font-bold text-white mb-4" data-lang-key="m4Title">你的習慣，不用重學</h3>
+                    <p class="text-white/55 leading-relaxed" data-lang-key="m4Desc">從任何截圖工具遷移過來，快捷鍵配合你，不是你配合快捷鍵。在偏好設定裡錄製一次，往後每個工具都回應你熟悉的那個按鍵組合。</p>
+                </div>
+            </div>
+
         </section>
 
         <!-- Origin Story -->
@@ -573,9 +615,11 @@
                 m1Label: 'Capture Toolbar', m1Title: '不需要你的時候，它消失',
                 m1Desc: '工具列縮成一條呼吸燈，待在桌面角落。拖著檔案靠近，它自己張開。放開，直接進編輯器。走了，它縮回去，繼續等。',
                 m2Label: 'Delay Capture', m2Title: '那個截不到的瞬間，截到了',
-                m2Desc: '設好延遲，dropdown、tooltip、hover 狀態——點下去才出現的畫面，終於不再溜走。截完直接進編輯器，標注、匯出，一個流程。',
-                m3Label: 'Annotation Tools', m3Title: '比你以為的更多可能',
-                m3Desc: '漸層色塊、透明疊加、符號印章、貝茲曲線——不只是標注工具，是一個輕量設計環境。你能想到的表達方式，它都有。',
+                m2Desc: '設好延遲，dropdown、tooltip、hover 狀態——點下去才出現的畫面，終於不再溜走。截完直接進編輯器，標注、匯出，Workflow 不再有任何「選擇開啟資料夾」或「確定鍵」卡住你。',
+                m3Label: 'Annotation Tools', m3Title: '比你以為的更多可能', badgeAllVersions: '全版本',
+                m3Desc: '漸層色塊、透明疊加、符號印章、貝茲曲線、疊圖、複製物件、複數字型選擇——不只是標注工具，也是一個輕量設計環境。你能想到的表達方式，它都有。',
+                m4Label: 'Global Shortcuts', m4Title: '你的習慣，不用重學',
+                m4Desc: '從任何截圖工具遷移過來，快捷鍵配合你，不是你配合快捷鍵。在偏好設定裡錄製一次，往後每個工具都回應你熟悉的那個按鍵組合。',
                 storyTitle: 'Origin',
                 storyBody: '來自一位<strong class="text-white">一行程式碼都不會寫的 PM</strong>，<br>以及 Claude Code 的 Claude，<br>人機協作 <strong class="gradient-text text-2xl font-bold">一週</strong> 內迭代至 v3.43 而誕生的作品。',
                 storyByline: '— Nova & Claude，2026',
@@ -665,9 +709,11 @@
                 m1Label: 'Capture Toolbar', m1Title: 'When you don\'t need it, it disappears',
                 m1Desc: 'The toolbar shrinks to a breathing light, sitting quietly in a corner of your desktop. Drag a file near it — it opens by itself. Drop, and you\'re straight into the editor. Walk away, it folds back and waits.',
                 m2Label: 'Delay Capture', m2Title: 'That moment you could never capture — captured',
-                m2Desc: 'Set a delay. Dropdowns, tooltips, hover states — the UI that vanishes the moment you click, caught at last. Right into the editor. Annotate, export, done.',
-                m3Label: 'Annotation Tools', m3Title: 'More than you expected',
-                m3Desc: 'Gradient fills, transparent overlays, symbol stamps, Bézier curves — not just an annotation tool, but a lightweight design environment. If you can picture it, VAS can draw it.',
+                m2Desc: 'Set a delay. Dropdowns, tooltips, hover states — the UI that vanishes the moment you click, caught at last. Straight into the editor, annotate, export. No "choose a folder" dialog. No confirm button. Nothing in the way.',
+                m3Label: 'Annotation Tools', m3Title: 'More than you expected', badgeAllVersions: 'All Versions',
+                m3Desc: 'Gradient fills, transparent overlays, symbol stamps, Bézier curves, image overlay, duplicate objects, multiple font choices — not just an annotation tool, but a lightweight design environment. If you can picture it, VAS can draw it.',
+                m4Label: 'Global Shortcuts', m4Title: 'Your muscle memory, honoured',
+                m4Desc: 'Migrating from any other screenshot tool? Shortcuts adapt to you — not the other way around. Record once in Preferences, and every tool responds to the key combination you\'ve always used.',
                 storyTitle: 'Origin',
                 storyBody: 'Born from a collaboration between <strong class="text-white">a PM who can\'t write a single line of code</strong> and Claude from Claude Code —<br>iterated together to v3.43 in <strong class="gradient-text text-2xl font-bold">one week</strong>.',
                 storyByline: '— Nova & Claude, 2026',
