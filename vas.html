@@ -225,6 +225,7 @@
             <div class="flex-1 flex justify-end"><div class="lang-switcher flex items-center rounded-full p-1" style="background: rgba(255,255,255,0.08);" role="group" aria-label="語言切換">
                 <button id="lang-zh" class="active" aria-pressed="true">中</button>
                 <button id="lang-en" aria-pressed="false">EN</button>
+                <button id="lang-ja" aria-pressed="false">日</button>
             </div></div>
         </div>
     </header>
@@ -775,11 +776,107 @@
                 cl44items: '<li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>Toolbar modal position drift & accumulation — fixed</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>All three capture modes (fullscreen / window / rectangle) restored</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>OCR and privacy scan fixed</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>Number stamp & text tool scale consistency fixed</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">⌨️</span><span>Arrow key nudge for selected objects</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🧹</span><span>Drag export temp files auto-deleted after 60 seconds</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🔒</span><span>Security patch (brace-expansion vulnerability)</span></li>',
                 cl43date: '2026-03-29',
                 cl43items: '<li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>Initial public release</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>Full feature set: capture, annotation, OCR, privacy scan, batch convert</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>Smart snap, object rotation, QR Code scan, Bezier curve arrows</span></li>'
+            },
+            ja: {
+                backLabel: '深握プロジェクト',
+                badge: 'Mac 専用 · v3.44.0 リリース',
+                heroSubtitle: 'Visual Annotation Studio',
+                heroTagline: '伝えるために、撮る。Mac のための視覚的注釈ツール。',
+                downloadBtn: '無料ダウンロード',
+                releaseNotesBtn: 'Release Notes',
+                guideBtn: '操作マニュアル',
+                sysReq: 'Electron 先行リリース版 · macOS · Apple Silicon (arm64) · Apple notarize 認証済み',
+                aboutTitle: 'VAS について',
+                about1: '他のツールと比べるのではなく、VAS が目指すのは<strong class="text-white/95">情報を伝えるための錬金術の容器</strong>になること。',
+                about2: '情報は自然な流れで VAS に入り、豊富なツールが思考を乗せて、あなたの届けたい場所へ届ける。一ヶ所にあらゆるコミュニケーションツールが集まる場所。誰もがここで、自分だけの伝え方を見つけられる。',
+                featuresTitle: '使い方を見つけよう',
+                featuresSub: '役割は違っても、ツールはひとつ',
+                tabQA: '🔬 QA / テストエンジニア',
+                tabDesign: '🎨 デザイナー / 学生',
+                tabPM: '📋 PM / クロスファンクショナル',
+                tabDev: '💻 開発者 / DevOps',
+                qaTagline: 'スクリーンショットは共有したい。でも見せてはいけないものが写っている。',
+                qa1n: 'プライバシー遮蔽', qa1d: 'IP・メール・電話番号・ID・クレジットカード・API Token・パスワードなど10種以上の機密情報を自動検出・遮蔽。繁体字中国語シーンにも特化対応済み。',
+                qa2n: 'モザイク / ぼかし', qa2d: '任意の範囲を手動でマスク。サイズ調整可能、ぼかしモード対応。<strong class="text-white/80">貼り付け後も移動・拡大縮小・調整が可能</strong>——多くのツールのように焼き付けではないので、ズレても引き戻して貼り直せる。OCR プライバシー遮蔽との組み合わせが最も効果的。',
+                qa3n: '番号ステップスタンプ', qa3d: 'スクリーンショットに連番を貼り付け。Bug Report の手順が一目瞭然。',
+                qa4n: '矩形赤枠アノテーション', qa4d: '問題箇所を囲む定番ツール。角丸・枠色・シャドウに対応。',
+                qa5n: 'OCR テキスト認識', qa5d: 'スクリーンショット内のエラーメッセージをワンクリックで編集可能テキストに変換。Jira にそのまま貼り付けられる。',
+                qa6n: 'ワンクリックコピー + ドラッグ書き出し', qa6d: 'アノテーション後すぐ Slack・Notion・Confluence に貼り付け、または添付欄にドラッグ。',
+                qa7n: '範囲 / ウィンドウキャプチャ', qa7d: '問題箇所を正確に選択、または特定ウィンドウのみ。デスクトップのノイズを含まない。',
+                qa8n: '遅延キャプチャ', qa8d: '1〜3秒の遅延を設定。tooltip・dropdown・hover 状態など一瞬で消えるUIを確実に捉える。',
+                designTagline: 'スクリーンショットは素材に過ぎない。その上で作業したい。',
+                d1n: '新規キャンバス', d1d: 'A4・Full HD・Instagram 投稿・YouTube サムネイルなどのプリセットをワンクリックで開く。ピクセル計算不要。',
+                d2n: 'カラーブロック（グラデーション / 透明）', d2d: '矩形・楕円のカラーブロック。2色グラデーション・透明度対応。素早くベースカラーを敷ける。',
+                d3n: 'テキストツール', d3d: '太字・斜体・下線・取り消し線・アウトライン・背景色・透明テキスト・複数行対応。基本的なタイポグラフィをすべてカバー。',
+                d4n: 'シンボルスタンプ', d4d: '絵文字・矢印・幾何学シンボルをすぐ貼り付け。別のライブラリを開く必要なし。',
+                d5n: 'スマートスナップ整列', d5d: 'ドラッグ時に端・中央・等間隔に自動吸着。ガイドラインがリアルタイムで表示。',
+                d6n: '複数選択整列 + ミラー', d6d: '6方向整列・水平/垂直均等分布・水平/垂直ミラー。選択オブジェクトに一括適用。',
+                d7n: 'ワンクリックテンプレート', d7d: '6種の Apple mesh グラデーション背景。LinkedIn・Instagram・X の規格に即変換。',
+                d8n: 'トリミング / 拡張 / キャンバスリサイズ', d8d: '完全なキャンバス操作。別の画像編集ソフトは不要。',
+                pmTagline: 'スクリーンショットはコミュニケーション。明確に、速く、届けられる形で。',
+                pm1n: 'OCR テキスト認識', pm1d: 'スクリーンショット内のテキストを直接スキャン。デザイナーへのコピーとしてワンクリックで共有。手入力不要。',
+                pm2n: 'QR Code スマートスキャン', pm2d: 'QR を囲むだけで直接ブラウザで開く。70%以上で自動オープン、21〜69%で確認ダイアログ。スマホ不要。',
+                pm3n: '矢印 / ベジェ曲線', pm3d: 'フロー・指示・関係性を描く。カーブのコントロールポイントで障害物を避けた矢印も自由自在。',
+                pm4n: 'テキストアノテーション', pm4d: 'スクリーンショットに直接説明文を書き込める。ドキュメントに戻って補足する手間がなくなる。',
+                pm5n: 'ウィンドウキャプチャ', pm5d: '特定のアプリウィンドウのみキャプチャ。デスクトップや他のウィンドウを含まないクリーンな画面。',
+                pm6n: 'コピー + ドラッグ書き出し', pm6d: '撮ったらすぐ貼り付け。Notion・Confluence・Slack にシームレスに。',
+                pm7n: 'バッチ変換', pm7d: '複数の画像を一括でフォーマット変換。JPG・PNG・WebP・GIF に対応。',
+                pm8n: '画像オーバーレイ / プロトタイプ作成', pm8d: 'ワイヤーフレーム・デザインカンプ・ロゴをスクリーンショットに重ねる。または UI コンポーネントを切り取って並べ替え、簡易プロトタイプを作成——別のデザインツール不要。',
+                devTagline: 'スクリーンショットにサーバー情報が写っている。外部共有前にクリーンにしたい。',
+                dev1n: 'プライバシー遮蔽（サーバー情報）', dev1d: 'IPv4/IPv6・API Token・サーバーパス・法人番号などを自動検出。外部共有前に安全なスクリーンショットへ。繁体字中国語シーンにも特化対応済み。',
+                dev2n: 'OCR テキスト認識', dev2d: 'ターミナルログのスクリーンショットを検索可能なテキストに変換。issue やチケットへの貼り付けが簡単に。',
+                dev3n: 'モザイク / ぼかし', dev3d: '自動検出でカバーしきれなかった特定フィールドを手動でマスク。<strong class="text-white/80">マスク後も移動・範囲調整が可能</strong>。再キャプチャ不要。OCR 遮蔽との2層保護で安心。',
+                dev4n: 'QR Code スキャン', dev4d: 'デプロイ後の QR コードをキャプチャして直接ジャンプ確認。スマホ不要。',
+                dev5n: '番号ステップスタンプ', dev5d: '再現手順のスクリーンショットに連番を付け、Bug Report の操作フローが一目瞭然。',
+                dev6n: '範囲キャプチャ', dev6d: 'console や特定ウィンドウ範囲のみキャプチャ。他のウィンドウの機密情報を含まない。',
+                dev7n: '遅延キャプチャ', dev7d: '1〜3秒の遅延を設定。toast・loading spinner・hover dropdown など一瞬で消えるUI状態を確実に捉える——「クリックして初めて現れる」あの画面が、ようやくキャプチャできる。',
+                dev8n: 'ワンクリックコピー + ドラッグ書き出し', dev8d: 'キャプチャ後すぐ GitHub issue・PR comment・Slack チャンネルへ。保存して添付する手間が半分に。',
+                toolbarLabel: 'キャプチャツールバー',
+                momentsLabel: 'Thoughtful by Design',
+                momentsTitle: '細部に宿る、思いやり',
+                m1Label: 'Capture Toolbar', m1Title: '生きるように、そこにいる。',
+                m1Desc: 'ツールバーはひとすじの光になって、デスクトップの隅で静かに待つ。ファイルを近づけると、それだけで開く。離すと、そのままエディタへ。去れば、また光に戻って、次を待つ。',
+                m2Label: 'Delay Capture', m2Title: '捉えられなかったあの瞬間が、今度こそ。',
+                m2Desc: '遅延を設定すれば、dropdown・tooltip・hover 状態——クリックして初めて現れる画面が、もう逃げない。キャプチャ後すぐエディタへ。アノテーション、書き出し、「フォルダを選択」も「確認」ボタンも、何も邪魔しない。',
+                m3Label: 'Annotation Tools', m3Title: '思っていたより、ずっと多い。', badgeAllVersions: '全バージョン',
+                m3Desc: 'グラデーション塗り・透明オーバーレイ・シンボルスタンプ・ベジェ曲線・画像重ね・オブジェクト複製・複数フォント——注釈ツールではなく、軽量デザイン環境。あなたが思い描く表現が、ここにある。',
+                m4Label: 'Global Shortcuts', m4Title: '慣れた手つきで、そのまま使える。',
+                m4Desc: 'どのスクリーンショットツールから移行しても、ショートカットがあなたに合わせる。環境設定で一度録音するだけで、以降はすべてのツールがあなたの慣れたキーに応答する。',
+                navFeatures: '機能', navMoments: '細部', navOrigin: '起源', navRoadmap: 'バージョン',
+                storyTitle: 'Origin',
+                storyBody: '<strong class="text-white">コードを一行も書けない PM</strong> と、<br>Claude Code の Claude が組んで、<br>人と AI の協働で <strong class="gradient-text text-2xl font-bold">1週間</strong> で v3.43 まで育てた作品。',
+                storyByline: '— Nova & Claude, 2026',
+                footer: 'GitHub でデプロイ　｜　Claude Code で構築　｜　2026年 最終更新　<a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a>',
+                gkTitle: '⚠️ VAS を初めて開く場合',
+                gkDesc: 'macOS が「開けません」と表示することがあります。これは通常のセキュリティ機能で、ファイルに問題があるわけではありません。以下のいずれかで解決できます：',
+                gkSteps: '<li><strong class="text-white/70">右クリックで開く：</strong>Finder で Vas.app を探す → Control キーを押しながらクリック → 「開く」を選択 → 確認画面で再度「開く」をクリック</li><li><strong class="text-white/70">ターミナルコマンド：</strong><code class="bg-white/10 px-1.5 py-0.5 rounded text-white/80">xattr -cr /Applications/Vas.app</code> を実行</li>',
+                roadmapTitle: 'Roadmap &amp; Pricing',
+                roadmapSub: '2つのバージョン、1つのストーリー',
+                planElectronName: 'Electron 版（現行）',
+                planElectronPriceBadge: '無料 · 全機能',
+                planElectronFeatures: '<li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>すべての現行機能を完全収録</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>使用期限なし、永久無料</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">△</span><span>インストールサイズが大きめ（約113 MB）</span></li><li class="flex gap-2"><span class="text-white/30 mt-0.5" aria-hidden="true">—</span><span>リリース後の機能追加なし</span></li>',
+                planElectronNote: '初回リリース版。機能完全。長く使えます。',
+                planTauriName: 'Tauri 版（開発中）',
+                planTauriPriceBadge: '有料 · 継続アップデート',
+                planTauriFeatures: '<li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>新しい軽量アーキテクチャ、サイズ大幅削減</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>以降のすべての新機能を優先提供</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>回転・キャプチャ履歴などの高度なツール</span></li><li class="flex gap-2"><span class="text-purple-300/80 mt-0.5" aria-hidden="true">★</span><span>Electron 早期ユーザーはアップグレード割引あり</span></li>',
+                planTauriNote: '今は Electron 版を使いながら、Tauri 版リリース時に早期割引を受け取れます。',
+                surveyBadge: '早期ユーザー限定',
+                surveyTitle: 'アンケートに答えて、早期割引コードをゲット',
+                surveyDesc: '6つの質問。どれも真剣に考える価値があります。あなたの回答が Tauri 版の機能優先順位に直接影響します——Tauri 版リリース時に、早期割引コードをメールでお送りします。',
+                surveyBtn: 'アンケートに回答する',
+                surveyNote: 'メールアドレスは Tauri 版リリース時の割引コード送付のみに使用します。',
+                changelogTitle: 'Changelog',
+                changelogSub: '1万時間ではなく、1万回のイテレーション',
+                cl44date: '2026-03-31',
+                cl44items: '<li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>ツールバー Modal の位置ずれ・累積オフセットを根本修正</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>3種のキャプチャモード（全画面/ウィンドウ/矩形）の一斉不具合を修正</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>OCR・プライバシースキャン機能を修正</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>スタンプとテキストツールのサイズスケール一貫性を修正</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">⌨️</span><span>矢印キーでオブジェクトの微調整（Arrow nudge）</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🧹</span><span>ドラッグ書き出しの一時ファイルを60秒後に自動削除</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🔒</span><span>セキュリティパッチ（brace-expansion 脆弱性）</span></li>',
+                cl43date: '2026-03-29',
+                cl43items: '<li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>初回公開リリース</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>キャプチャ・アノテーション・OCR・プライバシースキャン・バッチ変換を全収録</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>スマートスナップ・オブジェクト回転・QR Code スキャン・ベジェ曲線矢印</span></li>'
             }
         };
 
         const langZhBtn = document.getElementById('lang-zh');
         const langEnBtn = document.getElementById('lang-en');
+        const langJaBtn = document.getElementById('lang-ja');
 
         const surveyLinks = {
             zh: 'https://forms.gle/5xWyyvehF1HSAyDu7',
@@ -787,7 +884,6 @@
         };
 
         function switchLanguage(lang) {
-            document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
             const trans = translations[lang];
             document.querySelectorAll('[data-lang-key]').forEach(el => {
                 const key = el.dataset.langKey;
@@ -802,12 +898,16 @@
             vasframeImg.alt = lang === 'zh' ? 'VAS 編輯器介面：深色工作區，左側工具列，頂部選項列，中央為圖片標注畫布' : 'VAS editor interface: dark workspace with left toolbar, top options bar, and annotation canvas';
             langZhBtn.classList.toggle('active', lang === 'zh');
             langEnBtn.classList.toggle('active', lang === 'en');
+            langJaBtn.classList.toggle('active', lang === 'ja');
             langZhBtn.setAttribute('aria-pressed', lang === 'zh');
             langEnBtn.setAttribute('aria-pressed', lang === 'en');
+            langJaBtn.setAttribute('aria-pressed', lang === 'ja');
+            document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : lang === 'ja' ? 'ja' : 'en';
         }
 
         langZhBtn.addEventListener('click', () => switchLanguage('zh'));
         langEnBtn.addEventListener('click', () => switchLanguage('en'));
+        langJaBtn.addEventListener('click', () => switchLanguage('ja'));
 
         // ── Floating pill nav ─────────────────────────────────────────────────
         (function() {
