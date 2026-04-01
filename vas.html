@@ -442,27 +442,39 @@
                 </div>
             </div>
 
-            <!-- Moment 3: 自定義快捷鍵 -->
+            <!-- Moment 3: ShareSheet -->
             <div class="flex flex-col lg:flex-row items-center gap-10 mb-20">
                 <div class="flex-1 order-2 lg:order-1">
+                    <p class="text-xs font-bold tracking-widest text-purple-400/70 uppercase mb-3"><span data-lang-key="m5Label">ShareSheet</span> <span class="badge-tauri">Tauri</span></p>
+                    <h3 class="text-xl md:text-2xl font-bold text-white mb-4" data-lang-key="m5Title">順勢流動，一鍵出口</h3>
+                    <p class="text-white/55 leading-relaxed" data-lang-key="m5Desc">截完，不用存檔。不用找資料夾。不用切 App。叫出 ShareSheet，選一個去處，圖就到了。資訊流進 VAS，也流出 VAS——從來不是你的終點站，是你工作流的一條河。</p>
+                </div>
+                <div class="flex-1 order-1 lg:order-2">
+                    <img src="img/sharesheet.png" alt="VAS ShareSheet：截圖後一鍵叫出系統分享選單，直接傳送至社群或雲端" class="w-full rounded-2xl shadow-2xl" style="border: 1px solid rgba(255,255,255,0.08);" loading="lazy">
+                </div>
+            </div>
+
+            <!-- Moment 4: 自定義快捷鍵 -->
+            <div class="flex flex-col lg:flex-row items-center gap-10 mb-20">
+                <div class="flex-1">
+                    <img src="img/fast.png" alt="VAS 自定義全域快捷鍵：在偏好設定中為工具錄製專屬快捷鍵組合" class="w-full rounded-2xl shadow-2xl" style="border: 1px solid rgba(255,255,255,0.08); max-height: 380px; object-fit: contain;" loading="lazy">
+                </div>
+                <div class="flex-1">
                     <p class="text-xs font-bold tracking-widest text-purple-400/70 uppercase mb-3"><span data-lang-key="m4Label">Global Shortcuts</span> <span class="badge-tauri">Tauri</span></p>
                     <h3 class="text-xl md:text-2xl font-bold text-white mb-4" data-lang-key="m4Title">你的習慣，不用重學</h3>
                     <p class="text-white/55 leading-relaxed" data-lang-key="m4Desc">從任何截圖工具遷移過來，快捷鍵配合你，不是你配合快捷鍵。在偏好設定裡錄製一次，往後每個工具都回應你熟悉的那個按鍵組合。</p>
                 </div>
-                <div class="flex-1 order-1 lg:order-2">
-                    <img src="img/fast.png" alt="VAS 自定義全域快捷鍵：在偏好設定中為工具錄製專屬快捷鍵組合" class="w-full rounded-2xl shadow-2xl" style="border: 1px solid rgba(255,255,255,0.08); max-height: 380px; object-fit: contain;" loading="lazy">
-                </div>
             </div>
 
-            <!-- Moment 4: 設計火力 -->
+            <!-- Moment 5: 設計火力 -->
             <div class="flex flex-col lg:flex-row items-center gap-10">
-                <div class="flex-1">
-                    <img src="img/paint.png" alt="VAS 設計工具展示：漸層色塊、透明文字、符號印章、貝茲曲線等標注工具成果" class="w-full rounded-2xl shadow-2xl" style="border: 1px solid rgba(255,255,255,0.08);" loading="lazy">
-                </div>
-                <div class="flex-1">
+                <div class="flex-1 order-2 lg:order-1">
                     <p class="text-xs font-bold tracking-widest text-purple-400/70 uppercase mb-3"><span data-lang-key="m3Label">Annotation Tools</span> <span class="badge-all" data-lang-key="badgeAllVersions">全版本</span></p>
                     <h3 class="text-xl md:text-2xl font-bold text-white mb-4" data-lang-key="m3Title">比你以為的更多可能</h3>
                     <p class="text-white/55 leading-relaxed" data-lang-key="m3Desc">漸層色塊、透明疊加、符號印章、貝茲曲線、疊圖、複製物件、複數字型選擇——不只是標注工具，也是一個輕量設計環境。你能想到的表達方式，它都有。</p>
+                </div>
+                <div class="flex-1 order-1 lg:order-2">
+                    <img src="img/paint.png" alt="VAS 設計工具展示：漸層色塊、透明文字、符號印章、貝茲曲線等標注工具成果" class="w-full rounded-2xl shadow-2xl" style="border: 1px solid rgba(255,255,255,0.08);" loading="lazy">
                 </div>
             </div>
         </section>
@@ -652,6 +664,8 @@
                 m3Desc: '漸層色塊、透明疊加、符號印章、貝茲曲線、疊圖、複製物件、複數字型選擇——不只是標注工具，也是一個輕量設計環境。你能想到的表達方式，它都有。',
                 m4Label: 'Global Shortcuts', m4Title: '你的習慣，不用重學',
                 m4Desc: '從任何截圖工具遷移過來，快捷鍵配合你，不是你配合快捷鍵。在偏好設定裡錄製一次，往後每個工具都回應你熟悉的那個按鍵組合。',
+                m5Label: 'ShareSheet', m5Title: '順勢流動，一鍵出口',
+                m5Desc: '截完，不用存檔。不用找資料夾。不用切 App。叫出 ShareSheet，選一個去處，圖就到了。資訊流進 VAS，也流出 VAS——從來不是你的終點站，是你工作流的一條河。',
                 navFeatures: '功能', navMoments: '細節', navOrigin: '起源', navRoadmap: '版本',
                 storyTitle: 'Origin',
                 storyBody: '來自一位<strong class="text-white">一行程式碼都不會寫的 PM</strong>，<br>以及 Claude Code 的 Claude，<br>人機協作 <strong class="gradient-text text-2xl font-bold">一週</strong> 內迭代至 v3.43 而誕生的作品。',
@@ -747,6 +761,8 @@
                 m3Desc: 'Gradient fills, transparent overlays, symbol stamps, Bézier curves, image overlay, duplicate objects, multiple font choices — not just an annotation tool, but a lightweight design environment. If you can picture it, VAS can draw it.',
                 m4Label: 'Global Shortcuts', m4Title: 'Your muscle memory, honoured',
                 m4Desc: 'Migrating from any other screenshot tool? Shortcuts adapt to you — not the other way around. Record once in Preferences, and every tool responds to the key combination you\'ve always used.',
+                m5Label: 'ShareSheet', m5Title: 'Flow in. Flow out.',
+                m5Desc: 'No saving. No hunting for files. No switching apps. One key brings up the Share Sheet — pick a destination, and your image is already there. Information flows into VAS, and flows right back out. Not a destination. A current.',
                 navFeatures: 'Features', navMoments: 'Moments', navOrigin: 'Origin', navRoadmap: 'Versions',
                 storyTitle: 'Origin',
                 storyBody: 'Born from a collaboration between <strong class="text-white">a PM who can\'t write a single line of code</strong> and Claude from Claude Code —<br>iterated together to v3.43 in <strong class="gradient-text text-2xl font-bold">one week</strong>.',
@@ -842,6 +858,8 @@
                 m3Desc: 'グラデーション塗り・透明オーバーレイ・シンボルスタンプ・ベジェ曲線・画像重ね・オブジェクト複製・複数フォント——注釈ツールではなく、軽量デザイン環境。あなたが思い描く表現が、ここにある。',
                 m4Label: 'Global Shortcuts', m4Title: '慣れた手つきで、そのまま使える。',
                 m4Desc: 'どのスクリーンショットツールから移行しても、ショートカットがあなたに合わせる。環境設定で一度録音するだけで、以降はすべてのツールがあなたの慣れたキーに応答する。',
+                m5Label: 'ShareSheet', m5Title: '流れるように、一瞬で届く。',
+                m5Desc: '保存しなくていい。ファイルを探さなくていい。アプリを切り替えなくていい。ShareSheet を呼び出して、送り先を選べば、もうそこにある。情報は VAS に流れ込み、そのまま流れ出ていく——終点ではなく、ワークフローの一筋の川。',
                 navFeatures: '機能', navMoments: '細部', navOrigin: '起源', navRoadmap: 'バージョン',
                 storyTitle: 'Origin',
                 storyBody: '<strong class="text-white">コードを一行も書けない PM</strong> と、<br>Claude Code の Claude が組んで、<br>人と AI の協働で <strong class="gradient-text text-2xl font-bold">1週間</strong> で v3.43 まで育てた作品。',
