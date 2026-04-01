@@ -209,9 +209,6 @@
             <a href="#moments-heading" class="nav-pill" data-lang-key="navMoments">細節</a>
             <a href="#story-heading" class="nav-pill" data-lang-key="navOrigin">起源</a>
             <a href="#roadmap-heading" class="nav-pill" data-lang-key="navRoadmap">版本</a>
-            <div class="w-px h-3.5 bg-white/15 mx-1" aria-hidden="true"></div>
-            <button id="nav-lang-zh" class="nav-pill active" aria-label="切換為中文">中</button>
-            <button id="nav-lang-en" class="nav-pill" aria-label="Switch to English">EN</button>
         </div>
     </nav>
 
@@ -807,11 +804,6 @@
             langEnBtn.classList.toggle('active', lang === 'en');
             langZhBtn.setAttribute('aria-pressed', lang === 'zh');
             langEnBtn.setAttribute('aria-pressed', lang === 'en');
-            // 同步 pill bar 語言按鈕
-            const nz = document.getElementById('nav-lang-zh');
-            const ne = document.getElementById('nav-lang-en');
-            if (nz) nz.classList.toggle('active', lang === 'zh');
-            if (ne) ne.classList.toggle('active', lang === 'en');
         }
 
         langZhBtn.addEventListener('click', () => switchLanguage('zh'));
@@ -831,9 +823,6 @@
                 floatingNav.style.pointerEvents = past ? 'auto' : 'none';
             }, { passive: true });
 
-            // Lang buttons in pill bar
-            navLangZh.addEventListener('click', () => switchLanguage('zh'));
-            navLangEn.addEventListener('click', () => switchLanguage('en'));
         })();
 
         // ── Workflow image carousel ──────────────────────────────
