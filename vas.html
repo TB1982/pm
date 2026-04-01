@@ -175,9 +175,45 @@
                 transition-duration: 0.01ms !important;
             }
         }
+        /* Floating pill nav */
+        #floatingNav { transition: opacity 0.3s ease, transform 0.3s ease; }
+        .nav-pill {
+            display: inline-block;
+            padding: 4px 11px;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            color: rgba(255,255,255,0.45);
+            background: transparent;
+            border: none;
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.2s, background 0.2s;
+            white-space: nowrap;
+        }
+        .nav-pill:hover, .nav-pill:focus-visible {
+            color: white;
+            background: rgba(255,255,255,0.1);
+            outline: none;
+        }
+        .nav-pill.active { color: white; background: rgba(255,255,255,0.12); }
     </style>
 </head>
 <body class="hero-bg text-white min-h-screen">
+
+    <!-- Floating Pill Nav -->
+    <nav id="floatingNav" class="fixed top-4 left-1/2 -translate-x-1/2 z-40 opacity-0 pointer-events-none" aria-label="頁面導航">
+        <div class="flex items-center gap-0.5 px-2 py-1.5 rounded-full" style="background: rgba(15,12,41,0.82); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 4px 24px rgba(0,0,0,0.5);">
+            <a href="#features-heading" class="nav-pill" data-lang-key="navFeatures">功能</a>
+            <a href="#moments-heading" class="nav-pill" data-lang-key="navMoments">細節</a>
+            <a href="#story-heading" class="nav-pill" data-lang-key="navOrigin">起源</a>
+            <a href="#roadmap-heading" class="nav-pill" data-lang-key="navRoadmap">版本</a>
+            <div class="w-px h-3.5 bg-white/15 mx-1" aria-hidden="true"></div>
+            <button id="nav-lang-zh" class="nav-pill active" aria-label="切換為中文">中</button>
+            <button id="nav-lang-en" class="nav-pill" aria-label="Switch to English">EN</button>
+        </div>
+    </nav>
 
     <!-- Header -->
     <header class="sticky top-0 z-50 border-b border-white/10" style="background: rgba(15,12,41,0.85); backdrop-filter: blur(16px);">
@@ -618,6 +654,7 @@
                 m3Desc: '漸層色塊、透明疊加、符號印章、貝茲曲線、疊圖、複製物件、複數字型選擇——不只是標注工具，也是一個輕量設計環境。你能想到的表達方式，它都有。',
                 m4Label: 'Global Shortcuts', m4Title: '你的習慣，不用重學',
                 m4Desc: '從任何截圖工具遷移過來，快捷鍵配合你，不是你配合快捷鍵。在偏好設定裡錄製一次，往後每個工具都回應你熟悉的那個按鍵組合。',
+                navFeatures: '功能', navMoments: '細節', navOrigin: '起源', navRoadmap: '版本',
                 storyTitle: 'Origin',
                 storyBody: '來自一位<strong class="text-white">一行程式碼都不會寫的 PM</strong>，<br>以及 Claude Code 的 Claude，<br>人機協作 <strong class="gradient-text text-2xl font-bold">一週</strong> 內迭代至 v3.43 而誕生的作品。',
                 storyByline: '— Nova & Claude，2026',
@@ -712,6 +749,7 @@
                 m3Desc: 'Gradient fills, transparent overlays, symbol stamps, Bézier curves, image overlay, duplicate objects, multiple font choices — not just an annotation tool, but a lightweight design environment. If you can picture it, VAS can draw it.',
                 m4Label: 'Global Shortcuts', m4Title: 'Your muscle memory, honoured',
                 m4Desc: 'Migrating from any other screenshot tool? Shortcuts adapt to you — not the other way around. Record once in Preferences, and every tool responds to the key combination you\'ve always used.',
+                navFeatures: 'Features', navMoments: 'Moments', navOrigin: 'Origin', navRoadmap: 'Versions',
                 storyTitle: 'Origin',
                 storyBody: 'Born from a collaboration between <strong class="text-white">a PM who can\'t write a single line of code</strong> and Claude from Claude Code —<br>iterated together to v3.43 in <strong class="gradient-text text-2xl font-bold">one week</strong>.',
                 storyByline: '— Nova & Claude, 2026',
@@ -772,6 +810,34 @@
         }
 
         langZhBtn.addEventListener('click', () => switchLanguage('zh'));
+        langEnBtn.addEventListener('click', () => switchLanguage('en'));
+
+        // ── Floating pill nav ─────────────────────────────────────────────────
+        (function() {
+            const floatingNav = document.getElementById('floatingNav');
+            const navLangZh = document.getElementById('nav-lang-zh');
+            const navLangEn = document.getElementById('nav-lang-en');
+            const hero = document.querySelector('section');
+
+            // Show/hide on scroll
+            window.addEventListener('scroll', () => {
+                const past = hero.getBoundingClientRect().bottom < 0;
+                floatingNav.style.opacity = past ? '1' : '0';
+                floatingNav.style.pointerEvents = past ? 'auto' : 'none';
+            }, { passive: true });
+
+            // Lang buttons in pill bar
+            navLangZh.addEventListener('click', () => switchLanguage('zh'));
+            navLangEn.addEventListener('click', () => switchLanguage('en'));
+
+            // Patch switchLanguage to sync pill bar lang state
+            const _orig = switchLanguage;
+            switchLanguage = function(lang) {
+                _orig(lang);
+                navLangZh.classList.toggle('active', lang === 'zh');
+                navLangEn.classList.toggle('active', lang === 'en');
+            };
+        })();
 
         // ── Workflow image carousel ──────────────────────────────
         (function() {
@@ -787,7 +853,6 @@
                 dots[cur].style.background = 'rgba(255,255,255,0.6)';
             }, 2800);
         })();
-        langEnBtn.addEventListener('click', () => switchLanguage('en'));
 
         switchLanguage('zh'); // 初始化：套用 zh i18n key，確保硬寫內容與翻譯一致
 
