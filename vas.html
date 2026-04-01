@@ -203,7 +203,7 @@
 <body class="hero-bg text-white min-h-screen">
 
     <!-- Floating Pill Nav -->
-    <nav id="floatingNav" class="fixed top-4 left-1/2 -translate-x-1/2 z-40 opacity-0 pointer-events-none" aria-label="頁面導航">
+    <nav id="floatingNav" class="fixed top-4 left-1/2 -translate-x-1/2 z-[60] opacity-0 pointer-events-none" aria-label="頁面導航">
         <div class="flex items-center gap-0.5 px-2 py-1.5 rounded-full" style="background: rgba(15,12,41,0.82); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 4px 24px rgba(0,0,0,0.5);">
             <a href="#features-heading" class="nav-pill" data-lang-key="navFeatures">功能</a>
             <a href="#moments-heading" class="nav-pill" data-lang-key="navMoments">細節</a>
@@ -807,6 +807,11 @@
             langEnBtn.classList.toggle('active', lang === 'en');
             langZhBtn.setAttribute('aria-pressed', lang === 'zh');
             langEnBtn.setAttribute('aria-pressed', lang === 'en');
+            // 同步 pill bar 語言按鈕
+            const nz = document.getElementById('nav-lang-zh');
+            const ne = document.getElementById('nav-lang-en');
+            if (nz) nz.classList.toggle('active', lang === 'zh');
+            if (ne) ne.classList.toggle('active', lang === 'en');
         }
 
         langZhBtn.addEventListener('click', () => switchLanguage('zh'));
@@ -829,14 +834,6 @@
             // Lang buttons in pill bar
             navLangZh.addEventListener('click', () => switchLanguage('zh'));
             navLangEn.addEventListener('click', () => switchLanguage('en'));
-
-            // Patch switchLanguage to sync pill bar lang state
-            const _orig = switchLanguage;
-            switchLanguage = function(lang) {
-                _orig(lang);
-                navLangZh.classList.toggle('active', lang === 'zh');
-                navLangEn.classList.toggle('active', lang === 'en');
-            };
         })();
 
         // ── Workflow image carousel ──────────────────────────────
