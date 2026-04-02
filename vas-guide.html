@@ -231,6 +231,7 @@
     <div class="flex gap-1">
       <button class="lang-btn active" id="lang-zh" aria-pressed="true">中</button>
       <button class="lang-btn" id="lang-en" aria-pressed="false">EN</button>
+      <button class="lang-btn" id="lang-ja" aria-pressed="false">日</button>
     </div>
   </nav>
 
@@ -608,31 +609,37 @@
 
     const langZhBtn = document.getElementById('lang-zh');
     const langEnBtn = document.getElementById('lang-en');
+    const langJaBtn = document.getElementById('lang-ja');
 
     function switchLanguage(lang) {
-      document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
-      const trans = translations[lang];
+      document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : lang === 'ja' ? 'ja' : 'en';
+      const trans = translations[lang] || translations['en'];
       document.querySelectorAll('[data-lang-key]').forEach(el => {
         const key = el.dataset.langKey;
         if (trans[key] !== undefined) el.innerHTML = trans[key];
       });
       document.getElementById('editorImg').src = lang === 'zh'
         ? 'img/vas-guide-editor-zh.png'
+        : lang === 'ja' ? 'img/vas-guide-editor-jp.png'
         : 'img/vas-guide-editor-en.png';
       document.getElementById('editorImg').alt = lang === 'zh'
         ? 'VAS 編輯器介面說明圖'
+        : lang === 'ja' ? 'VAS エディタ画面の説明図'
         : 'VAS editor interface diagram';
       const toolbarImg = document.getElementById('toolbarImg');
-      toolbarImg.src = lang === 'zh' ? 'img/vastoolbar.png' : 'img/vastoolbar-en.png';
-      toolbarImg.alt = lang === 'zh' ? 'VAS 浮動工作列' : 'VAS capture toolbar';
+      toolbarImg.src = lang === 'zh' ? 'img/vastoolbar.png' : lang === 'ja' ? 'img/vastoolbar-jp.png' : 'img/vastoolbar-en.png';
+      toolbarImg.alt = lang === 'zh' ? 'VAS 浮動工作列' : lang === 'ja' ? 'VAS キャプチャツールバー' : 'VAS capture toolbar';
       langZhBtn.classList.toggle('active', lang === 'zh');
       langEnBtn.classList.toggle('active', lang === 'en');
+      langJaBtn.classList.toggle('active', lang === 'ja');
       langZhBtn.setAttribute('aria-pressed', lang === 'zh');
       langEnBtn.setAttribute('aria-pressed', lang === 'en');
+      langJaBtn.setAttribute('aria-pressed', lang === 'ja');
     }
 
     langZhBtn.addEventListener('click', () => switchLanguage('zh'));
     langEnBtn.addEventListener('click', () => switchLanguage('en'));
+    langJaBtn.addEventListener('click', () => switchLanguage('ja'));
 
     // ── Popup Data ──────────────────────────────────────────────
     const popupData = {
@@ -1404,6 +1411,7 @@
     // keep currentLang in sync when user switches language
     langZhBtn.addEventListener('click', () => { currentLang = 'zh'; });
     langEnBtn.addEventListener('click', () => { currentLang = 'en'; });
+    langJaBtn.addEventListener('click', () => { currentLang = 'en'; }); // ja popup fallback to en
   </script>
 
 </body>
