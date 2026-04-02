@@ -450,14 +450,14 @@
                     <p class="text-white/55 leading-relaxed" data-lang-key="m5Desc">截完，不用存檔。不用找資料夾。不用切 App。叫出 ShareSheet，選一個去處，圖就到了。資訊流進 VAS，也流出 VAS——從來不是你的終點站，是你工作流的一條河。</p>
                 </div>
                 <div class="flex-1 order-1 lg:order-2">
-                    <img src="img/sharesheet.png" alt="VAS ShareSheet：截圖後一鍵叫出系統分享選單，直接傳送至社群或雲端" class="w-full rounded-2xl shadow-2xl" style="border: 1px solid rgba(255,255,255,0.08);" loading="lazy">
+                    <img id="sharesheetImg" src="img/sharesheet.png" alt="VAS ShareSheet：截圖後一鍵叫出系統分享選單，直接傳送至社群或雲端" class="w-full rounded-2xl shadow-2xl" style="border: 1px solid rgba(255,255,255,0.08);" loading="lazy">
                 </div>
             </div>
 
             <!-- Moment 4: 自定義快捷鍵 -->
             <div class="flex flex-col lg:flex-row items-center gap-10 mb-20">
                 <div class="flex-1">
-                    <img src="img/fast.png" alt="VAS 自定義全域快捷鍵：在偏好設定中為工具錄製專屬快捷鍵組合" class="w-full rounded-2xl shadow-2xl" style="border: 1px solid rgba(255,255,255,0.08); max-height: 380px; object-fit: contain;" loading="lazy">
+                    <img id="fastImg" src="img/fast.png" alt="VAS 自定義全域快捷鍵：在偏好設定中為工具錄製專屬快捷鍵組合" class="w-full rounded-2xl shadow-2xl" style="border: 1px solid rgba(255,255,255,0.08); max-height: 380px; object-fit: contain;" loading="lazy">
                 </div>
                 <div class="flex-1">
                     <p class="text-xs font-bold tracking-widest text-purple-400/70 uppercase mb-3"><span data-lang-key="m4Label">Global Shortcuts</span> <span class="badge-tauri">Tauri</span></p>
@@ -910,11 +910,15 @@
             });
             document.getElementById('surveyFormLink').href = surveyLinks[lang];
             const toolbarImg = document.getElementById('toolbarImg');
-            toolbarImg.src = lang === 'zh' ? 'img/vastoolbar.png' : 'img/vastoolbar-en.png';
-            toolbarImg.alt = lang === 'zh' ? 'VAS 截圖工具列：全螢幕、視窗、矩形、延遲、開啟、批次轉等功能按鈕' : 'VAS capture toolbar: fullscreen, window, rectangle, delay, open, batch convert buttons';
+            toolbarImg.src = lang === 'zh' ? 'img/vastoolbar.png' : lang === 'ja' ? 'img/vastoolbar-jp.png' : 'img/vastoolbar-en.png';
+            toolbarImg.alt = lang === 'zh' ? 'VAS 截圖工具列：全螢幕、視窗、矩形、延遲、開啟、批次轉等功能按鈕' : lang === 'ja' ? 'VAS キャプチャツールバー：全画面・ウィンドウ・矩形・遅延・開く・バッチ変換ボタン' : 'VAS capture toolbar: fullscreen, window, rectangle, delay, open, batch convert buttons';
             const vasframeImg = document.getElementById('vasframeImg');
-            vasframeImg.src = lang === 'zh' ? 'img/vasframe-zh.png' : 'img/vasframe-en.png';
-            vasframeImg.alt = lang === 'zh' ? 'VAS 編輯器介面：深色工作區，左側工具列，頂部選項列，中央為圖片標注畫布' : 'VAS editor interface: dark workspace with left toolbar, top options bar, and annotation canvas';
+            vasframeImg.src = lang === 'zh' ? 'img/vasframe-zh.png' : lang === 'ja' ? 'img/vasframe-jp.png' : 'img/vasframe-en.png';
+            vasframeImg.alt = lang === 'zh' ? 'VAS 編輯器介面：深色工作區，左側工具列，頂部選項列，中央為圖片標注畫布' : lang === 'ja' ? 'VAS エディタ画面：ダーク作業エリア、左側ツールバー、上部オプションバー、中央に注釈キャンバス' : 'VAS editor interface: dark workspace with left toolbar, top options bar, and annotation canvas';
+            const sharesheetImg = document.getElementById('sharesheetImg');
+            if (sharesheetImg) sharesheetImg.src = lang === 'zh' ? 'img/sharesheet.png' : lang === 'ja' ? 'img/sharesheet-jp.png' : 'img/sharesheet-en.png';
+            const fastImg = document.getElementById('fastImg');
+            if (fastImg) fastImg.src = lang === 'zh' ? 'img/fast.png' : lang === 'ja' ? 'img/fast-jp.jpg' : 'img/fast-en.png';
             langZhBtn.classList.toggle('active', lang === 'zh');
             langEnBtn.classList.toggle('active', lang === 'en');
             langJaBtn.classList.toggle('active', lang === 'ja');
