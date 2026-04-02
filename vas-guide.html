@@ -604,6 +604,63 @@
         kb_r4: 'System-reserved shortcut',
         kb_r5: 'Modifier key alone',
         footer: 'Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by <a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a>'
+      },
+      ja: {
+        backLabel: 'VAS',
+        heroLabel: 'ユーザーガイド',
+        heroTitle: 'VAS 操作マニュアル',
+        heroSub: 'キャプチャツールバー、エディタ画面、ツールメニューの説明',
+        s1Label: 'Section 02',
+        s1Title: 'エディタ画面',
+        s1Sub: '4つのメイン操作エリア',
+        zone1Name: 'メインツールメニュー',
+        zone1Desc: '左側の縦型ツールバー。ツールを選択するとキャンバスの操作モードが切り替わります。使用中のツールは青くハイライトされます。',
+        zone2Name: 'サブプロパティパネル',
+        zone2Desc: '上部ツールバー。選択中のツールに応じて動的に内容が変わります。色・線幅・不透明度・線スタイルなどを調整できます。',
+        zone3Name: '動的書き出しボタン',
+        zone3Desc: '右下のフローティングボタン。ドラッグして位置を変更でき、左右どちらの手にも対応。完了後、対象アプリにドラッグして書き出します。',
+        zone4Name: 'ステータスバーとスナップのオン/オフ',
+        zone4Desc: '左下のステータスバー。現在のズーム倍率とキャンバスサイズを表示し、スマートスナップのオン/オフを切り替えられます。',
+        s2Label: 'Section 03',
+        s2Title: 'ツールメニュー',
+        s2Sub: 'すべての注釈ツール一覧——括弧内はショートカット',
+        grpSelect: '選択',
+        grpDraw: '描画',
+        grpAnnotate: '注釈',
+        grpPrivacy: 'プライバシー・遮蔽',
+        grpCanvas: 'キャンバス',
+        grpLayout: 'レイアウト',
+        grpOther: 'その他',
+        t_select: '選択', t_boxselect: '範囲選択', t_pen: 'ペン', t_line: '線条',
+        t_rect: '矩形', t_fillrect: '塗りつぶし', t_text: 'テキスト', t_number: '番号',
+        t_symbol: 'スタンプ', t_ocr: 'OCR', t_mosaic: 'モザイク / ぼかし',
+        t_privacy: 'プライバシー遮蔽', t_zoomin: '拡大', t_zoomout: '縮小', t_fit: 'ウィンドウに合わせる',
+        t_crop: 'トリミング', t_resize: 'サイズ変更', t_extend: 'キャンバス拡張',
+        t_overlay: '画像オーバーレイ', t_open: 'ワンクリックテンプレート', t_undo: '元に戻す', t_redo: 'やり直し',
+        s3Label: 'Section 01',
+        s3Title: 'キャプチャツールバー',
+        s3Sub: 'デスクトップに常駐するフローティングツールバー',
+        cb_fullscreen: '全画面', cb_fullscreen_desc: '画面全体をキャプチャしてエディタを直接開きます。',
+        cb_window: 'ウィンドウ', cb_window_desc: 'クリックしたウィンドウのみをキャプチャします。',
+        cb_rect: '矩形', cb_rect_desc: 'ドラッグして任意の矩形領域をキャプチャ。QR コードを直接囲むと自動スキャンして内容を表示します。',
+        cb_delay: '遅延', cb_delay_desc: '1〜3秒の遅延を設定。tooltip・dropdown など一瞬で消えるUI状態を確実に捉えます。',
+        cb_open: '開く', cb_open_desc: '既存の画像をディスクから開く、またはカスタムサイズの新規キャンバスを作成します。',
+        cb_whiteboard: 'ホワイトボード', cb_whiteboard_desc: '白紙のキャンバスを開き、ゼロからビジュアルを作成します。',
+        cb_batch: 'バッチ', cb_batch_desc: '複数の画像をドロップして JPG・PNG・WebP などに一括変換。透かしとリサイズにも対応。',
+        cb_help: 'ヘルプ', cb_help_desc: 'キーボードショートカット一覧を表示し、このマニュアルへのリンクを提供します。',
+        s4Label: 'Section 04',
+        s4Title: 'カスタムグローバルショートカット',
+        s4ComingBadge: '近日公開 · Tauri',
+        s4Sub: '環境設定で各ツールに専用のグローバルショートカットを割り当て',
+        kb_intro: '環境設定 → ショートカット を開き、ツールを選択して希望のキー組み合わせを押して録音します。無効な組み合わせはすぐにハイライトされます。',
+        kb_rules_title: 'キー受付ルール',
+        kb_col_input: '入力', kb_col_result: '結果',
+        kb_r1: 'F キーは修飾キー不要',
+        kb_r2: '修飾キーを含む任意の組み合わせ',
+        kb_r3: '裸の文字または数字',
+        kb_r4: 'システム予約ショートカット',
+        kb_r5: '修飾キー単独',
+        footer: 'GitHub でデプロイ　｜　Claude Code で構築　｜　2026年 最終更新　<a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a>'
       }
     };
 
@@ -1371,6 +1428,370 @@
               </div>
             </div>`
         }
+      },
+      ja: {
+        select: {
+          icon: '↖', title: '選択', shortcut: 'V',
+          body: `
+            <div>
+              <p class="modal-section-label">操作方法</p>
+              <ul class="space-y-1 text-white/55 text-xs leading-relaxed list-disc list-inside">
+                <li>注釈をクリックして選択；空白エリアをクリックで選択解除</li>
+                <li>空白キャンバスをドラッグして複数オブジェクトをまとめて選択</li>
+                <li>Shift クリックで選択に追加／解除</li>
+              </ul>
+            </div>
+            <div>
+              <p class="modal-section-label">単一選択</p>
+              <p class="text-white/55 text-xs leading-relaxed">選択したオブジェクトのサブプロパティをすべて表示（種類によって異なります）：色・線幅・不透明度・サイズ・シャドウなど。</p>
+            </div>
+            <div>
+              <p class="modal-section-label">複数選択</p>
+              <p class="text-white/40 text-xs mb-2">整列ツールバーを表示：</p>
+              <div class="modal-align-grid">
+                ${[['左揃え','最も左のオブジェクトの左端に揃える'],['中央H','水平中央揃え'],['右揃え','最も右のオブジェクトの右端に揃える'],['上揃え','最も上のオブジェクトの上端に揃える'],['中央V','垂直中央揃え'],['下揃え','最も下のオブジェクトの下端に揃える'],['均等H','水平方向に均等配置'],['均等V','垂直方向に均等配置'],['中心線','キャンバス中心線に揃える'],['↔','水平ミラー'],['↕','垂直ミラー']].map(([k,v])=>`<div class="modal-align-row"><span class="text-purple-300 font-semibold text-xs w-16 shrink-0">${k}</span><span class="text-white/40 text-xs">${v}</span></div>`).join('')}
+              </div>
+            </div>`
+        },
+        boxselect: {
+          icon: '⬚', title: '範囲選択', shortcut: 'M',
+          body: `
+            <div>
+              <p class="modal-section-label">操作方法</p>
+              <ul class="space-y-1 text-white/55 text-xs leading-relaxed list-disc list-inside">
+                <li>ドラッグして画素範囲を選択</li>
+                <li>選択範囲をコピー＆ペーストして新しいオブジェクトとして配置</li>
+              </ul>
+            </div>`
+        },
+        pen: {
+          icon: '✒', title: 'ペン', shortcut: 'P',
+          body: `
+            <div>
+              <p class="modal-section-label">操作方法</p>
+              <p class="text-white/55 text-xs leading-relaxed">キャンバス上をドラッグしてなめらかなフリーハンド曲線を描きます。</p>
+            </div>
+            <div>
+              <p class="modal-section-label">プロパティ</p>
+              <div class="flex flex-wrap">
+                ${['色','線幅 (px)','線スタイル（実線 / 破線）','端点スタイル（なし / 矢印 / 点 / 四角）','アウトライン色','不透明度','シャドウ'].map(t=>`<span class="modal-tag">${t}</span>`).join('')}
+              </div>
+            </div>`
+        },
+        line: {
+          icon: '╱', title: '線条', shortcut: 'L', tauri: true,
+          body: `
+            <div class="modal-tauri-notice"><span class="badge-tauri">Tauri</span><span class="text-white/50 text-xs">2点ベジェ曲線は Tauri 専用機能です</span></div>
+            <div>
+              <p class="modal-section-label">操作方法</p>
+              <ul class="space-y-1 text-white/55 text-xs leading-relaxed list-disc list-inside">
+                <li>ドラッグで直線を描画；Shift ドラッグで90°スナップ</li>
+                <li>選択した線の中点ハンドルをドラッグしてベジェ曲線に変換</li>
+              </ul>
+            </div>
+            <div>
+              <p class="modal-section-label">プロパティ</p>
+              <div class="flex flex-wrap">
+                ${['色','線幅','線スタイル（実線 / 破線）','始点スタイル（なし / 矢印 / 点）','終点スタイル（なし / 矢印 / 点）','直角モード','水平ミラー','垂直ミラー','アウトライン色','不透明度','シャドウ'].map(t=>`<span class="modal-tag">${t}</span>`).join('')}
+              </div>
+            </div>`
+        },
+        rect: {
+          icon: '▭', title: '矩形', shortcut: 'R',
+          body: `
+            <div>
+              <p class="modal-section-label">シェイプ</p>
+              <div class="flex flex-wrap">
+                ${['矩形','楕円'].map(t=>`<span class="modal-tag">${t}</span>`).join('')}
+              </div>
+            </div>
+            <div>
+              <p class="modal-section-label">操作方法</p>
+              <ul class="space-y-1 text-white/55 text-xs leading-relaxed list-disc list-inside">
+                <li>ドラッグして枠線シェイプを描画</li>
+                <li>Shift ドラッグで正方形 / 正円に固定（楕円モードも対応）</li>
+              </ul>
+            </div>
+            <div>
+              <p class="modal-section-label">プロパティ</p>
+              <div class="flex flex-wrap">
+                ${['色','線幅','角丸（矩形のみ、0–100%）','線スタイル（実線 / 破線）','枠色','オフセット','水平ミラー','垂直ミラー','不透明度','シャドウ'].map(t=>`<span class="modal-tag">${t}</span>`).join('')}
+              </div>
+            </div>`
+        },
+        fillrect: {
+          icon: '■', title: '塗りつぶし', shortcut: 'B',
+          body: `
+            <div>
+              <p class="modal-section-label">シェイプ</p>
+              <div class="flex flex-wrap">
+                ${['矩形塗りつぶし','楕円塗りつぶし'].map(t=>`<span class="modal-tag">${t}</span>`).join('')}
+              </div>
+            </div>
+            <div>
+              <p class="modal-section-label">操作方法</p>
+              <ul class="space-y-1 text-white/55 text-xs leading-relaxed list-disc list-inside">
+                <li>ドラッグして塗りつぶしシェイプを描画</li>
+                <li>Shift ドラッグで正方形 / 正円に固定</li>
+              </ul>
+            </div>
+            <div>
+              <p class="modal-section-label">プロパティ</p>
+              <div class="flex flex-wrap">
+                ${['塗り（単色 / グラデーション）','グラデーション色（A・B）','角丸（矩形のみ、0–100%）','枠線幅','枠線色','線スタイル（実線 / 破線）','不透明度','シャドウ'].map(t=>`<span class="modal-tag">${t}</span>`).join('')}
+              </div>
+            </div>`
+        },
+        text: {
+          icon: 'T', title: 'テキスト', shortcut: 'T',
+          body: `
+            <div>
+              <p class="modal-section-label">操作方法</p>
+              <ul class="space-y-1 text-white/55 text-xs leading-relaxed list-disc list-inside">
+                <li>キャンバスをクリックしてテキストボックスを配置</li>
+                <li>Enter で改行；Shift-Enter で確定</li>
+                <li>既存のテキストをダブルクリックして再編集</li>
+              </ul>
+            </div>
+            <div>
+              <p class="modal-section-label">プロパティ</p>
+              <div class="flex flex-wrap">
+                ${['色','フォント','サイズ（8–400 px）','太字 / 斜体 / 下線 / 取り消し線','揃え（左 / 中 / 右）','テキストアウトライン（クイックドロップダウン付き）','テキスト背景色＋不透明度','シャドウ'].map(t=>`<span class="modal-tag">${t}</span>`).join('')}
+              </div>
+            </div>`
+        },
+        number: {
+          icon: '①', title: '番号', shortcut: 'N',
+          body: `
+            <div>
+              <p class="modal-section-label">操作方法</p>
+              <p class="text-white/55 text-xs leading-relaxed">キャンバスをクリックして自動連番マーカーを配置します。</p>
+            </div>
+            <div>
+              <p class="modal-section-label">プロパティ</p>
+              <div class="flex flex-wrap">
+                ${['サイズ（小 / 標準 / 大）','色','スタイル（点 / 丸 / 塗り丸 / ローマ数字 / CJK括弧 / CJK丸数字）','線幅','線色','シャドウ','カウンターリセット'].map(t=>`<span class="modal-tag">${t}</span>`).join('')}
+              </div>
+            </div>`
+        },
+        stamp: {
+          icon: '☺', title: 'シンボルスタンプ', shortcut: 'U', tauri: true,
+          body: `
+            <div class="modal-tauri-notice"><span class="badge-tauri">Tauri</span><span class="text-white/50 text-xs">グラデーション塗りは Tauri 専用機能です</span></div>
+            <div>
+              <p class="modal-section-label">操作方法</p>
+              <p class="text-white/55 text-xs leading-relaxed">キャンバスをクリックしてシンボルを配置；フローティングパネルでカテゴリとグリフを選択します。</p>
+            </div>
+            <div>
+              <p class="modal-section-label">カテゴリ</p>
+              <div class="flex flex-wrap">
+                ${['シェイプ','文字（丸囲み / 全角 / 太字 / 太字斜体 / スクリプト）','矢印','その他（記号 / 通貨 / 数学 / テクニカル）'].map(t=>`<span class="modal-tag">${t}</span>`).join('')}
+              </div>
+            </div>
+            <div>
+              <p class="modal-section-label">プロパティ</p>
+              <div class="flex flex-wrap">
+                ${['色','サイズ (px)','シャドウ'].map(t=>`<span class="modal-tag">${t}</span>`).join('')}
+              </div>
+            </div>`
+        },
+        mosaic: {
+          icon: '⬜', title: 'モザイク / ぼかし', shortcut: 'X',
+          body: `
+            <div>
+              <p class="modal-section-label">操作方法</p>
+              <ul class="space-y-1 text-white/55 text-xs leading-relaxed list-disc list-inside">
+                <li>ドラッグして範囲を指定——エフェクトが即時適用されます</li>
+                <li>適用後は選択ツールに切り替えてマスクオブジェクトのリサイズ・削除で微調整できます</li>
+              </ul>
+            </div>
+            <div>
+              <p class="modal-section-label">プロパティ</p>
+              <div class="flex flex-wrap">
+                ${['モード（モザイク / ぼかし）','モザイクブロックサイズ（4 / 8 / 16 / 32 px）','ぼかし半径（4 / 8 / 16 / 24 px）'].map(t=>`<span class="modal-tag">${t}</span>`).join('')}
+              </div>
+            </div>`
+        },
+        ocr: {
+          icon: '文', title: 'OCR', shortcut: 'G',
+          body: `
+            <div>
+              <p class="modal-section-label">操作方法</p>
+              <ul class="space-y-1 text-white/55 text-xs leading-relaxed list-disc list-inside">
+                <li>ドラッグして範囲を指定——テキストが自動認識されます（中国語・英語・日本語対応）</li>
+                <li>結果はフローティングパネルに表示され、「テキストをコピー」ボタンで取得できます</li>
+              </ul>
+            </div>
+            <div>
+              <p class="modal-section-label">プロパティ</p>
+              <p class="text-white/40 text-xs">調整可能なプロパティはありません</p>
+            </div>`
+        },
+        privacy: {
+          icon: '文', title: 'プライバシー遮蔽', shortcut: 'K', tauri: true,
+          body: `
+            <div class="modal-tauri-notice"><span class="badge-tauri">Tauri</span><span class="text-white/50 text-xs">5層検出（日本語含む）は Tauri 専用機能です</span></div>
+            <div>
+              <p class="modal-section-label">操作方法</p>
+              <ul class="space-y-1 text-white/55 text-xs leading-relaxed list-disc list-inside">
+                <li>K キーで画像全体をスキャン、またはドラッグで範囲を指定</li>
+                <li>自動検出・遮蔽：マイナンバー・法人番号・クレジットカード番号・電話番号・メール・IPv4/IPv6・API トークンなど</li>
+                <li>スキャン後は選択ツールに切り替えてマスクオブジェクトを微調整・削除できます</li>
+              </ul>
+            </div>
+            <div>
+              <p class="modal-section-label">プロパティ</p>
+              <div class="flex flex-wrap">
+                ${['モード（モザイク / ぼかし）','モザイクブロックサイズ（8 / 16 / 24 / 32 px）','ぼかし半径（4 / 8 / 16 / 24 px）'].map(t=>`<span class="modal-tag">${t}</span>`).join('')}
+              </div>
+            </div>`
+        },
+        zoomin: {
+          icon: '⊕', title: '拡大', shortcut: '⌘=',
+          body: `
+            <div>
+              <p class="modal-section-label">操作方法</p>
+              <p class="text-white/55 text-xs leading-relaxed">カーソルを中心に拡大します。範囲：25%〜400%。</p>
+            </div>
+            <div>
+              <p class="modal-section-label">クイックズームプリセット</p>
+              <div class="flex flex-wrap">
+                ${['25%','50%','75%','100%','150%','200%','300%','400%'].map(t=>`<span class="modal-tag">${t}</span>`).join('')}
+              </div>
+            </div>`
+        },
+        zoomout: {
+          icon: '⊖', title: '縮小', shortcut: '⌘-',
+          body: `
+            <div>
+              <p class="modal-section-label">操作方法</p>
+              <p class="text-white/55 text-xs leading-relaxed">カーソルを中心に縮小します。範囲：25%〜400%。</p>
+            </div>
+            <div>
+              <p class="modal-section-label">クイックズームプリセット</p>
+              <div class="flex flex-wrap">
+                ${['25%','50%','75%','100%','150%','200%','300%','400%'].map(t=>`<span class="modal-tag">${t}</span>`).join('')}
+              </div>
+            </div>`
+        },
+        fit: {
+          icon: '⊡', title: 'ウィンドウに合わせる', shortcut: '⌘0',
+          body: `
+            <div>
+              <p class="modal-section-label">操作方法</p>
+              <p class="text-white/55 text-xs leading-relaxed">キャンバスを100%にリセットし、ウィンドウサイズにフィットさせます。</p>
+            </div>`
+        },
+        crop: {
+          icon: '✂', title: 'トリミング', shortcut: 'C',
+          body: `
+            <div>
+              <p class="modal-section-label">操作方法</p>
+              <ul class="space-y-1 text-white/55 text-xs leading-relaxed list-disc list-inside">
+                <li>ドラッグして8ハンドル付きのトリム枠を作成</li>
+                <li>矢印キーで1px単位；Shift＋矢印で10px単位の微調整</li>
+                <li>ダブルクリックまたは確定ボタンで適用</li>
+              </ul>
+            </div>
+            <div>
+              <p class="modal-section-label">プロパティ</p>
+              <div class="flex flex-wrap">
+                ${['確定ボタン','キャンセルボタン'].map(t=>`<span class="modal-tag">${t}</span>`).join('')}
+              </div>
+            </div>`
+        },
+        resize: {
+          icon: '↔', title: 'サイズ変更', shortcut: 'S',
+          body: `
+            <div>
+              <p class="modal-section-label">操作方法</p>
+              <ul class="space-y-1 text-white/55 text-xs leading-relaxed list-disc list-inside">
+                <li>ポップアップが開きます——目的の幅を入力</li>
+                <li>高さは自動計算；すべての注釈が比例スケール</li>
+                <li>範囲：1〜8192 px</li>
+              </ul>
+            </div>
+            <div>
+              <p class="modal-section-label">プロパティ</p>
+              <div class="flex flex-wrap">
+                ${['幅 (px)','高さ（読み取り専用、自動）','適用ボタン','キャンセルボタン'].map(t=>`<span class="modal-tag">${t}</span>`).join('')}
+              </div>
+            </div>`
+        },
+        extend: {
+          icon: '⊞', title: 'キャンバス拡張', shortcut: 'E',
+          body: `
+            <div>
+              <p class="modal-section-label">操作方法</p>
+              <ul class="space-y-1 text-white/55 text-xs leading-relaxed list-disc list-inside">
+                <li>ポップアップが開きます——9点パッドで方向を選択</li>
+                <li>拡張距離 (px) を入力；背景は白で固定</li>
+                <li>結果のサイズはポップアップ下部に表示されます</li>
+              </ul>
+            </div>
+            <div>
+              <p class="modal-section-label">プロパティ</p>
+              <div class="flex flex-wrap">
+                ${['方向（9種）','距離 (px)','結果サイズプレビュー','確定ボタン','キャンセルボタン'].map(t=>`<span class="modal-tag">${t}</span>`).join('')}
+              </div>
+            </div>`
+        },
+        overlay: {
+          icon: '⧉', title: '画像オーバーレイ', shortcut: 'O',
+          body: `
+            <div>
+              <p class="modal-section-label">操作方法</p>
+              <ul class="space-y-1 text-white/55 text-xs leading-relaxed list-disc list-inside">
+                <li>ファイルピッカーが開き、キャンバスに画像を配置</li>
+                <li>ドラッグで位置変更；8ハンドルでリサイズ</li>
+                <li>フローティングオブジェクトとして保持——書き出し時にベース画像に結合</li>
+              </ul>
+            </div>
+            <div>
+              <p class="modal-section-label">対応フォーマット</p>
+              <div class="flex flex-wrap">
+                ${['JPG','PNG','WebP','GIF（最初のフレーム）','SVG'].map(t=>`<span class="modal-tag">${t}</span>`).join('')}
+              </div>
+            </div>`
+        },
+        template: {
+          icon: '◱', title: 'ワンクリックテンプレート', shortcut: '—',
+          body: `
+            <div>
+              <p class="modal-section-label">操作方法</p>
+              <ul class="space-y-1 text-white/55 text-xs leading-relaxed list-disc list-inside">
+                <li>テンプレートパネルが開きます——グラデーションスタイルをクリックして適用</li>
+                <li>6種：赤 / オレンジ / 黄 / 緑 / 青 / 紫</li>
+                <li>元に戻す対応</li>
+              </ul>
+            </div>
+            <div>
+              <p class="modal-section-label">プロパティ</p>
+              <div class="flex flex-wrap">
+                ${['パディング（2〜30%）','角丸（0〜10）','シャドウ（0〜10）'].map(t=>`<span class="modal-tag">${t}</span>`).join('')}
+              </div>
+            </div>
+            <div>
+              <p class="modal-section-label">SNS サイズプリセット</p>
+              <div class="flex flex-wrap">
+                ${['LinkedIn (1200×627)','Instagram 1:1 (1080×1080)','Instagram 4:5 (1080×1350)','X (1600×900)'].map(t=>`<span class="modal-tag">${t}</span>`).join('')}
+              </div>
+            </div>`
+        },
+        undoredo: {
+          icon: '↩↪', title: '元に戻す / やり直し', shortcut: '⌘Z / ⌘⇧Z',
+          body: `
+            <div class="space-y-2">
+              <div class="flex items-center gap-3">
+                <span class="modal-tag font-mono">⌘Z</span>
+                <span class="text-white/55 text-xs">元に戻す：ひとつ前の状態に戻る</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="modal-tag font-mono">⌘⇧Z</span>
+                <span class="text-white/55 text-xs">やり直し：取り消した操作を復元する</span>
+              </div>
+            </div>`
+        }
       }
     };
 
@@ -1411,7 +1832,7 @@
     // keep currentLang in sync when user switches language
     langZhBtn.addEventListener('click', () => { currentLang = 'zh'; });
     langEnBtn.addEventListener('click', () => { currentLang = 'en'; });
-    langJaBtn.addEventListener('click', () => { currentLang = 'en'; }); // ja popup fallback to en
+    langJaBtn.addEventListener('click', () => { currentLang = 'ja'; });
   </script>
 
 </body>
