@@ -450,14 +450,14 @@
                     <p class="text-white/55 leading-relaxed" data-lang-key="m5Desc">截完，不用存檔。不用找資料夾。不用切 App。叫出 ShareSheet，選一個去處，圖就到了。資訊流進 VAS，也流出 VAS——從來不是你的終點站，是你工作流的一條河。</p>
                 </div>
                 <div class="flex-1 order-1 lg:order-2">
-                    <img src="img/sharesheet.png" alt="VAS ShareSheet：截圖後一鍵叫出系統分享選單，直接傳送至社群或雲端" class="w-full rounded-2xl shadow-2xl" style="border: 1px solid rgba(255,255,255,0.08);" loading="lazy">
+                    <img id="sharesheetImg" src="img/sharesheet.png" alt="VAS ShareSheet：截圖後一鍵叫出系統分享選單，直接傳送至社群或雲端" class="w-full rounded-2xl shadow-2xl" style="border: 1px solid rgba(255,255,255,0.08);" loading="lazy">
                 </div>
             </div>
 
             <!-- Moment 4: 自定義快捷鍵 -->
             <div class="flex flex-col lg:flex-row items-center gap-10 mb-20">
                 <div class="flex-1">
-                    <img src="img/fast.png" alt="VAS 自定義全域快捷鍵：在偏好設定中為工具錄製專屬快捷鍵組合" class="w-full rounded-2xl shadow-2xl" style="border: 1px solid rgba(255,255,255,0.08); max-height: 380px; object-fit: contain;" loading="lazy">
+                    <img id="fastImg" src="img/fast.png" alt="VAS 自定義全域快捷鍵：在偏好設定中為工具錄製專屬快捷鍵組合" class="w-full rounded-2xl shadow-2xl" style="border: 1px solid rgba(255,255,255,0.08); max-height: 380px; object-fit: contain;" loading="lazy">
                 </div>
                 <div class="flex-1">
                     <p class="text-xs font-bold tracking-widest text-purple-400/70 uppercase mb-3"><span data-lang-key="m4Label">Global Shortcuts</span> <span class="badge-tauri">Tauri</span></p>
@@ -529,7 +529,7 @@
                     <ul class="space-y-2 text-white/65 text-sm flex-1" data-lang-key="planTauriFeatures">
                         <li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>全新輕量架構，體積大幅縮小</span></li>
                         <li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>所有後續新功能優先上線</span></li>
-                        <li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>旋轉、截圖歷史等進階工具</span></li>
+                        <li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>ShareSheet 分享、自定義快捷鍵等進階工具</span></li>
                         <li class="flex gap-2"><span class="text-purple-300/80 mt-0.5" aria-hidden="true">★</span><span>Electron 早鳥用戶享升級優惠</span></li>
                     </ul>
                     <div class="text-purple-300/40 text-xs border-t border-purple-400/15 pt-4" data-lang-key="planTauriNote">現在使用 Electron 版，等 Tauri 版推出時享有早鳥優惠。</div>
@@ -682,7 +682,7 @@
                 planElectronNote: '首發版本，功能完整，歡迎久用。',
                 planTauriName: 'Tauri 版（開發中）',
                 planTauriPriceBadge: '付費 · 持續更新',
-                planTauriFeatures: '<li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>全新輕量架構，體積大幅縮小</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>所有後續新功能優先上線</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>旋轉、截圖歷史等進階工具</span></li><li class="flex gap-2"><span class="text-purple-300/80 mt-0.5" aria-hidden="true">★</span><span>Electron 早鳥用戶享升級優惠</span></li>',
+                planTauriFeatures: '<li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>全新輕量架構，體積大幅縮小</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>所有後續新功能優先上線</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>ShareSheet 分享、自定義快捷鍵等進階工具</span></li><li class="flex gap-2"><span class="text-purple-300/80 mt-0.5" aria-hidden="true">★</span><span>Electron 早鳥用戶享升級優惠</span></li>',
                 planTauriNote: '現在使用 Electron 版，等 Tauri 版推出時享有早鳥優惠。',
                 surveyBadge: '早鳥專區',
                 surveyTitle: '填問卷，換早鳥優惠碼',
@@ -779,7 +779,7 @@
                 planElectronNote: 'The launch version — fully capable. Keep using it as long as you like.',
                 planTauriName: 'Tauri (Coming Soon)',
                 planTauriPriceBadge: 'Paid · Continuously updated',
-                planTauriFeatures: '<li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>New lightweight architecture — much smaller footprint</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>All future features land here first</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>Rotation, capture history, and more advanced tools</span></li><li class="flex gap-2"><span class="text-purple-300/80 mt-0.5" aria-hidden="true">★</span><span>Electron early adopters get an upgrade discount</span></li>',
+                planTauriFeatures: '<li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>New lightweight architecture — much smaller footprint</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>All future features land here first</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>ShareSheet sharing, custom shortcuts, and more advanced tools</span></li><li class="flex gap-2"><span class="text-purple-300/80 mt-0.5" aria-hidden="true">★</span><span>Electron early adopters get an upgrade discount</span></li>',
                 planTauriNote: 'Use the Electron version now — early adopter pricing awaits when Tauri launches.',
                 surveyBadge: 'Early Bird',
                 surveyTitle: 'Fill the Survey, Get Early Bird Code',
@@ -876,7 +876,7 @@
                 planElectronNote: '初回リリース版。機能完全。長く使えます。',
                 planTauriName: 'Tauri 版（開発中）',
                 planTauriPriceBadge: '有料 · 継続アップデート',
-                planTauriFeatures: '<li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>新しい軽量アーキテクチャ、サイズ大幅削減</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>以降のすべての新機能を優先提供</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>回転・キャプチャ履歴などの高度なツール</span></li><li class="flex gap-2"><span class="text-purple-300/80 mt-0.5" aria-hidden="true">★</span><span>Electron 早期ユーザーはアップグレード割引あり</span></li>',
+                planTauriFeatures: '<li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>新しい軽量アーキテクチャ、サイズ大幅削減</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>以降のすべての新機能を優先提供</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>ShareSheet 共有・カスタムショートカットなど高度なツール</span></li><li class="flex gap-2"><span class="text-purple-300/80 mt-0.5" aria-hidden="true">★</span><span>Electron 早期ユーザーはアップグレード割引あり</span></li>',
                 planTauriNote: '今は Electron 版を使いながら、Tauri 版リリース時に早期割引を受け取れます。',
                 surveyBadge: '早期ユーザー限定',
                 surveyTitle: 'アンケートに答えて、早期割引コードをゲット',
@@ -910,11 +910,15 @@
             });
             document.getElementById('surveyFormLink').href = surveyLinks[lang];
             const toolbarImg = document.getElementById('toolbarImg');
-            toolbarImg.src = lang === 'zh' ? 'img/vastoolbar.png' : 'img/vastoolbar-en.png';
-            toolbarImg.alt = lang === 'zh' ? 'VAS 截圖工具列：全螢幕、視窗、矩形、延遲、開啟、批次轉等功能按鈕' : 'VAS capture toolbar: fullscreen, window, rectangle, delay, open, batch convert buttons';
+            toolbarImg.src = lang === 'zh' ? 'img/vastoolbar.png' : lang === 'ja' ? 'img/vastoolbar-jp.png' : 'img/vastoolbar-en.png';
+            toolbarImg.alt = lang === 'zh' ? 'VAS 截圖工具列：全螢幕、視窗、矩形、延遲、開啟、批次轉等功能按鈕' : lang === 'ja' ? 'VAS キャプチャツールバー：全画面・ウィンドウ・矩形・遅延・開く・バッチ変換ボタン' : 'VAS capture toolbar: fullscreen, window, rectangle, delay, open, batch convert buttons';
             const vasframeImg = document.getElementById('vasframeImg');
-            vasframeImg.src = lang === 'zh' ? 'img/vasframe-zh.png' : 'img/vasframe-en.png';
-            vasframeImg.alt = lang === 'zh' ? 'VAS 編輯器介面：深色工作區，左側工具列，頂部選項列，中央為圖片標注畫布' : 'VAS editor interface: dark workspace with left toolbar, top options bar, and annotation canvas';
+            vasframeImg.src = lang === 'zh' ? 'img/vasframe-zh.png' : lang === 'ja' ? 'img/vasframe-jp.png' : 'img/vasframe-en.png';
+            vasframeImg.alt = lang === 'zh' ? 'VAS 編輯器介面：深色工作區，左側工具列，頂部選項列，中央為圖片標注畫布' : lang === 'ja' ? 'VAS エディタ画面：ダーク作業エリア、左側ツールバー、上部オプションバー、中央に注釈キャンバス' : 'VAS editor interface: dark workspace with left toolbar, top options bar, and annotation canvas';
+            const sharesheetImg = document.getElementById('sharesheetImg');
+            if (sharesheetImg) sharesheetImg.src = lang === 'zh' ? 'img/sharesheet.png' : lang === 'ja' ? 'img/sharesheet-jp.png' : 'img/sharesheet-en.png';
+            const fastImg = document.getElementById('fastImg');
+            if (fastImg) fastImg.src = lang === 'zh' ? 'img/fast.png' : lang === 'ja' ? 'img/fast-jp.jpg' : 'img/fast-en.png';
             langZhBtn.classList.toggle('active', lang === 'zh');
             langEnBtn.classList.toggle('active', lang === 'en');
             langJaBtn.classList.toggle('active', lang === 'ja');
