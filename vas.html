@@ -50,21 +50,51 @@
             border: 1px solid rgba(255,255,255,0.10);
             backdrop-filter: blur(8px);
         }
-        .lang-switcher button {
+        /* ── Language dropdown ── */
+        .lang-dropdown-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.08);
+            border: none;
+            color: #fff;
+            font-size: 0.875rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .lang-dropdown-btn:hover { background: rgba(255,255,255,0.13); }
+        .lang-dropdown-menu {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 6px);
+            min-width: 110px;
+            background: rgba(18,14,48,0.97);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 14px;
+            overflow: hidden;
+            display: none;
+            z-index: 100;
+        }
+        .lang-dropdown-menu.open { display: block; }
+        .lang-opt {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 10px 18px;
             background: transparent;
             border: none;
-            color: rgba(255,255,255,0.5);
-            padding: 6px 14px;
-            cursor: pointer;
+            color: rgba(255,255,255,0.6);
             font-size: 0.875rem;
-            border-radius: 14px;
-            transition: color 0.2s, background 0.2s;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
         }
-        .lang-switcher button.active {
-            background: rgba(255,255,255,0.15);
-            color: #ffffff;
-            font-weight: 700;
-        }
+        .lang-opt:hover { background: rgba(255,255,255,0.08); color: #fff; }
+        .lang-opt.active { color: #fff; font-weight: 700; }
         .divider {
             width: 48px;
             height: 3px;
@@ -219,14 +249,22 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
                     <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
                 </svg>
-                <span data-lang-key="backLabel">深握計畫</span>
+                <span data-lang-key="backLabel" class="hidden sm:inline">深握計畫</span>
             </a>
             <div class="text-lg font-bold tracking-widest gradient-text">VAS</div>
-            <div class="flex-1 flex justify-end"><div class="lang-switcher flex items-center rounded-full p-1" style="background: rgba(255,255,255,0.08);" role="group" aria-label="語言切換">
-                <button id="lang-zh" class="active" aria-pressed="true">中</button>
-                <button id="lang-en" aria-pressed="false">EN</button>
-                <button id="lang-ja" aria-pressed="false">日</button>
-            </div></div>
+            <div class="flex-1 flex justify-end">
+                <div class="relative" id="langDropdownWrap">
+                    <button id="langDropdownBtn" class="lang-dropdown-btn" aria-haspopup="listbox" aria-expanded="false" aria-label="語言切換">
+                        <span id="langDropdownLabel">中</span>
+                        <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.7"/></svg>
+                    </button>
+                    <div id="langDropdownMenu" class="lang-dropdown-menu" role="listbox" aria-label="語言選擇">
+                        <button class="lang-opt active" data-lang="zh" role="option">中文</button>
+                        <button class="lang-opt" data-lang="en" role="option">English</button>
+                        <button class="lang-opt" data-lang="ja" role="option">日本語</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -906,9 +944,10 @@
             }
         };
 
-        const langZhBtn = document.getElementById('lang-zh');
-        const langEnBtn = document.getElementById('lang-en');
-        const langJaBtn = document.getElementById('lang-ja');
+        const langDropdownBtn   = document.getElementById('langDropdownBtn');
+        const langDropdownMenu  = document.getElementById('langDropdownMenu');
+        const langDropdownLabel = document.getElementById('langDropdownLabel');
+        const langLabels = { zh: '中', en: 'EN', ja: '日' };
 
         const surveyLinks = {
             zh: 'https://forms.gle/5xWyyvehF1HSAyDu7',
@@ -933,18 +972,35 @@
             if (sharesheetImg) sharesheetImg.src = lang === 'zh' ? 'img/sharesheet.png' : lang === 'ja' ? 'img/sharesheet-jp.png' : 'img/sharesheet-en.png';
             const fastImg = document.getElementById('fastImg');
             if (fastImg) fastImg.src = lang === 'zh' ? 'img/fast.png' : lang === 'ja' ? 'img/fast-jp.jpg' : 'img/fast-en.png';
-            langZhBtn.classList.toggle('active', lang === 'zh');
-            langEnBtn.classList.toggle('active', lang === 'en');
-            langJaBtn.classList.toggle('active', lang === 'ja');
-            langZhBtn.setAttribute('aria-pressed', lang === 'zh');
-            langEnBtn.setAttribute('aria-pressed', lang === 'en');
-            langJaBtn.setAttribute('aria-pressed', lang === 'ja');
+            if (langDropdownLabel) langDropdownLabel.textContent = langLabels[lang];
+            document.querySelectorAll('.lang-opt').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
             document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : lang === 'ja' ? 'ja' : 'en';
         }
 
-        langZhBtn.addEventListener('click', () => switchLanguage('zh'));
-        langEnBtn.addEventListener('click', () => switchLanguage('en'));
-        langJaBtn.addEventListener('click', () => switchLanguage('ja'));
+        // ── Dropdown open / close ──────────────────────────────────────────────
+        if (langDropdownBtn) {
+            langDropdownBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                const isOpen = langDropdownMenu.classList.contains('open');
+                langDropdownMenu.classList.toggle('open', !isOpen);
+                langDropdownBtn.setAttribute('aria-expanded', String(!isOpen));
+            });
+        }
+        document.querySelectorAll('.lang-opt').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                switchLanguage(btn.dataset.lang);
+                langDropdownMenu.classList.remove('open');
+                langDropdownBtn.setAttribute('aria-expanded', 'false');
+            });
+        });
+        document.addEventListener('click', function () {
+            if (langDropdownMenu.classList.contains('open')) {
+                langDropdownMenu.classList.remove('open');
+                langDropdownBtn.setAttribute('aria-expanded', 'false');
+            }
+        });
 
         // ── Floating pill nav ─────────────────────────────────────────────────
         (function() {

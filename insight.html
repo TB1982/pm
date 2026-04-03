@@ -88,24 +88,24 @@
 
     <!-- Header -->
     <header class="sticky top-0 z-50 px-6 py-4 flex items-center justify-between" style="background: rgba(15,12,41,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.08);">
-        <a href="vas.html" class="back-link">← VAS</a>
+        <a href="vas.html" class="back-link flex-1">← VAS</a>
         <p class="text-xs text-white/30 tracking-widest uppercase">Design Insights</p>
-        <div class="lang-switcher flex items-center rounded-full p-1" style="background: rgba(255,255,255,0.08);" role="group" aria-label="語言切換">
+        <div class="flex-1 flex justify-end"><div class="lang-switcher flex items-center rounded-full p-1" style="background: rgba(255,255,255,0.08);" role="group" aria-label="語言切換">
             <button id="lang-zh" class="active" aria-pressed="true">中</button>
             <button id="lang-en" aria-pressed="false">EN</button>
             <button id="lang-ja" aria-pressed="false">日</button>
-        </div>
+        </div></div>
     </header>
 
     <!-- Hero -->
-    <section class="px-6 py-24 text-center max-w-3xl mx-auto">
+    <section class="px-6 pt-28 pb-24 text-center max-w-3xl mx-auto">
         <p class="tag mb-8" data-lang-key="heroTag">VAS · 設計洞察筆記</p>
-        <h1 class="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight" data-lang-key="heroH1">
+        <h1 class="text-4xl md:text-5xl font-bold text-white mb-8 leading-snug" data-lang-key="heroH1">
             那些沒有寫在<br>
             <span class="gradient-text">功能列表</span>裡的決定
         </h1>
         <p class="text-white/70 text-xl leading-relaxed mb-4" data-lang-key="heroTagline">
-            我們都不完美，但我們仍然可以攜手並進。
+            我們都不完美，<br class="sm:hidden">但我們仍然可以攜手並進。
         </p>
         <p class="text-white/35 text-base leading-relaxed" data-lang-key="heroDesc">
             這裡記錄 VAS 開發過程中，那些沒有寫在功能列表裡、但決定了產品質感的設計決策——每一條，都是在重新營造人與工具之間的關係。
@@ -308,6 +308,8 @@
         <p>Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by Nova (babelon1882@gmail.com)</p>
         <p><a href="privacy.html" class="hover:text-white/50 transition-colors">隱私權政策 · Privacy Policy · プライバシーポリシー</a></p>
     </footer>
+
+    <script src="i18n-insight.js"></script>
 
     <script type="application/ld+json">
     {
