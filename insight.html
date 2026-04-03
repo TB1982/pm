@@ -96,32 +96,36 @@
     <!-- Insights -->
     <main class="px-6 pb-32 max-w-3xl mx-auto space-y-8">
 
-        <!-- Insight 01 -->
+        <!-- Insight 01：承認不完美 -->
         <article class="insight-card rounded-2xl p-8">
-            <p class="tag mb-2">零摩擦觸發 · Proactive Ambient Computing</p>
-            <h2 class="text-xl font-bold text-white mt-1 mb-4">呼吸燈讀懂你的意圖，再開口問你</h2>
+            <p class="tag mb-2">人機協作 · Human-AI Collaboration</p>
+            <h2 class="text-xl font-bold text-white mt-1 mb-4">沒有完美的人機，但有完整的協作關係</h2>
             <p class="text-white/55 leading-relaxed mb-4">
-                VAS 的呼吸燈不只是等待的象徵——它在偵測環境。當使用者複製了一個網址，呼吸燈會輕輕詢問：「要幫你截這個網頁嗎？」使用者同意，截圖完成，編輯器打開。
+                OCR 隱私辨識盡可能自動——自動偵測畫面中的敏感文字，自動標記需要遮蔽的區域。但 OCR 有它的極限，辨識不到或辨識錯的地方，不是工具的失敗，是協作的交接點。
             </p>
             <p class="text-white/55 leading-relaxed mb-4">
-                這個設計源自一個觀察：原本的網頁截圖流程需要複製網址 → 呼叫工具列 → 按截圖 → 貼上網址——四個步驟，全部是「為了工具而做的事」。但使用者複製網址，是為了他自己的事，不是為了 VAS。
+                浮動馬賽克圖層在那裡等著：OCR 沒蓋到的，使用者手動補上。辨識失誤從「錯誤」變成「待確認」，工具的不完美被設計成使用者的控制權。
             </p>
             <p class="text-white/55 leading-relaxed mb-8">
-                最好的工具不讓你切換到「工具模式」。它待在你的環境裡，讀懂你在做什麼，然後輕聲問你一句。
+                而且遮錯了也沒關係——馬賽克是獨立的浮動物件，undo 一鍵刪除。工具不只承認自己不完美，也承認使用者會手滑。沒有任何決定是不可逆的。
             </p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div class="compare-box">
-                    <p class="text-xs text-white/30 mb-1">傳統工具思維</p>
-                    <p class="text-sm text-white/70">你呼叫 → 它執行</p>
+            <div class="space-y-3">
+                <div class="compare-box flex items-start gap-4">
+                    <div class="text-sm font-bold text-purple-300 w-20 shrink-0 mt-0.5">OCR 自動</div>
+                    <p class="text-sm text-white/70">盡可能辨識，自動標記敏感區域</p>
                 </div>
-                <div class="compare-box highlight">
-                    <p class="text-xs text-purple-300/60 mb-1">VAS 的方式</p>
-                    <p class="text-sm text-white">它感知 → 它詢問 → 你確認</p>
+                <div class="compare-box flex items-start gap-4">
+                    <div class="text-sm font-bold text-white/50 w-20 shrink-0 mt-0.5">馬賽克補位</div>
+                    <p class="text-sm text-white/70">OCR 不足的地方，使用者手動接手</p>
+                </div>
+                <div class="compare-box highlight flex items-start gap-4">
+                    <div class="text-sm font-bold text-purple-300 w-20 shrink-0 mt-0.5">Undo</div>
+                    <p class="text-sm text-white">遮錯了？一鍵刪除，沒有不可逆的決定</p>
                 </div>
             </div>
         </article>
 
-        <!-- Insight 02 -->
+        <!-- Insight 02：學會讀人 -->
         <article class="insight-card rounded-2xl p-8">
             <p class="tag mb-2">信心度感知 · Confidence-Aware Interaction</p>
             <h2 class="text-xl font-bold text-white mt-1 mb-4">QR Code 掃到了，但它有多確定？</h2>
@@ -165,35 +169,32 @@
             </div>
         </article>
 
-        <!-- Insight 03 -->
+        <!-- Insight 03：主動陪伴 -->
         <article class="insight-card rounded-2xl p-8">
-            <p class="tag mb-2">系統架構 · Design Token Architecture</p>
-            <h2 class="text-xl font-bold text-white mt-1 mb-4">功能可以一直加，但底層要先說同一種語言</h2>
+            <p class="tag mb-2">零摩擦觸發 · Proactive Ambient Computing</p>
+            <h2 class="text-xl font-bold text-white mt-1 mb-4">呼吸燈讀懂你的意圖，再開口問你</h2>
             <p class="text-white/55 leading-relaxed mb-4">
-                當工具種類越來越多——點、線、面、文字、符號——每個物件都有顏色、線條、大小、方向這些屬性。如果每個工具各自管自己的屬性，加功能就是在還債；但如果這些屬性是共享的、模組化的，改一個地方，全體同步。
-            </p>
-            <p class="text-white/55 leading-relaxed mb-4">
-                VAS 正在進行的重構，核心是兩件事：座標系統統一，讓所有物件說同一種語言；屬性模組化，讓實色、漸層、虛實線、大小、方向這些設定成為可以跨工具套用的共用語彙。
+                VAS 的呼吸燈不只是等待的象徵——它在偵測環境。當使用者複製了一個網址，呼吸燈會輕輕詢問：「要幫你截這個網頁嗎？」使用者同意，截圖完成，編輯器打開。
             </p>
             <p class="text-white/55 leading-relaxed mb-4">
-                這不是在加功能，是在為後面所有功能打地基。地基穩了，之後疊加旋轉、對齊、群組才不會打架。
+                這個設計源自一個觀察：原本的網頁截圖流程需要複製網址 → 呼叫工具列 → 按截圖 → 貼上網址——四個步驟，全部是「為了工具而做的事」。但使用者複製網址，是為了他自己的事，不是為了 VAS。
             </p>
-            <p class="text-white/55 leading-relaxed mb-6">
-                這次重構也連帶讓 Electron 版受惠——底層統一，兩個平台都跑在同一套邏輯上，穩定性自然提升。Electron 雖然不再新增功能，但作為付費入門磚，它需要被好好維護：功能完整、免費、穩定，讓使用者有機會先信任 VAS，再決定要不要升級 Tauri。一次重構，把整個雙平台策略都撐起來了。
+            <p class="text-white/55 leading-relaxed mb-8">
+                最好的工具不讓你切換到「工具模式」。它待在你的環境裡，讀懂你在做什麼，然後輕聲問你一句。
             </p>
-            <div class="compare-box highlight">
-                <p class="text-xs text-purple-300/60 mb-2">重構帶來的連鎖效應</p>
-                <ul class="text-sm text-white/70 space-y-1.5">
-                    <li>· 座標系統統一：所有物件共享同一套空間語言</li>
-                    <li>· 屬性模組化：實色／漸層／虛實線／大小／方向跨工具通用</li>
-                    <li>· Tauri 可持續疊加新功能，不會因複雜度打架</li>
-                    <li>· Electron 穩定性同步提升，入門磚角色得以維持</li>
-                </ul>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="compare-box">
+                    <p class="text-xs text-white/30 mb-1">傳統工具思維</p>
+                    <p class="text-sm text-white/70">你呼叫 → 它執行</p>
+                </div>
+                <div class="compare-box highlight">
+                    <p class="text-xs text-purple-300/60 mb-1">VAS 的方式</p>
+                    <p class="text-sm text-white">它感知 → 它詢問 → 你確認</p>
+                </div>
             </div>
-            <!-- 實作完成後補充：發現了什麼、改變了什麼 -->
         </article>
 
-        <!-- Insight 04 -->
+        <!-- Insight 04：不打擾 -->
         <article class="insight-card rounded-2xl p-8">
             <p class="tag mb-2">消除中斷 · Eliminating Interruption</p>
             <h2 class="text-xl font-bold text-white mt-1 mb-4">擺好 pose 在那邊等，工具不應該叫你回來選</h2>
@@ -231,33 +232,32 @@
             </div>
         </article>
 
-        <!-- Insight 05 -->
+        <!-- Insight 05：走得遠 -->
         <article class="insight-card rounded-2xl p-8">
-            <p class="tag mb-2">人機協作 · Human-AI Collaboration</p>
-            <h2 class="text-xl font-bold text-white mt-1 mb-4">沒有完美的人機，但有完整的協作關係</h2>
+            <p class="tag mb-2">系統架構 · Design Token Architecture</p>
+            <h2 class="text-xl font-bold text-white mt-1 mb-4">功能可以一直加，但底層要先說同一種語言</h2>
             <p class="text-white/55 leading-relaxed mb-4">
-                OCR 隱私辨識盡可能自動——自動偵測畫面中的敏感文字，自動標記需要遮蔽的區域。但 OCR 有它的極限，辨識不到或辨識錯的地方，不是工具的失敗，是協作的交接點。
+                當工具種類越來越多——點、線、面、文字、符號——每個物件都有顏色、線條、大小、方向這些屬性。如果每個工具各自管自己的屬性，加功能就是在還債；但如果這些屬性是共享的、模組化的，改一個地方，全體同步。
             </p>
             <p class="text-white/55 leading-relaxed mb-4">
-                浮動馬賽克圖層在那裡等著：OCR 沒蓋到的，使用者手動補上。辨識失誤從「錯誤」變成「待確認」，工具的不完美被設計成使用者的控制權。
+                VAS 正在進行的重構，核心是兩件事：座標系統統一，讓所有物件說同一種語言；屬性模組化，讓實色、漸層、虛實線、大小、方向這些設定成為可以跨工具套用的共用語彙。
             </p>
-            <p class="text-white/55 leading-relaxed mb-8">
-                而且遮錯了也沒關係——馬賽克是獨立的浮動物件，undo 一鍵刪除。工具不只承認自己不完美，也承認使用者會手滑。沒有任何決定是不可逆的。
+            <p class="text-white/55 leading-relaxed mb-4">
+                這不是在加功能，是在為後面所有功能打地基。地基穩了，之後疊加旋轉、對齊、群組才不會打架。
             </p>
-            <div class="space-y-3">
-                <div class="compare-box flex items-start gap-4">
-                    <div class="text-sm font-bold text-purple-300 w-20 shrink-0 mt-0.5">OCR 自動</div>
-                    <p class="text-sm text-white/70">盡可能辨識，自動標記敏感區域</p>
-                </div>
-                <div class="compare-box flex items-start gap-4">
-                    <div class="text-sm font-bold text-white/50 w-20 shrink-0 mt-0.5">馬賽克補位</div>
-                    <p class="text-sm text-white/70">OCR 不足的地方，使用者手動接手</p>
-                </div>
-                <div class="compare-box highlight flex items-start gap-4">
-                    <div class="text-sm font-bold text-purple-300 w-20 shrink-0 mt-0.5">Undo</div>
-                    <p class="text-sm text-white">遮錯了？一鍵刪除，沒有不可逆的決定</p>
-                </div>
+            <p class="text-white/55 leading-relaxed mb-6">
+                這次重構也連帶讓 Electron 版受惠——底層統一，兩個平台都跑在同一套邏輯上，穩定性自然提升。Electron 雖然不再新增功能，但作為付費入門磚，它需要被好好維護：功能完整、免費、穩定，讓使用者有機會先信任 VAS，再決定要不要升級 Tauri。一次重構，把整個雙平台策略都撐起來了。
+            </p>
+            <div class="compare-box highlight">
+                <p class="text-xs text-purple-300/60 mb-2">重構帶來的連鎖效應</p>
+                <ul class="text-sm text-white/70 space-y-1.5">
+                    <li>· 座標系統統一：所有物件共享同一套空間語言</li>
+                    <li>· 屬性模組化：實色／漸層／虛實線／大小／方向跨工具通用</li>
+                    <li>· Tauri 可持續疊加新功能，不會因複雜度打架</li>
+                    <li>· Electron 穩定性同步提升，入門磚角色得以維持</li>
+                </ul>
             </div>
+            <!-- 實作完成後補充：發現了什麼、改變了什麼 -->
         </article>
 
         <!-- Milestone Timeline -->
