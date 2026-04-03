@@ -53,6 +53,21 @@
             border-radius: 2px;
             margin: 0 auto 3rem;
         }
+        .lang-switcher button {
+            background: transparent;
+            border: none;
+            color: rgba(255,255,255,0.5);
+            padding: 6px 14px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            border-radius: 14px;
+            transition: color 0.2s, background 0.2s;
+        }
+        .lang-switcher button.active {
+            background: rgba(255,255,255,0.15);
+            color: #ffffff;
+            font-weight: 700;
+        }
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
                 animation-duration: 0.01ms !important;
@@ -65,31 +80,35 @@
 
     <!-- Header -->
     <header class="sticky top-0 z-50 px-6 py-4 flex items-center justify-between" style="background: rgba(15,12,41,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.08);">
-        <a href="vas.html" class="back-link">← VAS</a>
-        <p class="text-xs text-white/30 tracking-widest uppercase">Milestone</p>
-        <a href="insight.html" class="back-link">設計洞察 →</a>
+        <a href="vas.html" class="back-link flex-1">← VAS</a>
+        <p class="text-xs text-white/30 tracking-widest uppercase" data-lang-key="pageLabel">Milestone</p>
+        <div class="flex-1 flex justify-end"><div class="lang-switcher flex items-center rounded-full p-1" style="background: rgba(255,255,255,0.08);" role="group" aria-label="語言切換">
+            <button id="lang-zh" class="active" aria-pressed="true">中</button>
+            <button id="lang-en" aria-pressed="false">EN</button>
+            <button id="lang-ja" aria-pressed="false">日</button>
+        </div></div>
     </header>
 
     <!-- Hero -->
-    <section class="px-6 py-24 text-center max-w-3xl mx-auto">
-        <p class="tag mb-8">VAS · 產品里程碑</p>
-        <h1 class="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
+    <section class="px-6 pt-28 pb-24 text-center max-w-3xl mx-auto">
+        <p class="tag mb-8" data-lang-key="heroTag">VAS · 產品里程碑</p>
+        <h1 class="text-4xl md:text-5xl font-bold text-white mb-8 leading-snug" data-lang-key="heroH1">
             14 天，從零到<br><span class="gradient-text">雙平台上架</span>
         </h1>
         <div class="flex justify-center gap-8 text-center mt-8">
             <div>
                 <p class="text-3xl font-bold text-white">14</p>
-                <p class="text-xs text-white/35 mt-1">天</p>
+                <p class="text-xs text-white/35 mt-1" data-lang-key="statDays">天</p>
             </div>
             <div class="w-px bg-white/10"></div>
             <div>
                 <p class="text-3xl font-bold text-white">50+</p>
-                <p class="text-xs text-white/35 mt-1">版本迭代</p>
+                <p class="text-xs text-white/35 mt-1" data-lang-key="statVersions">版本迭代</p>
             </div>
             <div class="w-px bg-white/10"></div>
             <div>
                 <p class="text-3xl font-bold text-white">2</p>
-                <p class="text-xs text-white/35 mt-1">平台上架</p>
+                <p class="text-xs text-white/35 mt-1" data-lang-key="statPlatforms">平台上架</p>
             </div>
         </div>
     </section>
@@ -98,8 +117,8 @@
 
         <!-- 大里程碑時間軸 -->
         <section>
-            <p class="tag text-center mb-2">產品故事弧</p>
-            <h2 class="text-2xl font-bold text-white text-center mb-10">兩條線交織，互相成就</h2>
+            <p class="tag text-center mb-2" data-lang-key="storyTag">產品故事弧</p>
+            <h2 class="text-2xl font-bold text-white text-center mb-10" data-lang-key="storyH2">兩條線交織，互相成就</h2>
 
             <div class="card rounded-2xl p-8">
                 <div class="relative">
@@ -108,44 +127,44 @@
 
                         <div class="relative">
                             <div class="absolute -left-8 top-1 w-[15px] h-[15px] rounded-full bg-white/20 border-2 border-white/30"></div>
-                            <p class="text-xs text-white/30 mb-1">2026 / 3 / 21　從零開始</p>
-                            <h3 class="text-base font-bold text-white mb-1">v0.1 — 什麼都沒有的第一天</h3>
-                            <p class="text-sm text-white/50">一週後，Electron v3.43 首發。</p>
+                            <p class="text-xs text-white/30 mb-1" data-lang-key="m1meta">2026 / 3 / 21　從零開始</p>
+                            <h3 class="text-base font-bold text-white mb-1" data-lang-key="m1h3">v0.1 — 什麼都沒有的第一天</h3>
+                            <p class="text-sm text-white/50" data-lang-key="m1p">一週後，Electron v3.43 首發。</p>
                         </div>
 
                         <div class="relative">
                             <div class="absolute -left-8 top-1 w-[15px] h-[15px] rounded-full bg-purple-500 border-2 border-purple-300/50 shadow-[0_0_10px_rgba(196,113,245,0.6)]"></div>
-                            <p class="text-xs text-purple-300/60 mb-1">2026 / 3 / 28　第一週結束</p>
-                            <h3 class="text-base font-bold text-white mb-1">Electron v3.43 首發</h3>
-                            <p class="text-sm text-white/50">功能完整的第一個公開版本。從這裡開始，VAS 有了真實使用者。</p>
+                            <p class="text-xs text-purple-300/60 mb-1" data-lang-key="m2meta">2026 / 3 / 28　第一週結束</p>
+                            <h3 class="text-base font-bold text-white mb-1" data-lang-key="m2h3">Electron v3.43 首發</h3>
+                            <p class="text-sm text-white/50" data-lang-key="m2p">功能完整的第一個公開版本。從這裡開始，VAS 有了真實使用者。</p>
                         </div>
 
                         <div class="relative">
                             <div class="absolute -left-8 top-1 w-[15px] h-[15px] rounded-full bg-purple-400/60 border-2 border-purple-300/30"></div>
-                            <p class="text-xs text-purple-300/60 mb-1">2026 / 3 / 28　同日啟動</p>
-                            <h3 class="text-base font-bold text-white mb-1">Tauri 移植啟動</h3>
-                            <p class="text-sm text-white/50">決定為未來打一個更輕的底。移植不是拋棄 Electron，是帶著它的經驗重新出發。</p>
+                            <p class="text-xs text-purple-300/60 mb-1" data-lang-key="m3meta">2026 / 3 / 28　同日啟動</p>
+                            <h3 class="text-base font-bold text-white mb-1" data-lang-key="m3h3">Tauri 移植啟動</h3>
+                            <p class="text-sm text-white/50" data-lang-key="m3p">決定為未來打一個更輕的底。移植不是拋棄 Electron，是帶著它的經驗重新出發。</p>
                         </div>
 
                         <div class="relative">
                             <div class="absolute -left-8 top-1 w-[15px] h-[15px] rounded-full bg-purple-400/60 border-2 border-purple-300/30"></div>
-                            <p class="text-xs text-purple-300/60 mb-1">2026 / 3 / 31　回饋</p>
-                            <h3 class="text-base font-bold text-white mb-1">Electron v3.44 整修版</h3>
-                            <p class="text-sm text-white/50">完整移植 Tauri 後，帶著過程中累積的眼光回頭整修 Electron，補上新功能。Tauri 的經驗反哺了起點。</p>
+                            <p class="text-xs text-purple-300/60 mb-1" data-lang-key="m4meta">2026 / 3 / 31　回饋</p>
+                            <h3 class="text-base font-bold text-white mb-1" data-lang-key="m4h3">Electron v3.44 整修版</h3>
+                            <p class="text-sm text-white/50" data-lang-key="m4p">完整移植 Tauri 後，帶著過程中累積的眼光回頭整修 Electron，補上新功能。Tauri 的經驗反哺了起點。</p>
                         </div>
 
                         <div class="relative">
                             <div class="absolute -left-8 top-1 w-[15px] h-[15px] rounded-full bg-purple-400/60 border-2 border-purple-300/30"></div>
-                            <p class="text-xs text-purple-300/60 mb-1">2026 / 3 / 31　加速</p>
-                            <h3 class="text-base font-bold text-white mb-1">Tauri 新功能開發</h3>
-                            <p class="text-sm text-white/50">底層穩了，開始疊加 Tauri 專屬功能——ShareSheet、自定義快捷鍵、呼吸燈彩蛋。前端共用，Electron 靜靜受惠。</p>
+                            <p class="text-xs text-purple-300/60 mb-1" data-lang-key="m5meta">2026 / 3 / 31　加速</p>
+                            <h3 class="text-base font-bold text-white mb-1" data-lang-key="m5h3">Tauri 新功能開發</h3>
+                            <p class="text-sm text-white/50" data-lang-key="m5p">底層穩了，開始疊加 Tauri 專屬功能——ShareSheet、自定義快捷鍵、呼吸燈彩蛋。前端共用，Electron 靜靜受惠。</p>
                         </div>
 
                         <div class="relative">
                             <div class="absolute -left-8 top-1 w-[15px] h-[15px] rounded-full bg-gradient-to-br from-purple-400 to-pink-400 border-2 border-pink-300/50 shadow-[0_0_12px_rgba(250,113,205,0.5)]"></div>
-                            <p class="text-xs text-pink-300/60 mb-1">2026 / 4 / 4（預訂）　終章・慶功</p>
-                            <h3 class="text-base font-bold text-white mb-1">Electron v3.45 慶功版 &amp; Tauri 1.0 同步首發</h3>
-                            <p class="text-sm text-white/50">兩條線在這裡交匯。不是誰取代誰，是兩個版本各自走到最好的狀態，一起亮相。</p>
+                            <p class="text-xs text-pink-300/60 mb-1" data-lang-key="m6meta">2026 / 4 / 4（預訂）　終章・慶功</p>
+                            <h3 class="text-base font-bold text-white mb-1" data-lang-key="m6h3">Electron v3.45 慶功版 &amp; Tauri 1.0 同步首發</h3>
+                            <p class="text-sm text-white/50" data-lang-key="m6p">兩條線在這裡交匯。不是誰取代誰，是兩個版本各自走到最好的狀態，一起亮相。</p>
                         </div>
 
                     </div>
@@ -156,73 +175,73 @@
         <!-- Electron 迭代紀錄 -->
         <section>
             <div class="section-divider"></div>
-            <p class="tag text-center mb-2">Electron 版</p>
-            <h2 class="text-2xl font-bold text-white text-center mb-3">11 天，40+ 版本</h2>
-            <p class="text-white/35 text-sm text-center mb-10">3/27 最猛——一天推了 15 個版本。</p>
+            <p class="tag text-center mb-2" data-lang-key="electronTag">Electron 版</p>
+            <h2 class="text-2xl font-bold text-white text-center mb-3" data-lang-key="electronH2">11 天，40+ 版本</h2>
+            <p class="text-white/35 text-sm text-center mb-10" data-lang-key="electronSub">3/27 最猛——一天推了 15 個版本。</p>
 
             <div class="card rounded-2xl p-8 space-y-6">
 
                 <div class="flex gap-4">
                     <div class="w-14 shrink-0 text-right"><p class="text-xs text-white/30 mt-0.5">3 / 21</p></div>
                     <div class="flex-1 border-l border-white/10 pl-4 pb-2">
-                        <p class="text-xs text-purple-300/60 mb-1">v0.1　起點</p>
-                        <p class="text-sm text-white/70">什麼都沒有的第一天。</p>
+                        <p class="text-xs text-purple-300/60 mb-1" data-lang-key="e1label">v0.1　起點</p>
+                        <p class="text-sm text-white/70" data-lang-key="e1desc">什麼都沒有的第一天。</p>
                     </div>
                 </div>
 
                 <div class="flex gap-4">
                     <div class="w-14 shrink-0 text-right"><p class="text-xs text-white/30 mt-0.5">3 / 23</p></div>
                     <div class="flex-1 border-l border-white/10 pl-4 pb-2">
-                        <p class="text-xs text-purple-300/60 mb-1">v3.0</p>
-                        <p class="text-sm text-white/70">橢圓框工具——第一個有形狀的版本。</p>
+                        <p class="text-xs text-purple-300/60 mb-1" data-lang-key="e2label">v3.0</p>
+                        <p class="text-sm text-white/70" data-lang-key="e2desc">橢圓框工具——第一個有形狀的版本。</p>
                     </div>
                 </div>
 
                 <div class="flex gap-4">
                     <div class="w-14 shrink-0 text-right"><p class="text-xs text-white/30 mt-0.5">3 / 24</p></div>
                     <div class="flex-1 border-l border-white/10 pl-4 pb-2">
-                        <p class="text-xs text-purple-300/60 mb-1">v3.1 → v3.9</p>
-                        <p class="text-sm text-white/70">OCR 文字辨識首登場 · 折線修正 · 工具列雙排佈局 · Smart Numbering · 框型選取 · 筆型工具 · 虛線升級 · Options Bar 對齊</p>
+                        <p class="text-xs text-purple-300/60 mb-1" data-lang-key="e3label">v3.1 → v3.9</p>
+                        <p class="text-sm text-white/70" data-lang-key="e3desc">OCR 文字辨識首登場 · 折線修正 · 工具列雙排佈局 · Smart Numbering · 框型選取 · 筆型工具 · 虛線升級 · Options Bar 對齊</p>
                     </div>
                 </div>
 
                 <div class="flex gap-4">
                     <div class="w-14 shrink-0 text-right"><p class="text-xs text-white/30 mt-0.5">3 / 25</p></div>
                     <div class="flex-1 border-l border-white/10 pl-4 pb-2">
-                        <p class="text-xs text-purple-300/60 mb-1">v3.10 → v3.27</p>
-                        <p class="text-sm text-white/70">Bug 修正集中爆發 · 馬賽克 / 模糊 / 符號印章 · 符號工具重構 · 一鍵套版（6 款框架 / Apple 漸層 / mesh gradient）· 批次轉換 · 浮水印 · 去背 · 品牌色庫 · 歷史面板</p>
+                        <p class="text-xs text-purple-300/60 mb-1" data-lang-key="e4label">v3.10 → v3.27</p>
+                        <p class="text-sm text-white/70" data-lang-key="e4desc">Bug 修正集中爆發 · 馬賽克 / 模糊 / 符號印章 · 符號工具重構 · 一鍵套版（6 款框架 / Apple 漸層 / mesh gradient）· 批次轉換 · 浮水印 · 去背 · 品牌色庫 · 歷史面板</p>
                     </div>
                 </div>
 
                 <div class="flex gap-4">
                     <div class="w-14 shrink-0 text-right"><p class="text-xs text-white/30 mt-0.5">3 / 26</p></div>
                     <div class="flex-1 border-l border-white/10 pl-4 pb-2">
-                        <p class="text-xs text-purple-300/60 mb-1">v3.28 → v3.29</p>
-                        <p class="text-sm text-white/70">隱私遮蔽 · 歷史 Drawer 重設計 · Retina DPR · 批次 bug 修正</p>
+                        <p class="text-xs text-purple-300/60 mb-1" data-lang-key="e5label">v3.28 → v3.29</p>
+                        <p class="text-sm text-white/70" data-lang-key="e5desc">隱私遮蔽 · 歷史 Drawer 重設計 · Retina DPR · 批次 bug 修正</p>
                     </div>
                 </div>
 
                 <div class="flex gap-4">
                     <div class="w-14 shrink-0 text-right"><p class="text-xs text-yellow-300/60 font-bold mt-0.5">3 / 27</p></div>
                     <div class="flex-1 border-l border-yellow-400/20 pl-4 pb-2">
-                        <p class="text-xs text-yellow-300/60 mb-1">v3.30 → v3.43　<span class="text-white/30 font-normal">單日 15 版</span></p>
-                        <p class="text-sm text-white/70">資安升級 · Retina WYSIWYG · 多選 / 對齊工具列 · Smart Snap · Bezier 曲線 · 新開畫布 · QR Code 掃描 · 工具列入口 · 批次上限 · XSS 資安修補 · 裁切工具完善 · 套版搖桿</p>
+                        <p class="text-xs text-yellow-300/60 mb-1" data-lang-key="e6label">v3.30 → v3.43　<span class="text-white/30 font-normal">單日 15 版</span></p>
+                        <p class="text-sm text-white/70" data-lang-key="e6desc">資安升級 · Retina WYSIWYG · 多選 / 對齊工具列 · Smart Snap · Bezier 曲線 · 新開畫布 · QR Code 掃描 · 工具列入口 · 批次上限 · XSS 資安修補 · 裁切工具完善 · 套版搖桿</p>
                     </div>
                 </div>
 
                 <div class="flex gap-4">
                     <div class="w-14 shrink-0 text-right"><p class="text-xs text-purple-300/80 font-bold mt-0.5">3 / 28</p></div>
                     <div class="flex-1 border-l border-purple-400/30 pl-4 pb-2">
-                        <p class="text-xs text-purple-300/80 mb-1">v3.43　首發</p>
-                        <p class="text-sm text-white/70">第一個公開版本正式發布。VAS 有了真實使用者。</p>
+                        <p class="text-xs text-purple-300/80 mb-1" data-lang-key="e7label">v3.43　首發</p>
+                        <p class="text-sm text-white/70" data-lang-key="e7desc">第一個公開版本正式發布。VAS 有了真實使用者。</p>
                     </div>
                 </div>
 
                 <div class="flex gap-4">
                     <div class="w-14 shrink-0 text-right"><p class="text-xs text-pink-300/80 font-bold mt-0.5">4 / 3</p></div>
                     <div class="flex-1 border-l border-pink-400/30 pl-4 pb-2">
-                        <p class="text-xs text-pink-300/80 mb-1">v3.45.0　正式打包發布 🎉</p>
-                        <p class="text-sm text-white/70">呼吸燈自動隱藏 · 全螢幕 screen-select overlay · Electron 版本封存。功能完整，永久免費，作為入門磚長期維護。</p>
+                        <p class="text-xs text-pink-300/80 mb-1" data-lang-key="e8label">v3.45.0　正式打包發布 🎉</p>
+                        <p class="text-sm text-white/70" data-lang-key="e8desc">呼吸燈自動隱藏 · 全螢幕 screen-select overlay · Electron 版本封存。功能完整，永久免費，作為入門磚長期維護。</p>
                     </div>
                 </div>
 
@@ -232,97 +251,97 @@
         <!-- Tauri Sprint 時間線 -->
         <section>
             <div class="section-divider"></div>
-            <p class="tag text-center mb-2">Tauri 版</p>
-            <h2 class="text-2xl font-bold text-white text-center mb-3">7 天，9 個 Sprint，~80 項交付</h2>
-            <p class="text-white/35 text-sm text-center mb-10">從第一行 Rust code 到 App Store 送審。</p>
+            <p class="tag text-center mb-2" data-lang-key="tauriTag">Tauri 版</p>
+            <h2 class="text-2xl font-bold text-white text-center mb-3" data-lang-key="tauriH2">7 天，9 個 Sprint，~80 項交付</h2>
+            <p class="text-white/35 text-sm text-center mb-10" data-lang-key="tauriSub">從第一行 Rust code 到 App Store 送審。</p>
 
             <!-- 關鍵里程碑 -->
             <div class="card rounded-2xl p-6 mb-6 font-mono text-xs text-white/50 leading-relaxed space-y-1">
-                <p><span class="text-white/30">03/28</span>  <span class="text-purple-300/80">🏁</span>  專案啟動（第一行 Rust code）</p>
-                <p><span class="text-white/30">03/29</span>  <span class="text-white/50">📦</span>  Sprint 1 完工 — 核心截圖功能可用</p>
-                <p><span class="text-white/30">03/30</span>  <span class="text-yellow-300/70">💎</span>  一日三 Sprint（S2–S4）— OCR / 隱私 / 旋轉 / QR Code 全上線</p>
-                <p><span class="text-white/30">03/31</span>  <span class="text-white/50">🎨</span>  印章漸層 + 自訂快捷鍵 + Preferences 系統</p>
-                <p><span class="text-white/30">04/01</span>  <span class="text-purple-300/80">✨</span>  呼吸燈旗艦改版 — VAS 獨家 UX 誕生</p>
-                <p><span class="text-white/30">04/02</span>  <span class="text-white/50">🌐</span>  網頁長截圖 + Release build 首次成功</p>
-                <p><span class="text-white/30">04/03</span>  <span class="text-pink-300/80">🍎</span>  <span class="text-pink-300/80">Mac App Store 送審 — 175 國上架</span></p>
+                <p data-lang-key="t1"><span class="text-white/30">03/28</span>  <span class="text-purple-300/80">🏁</span>  專案啟動（第一行 Rust code）</p>
+                <p data-lang-key="t2"><span class="text-white/30">03/29</span>  <span class="text-white/50">📦</span>  Sprint 1 完工 — 核心截圖功能可用</p>
+                <p data-lang-key="t3"><span class="text-white/30">03/30</span>  <span class="text-yellow-300/70">💎</span>  一日三 Sprint（S2–S4）— OCR / 隱私 / 旋轉 / QR Code 全上線</p>
+                <p data-lang-key="t4"><span class="text-white/30">03/31</span>  <span class="text-white/50">🎨</span>  印章漸層 + 自訂快捷鍵 + Preferences 系統</p>
+                <p data-lang-key="t5"><span class="text-white/30">04/01</span>  <span class="text-purple-300/80">✨</span>  呼吸燈旗艦改版 — VAS 獨家 UX 誕生</p>
+                <p data-lang-key="t6"><span class="text-white/30">04/02</span>  <span class="text-white/50">🌐</span>  網頁長截圖 + Release build 首次成功</p>
+                <p data-lang-key="t7"><span class="text-white/30">04/03</span>  <span class="text-pink-300/80">🍎</span>  <span class="text-pink-300/80">Mac App Store 送審 — 175 國上架</span></p>
             </div>
 
             <!-- Sprint 表格 -->
             <div class="card rounded-2xl p-8 space-y-5">
 
                 <div class="flex gap-4">
-                    <div class="w-10 shrink-0 text-right"><p class="text-xs text-purple-300/60 font-bold mt-0.5">S1</p></div>
+                    <div class="w-10 shrink-0 text-right"><p class="text-xs text-purple-300/60 font-bold mt-0.5" data-lang-key="s1num">S1</p></div>
                     <div class="flex-1 border-l border-white/10 pl-4 pb-2">
-                        <p class="text-xs text-white/30 mb-1">03/28 – 03/29　7 項</p>
-                        <p class="text-sm text-white/70 mb-1 font-medium">🏁 專案啟動</p>
-                        <p class="text-sm text-white/50">浮動工具列 + 截圖三兄弟 + 批次轉換</p>
+                        <p class="text-xs text-white/30 mb-1" data-lang-key="s1meta">03/28 – 03/29　7 項</p>
+                        <p class="text-sm text-white/70 mb-1 font-medium" data-lang-key="s1title">🏁 專案啟動</p>
+                        <p class="text-sm text-white/50" data-lang-key="s1desc">浮動工具列 + 截圖三兄弟 + 批次轉換</p>
                     </div>
                 </div>
 
                 <div class="flex gap-4">
-                    <div class="w-10 shrink-0 text-right"><p class="text-xs text-purple-300/60 font-bold mt-0.5">S2</p></div>
+                    <div class="w-10 shrink-0 text-right"><p class="text-xs text-purple-300/60 font-bold mt-0.5" data-lang-key="s2num">S2</p></div>
                     <div class="flex-1 border-l border-white/10 pl-4 pb-2">
-                        <p class="text-xs text-white/30 mb-1">03/30　5 項</p>
-                        <p class="text-sm text-white/50">存檔 7 格式 + Share Sheet + OCR + 隱私掃描 + 無縫匯入匯出（Drag & Drop / Drag Out）</p>
+                        <p class="text-xs text-white/30 mb-1" data-lang-key="s2meta">03/30　5 項</p>
+                        <p class="text-sm text-white/50" data-lang-key="s2desc">存檔 7 格式 + Share Sheet + OCR + 隱私掃描 + 無縫匯入匯出（Drag &amp; Drop / Drag Out）</p>
                     </div>
                 </div>
 
                 <div class="flex gap-4">
-                    <div class="w-10 shrink-0 text-right"><p class="text-xs text-yellow-300/60 font-bold mt-0.5">S3</p></div>
+                    <div class="w-10 shrink-0 text-right"><p class="text-xs text-yellow-300/60 font-bold mt-0.5" data-lang-key="s3num">S3</p></div>
                     <div class="flex-1 border-l border-yellow-400/15 pl-4 pb-2">
-                        <p class="text-xs text-yellow-300/50 mb-1">03/30 同日　4 項　<span class="text-white/25 font-normal">一日三 Sprint</span></p>
-                        <p class="text-sm text-white/50">QR Code 掃描 + 智慧導線 + 滴管工具</p>
+                        <p class="text-xs text-yellow-300/50 mb-1" data-lang-key="s3meta">03/30 同日　4 項　<span class="text-white/25 font-normal">一日三 Sprint</span></p>
+                        <p class="text-sm text-white/50" data-lang-key="s3desc">QR Code 掃描 + 智慧導線 + 滴管工具</p>
                     </div>
                 </div>
 
                 <div class="flex gap-4">
-                    <div class="w-10 shrink-0 text-right"><p class="text-xs text-yellow-300/60 font-bold mt-0.5">S4</p></div>
+                    <div class="w-10 shrink-0 text-right"><p class="text-xs text-yellow-300/60 font-bold mt-0.5" data-lang-key="s4num">S4</p></div>
                     <div class="flex-1 border-l border-yellow-400/15 pl-4 pb-2">
-                        <p class="text-xs text-yellow-300/50 mb-1">03/30 同日　4 項　<span class="text-white/25 font-normal">一日三 Sprint</span></p>
-                        <p class="text-sm text-white/50">物件旋轉 + Space 拖移 + 浮水印預覽</p>
+                        <p class="text-xs text-yellow-300/50 mb-1" data-lang-key="s4meta">03/30 同日　4 項　<span class="text-white/25 font-normal">一日三 Sprint</span></p>
+                        <p class="text-sm text-white/50" data-lang-key="s4desc">物件旋轉 + Space 拖移 + 浮水印預覽</p>
                     </div>
                 </div>
 
                 <div class="flex gap-4">
-                    <div class="w-10 shrink-0 text-right"><p class="text-xs text-purple-300/60 font-bold mt-0.5">S5</p></div>
+                    <div class="w-10 shrink-0 text-right"><p class="text-xs text-purple-300/60 font-bold mt-0.5" data-lang-key="s5num">S5</p></div>
                     <div class="flex-1 border-l border-white/10 pl-4 pb-2">
-                        <p class="text-xs text-white/30 mb-1">03/31　8 項　QC 87.5%</p>
-                        <p class="text-sm text-white/50">貝茲曲線 + 馬賽克修復 + 方向鍵微調</p>
+                        <p class="text-xs text-white/30 mb-1" data-lang-key="s5meta">03/31　8 項　QC 87.5%</p>
+                        <p class="text-sm text-white/50" data-lang-key="s5desc">貝茲曲線 + 馬賽克修復 + 方向鍵微調</p>
                     </div>
                 </div>
 
                 <div class="flex gap-4">
-                    <div class="w-10 shrink-0 text-right"><p class="text-xs text-purple-300/60 font-bold mt-0.5">S6</p></div>
+                    <div class="w-10 shrink-0 text-right"><p class="text-xs text-purple-300/60 font-bold mt-0.5" data-lang-key="s6num">S6</p></div>
                     <div class="flex-1 border-l border-white/10 pl-4 pb-2">
-                        <p class="text-xs text-white/30 mb-1">03/31 同日　4 項</p>
-                        <p class="text-sm text-white/50">印章漸層 + 自訂快捷鍵 + Preferences</p>
+                        <p class="text-xs text-white/30 mb-1" data-lang-key="s6meta">03/31 同日　4 項</p>
+                        <p class="text-sm text-white/50" data-lang-key="s6desc">印章漸層 + 自訂快捷鍵 + Preferences</p>
                     </div>
                 </div>
 
                 <div class="flex gap-4">
-                    <div class="w-10 shrink-0 text-right"><p class="text-xs text-purple-300/80 font-bold mt-0.5">S7</p></div>
+                    <div class="w-10 shrink-0 text-right"><p class="text-xs text-purple-300/80 font-bold mt-0.5" data-lang-key="s7num">S7</p></div>
                     <div class="flex-1 border-l border-purple-400/30 pl-4 pb-2">
-                        <p class="text-xs text-purple-300/60 mb-1">04/01　7 項　QC 100%</p>
-                        <p class="text-sm text-white/70 font-medium mb-1">🌟 呼吸燈旗艦改版</p>
-                        <p class="text-sm text-white/50">光條 + 光球 + ::before 根治 — VAS 獨家 UX 誕生</p>
+                        <p class="text-xs text-purple-300/60 mb-1" data-lang-key="s7meta">04/01　7 項　QC 100%</p>
+                        <p class="text-sm text-white/70 font-medium mb-1" data-lang-key="s7title">🌟 呼吸燈旗艦改版</p>
+                        <p class="text-sm text-white/50" data-lang-key="s7desc">光條 + 光球 + ::before 根治 — VAS 獨家 UX 誕生</p>
                     </div>
                 </div>
 
                 <div class="flex gap-4">
-                    <div class="w-10 shrink-0 text-right"><p class="text-xs text-purple-300/80 font-bold mt-0.5">S8</p></div>
+                    <div class="w-10 shrink-0 text-right"><p class="text-xs text-purple-300/80 font-bold mt-0.5" data-lang-key="s8num">S8</p></div>
                     <div class="flex-1 border-l border-purple-400/30 pl-4 pb-2">
-                        <p class="text-xs text-purple-300/60 mb-1">04/01 – 04/02　7 項　QC 100%</p>
-                        <p class="text-sm text-white/70 font-medium mb-1">🌐 網頁長截圖 MVP</p>
-                        <p class="text-sm text-white/50">Dock 召喚 + 位置記憶</p>
+                        <p class="text-xs text-purple-300/60 mb-1" data-lang-key="s8meta">04/01 – 04/02　7 項　QC 100%</p>
+                        <p class="text-sm text-white/70 font-medium mb-1" data-lang-key="s8title">🌐 網頁長截圖 MVP</p>
+                        <p class="text-sm text-white/50" data-lang-key="s8desc">Dock 召喚 + 位置記憶</p>
                     </div>
                 </div>
 
                 <div class="flex gap-4">
-                    <div class="w-10 shrink-0 text-right"><p class="text-xs text-pink-300/80 font-bold mt-0.5">S9</p></div>
+                    <div class="w-10 shrink-0 text-right"><p class="text-xs text-pink-300/80 font-bold mt-0.5" data-lang-key="s9num">S9</p></div>
                     <div class="flex-1 border-l border-pink-400/30 pl-4 pb-2">
-                        <p class="text-xs text-pink-300/60 mb-1">04/02 – 04/03　15 項　QC 100%</p>
-                        <p class="text-sm text-white font-medium mb-1">🍎 Mac App Store 上架</p>
-                        <p class="text-sm text-white/50">Release build + 沙箱 + 送審 — 175 國</p>
+                        <p class="text-xs text-pink-300/60 mb-1" data-lang-key="s9meta">04/02 – 04/03　15 項　QC 100%</p>
+                        <p class="text-sm text-white font-medium mb-1" data-lang-key="s9title">🍎 Mac App Store 上架</p>
+                        <p class="text-sm text-white/50" data-lang-key="s9desc">Release build + 沙箱 + 送審 — 175 國</p>
                     </div>
                 </div>
 
@@ -332,16 +351,16 @@
         <!-- 下一階段路線圖 -->
         <section>
             <div class="section-divider"></div>
-            <p class="tag text-center mb-2">下一階段</p>
-            <h2 class="text-2xl font-bold text-white text-center mb-10">路線圖</h2>
+            <p class="tag text-center mb-2" data-lang-key="roadmapTag">下一階段</p>
+            <h2 class="text-2xl font-bold text-white text-center mb-10" data-lang-key="roadmapH2">路線圖</h2>
 
             <div class="space-y-4">
                 <div class="card rounded-2xl p-6 opacity-50">
                     <div class="flex items-start gap-4">
                         <span class="text-green-400 font-bold text-sm mt-0.5 shrink-0">✅</span>
                         <div>
-                            <p class="text-sm font-bold text-white mb-1">v1.0　功能驗證原型</p>
-                            <p class="text-sm text-white/50">已上架 App Store（審核中）</p>
+                            <p class="text-sm font-bold text-white mb-1" data-lang-key="r1h">v1.0　功能驗證原型</p>
+                            <p class="text-sm text-white/50" data-lang-key="r1p">已上架 App Store（審核中）</p>
                         </div>
                     </div>
                 </div>
@@ -350,8 +369,8 @@
                     <div class="flex items-start gap-4">
                         <span class="text-yellow-400 font-bold text-sm mt-0.5 shrink-0">🔧</span>
                         <div>
-                            <p class="text-sm font-bold text-white mb-2">v2.0　架構重構（Sprint 10–13）</p>
-                            <ul class="text-sm text-white/50 space-y-1">
+                            <p class="text-sm font-bold text-white mb-2" data-lang-key="r2h">v2.0　架構重構（Sprint 10–13）</p>
+                            <ul class="text-sm text-white/50 space-y-1" data-lang-key="r2items">
                                 <li>· 日文字型 + 惡意連結防護</li>
                                 <li>· 座標系統統一</li>
                                 <li>· 資料模型正規化</li>
@@ -367,8 +386,8 @@
                     <div class="flex items-start gap-4">
                         <span class="text-purple-300 font-bold text-sm mt-0.5 shrink-0">🚀</span>
                         <div>
-                            <p class="text-sm font-bold text-white mb-2">v3.0　功能爆發</p>
-                            <ul class="text-sm text-white/50 space-y-1">
+                            <p class="text-sm font-bold text-white mb-2" data-lang-key="r3h">v3.0　功能爆發</p>
+                            <ul class="text-sm text-white/50 space-y-1" data-lang-key="r3items">
                                 <li>· 截圖知識庫 / 截圖比對 / 色票萃取</li>
                                 <li>· 對話氣泡 / 群組 / 放大鏡標注</li>
                                 <li>· 螢幕錄影 + GIF</li>
@@ -383,8 +402,8 @@
 
         <!-- 跨頁連結 -->
         <section class="text-center pt-4">
-            <p class="text-white/30 text-sm mb-4">這些里程碑背後的設計思路</p>
-            <a href="insight.html" class="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold text-white/70 hover:text-white transition-colors" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);">閱讀設計洞察 →</a>
+            <p class="text-white/30 text-sm mb-4" data-lang-key="insightTeaser">這些里程碑背後的設計思路</p>
+            <a href="insight.html" class="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold text-white/70 hover:text-white transition-colors" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);" data-lang-key="insightBtn">閱讀設計洞察 →</a>
         </section>
 
     </main>
@@ -394,6 +413,8 @@
         <p>Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by Nova (babelon1882@gmail.com)</p>
         <p><a href="privacy.html" class="hover:text-white/50 transition-colors">隱私權政策 · Privacy Policy · プライバシーポリシー</a></p>
     </footer>
+
+    <script src="i18n-milestone.js"></script>
 
     <script type="application/ld+json">
     {
