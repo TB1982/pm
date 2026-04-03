@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAS Design Insights — 設計洞察筆記</title>
+    <link rel="icon" href="img/vas.ico" type="image/x-icon">
+    <meta name="description" content="記錄 VAS 開發過程中，那些沒有寫在功能列表裡、但決定了產品質感的設計決策。">
+    <link rel="canonical" href="https://tb1982.github.io/pm/insight.html">
+    <meta property="og:title" content="VAS Design Insights — 設計洞察筆記">
+    <meta property="og:description" content="記錄 VAS 開發過程中，那些沒有寫在功能列表裡、但決定了產品質感的設計決策。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://tb1982.github.io/pm/insight.html">
+    <meta property="og:locale" content="zh_TW">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background: linear-gradient(145deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            color: rgba(255,255,255,0.85);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #c471f5 0%, #fa71cd 50%, #4facfe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .insight-card {
+            background: rgba(255,255,255,0.06);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.12);
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+        .insight-card:hover {
+            transform: translateY(-4px);
+            background: rgba(255,255,255,0.09);
+        }
+        .tag {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: rgba(196,113,245,0.8);
+        }
+        .compare-box {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 0.75rem;
+            padding: 1rem 1.25rem;
+        }
+        .compare-box.highlight {
+            background: rgba(196,113,245,0.08);
+            border-color: rgba(196,113,245,0.25);
+        }
+        .back-link {
+            color: rgba(255,255,255,0.4);
+            font-size: 0.875rem;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: rgba(255,255,255,0.75); }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 px-6 py-4 flex items-center justify-between" style="background: rgba(15,12,41,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.08);">
+        <a href="vas.html" class="back-link">← VAS</a>
+        <p class="text-xs text-white/30 tracking-widest uppercase">Design Insights</p>
+        <div class="w-12"></div>
+    </header>
+
+    <!-- Hero -->
+    <section class="px-6 py-24 text-center max-w-3xl mx-auto">
+        <p class="tag mb-4">VAS · 設計洞察筆記</p>
+        <h1 class="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
+            那些沒有寫在<br>
+            <span class="gradient-text">功能列表</span>裡的決定
+        </h1>
+        <p class="text-white/50 text-lg leading-relaxed">
+            工具的質感，藏在每一個「為什麼這樣設計」裡。<br>這裡記錄 VAS 開發過程中，那些從使用者行為出發的設計思路。
+        </p>
+    </section>
+
+    <!-- Insights -->
+    <main class="px-6 pb-32 max-w-3xl mx-auto space-y-8">
+
+        <!-- Insight 01 -->
+        <article class="insight-card rounded-2xl p-8">
+            <p class="tag mb-2">零摩擦觸發 · Proactive Ambient Computing</p>
+            <h2 class="text-xl font-bold text-white mt-1 mb-4">呼吸燈讀懂你的意圖，再開口問你</h2>
+            <p class="text-white/55 leading-relaxed mb-4">
+                VAS 的呼吸燈不只是等待的象徵——它在偵測環境。當使用者複製了一個網址，呼吸燈會輕輕詢問：「要幫你截這個網頁嗎？」使用者同意，截圖完成，編輯器打開。
+            </p>
+            <p class="text-white/55 leading-relaxed mb-4">
+                這個設計源自一個觀察：原本的網頁截圖流程需要複製網址 → 呼叫工具列 → 按截圖 → 貼上網址——四個步驟，全部是「為了工具而做的事」。但使用者複製網址，是為了他自己的事，不是為了 VAS。
+            </p>
+            <p class="text-white/55 leading-relaxed mb-8">
+                最好的工具不讓你切換到「工具模式」。它待在你的環境裡，讀懂你在做什麼，然後輕聲問你一句。
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="compare-box">
+                    <p class="text-xs text-white/30 mb-1">傳統工具思維</p>
+                    <p class="text-sm text-white/70">你呼叫 → 它執行</p>
+                </div>
+                <div class="compare-box highlight">
+                    <p class="text-xs text-purple-300/60 mb-1">VAS 的方式</p>
+                    <p class="text-sm text-white">它感知 → 它詢問 → 你確認</p>
+                </div>
+            </div>
+        </article>
+
+        <!-- 往後的洞察陸續加在這裡 -->
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-10 px-6 border-t border-white/8 text-white/25 text-xs space-y-2">
+        <p>Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by Nova (babelon1882@gmail.com)</p>
+        <p><a href="privacy.html" class="hover:text-white/50 transition-colors">隱私權政策 · Privacy Policy · プライバシーポリシー</a></p>
+    </footer>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "name": "VAS Design Insights — 設計洞察筆記",
+      "description": "記錄 VAS 開發過程中，那些沒有寫在功能列表裡、但決定了產品質感的設計決策。",
+      "inLanguage": "zh-Hant",
+      "url": "https://tb1982.github.io/pm/insight.html",
+      "author": {
+        "@type": "Person",
+        "name": "Nova",
+        "email": "babelon1882@gmail.com",
+        "sameAs": [
+          "https://github.com/tb1982",
+          "https://www.linkedin.com/in/yingtzuliu",
+          "https://www.instagram.com/liuyingtzu"
+        ]
+      }
+    }
+    </script>
+
+</body>
+</html>
