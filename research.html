@@ -423,6 +423,49 @@
         </div>
     </section>
 
+    <!-- Section: 設計巧思（草稿，持續累積中） -->
+    <section id="design-notes" class="section">
+        <div class="max-w-4xl w-full">
+            <p class="text-xs font-bold tracking-widest text-sky-400/60 uppercase mb-3 text-center">Design Notes · 草稿中</p>
+            <h2 class="text-3xl md:text-4xl font-bold mb-4 text-center">設計巧思：工具應該懂你在做什麼</h2>
+            <p class="text-gray-400 text-center mb-12 max-w-2xl mx-auto">這裡記錄 VAS 開發過程中，那些沒有寫在功能列表裡、但決定了產品質感的設計決策。</p>
+
+            <!-- Note 1 -->
+            <div class="card p-8 rounded-xl mb-6">
+                <div class="flex items-start gap-4">
+                    <div class="text-3xl mt-1" aria-hidden="true">🫧</div>
+                    <div>
+                        <p class="text-xs font-bold tracking-widest text-sky-400/70 uppercase mb-2">零摩擦觸發 · Proactive Ambient Computing</p>
+                        <h3 class="text-lg font-bold text-white mb-3">呼吸燈讀懂你的意圖，再開口問你</h3>
+                        <p class="text-gray-400 leading-relaxed mb-4">
+                            VAS 的呼吸燈不只是等待的象徵——它在偵測環境。當使用者複製了一個網址，呼吸燈會輕輕詢問：「要幫你截這個網頁嗎？」使用者同意，截圖完成，編輯器打開。
+                        </p>
+                        <p class="text-gray-400 leading-relaxed mb-4">
+                            這個設計源自一個觀察：原本的網頁截圖流程需要複製網址 → 呼叫工具列 → 按截圖 → 貼上網址——四個步驟，全部是「為了工具而做的事」。但使用者複製網址，是為了他自己的事，不是為了 VAS。
+                        </p>
+                        <p class="text-gray-400 leading-relaxed">
+                            最好的工具不讓你切換到「工具模式」。它待在你的環境裡，讀懂你在做什麼，然後輕聲問你一句。
+                        </p>
+                        <div class="mt-6 pt-6 border-t border-gray-700/50">
+                            <p class="text-xs text-gray-500">對比兩種設計哲學</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
+                                <div class="bg-gray-800/50 rounded-lg p-4">
+                                    <p class="text-xs text-gray-500 mb-2">傳統工具思維</p>
+                                    <p class="text-sm text-gray-300">你呼叫 → 它執行</p>
+                                </div>
+                                <div class="bg-sky-900/20 border border-sky-500/20 rounded-lg p-4">
+                                    <p class="text-xs text-sky-400/70 mb-2">VAS 的方式</p>
+                                    <p class="text-sm text-white">它感知 → 它詢問 → 你確認</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 往後的巧思陸續加在這裡 -->
+        </div>
+    </section>
+
     <!-- Section 5: Vision -->
     <section id="vision" class="section bg-accent-glow">
         <h2 class="text-3xl md:text-4xl font-bold mb-8 text-center">我想創造什麼？一條新的共生之路</h2>
