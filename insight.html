@@ -190,6 +190,44 @@
             <!-- 實作完成後補充：發現了什麼、改變了什麼 -->
         </article>
 
+        <!-- Insight 04 -->
+        <article class="insight-card rounded-2xl p-8">
+            <p class="tag mb-2">消除中斷 · Eliminating Interruption</p>
+            <h2 class="text-xl font-bold text-white mt-1 mb-4">擺好 pose 在那邊等，工具不應該叫你回來選</h2>
+            <p class="text-white/55 leading-relaxed mb-4">
+                延遲截圖是為了捕捉滑鼠事件——報錯狀態、hover 效果、debug 瞬間。使用者倒數等待，滑鼠必須留在現場。但原生的雙螢幕選單要求在截圖前先回去工具列選擇要截哪個螢幕——整個 pose 就廢了，等待也沒有意義了。
+            </p>
+            <p class="text-white/55 leading-relaxed mb-4">
+                VAS 捨棄原生選單，改用自製圖層遮罩覆蓋全螢幕：延遲開始之前就決定好，點哪個螢幕就截哪個，按 Enter 合併雙螢幕。倒數期間滑鼠哪都不用去，繼續擺著等就好。
+            </p>
+            <p class="text-white/55 leading-relaxed mb-8">
+                更進一步：當使用者設了延遲規則，VAS 默認截取滑鼠當下所在的螢幕——連選都不用選，工具自己判斷。使用者根本不會意識到這個決策發生過。
+            </p>
+            <div class="space-y-3">
+                <div class="compare-box flex items-start gap-4">
+                    <div class="text-lg font-bold text-white/30 w-6 shrink-0 mt-0.5">1</div>
+                    <div>
+                        <p class="text-xs text-white/30 mb-0.5">延遲截圖</p>
+                        <p class="text-sm text-white/70">為了截滑鼠事件，給自己備戰時間</p>
+                    </div>
+                </div>
+                <div class="compare-box flex items-start gap-4">
+                    <div class="text-lg font-bold text-white/30 w-6 shrink-0 mt-0.5">2</div>
+                    <div>
+                        <p class="text-xs text-white/30 mb-0.5">自製遮罩</p>
+                        <p class="text-sm text-white/70">延遲開始前就選好螢幕，倒數期間滑鼠不離場</p>
+                    </div>
+                </div>
+                <div class="compare-box highlight flex items-start gap-4">
+                    <div class="text-lg font-bold text-purple-300 w-6 shrink-0 mt-0.5">3</div>
+                    <div>
+                        <p class="text-xs text-purple-300/60 mb-0.5">滑鼠位置默認</p>
+                        <p class="text-sm text-white">連選都不用選，工具讀你在哪，就截哪裡</p>
+                    </div>
+                </div>
+            </div>
+        </article>
+
         <!-- Milestone Timeline -->
         <article class="insight-card rounded-2xl p-8">
             <p class="tag mb-2">產品里程碑 · Milestone</p>
