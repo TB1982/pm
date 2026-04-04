@@ -41,7 +41,7 @@
       c5Tag: '協作治理 · Collaboration Governance',
       c5Title: 'CLAUDE.md 從防錯清單變成協作憲法',
       c5phase1Label: 'Phase 1 · 防錯清單',
-      c5phase1Desc: '最早的 CLAUDE.md 只有一件事：記錄踩過的雷，加一條規則防止再踩。你現在看到的這份 pm 的 CLAUDE.md 就是活的例子——<code class="text-purple-300/80 text-xs">data-lang-key</code> 那條規則下面直接附了「Root cause of the bug (2026-03-29)」，<code class="text-purple-300/80 text-xs">Use 臺 not 台</code> 背後是某次被寫錯的記憶，footer 格式規則背後是某次格式跑掉的事故。每一條規則都是一道傷疤的形狀，文件是傷疤的集合，不是設計的產物。',
+      c5phase1Desc: '最早的 CLAUDE.md 只有一件事：記錄踩過的雷，加一條規則防止再踩。每一條背後都有一個具體的失敗事件——<code class="text-purple-300/80 text-xs">data-lang-key</code> 那條規則下面直接附了「Root cause of the bug (2026-03-29)」，footer 格式規則背後是某次格式跑掉的事故，某條身份規則背後是某次 AI 填入錯誤資訊的記憶。每一條規則都是一道傷疤的形狀，文件是傷疤的集合，不是設計的產物。',
       c5phase2Label: 'Phase 2 · 追加期',
       c5phase2Desc: '功能越來越複雜，規則越加越多——Tauri IPC 合約、Electron preload 白名單、雙版本 QC 流程、KM 即時記錄原則。每一條都必要，但你開始感覺到文件有了重量。這個階段的 CLAUDE.md 是一份能用的工具，但還沒有意識到自己是什麼。',
       c5phase3Label: 'Phase 3 · 協作憲法',
