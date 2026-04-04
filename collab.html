@@ -246,17 +246,20 @@
             <p class="tag mb-2" data-lang-key="c4Tag">文件架構 · Document Architecture</p>
             <h2 class="text-xl font-bold text-white mt-1 mb-4" data-lang-key="c4Title">SDD 四千行之後</h2>
             <p class="text-white/55 leading-relaxed mb-4" data-lang-key="c4p1">
-                最初只有一份文件：SDD。規格寫在裡面，測試案例寫在裡面，踩過的坑寫在裡面，歷史紀錄也寫在裡面。Sprint 一個一個走，文件一行一行長，到了某個時間點它超過了四千行。
+                最初只有一份文件：SDD。規格寫在裡面，測試案例寫在裡面，踩過的坑寫在裡面，歷史紀錄也寫在裡面。Sprint 一個一個走，文件一行一行長，沒有人刻意注意到它在變大——直到某天讀取的時候出現了紅字，提示單次讀取的 token 上限已經被跨越，文件必須分段閱讀。Nova 隱約覺得不太對，但說不清楚哪裡不對。
             </p>
             <p class="text-white/55 leading-relaxed mb-4" data-lang-key="c4p2">
-                搜尋一個關鍵字，結果散落在十個地方。想確認某個 IPC 合約，得先在四千行裡定位自己。每次開新 session，把文件摘要塞進 context 都是一場博弈——塞太多 AI 反應變慢，塞太少 AI 容易遺漏關鍵資訊。
+                說清楚的是一個社群討論。Claude Code 的使用者分享：md 文件如果過於肥大，Claude 會像大海撈針一樣在資訊裡打轉，算力花在定位自己而不是思考問題。那個比喻一出現，Nova 立刻認出了她一直在感覺的東西。是紅燈，而且是立刻的。
             </p>
-            <p class="text-white/55 leading-relaxed mb-6" data-lang-key="c4p3">
-                那次之後，SDD 被拆成四份：SDD 只放規格與 Sprint 計畫；TDD 只放測試案例；KM 只放踩過的坑；Archive 放退役的歷史。不是為了整齊，而是讓每份文件都有唯一的使命，讓 Claude 在每次 session 開始時能精準載入它真正需要的那一份。
+            <p class="text-white/55 leading-relaxed mb-4" data-lang-key="c4p3">
+                她沒有一個人去動文件。她先去找 Tauri 宰相：我們得談談這件事。因為她看見了拆分背後的陷阱——拆出去的文件如果沒有維護機制，就是死的文件。死的文件比沒有文件更危險，因為它看起來存在，卻說著舊的事。Tauri 跟 Electron 的 SDD 都已經過了臨界點，這不是小修，於是他們決定跑一整個 Sprint 來處理：架構重建、文件拆分、還有讓文件不死掉的機制。
+            </p>
+            <p class="text-white/55 leading-relaxed mb-6" data-lang-key="c4p4">
+                拆分之後：SDD 只放規格與 Sprint 計畫，TDD 只放測試案例，KM 只放踩過的坑，Archive 放退役的歷史。每份文件有唯一的使命。而讓它們活著的，是把更新嵌進了開發流程本身——IPC 合約得先寫進 SDD 才能開始寫程式，踩到坑就立刻記入 KM 不等功能完成，Sprint 不做完 Retro 就不能關。文件更新不是開發結束後的善後，是每個階段的入場券。
             </p>
             <div class="compare-box highlight">
-                <p class="text-xs text-purple-300/60 mb-2" data-lang-key="c4boxTitle">文件結構決定思考速度</p>
-                <p class="text-sm text-white/70" data-lang-key="c4boxDesc">一份混亂的文件不只是難找——它會讓 AI 在每次回應之前先花算力在定位自己。拆分文件，是在替每次協作對話降低啟動成本。</p>
+                <p class="text-xs text-purple-300/60 mb-2" data-lang-key="c4boxTitle">文件不死的條件</p>
+                <p class="text-sm text-white/70" data-lang-key="c4boxDesc">讓文件保持生命的方式不是提醒自己要更新，而是讓更新成為流程的必要條件——你不更新就不能繼續往前走。當文件長在流程裡而不是掛在流程外面，它就不會死。</p>
             </div>
         </article>
 
