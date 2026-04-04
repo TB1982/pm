@@ -70,8 +70,8 @@
       i5p4: '這次重構也連帶讓 Electron 版受惠——底層統一，兩個平台都跑在同一套邏輯上，穩定性自然提升。Electron 雖然不再新增功能，但也需保持功能完整、免費、穩定，讓使用者有機會先信任 VAS，再決定要不要升級 Tauri。一次重構，把整個雙平台長期營運策略都撐起來了。',
       i5boxTitle: '重構帶來的連鎖效應',
       i5bullets: '<li>· 座標系統統一：所有物件共享同一套空間語言</li><li>· 屬性模組化：實色／漸層／虛實線／大小／方向跨工具通用</li><li>· Tauri 可持續疊加新功能，不會因複雜度打架</li><li>· Electron 穩定性同步提升，入門磚角色得以維持</li>',
-      milestoneTeaser: '完整開發歷程 · Electron + Tauri · 路線圖',
-      milestoneBtn: '查看產品里程碑 →',
+      collabTeaser: '設計決策背後的故事 · 人與 AI 的協作紀錄',
+      collabBtn: '閱讀協作筆記 →',
     },
     en: {
       heroTag: 'VAS · Design Insights',
@@ -141,8 +141,8 @@
       i5p4: 'This refactor also benefits the Electron version — a unified foundation means both platforms run on the same logic, and stability improves naturally. Electron may no longer gain new features, but it still needs to remain feature-complete, free, and stable — giving users the chance to build trust in VAS before deciding whether to upgrade to Tauri. One refactor, and the entire long-term dual-platform strategy is supported.',
       i5boxTitle: 'Chain effects of the refactor',
       i5bullets: '<li>· Unified coordinate system: all objects share the same spatial language</li><li>· Modular properties: solid/gradient/dash/size/direction shared across all tools</li><li>· Tauri can keep stacking new features without complexity conflicts</li><li>· Electron stability improves in parallel, preserving its role as the entry point</li>',
-      milestoneTeaser: 'Full development history · Electron + Tauri · Roadmap',
-      milestoneBtn: 'View Product Milestones →',
+      collabTeaser: 'The stories behind design decisions · Human-AI collaboration notes',
+      collabBtn: 'Read Collab Notes →',
     },
     ja: {
       heroTag: 'VAS · デザインの洞察',
@@ -212,8 +212,8 @@
       i5p4: 'このリファクタリングは Electron 版にも恩恵をもたらします——底層の統一により、両プラットフォームが同じロジックで動き、安定性が自然と向上します。Electron は新機能を追加しなくなりましたが、機能完全・無料・安定を維持する必要があります。ユーザーが VAS を信頼し、Tauri へのアップグレードを決断する前に試す機会を与えるためです。一度のリファクタリングで、デュアルプラットフォームの長期運営戦略全体が支えられます。',
       i5boxTitle: 'リファクタリングの連鎖効果',
       i5bullets: '<li>· 座標系の統一：すべてのオブジェクトが同じ空間言語を共有</li><li>· プロパティのモジュール化：単色／グラデーション／線スタイル／サイズ／方向がすべてのツールで通用</li><li>· Tauri は複雑さの衝突なく新機能を積み重ね可能</li><li>· Electron の安定性が同時に向上し、入口としての役割を維持</li>',
-      milestoneTeaser: '完全な開発履歴 · Electron + Tauri · ロードマップ',
-      milestoneBtn: 'プロダクトマイルストーンを見る →',
+      collabTeaser: '設計判断の背景にある物語 · 人とAIの協作ノート',
+      collabBtn: '協作ノートを読む →',
     }
   };
 

@@ -115,8 +115,8 @@
       r3h: 'v3.0　功能爆發',
       r3items: '<li>· 截圖知識庫 / 截圖比對 / 色票萃取</li><li>· 對話氣泡 / 群組 / 放大鏡標注</li><li>· 螢幕錄影 + GIF</li><li>· 雲端分享</li><li>· 格式刷（壓軸）</li>',
 
-      insightTeaser: '這些里程碑背後的設計思路',
-      insightBtn: '閱讀設計洞察 →',
+      homeTeaser: '回到 VAS 產品首頁',
+      homeBtn: '← 回首頁',
     },
 
     en: {
@@ -232,8 +232,8 @@
       r3h: 'v3.0　Feature explosion',
       r3items: '<li>· Screenshot library / comparison / swatch extraction</li><li>· Speech bubbles / grouping / magnifier annotations</li><li>· Screen recording + GIF</li><li>· Cloud sharing</li><li>· Format Painter (grand finale)</li>',
 
-      insightTeaser: 'The design thinking behind these milestones',
-      insightBtn: 'Read Design Insights →',
+      homeTeaser: 'Back to the VAS product page',
+      homeBtn: '← Back to VAS',
     },
 
     ja: {
@@ -349,8 +349,8 @@
       r3h: 'v3.0　機能爆発',
       r3items: '<li>· スクリーンショットライブラリ / 比較 / カラースウォッチ抽出</li><li>· 吹き出し / グループ化 / 拡大鏡アノテーション</li><li>· 画面録画 + GIF</li><li>· クラウド共有</li><li>· フォーマットブラシ（大トリ）</li>',
 
-      insightTeaser: 'これらのマイルストーンの背景にある設計思想',
-      insightBtn: 'デザインの洞察を読む →',
+      homeTeaser: 'VAS プロダクトページに戻る',
+      homeBtn: '← ホームに戻る',
     },
   };
 
