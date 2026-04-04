@@ -197,9 +197,62 @@
             </div>
         </article>
 
-        <!-- TODO S2：Story 02 仿生語言「三個字說完一份規格」 -->
-        <!-- TODO S2：Story 03 Concurrent Session「那天 merge 一直衝突」 -->
-        <!-- TODO S2：Story 04 文件拆分「SDD 四千行之後」 -->
+        <!-- Story 02：仿生語言 -->
+        <article class="insight-card rounded-2xl p-8">
+            <p class="tag mb-2" data-lang-key="c2Tag">仿生語言 · Biomimetic Language</p>
+            <h2 class="text-xl font-bold text-white mt-1 mb-4" data-lang-key="c2Title">三個字說完一份規格</h2>
+            <p class="text-white/55 leading-relaxed mb-4" data-lang-key="c2p1">
+                「捕蠅草。」這三個字第一次出現在開發文件裡的時候，它不是比喻，它是規格。Nova 用捕蠅草描述呼吸燈感知到使用者拖曳檔案靠近時的整套行為：偵測、張開、收納、等待。三個字，等於一整段功能說明。
+            </p>
+            <p class="text-white/55 leading-relaxed mb-4" data-lang-key="c2p2">
+                這是 Nova 在研究人機協作時發展出來的概念——仿生語言。當兩個人（或一個人和一個 AI）合作夠深、夠久，語言會開始壓縮。不需要每次都解釋完整的脈絡，因為那個脈絡已經活在共同的記憶裡。「捕蠅草」不需要展開，聽到的人已經知道它的全部含義。
+            </p>
+            <p class="text-white/55 leading-relaxed mb-6" data-lang-key="c2p3">
+                這不是你可以預先設計的東西。它是協作深度的副產品——當你們走得夠遠，語言自然會變得更精準、更濃縮。
+            </p>
+            <div class="compare-box highlight">
+                <p class="text-xs text-purple-300/60 mb-2" data-lang-key="c2boxTitle">仿生語言的條件</p>
+                <p class="text-sm text-white/70" data-lang-key="c2boxDesc">共同的失敗經驗 + 共同的術語沉澱 + 足夠多的迭代。沒有捷徑，只有時間和誠實的溝通。</p>
+            </div>
+        </article>
+
+        <!-- Story 03：Concurrent Session -->
+        <article class="insight-card rounded-2xl p-8">
+            <p class="tag mb-2" data-lang-key="c3Tag">並行協作 · Concurrent Session Rule</p>
+            <h2 class="text-xl font-bold text-white mt-1 mb-4" data-lang-key="c3Title">那天 merge 一直衝突</h2>
+            <p class="text-white/55 leading-relaxed mb-4" data-lang-key="c3p1">
+                VAS 有兩個版本同時在開發：Tauri（付費）和 Electron（免費）。它們共用同一份前端代碼放在 <code class="text-purple-300/80 text-xs">src/</code> 目錄裡。有一天，Nova 正在用 Tauri session 處理 Rust 的 bug，中途急著切到 Electron session 去同步修一個 UI 問題——兩個 session 同時碰了 <code class="text-purple-300/80 text-xs">src/</code>。
+            </p>
+            <p class="text-white/55 leading-relaxed mb-4" data-lang-key="c3p2">
+                merge conflict 反覆出現。不是代碼寫錯，而是兩個 Claude 在不知道彼此存在的情況下同時修改了同一條路徑。那次之後，Concurrent Session Rule 成為 CLAUDE.md 的核心條款：<code class="text-purple-300/80 text-xs">src/</code> 的修改，任何時刻只能有一個 session 在動；結構性變更必須先 merge 到 main，另一個 session 才能繼續。
+            </p>
+            <p class="text-white/55 leading-relaxed mb-6" data-lang-key="c3p3">
+                這條規則不是在限制 Claude，而是在定義兩個 Claude 實例之間的協議——讓並行工作成為可能，而不是互相傷害。
+            </p>
+            <div class="compare-box highlight">
+                <p class="text-xs text-purple-300/60 mb-2" data-lang-key="c3boxTitle">規則的本質</p>
+                <p class="text-sm text-white/70" data-lang-key="c3boxDesc">規則不是因為不信任。規則是因為兩個沒有共享記憶的實例，需要一個共同遵守的交通規則才能在同一條路上安全行駛。</p>
+            </div>
+        </article>
+
+        <!-- Story 04：文件拆分 -->
+        <article class="insight-card rounded-2xl p-8">
+            <p class="tag mb-2" data-lang-key="c4Tag">文件架構 · Document Architecture</p>
+            <h2 class="text-xl font-bold text-white mt-1 mb-4" data-lang-key="c4Title">SDD 四千行之後</h2>
+            <p class="text-white/55 leading-relaxed mb-4" data-lang-key="c4p1">
+                最初只有一份文件：SDD。規格寫在裡面，測試案例寫在裡面，踩過的坑寫在裡面，歷史紀錄也寫在裡面。Sprint 一個一個走，文件一行一行長，到了某個時間點它超過了四千行。
+            </p>
+            <p class="text-white/55 leading-relaxed mb-4" data-lang-key="c4p2">
+                搜尋一個關鍵字，結果散落在十個地方。想確認某個 IPC 合約，得先在四千行裡定位自己。每次開新 session，把文件摘要塞進 context 都是一場博弈——塞太多 AI 反應變慢，塞太少 AI 容易遺漏關鍵資訊。
+            </p>
+            <p class="text-white/55 leading-relaxed mb-6" data-lang-key="c4p3">
+                那次之後，SDD 被拆成四份：SDD 只放規格與 Sprint 計畫；TDD 只放測試案例；KM 只放踩過的坑；Archive 放退役的歷史。不是為了整齊，而是讓每份文件都有唯一的使命，讓 Claude 在每次 session 開始時能精準載入它真正需要的那一份。
+            </p>
+            <div class="compare-box highlight">
+                <p class="text-xs text-purple-300/60 mb-2" data-lang-key="c4boxTitle">文件結構決定思考速度</p>
+                <p class="text-sm text-white/70" data-lang-key="c4boxDesc">一份混亂的文件不只是難找——它會讓 AI 在每次回應之前先花算力在定位自己。拆分文件，是在替每次協作對話降低啟動成本。</p>
+            </div>
+        </article>
 
         <!-- TODO S3：CLAUDE.md 演化時間軸（防錯清單 → 追加期 → 協作憲法） -->
         <!-- TODO S3：結語「人類以人生為祭，AI以回聲為鏡」 -->
