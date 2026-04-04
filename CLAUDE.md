@@ -198,19 +198,22 @@ https://www.instagram.com/liuyingtzu
 ```bash
 # Python 3 local preview — always use port 8081
 python3 -m http.server 8081
-# Then open: http://localhost:8081
 ```
+
+開啟：`http://localhost:8081`
 
 ### Static Page QC Checklist
 
 **Trigger:** After any change to user-visible content on a static HTML page (text, layout, links, interactive behaviour). Pure metadata or comment-only edits are exempt.
 
-After pushing, Claude provides the following ready-to-run command and asks Nova to verify:
+After pushing, Claude provides the following ready-to-run command and asks Nova to verify.
+The server command and the URL to open **must always be presented as two separate blocks** — never embed the URL as a comment inside the bash block, so Nova can copy each part directly.
 
 ```bash
 git pull origin <branch-name> && python3 -m http.server 8081
-# Then open: http://localhost:8081/<filename>.html
 ```
+
+開啟：`http://localhost:8081/<filename>.html`
 
 **Nova checks (in order):**
 1. Content is correct and matches intent
