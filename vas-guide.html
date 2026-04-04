@@ -372,7 +372,7 @@
         </div>
         <div class="glass-card rounded-xl p-4">
           <div class="text-sm font-semibold text-cyan-300 mb-1" data-lang-key="zone3Name">動態匯出按鈕</div>
-          <p class="text-white/50 text-xs leading-relaxed" data-lang-key="zone3Desc">右下角浮動按鈕。可拖曳移動位置，對應左右撇子不同使用習慣。完成後拖曳至目標應用程式即可匯出。</p>
+          <p class="text-white/50 text-xs leading-relaxed" data-lang-key="zone3Desc">右下角浮動按鈕。可拖曳移動位置，對應左右撇子不同使用習慣。完成後拖曳至目標應用程式即可匯出。<span class="badge-tauri" style="margin-left:6px;">Tauri 專屬</span> Tauri 另提供 Sharesheet 分享功能。</p>
         </div>
         <div class="glass-card rounded-xl p-4">
           <div class="text-sm font-semibold text-green-300 mb-1" data-lang-key="zone4Name">狀態列與磁吸工具開關</div>
@@ -411,7 +411,7 @@
             <p class="text-xs text-white/30 font-semibold mb-2 uppercase tracking-widest" data-lang-key="grpDraw">繪圖</p>
             <div class="flex flex-wrap gap-2">
               <span class="tool-chip" data-tool="pen" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">✒</span><span data-lang-key="t_pen">筆型</span><span class="key">P</span></span>
-              <span class="tool-chip" data-tool="line" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">╱</span><span data-lang-key="t_line">線條</span><span class="badge-tauri">Tauri</span><span class="key">L</span></span>
+              <span class="tool-chip" data-tool="line" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">╱</span><span data-lang-key="t_line">線條</span><span class="key">L</span></span>
               <span class="tool-chip" data-tool="rect" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">▭</span><span data-lang-key="t_rect">矩形框</span><span class="key">R</span></span>
               <span class="tool-chip" data-tool="fillrect" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">■</span><span data-lang-key="t_fillrect">色塊</span><span class="key">B</span></span>
             </div>
@@ -423,7 +423,7 @@
             <div class="flex flex-wrap gap-2">
               <span class="tool-chip" data-tool="text" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">T</span><span data-lang-key="t_text">文字</span><span class="key">T</span></span>
               <span class="tool-chip" data-tool="number" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">①</span><span data-lang-key="t_number">編號</span><span class="key">N</span></span>
-              <span class="tool-chip" data-tool="stamp" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">☺</span><span data-lang-key="t_symbol">符號印章</span><span class="badge-tauri">Tauri</span><span class="key">U</span></span>
+              <span class="tool-chip" data-tool="stamp" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">☺</span><span data-lang-key="t_symbol">符號印章</span><span class="key">U</span></span>
               <span class="tool-chip" data-tool="mosaic" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">⬜</span><span data-lang-key="t_mosaic">馬賽克／模糊</span><span class="key">X</span></span>
             </div>
           </div>
@@ -433,7 +433,7 @@
             <p class="text-xs text-white/30 font-semibold mb-2 uppercase tracking-widest" data-lang-key="grpPrivacy">隱私與遮蔽</p>
             <div class="flex flex-wrap gap-2">
               <span class="tool-chip" data-tool="ocr" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">文</span><span data-lang-key="t_ocr">OCR 文字辨識</span><span class="key">G</span></span>
-              <span class="tool-chip" data-tool="privacy" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon" style="text-decoration:line-through">文</span><span data-lang-key="t_privacy">隱私遮蔽</span><span class="badge-tauri">Tauri</span><span class="key">K</span></span>
+              <span class="tool-chip" data-tool="privacy" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon" style="text-decoration:line-through">文</span><span data-lang-key="t_privacy">隱私遮蔽</span><span class="key">K</span></span>
             </div>
           </div>
 
@@ -565,7 +565,7 @@
         zone2Name: '子屬性調整選單',
         zone2Desc: '頂部工具列。依所選工具動態更換內容，可調整顏色、粗細、不透明度、線條樣式等屬性。',
         zone3Name: '動態匯出按鈕',
-        zone3Desc: '右下角浮動按鈕。可拖曳移動位置，對應左右撇子不同使用習慣。完成後拖曳至目標應用程式即可匯出。',
+        zone3Desc: '右下角浮動按鈕。可拖曳移動位置，對應左右撇子不同使用習慣。完成後拖曳至目標應用程式即可匯出。Tauri 另提供 Sharesheet 分享功能。',
         zone4Name: '狀態列與磁吸工具開關',
         zone4Desc: '左下角狀態列。顯示目前縮放比例與畫布尺寸，並提供磁吸對齊開關，可快速啟用或關閉智慧磁吸功能。',
         s2Label: 'Section 03',
@@ -624,7 +624,7 @@
         zone2Name: 'Property Options Panel',
         zone2Desc: 'The top toolbar. Updates dynamically based on the selected tool — adjust colour, stroke width, opacity, line style, and more.',
         zone3Name: 'Floating Export Button',
-        zone3Desc: 'The floating button in the bottom-right corner. Drag it to reposition for left- or right-handed use. When finished, drag it to any target app to export.',
+        zone3Desc: 'The floating button in the bottom-right corner. Drag it to reposition for left- or right-handed use. When finished, drag it to any target app to export. Tauri also offers a dedicated Sharesheet.',
         zone4Name: 'Status Bar & Smart Guides Toggle',
         zone4Desc: 'The status bar in the bottom-left corner. Displays current zoom level and canvas size, with a toggle to enable or disable smart magnetic snapping.',
         s2Label: 'Section 03',
@@ -683,7 +683,7 @@
         zone2Name: 'サブプロパティパネル',
         zone2Desc: '上部ツールバー。選択中のツールに応じて動的に内容が変わります。色・線幅・不透明度・線スタイルなどを調整できます。',
         zone3Name: '動的書き出しボタン',
-        zone3Desc: '右下のフローティングボタン。ドラッグして位置を変更でき、左右どちらの手にも対応。完了後、対象アプリにドラッグして書き出します。',
+        zone3Desc: '右下のフローティングボタン。ドラッグして位置を変更でき、左右どちらの手にも対応。完了後、対象アプリにドラッグして書き出します。Tauri は Sharesheet 共有機能も提供します。',
         zone4Name: 'ステータスバーとスナップのオン/オフ',
         zone4Desc: '左下のステータスバー。現在のズーム倍率とキャンバスサイズを表示し、スマートスナップのオン/オフを切り替えられます。',
         s2Label: 'Section 03',
@@ -964,9 +964,9 @@
             </div>`
         },
         privacy: {
-          icon: '文', title: '隱私遮蔽', shortcut: 'K', tauri: true,
+          icon: '文', title: '隱私遮蔽', shortcut: 'K',
           body: `
-            <div class="modal-tauri-notice"><span class="badge-tauri">Tauri</span><span class="text-white/50 text-xs">五層偵測（含日文）為 Tauri 版獨有功能</span></div>
+            <div class="modal-tauri-notice"><span class="badge-all" style="font-size:0.6rem;padding:2px 8px;border-radius:999px;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.3);color:rgba(134,239,172,0.9);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">全版本</span><span class="text-white/50 text-xs" style="margin-left:6px;">Electron 使用 Vision Framework，Tauri 另支援五層偵測（含日文）</span></div>
             <div>
               <p class="modal-section-label">操作方式</p>
               <ul class="space-y-1 text-white/55 text-xs leading-relaxed list-disc list-inside">
@@ -1329,9 +1329,9 @@
             </div>`
         },
         privacy: {
-          icon: '文', title: 'Privacy Mask', shortcut: 'K', tauri: true,
+          icon: '文', title: 'Privacy Mask', shortcut: 'K',
           body: `
-            <div class="modal-tauri-notice"><span class="badge-tauri">Tauri</span><span class="text-white/50 text-xs">5-layer detection (incl. Japanese) is a Tauri-exclusive feature</span></div>
+            <div class="modal-tauri-notice"><span class="badge-all" style="font-size:0.6rem;padding:2px 8px;border-radius:999px;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.3);color:rgba(134,239,172,0.9);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">All Versions</span><span class="text-white/50 text-xs" style="margin-left:6px;">Electron uses Vision Framework; Tauri adds 5-layer detection (incl. Japanese)</span></div>
             <div>
               <p class="modal-section-label">How to use</p>
               <ul class="space-y-1 text-white/55 text-xs leading-relaxed list-disc list-inside">
@@ -1693,9 +1693,9 @@
             </div>`
         },
         privacy: {
-          icon: '文', title: 'プライバシー遮蔽', shortcut: 'K', tauri: true,
+          icon: '文', title: 'プライバシー遮蔽', shortcut: 'K',
           body: `
-            <div class="modal-tauri-notice"><span class="badge-tauri">Tauri</span><span class="text-white/50 text-xs">5層検出（日本語含む）は Tauri 専用機能です</span></div>
+            <div class="modal-tauri-notice"><span class="badge-all" style="font-size:0.6rem;padding:2px 8px;border-radius:999px;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.3);color:rgba(134,239,172,0.9);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">全バージョン</span><span class="text-white/50 text-xs" style="margin-left:6px;">Electron は Vision Framework を使用；Tauri は5層検出（日本語含む）を追加</span></div>
             <div>
               <p class="modal-section-label">操作方法</p>
               <ul class="space-y-1 text-white/55 text-xs leading-relaxed list-disc list-inside">
