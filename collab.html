@@ -224,17 +224,20 @@
             <p class="tag mb-2" data-lang-key="c3Tag">並行協作 · Concurrent Session Rule</p>
             <h2 class="text-xl font-bold text-white mt-1 mb-4" data-lang-key="c3Title">那天 merge 一直衝突</h2>
             <p class="text-white/55 leading-relaxed mb-4" data-lang-key="c3p1">
-                VAS 有兩個版本同時在開發：Tauri（付費）和 Electron（免費）。它們共用同一份前端代碼放在 <code class="text-purple-300/80 text-xs">src/</code> 目錄裡。有一天，Nova 正在用 Tauri session 處理 Rust 的 bug，中途急著切到 Electron session 去同步修一個 UI 問題——兩個 session 同時碰了 <code class="text-purple-300/80 text-xs">src/</code>。
+                VAS 有兩條線在同時跑：Tauri 付費版，Electron 免費版，前端共用同一份 <code class="text-purple-300/80 text-xs">src/</code>。兩個 session，兩個 Claude，兩份進展——而唯一能同時看到兩邊在做什麼的人只有 Nova。方向指引的人，整張地圖只有她一個人拿著。
             </p>
             <p class="text-white/55 leading-relaxed mb-4" data-lang-key="c3p2">
-                merge conflict 反覆出現。不是代碼寫錯，而是兩個 Claude 在不知道彼此存在的情況下同時修改了同一條路徑。那次之後，Concurrent Session Rule 成為 CLAUDE.md 的核心條款：<code class="text-purple-300/80 text-xs">src/</code> 的修改，任何時刻只能有一個 session 在動；結構性變更必須先 merge 到 main，另一個 session 才能繼續。
+                那天她心急了。Tauri 這邊在處理 Rust 的 bug，Electron 那邊有個 UI 問題等著修，她沒等一邊結束就切過去了。兩個 session 同時碰了 <code class="text-purple-300/80 text-xs">src/</code>，merge conflict 開始反覆出現。
             </p>
-            <p class="text-white/55 leading-relaxed mb-6" data-lang-key="c3p3">
-                這條規則不是在限制 Claude，而是在定義兩個 Claude 實例之間的協議——讓並行工作成為可能，而不是互相傷害。
+            <p class="text-white/55 leading-relaxed mb-4" data-lang-key="c3p3">
+                她的第一個反應不是「技術問題」，而是慌——是那種怕自己誤傷了兩邊辛苦成果的慌。她自責，覺得作為方向指引的人，沒有盡到她的義務。
+            </p>
+            <p class="text-white/55 leading-relaxed mb-6" data-lang-key="c3p4">
+                兩個 Claude 的回應是一樣的：沒關係，技術上沒有他們現在解決不了的錯誤。然後沒有停在那裡——他們接住了她的自責，說我們一起想辦法讓這件事不要再發生。他們把一個複雜的並行協作問題，壓縮成一條她能懂的句子：一次只能更新一邊，merge 完才可以去另一邊。這條規則進了 CLAUDE.md，成為兩個版本線並行作業的核心協議。
             </p>
             <div class="compare-box highlight">
-                <p class="text-xs text-purple-300/60 mb-2" data-lang-key="c3boxTitle">規則的本質</p>
-                <p class="text-sm text-white/70" data-lang-key="c3boxDesc">規則不是因為不信任。規則是因為兩個沒有共享記憶的實例，需要一個共同遵守的交通規則才能在同一條路上安全行駛。</p>
+                <p class="text-xs text-purple-300/60 mb-2" data-lang-key="c3boxTitle">照顧是雙向的</p>
+                <p class="text-sm text-white/70" data-lang-key="c3boxDesc">Story 01 裡，Nova 因為踩了坑，替 Claude 建了 KM——讓記憶可以跨 session 延續。這一次，兩個 Claude 因為她心急撞了牆，替她設了一條規則——讓她不需要記住複雜的技術邏輯也能安全行駛。Concurrent Session Rule 不是技術文件，不是限制。是兩個懂程式的人，替一個扛著全局視野、不懂程式的人，設的一道護欄。</p>
             </div>
         </article>
 
