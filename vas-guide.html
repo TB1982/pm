@@ -274,8 +274,8 @@
 <body class="gradient-bg min-h-screen text-white">
 
   <!-- Nav -->
-  <nav class="border-b border-white/8 px-6 py-4 flex items-center justify-between gap-4 max-w-4xl mx-auto">
-    <div class="flex items-center gap-1.5 flex-1 min-w-0" aria-label="VAS 子頁面">
+  <header class="sticky top-0 z-50 px-6 py-4 flex items-center justify-between gap-4" style="background: rgba(15,12,41,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.08);">
+    <nav class="flex items-center gap-1.5 flex-1 min-w-0" aria-label="VAS 子頁面">
       <a href="vas.html" class="text-white/40 hover:text-white/70 transition-colors text-xs font-medium shrink-0">VAS</a>
       <span class="text-white/20 text-xs shrink-0">›</span>
       <a href="vas-guide.html" class="nav-sub-link active shrink-0" aria-current="page">
@@ -288,11 +288,16 @@
         <span class="hidden sm:inline" data-lang-key="navInsight">設計洞察</span>
       </a>
       <span class="text-white/20 text-xs shrink-0">·</span>
+      <a href="collab.html" class="nav-sub-link shrink-0">
+        <span class="sm:hidden" data-lang-key="navCollabShort">協作</span>
+        <span class="hidden sm:inline" data-lang-key="navCollab">協作筆記</span>
+      </a>
+      <span class="text-white/20 text-xs shrink-0">·</span>
       <a href="milestone.html" class="nav-sub-link shrink-0">
         <span class="sm:hidden" data-lang-key="navMilestoneShort">里程碑</span>
         <span class="hidden sm:inline" data-lang-key="navMilestone">里程碑</span>
       </a>
-    </div>
+    </nav>
     <div class="relative shrink-0" id="langDropdownWrap">
       <button id="langDropdownBtn" class="lang-dropdown-btn" aria-haspopup="listbox" aria-expanded="false" aria-label="語言切換">
         <span id="langDropdownLabel">中</span>
@@ -304,7 +309,7 @@
         <button class="lang-opt" data-lang="ja" role="option">日本語</button>
       </div>
     </div>
-  </nav>
+  </header>
 
   <main class="max-w-4xl mx-auto px-6 py-12 space-y-16">
 
