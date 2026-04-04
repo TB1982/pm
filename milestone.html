@@ -330,7 +330,7 @@
                 <p data-lang-key="t1"><span class="text-white/30">03/28</span>  <span class="text-purple-300/80">🏁</span>  專案啟動（第一行 Rust code）</p>
                 <p data-lang-key="t2"><span class="text-white/30">03/29</span>  <span class="text-white/50">📦</span>  Sprint 1 完工 — 核心截圖功能可用</p>
                 <p data-lang-key="t3"><span class="text-white/30">03/30</span>  <span class="text-yellow-300/70">💎</span>  一日三 Sprint（S2–S4）— OCR / 隱私 / 旋轉 / QR Code 全上線</p>
-                <p data-lang-key="t4"><span class="text-white/30">03/31</span>  <span class="text-white/50">🎨</span>  印章漸層 + 自訂快捷鍵 + Preferences 系統</p>
+                <p data-lang-key="t4"><span class="text-white/30">03/31</span>  <span class="text-white/50">🎨</span>  SDD 文件系統重構拆檔 · 印章漸層 + 自訂快捷鍵 + Preferences 系統</p>
                 <p data-lang-key="t5"><span class="text-white/30">04/01</span>  <span class="text-purple-300/80">✨</span>  呼吸燈旗艦改版 — VAS 獨家 UX 誕生</p>
                 <p data-lang-key="t6"><span class="text-white/30">04/02</span>  <span class="text-white/50">🌐</span>  網頁長截圖 + Release build 首次成功</p>
                 <p data-lang-key="t7"><span class="text-white/30">04/03</span>  <span class="text-pink-300/80">🍎</span>  <span class="text-pink-300/80">Mac App Store 送審</span></p>
@@ -344,7 +344,7 @@
                     <div class="flex-1 border-l border-white/10 pl-4 pb-2">
                         <p class="text-xs text-white/30 mb-1" data-lang-key="s1meta">03/28 – 03/29　7 項</p>
                         <p class="text-sm text-white/70 mb-1 font-medium" data-lang-key="s1title">🏁 專案啟動</p>
-                        <p class="text-sm text-white/50" data-lang-key="s1desc">浮動工具列 + 截圖三兄弟 + 批次轉換</p>
+                        <p class="text-xs text-white/40" data-lang-key="s1desc">Tauri 2 scaffold 從零建立 · 浮動工具列架構遷移（無邊框視窗 + 雙視窗架構）· 截圖三兄弟（全螢幕含多螢幕 / 矩形 / 視窗 xcap）· 批次格式轉換（6 格式）+ 文字 / 圖片浮水印（9-grid）· asset protocol 坑繞路：改用 base64 data URL · Toolbar 飄移根治（ToolbarHidePos managed state）· WKWebView 五大開發坑記錄（KM-001～008）</p>
                     </div>
                 </div>
 
@@ -352,7 +352,7 @@
                     <div class="w-10 shrink-0 text-right"><p class="text-xs text-purple-300/60 font-bold mt-0.5" data-lang-key="s2num">S2</p></div>
                     <div class="flex-1 border-l border-white/10 pl-4 pb-2">
                         <p class="text-xs text-white/30 mb-1" data-lang-key="s2meta">03/30　5 項</p>
-                        <p class="text-sm text-white/50" data-lang-key="s2desc">存檔 7 格式 + Share Sheet + OCR + 隱私掃描 + 無縫匯入匯出（Drag &amp; Drop / Drag Out）</p>
+                        <p class="text-xs text-white/40" data-lang-key="s2desc">7 種格式匯出（PNG/JPG/WebP/PDF/BMP/TIFF/GIF）+ printpdf · Share Sheet（objc NSSharingServicePicker，非 plugin）· 拖曳匯出（tauri-plugin-drag）· OCR（Swift Vision）+ 隱私遮蔽五層偵測含日文場景（マイナンバー / JP 電話 / 郵便番号）· 編輯器 titlebar 重設計 · Modal 所見即所得修復 · Options Bar drag-region 根治</p>
                     </div>
                 </div>
 
@@ -360,7 +360,7 @@
                     <div class="w-10 shrink-0 text-right"><p class="text-xs text-yellow-300/60 font-bold mt-0.5" data-lang-key="s3num">S3</p></div>
                     <div class="flex-1 border-l border-yellow-400/15 pl-4 pb-2">
                         <p class="text-xs text-yellow-300/50 mb-1" data-lang-key="s3meta">03/30 同日　4 項　<span class="text-white/25 font-normal">一日三 Sprint</span></p>
-                        <p class="text-sm text-white/50" data-lang-key="s3desc">QR Code 掃描 + 智慧導線 + 滴管工具</p>
+                        <p class="text-xs text-white/40" data-lang-key="s3desc">滴管工具（canvas getImageData，繞過 WKWebView 不支援 EyeDropper API 的解法）· QR Code 智慧掃描（Vision VNDetectBarcodesRequest + 面積比例三段行為）· 智慧導線 v2（toggle + ⌥ 暫停 + 死鎖修復）· 檔案拖入工具列（tauri://drag-drop）</p>
                     </div>
                 </div>
 
@@ -368,7 +368,7 @@
                     <div class="w-10 shrink-0 text-right"><p class="text-xs text-yellow-300/60 font-bold mt-0.5" data-lang-key="s4num">S4</p></div>
                     <div class="flex-1 border-l border-yellow-400/15 pl-4 pb-2">
                         <p class="text-xs text-yellow-300/50 mb-1" data-lang-key="s4meta">03/30 同日　4 項　<span class="text-white/25 font-normal">一日三 Sprint</span></p>
-                        <p class="text-sm text-white/50" data-lang-key="s4desc">物件旋轉 + Space 拖移 + 浮水印預覽</p>
+                        <p class="text-xs text-white/40" data-lang-key="s4desc">Space 鍵拖移（放大後平移畫布）· 浮水印圖片預覽（80×80 縮圖）· Modal 往上展開（偵測螢幕底部空間不足，動態翻轉定位）· 物件旋轉（旋轉把手 + Shift 15° snap + 反向座標偵測）</p>
                     </div>
                 </div>
 
@@ -376,7 +376,7 @@
                     <div class="w-10 shrink-0 text-right"><p class="text-xs text-purple-300/60 font-bold mt-0.5" data-lang-key="s5num">S5</p></div>
                     <div class="flex-1 border-l border-white/10 pl-4 pb-2">
                         <p class="text-xs text-white/30 mb-1" data-lang-key="s5meta">03/31　8 項　QC 87.5%</p>
-                        <p class="text-sm text-white/50" data-lang-key="s5desc">貝茲曲線 + 馬賽克修復 + 方向鍵微調</p>
+                        <p class="text-xs text-white/40" data-lang-key="s5desc">馬賽克改 downscale+upscale（WKWebView 無 ctx.filter 的工程繞路解法）· Electron KM-E02～E04 移植 · 方向鍵微調 · 二次貝茲曲線 · 白色色票 · 貼上自動切換工具 · QC 87.5%（パスワード 為 Vision OCR 限制，記錄在案）</p>
                     </div>
                 </div>
 
@@ -384,7 +384,7 @@
                     <div class="w-10 shrink-0 text-right"><p class="text-xs text-purple-300/60 font-bold mt-0.5" data-lang-key="s6num">S6</p></div>
                     <div class="flex-1 border-l border-white/10 pl-4 pb-2">
                         <p class="text-xs text-white/30 mb-1" data-lang-key="s6meta">03/31 同日　4 項</p>
-                        <p class="text-sm text-white/50" data-lang-key="s6desc">印章漸層 + 自訂快捷鍵 + Preferences</p>
+                        <p class="text-xs text-white/40" data-lang-key="s6desc">符號印章漸層填色（線性 / 放射 / 雙色 + fillMode 向下相容）· 自定義全域快捷鍵（tauri-plugin-global-shortcut）· macOS 系統選單 Settings… · Preferences 視窗 · SDD 瘦身拆檔（歸檔機制建立 → SDD-vas-archive.md）· 捲動截圖 Playwright sidecar 方案確認</p>
                     </div>
                 </div>
 
@@ -393,7 +393,7 @@
                     <div class="flex-1 border-l border-purple-400/30 pl-4 pb-2">
                         <p class="text-xs text-purple-300/60 mb-1" data-lang-key="s7meta">04/01　7 項　QC 100%</p>
                         <p class="text-sm text-white/70 font-medium mb-1" data-lang-key="s7title">🌟 呼吸燈旗艦改版</p>
-                        <p class="text-sm text-white/50" data-lang-key="s7desc">光條 + 光球 + ::before 根治 — VAS 獨家 UX 誕生</p>
+                        <p class="text-xs text-white/40" data-lang-key="s7desc">呼吸燈旗艦改版（光條 + 光球 + ::before 根治）— VAS 獨家 UX 誕生 · QR 偵測後自動複製 / 開啟 URL · OCR 辨識後自動複製文字 · pen / polyline + 直線控制點拖曳修復 · auto-hide timer 修復 · QC 100%（1 項 NSTrackingArea 實驗退版）</p>
                     </div>
                 </div>
 
@@ -402,7 +402,7 @@
                     <div class="flex-1 border-l border-purple-400/30 pl-4 pb-2">
                         <p class="text-xs text-purple-300/60 mb-1" data-lang-key="s8meta">04/01 – 04/02　7 項　QC 100%</p>
                         <p class="text-sm text-white/70 font-medium mb-1" data-lang-key="s8title">🌐 網頁長截圖 MVP</p>
-                        <p class="text-sm text-white/50" data-lang-key="s8desc">Dock 召喚 + 位置記憶</p>
+                        <p class="text-xs text-white/40" data-lang-key="s8desc">網頁長截圖（WKWebView resize-then-snapshot）· 短頁面自動分流 · 呼吸燈圓角 + hover 光球 · Dock 圖示點擊召喚展開 · 工具列位置記憶（userData）· PreStripBounds 位移根治 · 原生對話框游標 desync 修正 · QC 100%</p>
                     </div>
                 </div>
 
@@ -410,8 +410,8 @@
                     <div class="w-10 shrink-0 text-right"><p class="text-xs text-pink-300/80 font-bold mt-0.5" data-lang-key="s9num">S9</p></div>
                     <div class="flex-1 border-l border-pink-400/30 pl-4 pb-2">
                         <p class="text-xs text-pink-300/60 mb-1" data-lang-key="s9meta">04/02 – 04/03　15 項　QC 100%</p>
-                        <p class="text-sm text-white font-medium mb-1" data-lang-key="s9title">🍎 Mac App Store 上架</p>
-                        <p class="text-sm text-white/50" data-lang-key="s9desc">Release build + 沙箱 + 送審 — 175 國</p>
+                        <p class="text-sm text-white font-medium mb-1" data-lang-key="s9title">🍎 Mac App Store 送審</p>
+                        <p class="text-xs text-white/40" data-lang-key="s9desc">黑底極光花瓶 App icon（與 Electron 版形成視覺區隔）· 呼吸燈引導文字（三語）· 截圖權限引導（失敗時 toast → 開系統設定）· Release build + 沙箱 + 提交 Mac App Store</p>
                     </div>
                 </div>
 
