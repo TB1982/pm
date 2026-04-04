@@ -34,6 +34,65 @@ Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by 
 ```
 Do **not** alter the wording, substitute a different email, or remove any segment without explicit instruction.
 
+### Version Badges — canonical design
+
+VAS pages use two badge types to indicate feature availability. Always use these exact CSS values; never invent new colours or styles.
+
+#### `.badge-tauri` — Tauri Exclusive (amber)
+```css
+display: inline-flex; align-items: center;
+font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em;
+padding: 2px 8px; border-radius: 999px;
+background: rgba(251,191,36,0.12);
+border: 1px solid rgba(251,191,36,0.25);
+color: rgba(251,191,36,0.85);
+text-transform: uppercase; vertical-align: middle;
+```
+Used for features available in **Tauri version only**.
+
+#### `.badge-all` — All Versions (green)
+```css
+display: inline-flex; align-items: center;
+font-size: 0.6rem; font-weight: 700; letter-spacing: 0.08em;
+padding: 2px 8px; border-radius: 999px;
+background: rgba(74,222,128,0.12);
+border: 1px solid rgba(74,222,128,0.3);
+color: rgba(134,239,172,0.9);
+text-transform: uppercase; vertical-align: middle;
+```
+Used for features available in **both Electron and Tauri versions**.
+
+#### Badge i18n keys
+Badges must use `data-lang-key` for trilingual support. Standard keys:
+
+| Key | zh | en | ja |
+|-----|-----|-----|-----|
+| `tauriOnly` / `tauriOnlyBadge` | Tauri 專屬 | Tauri Exclusive | Tauri 専用 |
+| `allVersions` | 全版本 | All Versions | 全バージョン |
+
+#### Usage pattern
+```html
+<!-- Card header with badge -->
+<div class="flex items-center gap-2 mb-2">
+  <p class="tag" data-lang-key="sectionTag">標籤文字</p>
+  <span class="badge-tauri" data-lang-key="tauriOnly">Tauri 專屬</span>
+</div>
+
+<!-- Inline next to a heading -->
+<div class="flex items-center gap-3 flex-wrap mb-1">
+  <h2 class="text-xl font-semibold" data-lang-key="sTitle">標題</h2>
+  <span class="badge-tauri" data-lang-key="tauriOnlyBadge">Tauri 專屬</span>
+</div>
+```
+
+**Rules:**
+- Never use inline `style` for badge colours — always use the CSS class.
+- `badge-tauri` (amber) = Tauri only. `badge-all` (green) = both versions.
+- Each page that uses badges must define both `.badge-tauri` and `.badge-all` in its `<style>` block (copy the exact values above).
+- Badge text keys (`tauriOnly`, `allVersions`) must be registered in that page's translation object for all three languages (zh / en / ja).
+
+---
+
 ### Social links — canonical URLs
 When generating contact sections, about pages, or JSON-LD `sameAs`, always use these exact URLs:
 ```

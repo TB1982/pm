@@ -222,10 +222,10 @@
       font-weight: 700;
       letter-spacing: 0.06em;
       padding: 1px 6px;
-      border-radius: 4px;
-      background: linear-gradient(135deg, rgba(139,92,246,0.35), rgba(196,113,245,0.25));
-      border: 1px solid rgba(139,92,246,0.45);
-      color: #d4aaff;
+      border-radius: 999px;
+      background: rgba(251,191,36,0.12);
+      border: 1px solid rgba(251,191,36,0.25);
+      color: rgba(251,191,36,0.85);
       text-transform: uppercase;
     }
     .badge-section-coming {
@@ -349,6 +349,22 @@
           <p class="text-white/40 text-xs leading-relaxed" data-lang-key="cb_help_desc">顯示快捷鍵一覽，並提供操作手冊連結。</p>
         </div>
       </div>
+
+      <!-- Breathing Light -->
+      <div class="glass-card rounded-xl p-5 mt-4">
+        <div class="flex items-center gap-2 mb-3">
+          <p class="text-sm font-semibold text-white/80" data-lang-key="bl_title">呼吸燈</p>
+          <span class="badge-all" data-lang-key="allVersions">全版本</span>
+        </div>
+        <div class="flex gap-4 items-start">
+          <img src="img/breathlightfinal.jpg" alt="VAS 呼吸燈" class="rounded-lg shrink-0" style="width:72px;height:72px;object-fit:cover;border:1px solid rgba(255,255,255,0.1);" loading="lazy">
+          <p class="text-white/45 text-xs leading-relaxed"><span style="display:inline-flex;align-items:center;justify-content:center;width:1.2em;height:1.2em;border:1px solid rgba(255,255,255,0.35);border-radius:50%;font-size:0.7em;color:rgba(255,255,255,0.5);vertical-align:middle;margin-right:4px;line-height:1;">?</span><span data-lang-key="bl_desc">可設定將工具列縮小成為呼吸燈，在桌面角落靜默待機，不佔空間。</span></p>
+        </div>
+        <ul class="space-y-2 text-white/45 text-xs leading-relaxed mt-3">
+          <li class="flex items-start gap-2"><span class="badge-tauri shrink-0" data-lang-key="tauriOnlyBadge">Tauri 專屬</span><span data-lang-key="bl_url">複製連結後靠近呼吸燈，會詢問是否進行網址截圖</span></li>
+          <li class="flex items-start gap-2"><span class="badge-tauri shrink-0" data-lang-key="tauriOnlyBadge">Tauri 專屬</span><span data-lang-key="bl_file">拖曳檔案靠近呼吸燈，會自動展開編輯器並載入檔案</span></li>
+        </ul>
+      </div>
     </section>
 
     <hr class="section-divider">
@@ -372,7 +388,7 @@
         </div>
         <div class="glass-card rounded-xl p-4">
           <div class="text-sm font-semibold text-cyan-300 mb-1" data-lang-key="zone3Name">動態匯出按鈕</div>
-          <p class="text-white/50 text-xs leading-relaxed" data-lang-key="zone3Desc">右下角浮動按鈕。可拖曳移動位置，對應左右撇子不同使用習慣。完成後拖曳至目標應用程式即可匯出。</p>
+          <p class="text-white/50 text-xs leading-relaxed" data-lang-key="zone3Desc">右下角浮動按鈕。可拖曳移動位置，對應左右撇子不同使用習慣。完成後拖曳至目標應用程式即可匯出。<span class="badge-tauri" style="margin-left:6px;">Tauri 專屬</span> Tauri 另提供 Sharesheet 分享功能。</p>
         </div>
         <div class="glass-card rounded-xl p-4">
           <div class="text-sm font-semibold text-green-300 mb-1" data-lang-key="zone4Name">狀態列與磁吸工具開關</div>
@@ -411,7 +427,7 @@
             <p class="text-xs text-white/30 font-semibold mb-2 uppercase tracking-widest" data-lang-key="grpDraw">繪圖</p>
             <div class="flex flex-wrap gap-2">
               <span class="tool-chip" data-tool="pen" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">✒</span><span data-lang-key="t_pen">筆型</span><span class="key">P</span></span>
-              <span class="tool-chip" data-tool="line" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">╱</span><span data-lang-key="t_line">線條</span><span class="badge-tauri">Tauri</span><span class="key">L</span></span>
+              <span class="tool-chip" data-tool="line" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">╱</span><span data-lang-key="t_line">線條</span><span class="key">L</span></span>
               <span class="tool-chip" data-tool="rect" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">▭</span><span data-lang-key="t_rect">矩形框</span><span class="key">R</span></span>
               <span class="tool-chip" data-tool="fillrect" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">■</span><span data-lang-key="t_fillrect">色塊</span><span class="key">B</span></span>
             </div>
@@ -423,7 +439,7 @@
             <div class="flex flex-wrap gap-2">
               <span class="tool-chip" data-tool="text" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">T</span><span data-lang-key="t_text">文字</span><span class="key">T</span></span>
               <span class="tool-chip" data-tool="number" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">①</span><span data-lang-key="t_number">編號</span><span class="key">N</span></span>
-              <span class="tool-chip" data-tool="stamp" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">☺</span><span data-lang-key="t_symbol">符號印章</span><span class="badge-tauri">Tauri</span><span class="key">U</span></span>
+              <span class="tool-chip" data-tool="stamp" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">☺</span><span data-lang-key="t_symbol">符號印章</span><span class="key">U</span></span>
               <span class="tool-chip" data-tool="mosaic" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">⬜</span><span data-lang-key="t_mosaic">馬賽克／模糊</span><span class="key">X</span></span>
             </div>
           </div>
@@ -433,7 +449,7 @@
             <p class="text-xs text-white/30 font-semibold mb-2 uppercase tracking-widest" data-lang-key="grpPrivacy">隱私與遮蔽</p>
             <div class="flex flex-wrap gap-2">
               <span class="tool-chip" data-tool="ocr" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon">文</span><span data-lang-key="t_ocr">OCR 文字辨識</span><span class="key">G</span></span>
-              <span class="tool-chip" data-tool="privacy" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon" style="text-decoration:line-through">文</span><span data-lang-key="t_privacy">隱私遮蔽</span><span class="badge-tauri">Tauri</span><span class="key">K</span></span>
+              <span class="tool-chip" data-tool="privacy" role="button" tabindex="0" aria-haspopup="dialog"><span class="tool-icon" style="text-decoration:line-through">文</span><span data-lang-key="t_privacy">隱私遮蔽</span><span class="key">K</span></span>
             </div>
           </div>
 
@@ -480,6 +496,7 @@
         <p class="section-label mb-2" data-lang-key="s4Label">Section 04</p>
         <div class="flex items-center gap-3 flex-wrap mb-1">
           <h2 id="s4-heading" class="text-xl font-semibold" data-lang-key="s4Title">自定義全域快捷鍵</h2>
+          <span class="badge-tauri" data-lang-key="tauriOnlyBadge">Tauri 專屬</span>
         </div>
         <p class="text-white/45 text-sm" data-lang-key="s4Sub">在偏好設定中為每個工具指定專屬的全域快捷鍵</p>
       </div>
@@ -564,7 +581,7 @@
         zone2Name: '子屬性調整選單',
         zone2Desc: '頂部工具列。依所選工具動態更換內容，可調整顏色、粗細、不透明度、線條樣式等屬性。',
         zone3Name: '動態匯出按鈕',
-        zone3Desc: '右下角浮動按鈕。可拖曳移動位置，對應左右撇子不同使用習慣。完成後拖曳至目標應用程式即可匯出。',
+        zone3Desc: '右下角浮動按鈕。可拖曳移動位置，對應左右撇子不同使用習慣。完成後拖曳至目標應用程式即可匯出。Tauri 另提供 Sharesheet 分享功能。',
         zone4Name: '狀態列與磁吸工具開關',
         zone4Desc: '左下角狀態列。顯示目前縮放比例與畫布尺寸，並提供磁吸對齊開關，可快速啟用或關閉智慧磁吸功能。',
         s2Label: 'Section 03',
@@ -594,7 +611,10 @@
         cb_whiteboard: '白板', cb_whiteboard_desc: '開啟空白畫布，從零開始建立圖像內容。',
         cb_batch: '批次轉', cb_batch_desc: '拖入多張圖片，一次轉換為 JPG、PNG、WebP 等格式，支援浮水印與尺寸調整。',
         cb_help: '說明', cb_help_desc: '顯示快捷鍵一覽，並提供操作手冊連結。',
+        allVersions: '全版本',
+        bl_title: '呼吸燈', bl_desc: '可設定將工具列縮小成為呼吸燈，在桌面角落靜默待機，不佔空間。', bl_url: '複製連結後靠近呼吸燈，會詢問是否進行網址截圖', bl_file: '拖曳檔案靠近呼吸燈，會自動展開編輯器並載入檔案',
         s4Label: 'Section 04',
+        tauriOnlyBadge: 'Tauri 專屬',
         s4Title: '自定義全域快捷鍵',
         s4ComingBadge: '即將推出 · Tauri 版',
         s4Sub: '在偏好設定中為每個工具指定專屬的全域快捷鍵',
@@ -622,7 +642,7 @@
         zone2Name: 'Property Options Panel',
         zone2Desc: 'The top toolbar. Updates dynamically based on the selected tool — adjust colour, stroke width, opacity, line style, and more.',
         zone3Name: 'Floating Export Button',
-        zone3Desc: 'The floating button in the bottom-right corner. Drag it to reposition for left- or right-handed use. When finished, drag it to any target app to export.',
+        zone3Desc: 'The floating button in the bottom-right corner. Drag it to reposition for left- or right-handed use. When finished, drag it to any target app to export. Tauri also offers a dedicated Sharesheet.',
         zone4Name: 'Status Bar & Smart Guides Toggle',
         zone4Desc: 'The status bar in the bottom-left corner. Displays current zoom level and canvas size, with a toggle to enable or disable smart magnetic snapping.',
         s2Label: 'Section 03',
@@ -652,7 +672,10 @@
         cb_whiteboard: 'Whiteboard', cb_whiteboard_desc: 'Open a blank canvas to build visuals from scratch.',
         cb_batch: 'Batch', cb_batch_desc: 'Drop multiple images to convert them all at once to JPG, PNG, WebP, and more — with watermark and resize support.',
         cb_help: 'Help', cb_help_desc: 'Show keyboard shortcuts and link to this user guide.',
+        allVersions: 'All Versions',
+        bl_title: 'Breathing Light', bl_desc: 'The toolbar can be minimised into a breathing light — sitting quietly in a corner of your desktop, out of the way.', bl_url: 'Copy a URL then hover over the breathing light — it will ask if you want to capture that webpage', bl_file: 'Drag a file toward the breathing light — the editor opens automatically and loads the file',
         s4Label: 'Section 04',
+        tauriOnlyBadge: 'Tauri Exclusive',
         s4Title: 'Custom Global Shortcuts',
         s4ComingBadge: 'Coming Soon · Tauri',
         s4Sub: 'Assign a dedicated global shortcut to any tool in Preferences',
@@ -680,7 +703,7 @@
         zone2Name: 'サブプロパティパネル',
         zone2Desc: '上部ツールバー。選択中のツールに応じて動的に内容が変わります。色・線幅・不透明度・線スタイルなどを調整できます。',
         zone3Name: '動的書き出しボタン',
-        zone3Desc: '右下のフローティングボタン。ドラッグして位置を変更でき、左右どちらの手にも対応。完了後、対象アプリにドラッグして書き出します。',
+        zone3Desc: '右下のフローティングボタン。ドラッグして位置を変更でき、左右どちらの手にも対応。完了後、対象アプリにドラッグして書き出します。Tauri は Sharesheet 共有機能も提供します。',
         zone4Name: 'ステータスバーとスナップのオン/オフ',
         zone4Desc: '左下のステータスバー。現在のズーム倍率とキャンバスサイズを表示し、スマートスナップのオン/オフを切り替えられます。',
         s2Label: 'Section 03',
@@ -710,7 +733,10 @@
         cb_whiteboard: 'ホワイトボード', cb_whiteboard_desc: '白紙のキャンバスを開き、ゼロからビジュアルを作成します。',
         cb_batch: 'バッチ', cb_batch_desc: '複数の画像をドロップして JPG・PNG・WebP などに一括変換。透かしとリサイズにも対応。',
         cb_help: 'ヘルプ', cb_help_desc: 'キーボードショートカット一覧を表示し、このマニュアルへのリンクを提供します。',
+        allVersions: '全バージョン',
+        bl_title: '呼吸ライト', bl_desc: 'ツールバーを呼吸ライトに縮小して、デスクトップの隅で静かに待機させることができます。', bl_url: 'URLをコピーして呼吸ライトに近づけると、ウェブページキャプチャを行うか確認します', bl_file: 'ファイルを呼吸ライトにドラッグすると、エディターが自動的に開きファイルを読み込みます',
         s4Label: 'Section 04',
+        tauriOnlyBadge: 'Tauri 専用',
         s4Title: 'カスタムグローバルショートカット',
         s4ComingBadge: '近日公開 · Tauri',
         s4Sub: '環境設定で各ツールに専用のグローバルショートカットを割り当て',
@@ -960,9 +986,9 @@
             </div>`
         },
         privacy: {
-          icon: '文', title: '隱私遮蔽', shortcut: 'K', tauri: true,
+          icon: '文', title: '隱私遮蔽', shortcut: 'K',
           body: `
-            <div class="modal-tauri-notice"><span class="badge-tauri">Tauri</span><span class="text-white/50 text-xs">五層偵測（含日文）為 Tauri 版獨有功能</span></div>
+            <div class="modal-tauri-notice"><span class="badge-all" style="font-size:0.6rem;padding:2px 8px;border-radius:999px;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.3);color:rgba(134,239,172,0.9);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">全版本</span><span class="text-white/50 text-xs" style="margin-left:6px;">Electron 使用 Vision Framework，Tauri 另支援五層偵測（含日文）</span></div>
             <div>
               <p class="modal-section-label">操作方式</p>
               <ul class="space-y-1 text-white/55 text-xs leading-relaxed list-disc list-inside">
@@ -1325,9 +1351,9 @@
             </div>`
         },
         privacy: {
-          icon: '文', title: 'Privacy Mask', shortcut: 'K', tauri: true,
+          icon: '文', title: 'Privacy Mask', shortcut: 'K',
           body: `
-            <div class="modal-tauri-notice"><span class="badge-tauri">Tauri</span><span class="text-white/50 text-xs">5-layer detection (incl. Japanese) is a Tauri-exclusive feature</span></div>
+            <div class="modal-tauri-notice"><span class="badge-all" style="font-size:0.6rem;padding:2px 8px;border-radius:999px;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.3);color:rgba(134,239,172,0.9);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">All Versions</span><span class="text-white/50 text-xs" style="margin-left:6px;">Electron uses Vision Framework; Tauri adds 5-layer detection (incl. Japanese)</span></div>
             <div>
               <p class="modal-section-label">How to use</p>
               <ul class="space-y-1 text-white/55 text-xs leading-relaxed list-disc list-inside">
@@ -1689,9 +1715,9 @@
             </div>`
         },
         privacy: {
-          icon: '文', title: 'プライバシー遮蔽', shortcut: 'K', tauri: true,
+          icon: '文', title: 'プライバシー遮蔽', shortcut: 'K',
           body: `
-            <div class="modal-tauri-notice"><span class="badge-tauri">Tauri</span><span class="text-white/50 text-xs">5層検出（日本語含む）は Tauri 専用機能です</span></div>
+            <div class="modal-tauri-notice"><span class="badge-all" style="font-size:0.6rem;padding:2px 8px;border-radius:999px;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.3);color:rgba(134,239,172,0.9);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">全バージョン</span><span class="text-white/50 text-xs" style="margin-left:6px;">Electron は Vision Framework を使用；Tauri は5層検出（日本語含む）を追加</span></div>
             <div>
               <p class="modal-section-label">操作方法</p>
               <ul class="space-y-1 text-white/55 text-xs leading-relaxed list-disc list-inside">
