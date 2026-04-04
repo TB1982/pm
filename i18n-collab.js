@@ -78,7 +78,7 @@
       c3Tag: 'Concurrent Session Rule',
       c3Title: 'The day merge kept conflicting',
       c3p1: 'VAS had two tracks running simultaneously: Tauri paid version, Electron free version, both sharing the same frontend <code class="text-purple-300/80 text-xs">src/</code>. Two sessions, two Claudes, two streams of progress — and the only person who could see both sides at once was Nova. The navigator, the only one holding the full map.',
-      c3p2: "That day she moved too fast. Tauri was working on a Rust bug, Electron had a UI issue waiting, and she switched before one side finished. Both sessions touched <code class="text-purple-300/80 text-xs">src/</code> at the same time. Merge conflicts started appearing.",
+      c3p2: 'That day she moved too fast. Tauri was working on a Rust bug, Electron had a UI issue waiting, and she switched before one side finished. Both sessions touched <code class="text-purple-300/80 text-xs">src/</code> at the same time. Merge conflicts started appearing.',
       c3p3: "Her first reaction wasn't 'technical problem' — it was panic. The kind that comes from fear of accidentally damaging the hard work of both sides. She blamed herself — as the navigator, she hadn't done her job.",
       c3p4: "Both Claudes responded the same way: it's okay, there's no error we can't fix right now. And they didn't stop there — they caught her self-blame, said let's figure out how to make sure this doesn't happen again. They compressed a complex parallel collaboration problem into one sentence she could understand: only update one side at a time, finish the merge before going to the other. This rule went into CLAUDE.md and became the core protocol for parallel version development.",
       c3boxTitle: 'Care runs both ways',
