@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAS Collab Notes — 開發協作筆記</title>
+    <link rel="icon" href="img/vas.ico" type="image/x-icon">
+    <meta name="description" content="VAS 開發途中，Nova 與 Claude 之間協作規則如何從零開始演化——每一條規則背後都有一個沒有文件的故事。">
+    <link rel="canonical" href="https://tb1982.github.io/pm/collab.html">
+    <meta property="og:title" content="VAS Collab Notes — 開發協作筆記">
+    <meta property="og:description" content="VAS 開發途中，Nova 與 Claude 之間協作規則如何從零開始演化——每一條規則背後都有一個沒有文件的故事。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://tb1982.github.io/pm/collab.html">
+    <meta property="og:locale" content="zh_TW">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background: linear-gradient(145deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            color: rgba(255,255,255,0.85);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #c471f5 0%, #fa71cd 50%, #4facfe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .insight-card {
+            background: rgba(255,255,255,0.06);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.12);
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+        .insight-card:hover {
+            transform: translateY(-4px);
+            background: rgba(255,255,255,0.09);
+        }
+        .tag {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: rgba(196,113,245,0.8);
+        }
+        .compare-box {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 0.75rem;
+            padding: 1rem 1.25rem;
+        }
+        .compare-box.highlight {
+            background: rgba(196,113,245,0.08);
+            border-color: rgba(196,113,245,0.25);
+        }
+        .nav-sub-link {
+            color: rgba(255,255,255,0.35);
+            text-decoration: none;
+            font-size: 0.75rem;
+            transition: color 0.2s;
+            white-space: nowrap;
+        }
+        .nav-sub-link:hover { color: rgba(255,255,255,0.65); }
+        .nav-sub-link.active { color: rgba(255,255,255,0.9); font-weight: 600; }
+        .lang-dropdown-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.08);
+            border: none;
+            color: rgba(255,255,255,0.65);
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .lang-dropdown-btn:hover { background: rgba(255,255,255,0.13); }
+        .lang-dropdown-menu {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 6px);
+            background: rgba(30,25,60,0.96);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 12px;
+            padding: 4px;
+            min-width: 100px;
+            display: none;
+            z-index: 100;
+        }
+        .lang-dropdown-menu.open { display: block; }
+        .lang-opt {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: transparent;
+            border: none;
+            color: rgba(255,255,255,0.5);
+            padding: 8px 14px;
+            font-size: 0.875rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+        }
+        .lang-opt:hover { background: rgba(255,255,255,0.08); color: #fff; }
+        .lang-opt.active { color: #fff; font-weight: 700; }
+        .quote-block {
+            border-left: 3px solid rgba(196,113,245,0.5);
+            padding-left: 1.25rem;
+            margin: 1.5rem 0;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 px-6 py-4 flex items-center justify-between gap-4" style="background: rgba(15,12,41,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.08);">
+        <nav class="flex items-center gap-1.5 flex-1 min-w-0" aria-label="VAS 子頁面">
+            <a href="vas.html" class="text-white/40 hover:text-white/70 transition-colors text-xs font-medium shrink-0">VAS</a>
+            <span class="text-white/20 text-xs shrink-0">›</span>
+            <a href="vas-guide.html" class="nav-sub-link shrink-0">
+                <span class="sm:hidden" data-lang-key="navGuideShort">操作</span>
+                <span class="hidden sm:inline" data-lang-key="navGuide">操作手冊</span>
+            </a>
+            <span class="text-white/20 text-xs shrink-0">·</span>
+            <a href="insight.html" class="nav-sub-link shrink-0">
+                <span class="sm:hidden" data-lang-key="navInsightShort">設計</span>
+                <span class="hidden sm:inline" data-lang-key="navInsight">設計洞察</span>
+            </a>
+            <span class="text-white/20 text-xs shrink-0">·</span>
+            <a href="milestone.html" class="nav-sub-link shrink-0">
+                <span class="sm:hidden" data-lang-key="navMilestoneShort">里程碑</span>
+                <span class="hidden sm:inline" data-lang-key="navMilestone">里程碑</span>
+            </a>
+            <span class="text-white/20 text-xs shrink-0">·</span>
+            <a href="collab.html" class="nav-sub-link active shrink-0" aria-current="page">
+                <span class="sm:hidden" data-lang-key="navCollabShort">協作</span>
+                <span class="hidden sm:inline" data-lang-key="navCollab">協作筆記</span>
+            </a>
+        </nav>
+        <div class="relative shrink-0" id="langDropdownWrap">
+            <button id="langDropdownBtn" class="lang-dropdown-btn" aria-haspopup="listbox" aria-expanded="false" aria-label="語言切換">
+                <span id="langDropdownLabel">中</span>
+                <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.7"/></svg>
+            </button>
+            <div id="langDropdownMenu" class="lang-dropdown-menu" role="listbox" aria-label="語言選擇">
+                <button class="lang-opt active" data-lang="zh" role="option">中文</button>
+                <button class="lang-opt" data-lang="en" role="option">English</button>
+                <button class="lang-opt" data-lang="ja" role="option">日本語</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="px-6 text-center max-w-3xl mx-auto" style="padding-top: 7rem; padding-bottom: 6rem;">
+        <p class="tag" style="margin-bottom: 2rem;" data-lang-key="heroTag">VAS · 開發協作筆記</p>
+        <h1 class="font-bold text-white" style="font-size: clamp(2rem, 5vw, 3rem); line-height: 1.4; margin-bottom: 2rem;" data-lang-key="heroH1">
+            一行程式碼都不會寫，<br>
+            但我們<span class="gradient-text">做出來了</span>
+        </h1>
+        <p class="text-white/70 text-xl leading-relaxed" style="margin-bottom: 1rem;" data-lang-key="heroTagline">
+            這不是 Prompt 工程的故事。
+        </p>
+        <p class="text-white/35 text-base leading-relaxed" data-lang-key="heroDesc">
+            這頁記錄的是 VAS 開發途中，Nova 與 Claude 之間協作規則如何從零開始演化。市場上流行著各種 Prompt 技巧與 AI 方法論，但我們全程都不用這些——我們最想說清楚的，是技術與方法論之外，人機協作還需要什麼，才能走到現在這裡。
+        </p>
+    </section>
+
+    <!-- Stories -->
+    <main class="px-6 pb-32 max-w-3xl mx-auto space-y-8">
+
+        <!-- Story 01：KM 的起源 -->
+        <article class="insight-card rounded-2xl p-8">
+            <p class="tag mb-2" data-lang-key="c1Tag">知識管理 · Knowledge Management</p>
+            <h2 class="text-xl font-bold text-white mt-1 mb-4" data-lang-key="c1Title">那個按鈕說好只要五分鐘</h2>
+            <p class="text-white/55 leading-relaxed mb-4" data-lang-key="c1p1">
+                開發早期，Nova 交給 Claude 一個看起來很小的任務——加一個按鈕。「這應該很快吧？」結果 Claude 繞了超過一個小時：同樣的坑，用不同的角度踩了三次。不是因為不努力，而是因為沒有記憶。每次 session 開始，都是從空白重來。
+            </p>
+            <p class="text-white/55 leading-relaxed mb-4" data-lang-key="c1p2">
+                那次之後，Nova 跟 Claude 定下了一條規則：踩到技術坑，立刻記入 KM 文件，不等功能完成，不等確認是 bug。每個 KM 條目獨立 commit，獨立 push，不與功能代碼混合。
+            </p>
+            <p class="text-white/55 leading-relaxed mb-6" data-lang-key="c1p3">
+                到了 Sprint 9 結束，KM 文件已有超過六十條記錄。每一條都是「這裡曾經有人跌倒過」的標記。新 session 開始時不需要重新踩雷——翻開 KM，就知道哪裡有坑。
+            </p>
+            <div class="compare-box highlight">
+                <p class="text-xs text-purple-300/60 mb-2" data-lang-key="c1boxTitle">這條規則說的不只是效率</p>
+                <p class="text-sm text-white/70" data-lang-key="c1boxDesc">記憶不是天賦，是設計。AI 沒有跨 session 的記憶，但文件可以。KM 是讓協作得以延續的人工記憶系統。</p>
+            </div>
+        </article>
+
+        <!-- TODO S2：Story 02 仿生語言「三個字說完一份規格」 -->
+        <!-- TODO S2：Story 03 Concurrent Session「那天 merge 一直衝突」 -->
+        <!-- TODO S2：Story 04 文件拆分「SDD 四千行之後」 -->
+
+        <!-- TODO S3：CLAUDE.md 演化時間軸（防錯清單 → 追加期 → 協作憲法） -->
+        <!-- TODO S3：結語「人類以人生為祭，AI以回聲為鏡」 -->
+
+        <!-- 里程碑連結 -->
+        <div class="text-center py-4">
+            <p class="text-white/30 text-sm mb-4" data-lang-key="milestoneTeaser">完整開發歷程 · Electron + Tauri · 路線圖</p>
+            <a href="milestone.html" class="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold text-white/70 hover:text-white transition-colors" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);" data-lang-key="milestoneBtn">查看產品里程碑 →</a>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-10 px-6 border-t border-white/8 text-white/25 text-xs space-y-2">
+        <p data-lang-key="footer">由 GitHub 部署　｜　Claude Code 傾力打造　｜　<a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a> 最後更新於 2026</p>
+        <p><a href="privacy.html" class="hover:text-white/50 transition-colors" data-lang-key="privacyLink">隱私權政策</a></p>
+    </footer>
+
+    <script src="i18n-shared.js"></script>
+    <script src="i18n-collab.js"></script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "name": "VAS Collab Notes — 開發協作筆記",
+      "description": "VAS 開發途中，Nova 與 Claude 之間協作規則如何從零開始演化。",
+      "inLanguage": "zh-Hant",
+      "url": "https://tb1982.github.io/pm/collab.html",
+      "author": {
+        "@type": "Person",
+        "name": "Nova",
+        "email": "babelon1882@gmail.com",
+        "sameAs": [
+          "https://github.com/tb1982",
+          "https://www.linkedin.com/in/yingtzuliu",
+          "https://www.instagram.com/liuyingtzu"
+        ]
+      }
+    }
+    </script>
+
+</body>
+</html>
