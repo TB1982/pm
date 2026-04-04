@@ -36,7 +36,7 @@
 
       electronTag: 'Electron 版',
       electronH2: '11 天，40+ 版本',
-      electronSub: '3/27 最猛——一天推了 15 個版本。',
+      electronSub: '當你的工程師不會找理由拒絕你，甚至比你還積極協作的迭代開發體驗。',
       e1label: 'v0.1 → v0.5　起點',
       e1desc: '什麼都沒有的第一天，從矩形截圖開始、快捷鍵說明面板、線條工具、SVG 轉檔。',
       e1blabel: 'v0.6 → v2.4',
@@ -153,7 +153,7 @@
 
       electronTag: 'Electron',
       electronH2: '11 days, 40+ versions',
-      electronSub: '3/27 was the peak — 15 versions in a single day.',
+      electronSub: 'What it feels like when your engineer never says no — and ships even harder than you do.',
       e1label: 'v0.1 → v0.5　Starting point',
       e1desc: 'Day one with nothing. Started with rectangle capture, a keyboard shortcut panel, line tool, and SVG export.',
       e1blabel: 'v0.6 → v2.4',
@@ -270,7 +270,7 @@
 
       electronTag: 'Electron 版',
       electronH2: '11 日間、40+ バージョン',
-      electronSub: '3/27 が最も激しかった——一日で 15 バージョンをリリース。',
+      electronSub: '断らないどころか、あなた以上に積極的に協働してくれるエンジニアとの開発体験。',
       e1label: 'v0.1 → v0.5　スタート地点',
       e1desc: '何もなかった最初の日。矩形キャプチャ、ショートカットパネル、ラインツール、SVG エクスポートからスタート。',
       e1blabel: 'v0.6 → v2.4',
