@@ -39,13 +39,15 @@
             text-transform: uppercase;
             color: rgba(196,113,245,0.8);
         }
-        .back-link {
-            color: rgba(255,255,255,0.4);
-            font-size: 0.875rem;
+        .nav-sub-link {
+            color: rgba(255,255,255,0.35);
             text-decoration: none;
+            font-size: 0.75rem;
             transition: color 0.2s;
+            white-space: nowrap;
         }
-        .back-link:hover { color: rgba(255,255,255,0.75); }
+        .nav-sub-link:hover { color: rgba(255,255,255,0.65); }
+        .nav-sub-link.active { color: rgba(255,255,255,0.9); font-weight: 600; }
         .section-divider {
             width: 40px;
             height: 2px;
@@ -53,21 +55,51 @@
             border-radius: 2px;
             margin: 0 auto 3rem;
         }
-        .lang-switcher button {
+        /* ── Language dropdown ── */
+        .lang-dropdown-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.08);
+            border: none;
+            color: rgba(255,255,255,0.65);
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .lang-dropdown-btn:hover { background: rgba(255,255,255,0.13); }
+        .lang-dropdown-menu {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 6px);
+            background: rgba(30,25,60,0.96);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 12px;
+            padding: 4px;
+            min-width: 100px;
+            display: none;
+            z-index: 100;
+        }
+        .lang-dropdown-menu.open { display: block; }
+        .lang-opt {
+            display: block;
+            width: 100%;
+            text-align: left;
             background: transparent;
             border: none;
             color: rgba(255,255,255,0.5);
-            padding: 6px 14px;
-            cursor: pointer;
+            padding: 8px 14px;
             font-size: 0.875rem;
-            border-radius: 14px;
-            transition: color 0.2s, background 0.2s;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
         }
-        .lang-switcher button.active {
-            background: rgba(255,255,255,0.15);
-            color: #ffffff;
-            font-weight: 700;
-        }
+        .lang-opt:hover { background: rgba(255,255,255,0.08); color: #fff; }
+        .lang-opt.active { color: #fff; font-weight: 700; }
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
                 animation-duration: 0.01ms !important;
@@ -79,14 +111,36 @@
 <body>
 
     <!-- Header -->
-    <header class="sticky top-0 z-50 px-6 py-4 flex items-center justify-between" style="background: rgba(15,12,41,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.08);">
-        <a href="vas.html" class="back-link flex-1">← VAS</a>
-        <p class="text-xs text-white/30 tracking-widest uppercase" data-lang-key="pageLabel">Milestone</p>
-        <div class="flex-1 flex justify-end"><div class="lang-switcher flex items-center rounded-full p-1" style="background: rgba(255,255,255,0.08);" role="group" aria-label="語言切換">
-            <button id="lang-zh" class="active" aria-pressed="true">中</button>
-            <button id="lang-en" aria-pressed="false">EN</button>
-            <button id="lang-ja" aria-pressed="false">日</button>
-        </div></div>
+    <header class="sticky top-0 z-50 px-6 py-4 flex items-center justify-between gap-4" style="background: rgba(15,12,41,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.08);">
+        <nav class="flex items-center gap-1.5 flex-1 min-w-0" aria-label="VAS 子頁面">
+            <a href="vas.html" class="text-white/40 hover:text-white/70 transition-colors text-xs font-medium shrink-0">VAS</a>
+            <span class="text-white/20 text-xs shrink-0">›</span>
+            <a href="vas-guide.html" class="nav-sub-link shrink-0">
+                <span class="sm:hidden" data-lang-key="navGuideShort">操作</span>
+                <span class="hidden sm:inline" data-lang-key="navGuide">操作手冊</span>
+            </a>
+            <span class="text-white/20 text-xs shrink-0">·</span>
+            <a href="insight.html" class="nav-sub-link shrink-0">
+                <span class="sm:hidden" data-lang-key="navInsightShort">設計</span>
+                <span class="hidden sm:inline" data-lang-key="navInsight">設計洞察</span>
+            </a>
+            <span class="text-white/20 text-xs shrink-0">·</span>
+            <a href="milestone.html" class="nav-sub-link active shrink-0" aria-current="page">
+                <span class="sm:hidden" data-lang-key="navMilestoneShort">里程碑</span>
+                <span class="hidden sm:inline" data-lang-key="navMilestone">里程碑</span>
+            </a>
+        </nav>
+        <div class="relative shrink-0" id="langDropdownWrap">
+            <button id="langDropdownBtn" class="lang-dropdown-btn" aria-haspopup="listbox" aria-expanded="false" aria-label="語言切換">
+                <span id="langDropdownLabel">中</span>
+                <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.7"/></svg>
+            </button>
+            <div id="langDropdownMenu" class="lang-dropdown-menu" role="listbox" aria-label="語言選擇">
+                <button class="lang-opt active" data-lang="zh" role="option">中文</button>
+                <button class="lang-opt" data-lang="en" role="option">English</button>
+                <button class="lang-opt" data-lang="ja" role="option">日本語</button>
+            </div>
+        </div>
     </header>
 
     <!-- Hero -->
@@ -136,7 +190,7 @@
                             <div class="absolute -left-8 top-1 w-[15px] h-[15px] rounded-full bg-purple-500 border-2 border-purple-300/50 shadow-[0_0_10px_rgba(196,113,245,0.6)]"></div>
                             <p class="text-xs text-purple-300/60 mb-1" data-lang-key="m2meta">2026 / 3 / 28　第一週結束</p>
                             <h3 class="text-base font-bold text-white mb-1" data-lang-key="m2h3">Electron v3.43 首發</h3>
-                            <p class="text-sm text-white/50" data-lang-key="m2p">功能完整的第一個公開版本。從這裡開始，VAS 有了真實使用者。</p>
+                            <p class="text-sm text-white/50" data-lang-key="m2p">功能完整的第一個公開版本。從這裡開始，VAS 有了真實外部使用者。</p>
                         </div>
 
                         <div class="relative">
@@ -150,7 +204,7 @@
                             <div class="absolute -left-8 top-1 w-[15px] h-[15px] rounded-full bg-purple-400/60 border-2 border-purple-300/30"></div>
                             <p class="text-xs text-purple-300/60 mb-1" data-lang-key="m4meta">2026 / 3 / 31　回饋</p>
                             <h3 class="text-base font-bold text-white mb-1" data-lang-key="m4h3">Electron v3.44 整修版</h3>
-                            <p class="text-sm text-white/50" data-lang-key="m4p">完整移植 Tauri 後，帶著過程中累積的眼光回頭整修 Electron，補上新功能。Tauri 的經驗反哺了起點。</p>
+                            <p class="text-sm text-white/50" data-lang-key="m4p">完整移植 Tauri 後，帶著過程中累積的經驗回頭整修 Electron，前端共用的結果也附贈了新功能。Tauri 的經驗反哺了起點。</p>
                         </div>
 
                         <div class="relative">
@@ -233,7 +287,15 @@
                     <div class="w-14 shrink-0 text-right"><p class="text-xs text-purple-300/80 font-bold mt-0.5">3 / 28</p></div>
                     <div class="flex-1 border-l border-purple-400/30 pl-4 pb-2">
                         <p class="text-xs text-purple-300/80 mb-1" data-lang-key="e7label">v3.43　首發</p>
-                        <p class="text-sm text-white/70" data-lang-key="e7desc">第一個公開版本正式發布。VAS 有了真實使用者。</p>
+                        <p class="text-sm text-white/70" data-lang-key="e7desc">第一個公開版本正式發布。VAS 有了真實外部使用者。</p>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <div class="w-14 shrink-0 text-right"><p class="text-xs text-white/50 font-bold mt-0.5">3 / 31</p></div>
+                    <div class="flex-1 border-l border-white/15 pl-4 pb-2">
+                        <p class="text-xs text-white/50 mb-1" data-lang-key="e7blabel">v3.44 — 整修版</p>
+                        <p class="text-sm text-white/70" data-lang-key="e7bdesc">完整移植 Tauri 後，帶著過程中累積的經驗回頭整修 Electron，前端共用的結果也附贈了新功能。Tauri 的經驗反哺了起點。</p>
                     </div>
                 </div>
 
@@ -241,7 +303,7 @@
                     <div class="w-14 shrink-0 text-right"><p class="text-xs text-pink-300/80 font-bold mt-0.5">4 / 3</p></div>
                     <div class="flex-1 border-l border-pink-400/30 pl-4 pb-2">
                         <p class="text-xs text-pink-300/80 mb-1" data-lang-key="e8label">v3.45.0　正式打包發布 🎉</p>
-                        <p class="text-sm text-white/70" data-lang-key="e8desc">呼吸燈自動隱藏 · 全螢幕 screen-select overlay · Electron 版本封存。功能完整，永久免費，作為入門磚長期維護。</p>
+                        <p class="text-sm text-white/70" data-lang-key="e8desc">呼吸燈自動隱藏 · 全螢幕 screen-select overlay · Electron 更加穩定且編輯器功能完整，永久免費。</p>
                     </div>
                 </div>
 
@@ -410,10 +472,11 @@
 
     <!-- Footer -->
     <footer class="text-center py-10 px-6 border-t border-white/8 text-white/25 text-xs space-y-2">
-        <p>Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by Nova (babelon1882@gmail.com)</p>
-        <p><a href="privacy.html" class="hover:text-white/50 transition-colors">隱私權政策 · Privacy Policy · プライバシーポリシー</a></p>
+        <p data-lang-key="footer">由 GitHub 部署　｜　Claude Code 傾力打造　｜　<a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a> 最後更新於 2026</p>
+        <p><a href="privacy.html" class="hover:text-white/50 transition-colors" data-lang-key="privacyLink">隱私權政策</a></p>
     </footer>
 
+    <script src="i18n-shared.js"></script>
     <script src="i18n-milestone.js"></script>
 
     <script type="application/ld+json">

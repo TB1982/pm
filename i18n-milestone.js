@@ -1,6 +1,7 @@
 // i18n-milestone.js — VAS 產品里程碑 三語翻譯 (zh / en / ja)
+// 載入順序：i18n-shared.js 必須先載入
 (function () {
-  const translations = {
+  var pageT = {
     zh: {
       pageLabel: 'Milestone',
       insightLink: '設計洞察 →',
@@ -19,13 +20,13 @@
       m1p: '一週後，Electron v3.43 首發。',
       m2meta: '2026 / 3 / 28　第一週結束',
       m2h3: 'Electron v3.43 首發',
-      m2p: '功能完整的第一個公開版本。從這裡開始，VAS 有了真實使用者。',
+      m2p: '功能完整的第一個公開版本。從這裡開始，VAS 有了真實外部使用者。',
       m3meta: '2026 / 3 / 28　同日啟動',
       m3h3: 'Tauri 移植啟動',
       m3p: '決定為未來打一個更輕的底。移植不是拋棄 Electron，是帶著它的經驗重新出發。',
       m4meta: '2026 / 3 / 31　回饋',
       m4h3: 'Electron v3.44 整修版',
-      m4p: '完整移植 Tauri 後，帶著過程中累積的眼光回頭整修 Electron，補上新功能。Tauri 的經驗反哺了起點。',
+      m4p: '完整移植 Tauri 後，帶著過程中累積的經驗回頭整修 Electron，前端共用的結果也附贈了新功能。Tauri 的經驗反哺了起點。',
       m5meta: '2026 / 3 / 31　加速',
       m5h3: 'Tauri 新功能開發',
       m5p: '底層穩了，開始疊加 Tauri 專屬功能——ShareSheet、自定義快捷鍵、呼吸燈彩蛋。前端共用，Electron 靜靜受惠。',
@@ -49,9 +50,11 @@
       e6label: 'v3.30 → v3.43　<span class="text-white/30 font-normal">單日 15 版</span>',
       e6desc: '資安升級 · Retina WYSIWYG · 多選 / 對齊工具列 · Smart Snap · Bezier 曲線 · 新開畫布 · QR Code 掃描 · 工具列入口 · 批次上限 · XSS 資安修補 · 裁切工具完善 · 套版搖桿',
       e7label: 'v3.43　首發',
-      e7desc: '第一個公開版本正式發布。VAS 有了真實使用者。',
+      e7desc: '第一個公開版本正式發布。VAS 有了真實外部使用者。',
+      e7blabel: 'v3.44 — 整修版',
+      e7bdesc: '完整移植 Tauri 後，帶著過程中累積的經驗回頭整修 Electron，前端共用的結果也附贈了新功能。Tauri 的經驗反哺了起點。',
       e8label: 'v3.45.0　正式打包發布 🎉',
-      e8desc: '呼吸燈自動隱藏 · 全螢幕 screen-select overlay · Electron 版本封存。功能完整，永久免費，作為入門磚長期維護。',
+      e8desc: '呼吸燈自動隱藏 · 全螢幕 screen-select overlay · Electron 更加穩定且編輯器功能完整，永久免費。',
 
       tauriTag: 'Tauri 版',
       tauriH2: '7 天，9 個 Sprint，~80 項交付',
@@ -132,13 +135,13 @@
       m1p: 'One week later, Electron v3.43 launched.',
       m2meta: '2026 / 3 / 28　End of week one',
       m2h3: 'Electron v3.43 — First public release',
-      m2p: 'The first fully-featured public version. From here, VAS had real users.',
+      m2p: 'The first fully-featured public version. From here, VAS had real external users.',
       m3meta: '2026 / 3 / 28　Same day',
       m3h3: 'Tauri migration begins',
       m3p: 'Decided to build a lighter foundation for the future. Not abandoning Electron — starting over with everything learned from it.',
       m4meta: '2026 / 3 / 31　Feedback loop',
       m4h3: 'Electron v3.44 — Refinement update',
-      m4p: 'After completing the Tauri migration, returned to Electron with a sharper eye and added new features. Tauri\'s experience fed back into the starting point.',
+      m4p: 'After completing the Tauri migration, returned to Electron with accumulated experience — new features came as a bonus from the shared frontend. Tauri\'s experience fed back into the starting point.',
       m5meta: '2026 / 3 / 31　Accelerating',
       m5h3: 'Tauri new feature development',
       m5p: 'With a stable foundation, began stacking Tauri-exclusive features — ShareSheet, custom shortcuts, breathing light easter egg. Shared frontend means Electron benefits quietly.',
@@ -162,9 +165,11 @@
       e6label: 'v3.30 → v3.43　<span class="text-white/30 font-normal">15 versions in one day</span>',
       e6desc: 'Security upgrade · Retina WYSIWYG · Multi-select / align toolbar · Smart Snap · Bezier curves · New canvas · QR Code scan · Toolbar entry · Batch limit · XSS patch · Crop tool polish · Template joystick',
       e7label: 'v3.43　First release',
-      e7desc: 'First public version officially launched. VAS had real users.',
+      e7desc: 'First public version officially launched. VAS had real external users.',
+      e7blabel: 'v3.44 — Refinement update',
+      e7bdesc: 'After completing the Tauri migration, returned to Electron with accumulated experience — new features came as a bonus from the shared frontend. Tauri\'s experience fed back into the starting point.',
       e8label: 'v3.45.0　Official packaged release 🎉',
-      e8desc: 'Breathing light auto-hide · Full-screen screen-select overlay · Electron version archived. Feature-complete, permanently free, maintained as the entry point.',
+      e8desc: 'Breathing light auto-hide · Full-screen screen-select overlay · Electron more stable with complete editor features, permanently free.',
 
       tauriTag: 'Tauri',
       tauriH2: '7 days, 9 Sprints, ~80 deliverables',
@@ -245,13 +250,13 @@
       m1p: '一週間後、Electron v3.43 が初公開。',
       m2meta: '2026 / 3 / 28　最初の一週間の終わり',
       m2h3: 'Electron v3.43 — 初公開',
-      m2p: '機能の揃った最初の公開バージョン。ここから VAS に実際のユーザーが生まれた。',
+      m2p: '機能の揃った最初の公開バージョン。ここから VAS に実際の外部ユーザーが生まれた。',
       m3meta: '2026 / 3 / 28　同日スタート',
       m3h3: 'Tauri 移植開始',
       m3p: '未来のためにより軽い土台を作ることを決意。Electron を捨てるのではなく、その経験を携えて再出発。',
       m4meta: '2026 / 3 / 31　フィードバックループ',
       m4h3: 'Electron v3.44 — 整備アップデート',
-      m4p: 'Tauri の移植を完了した後、積み上げた知見を持って Electron に戻り、新機能を追加。Tauri の経験が出発点にフィードバックされた。',
+      m4p: 'Tauri 移植完了後、蓄積した経験を携えて Electron に戻り整備。フロントエンド共有のおかげで新機能もおまけ付き。Tauri の経験が出発点にフィードバックされた。',
       m5meta: '2026 / 3 / 31　加速',
       m5h3: 'Tauri 新機能開発',
       m5p: '土台が安定したので、Tauri 専用機能の積み上げを開始——ShareSheet、カスタムショートカット、呼吸ライトのイースターエッグ。フロントエンドを共有することで、Electron も静かに恩恵を受ける。',
@@ -275,9 +280,11 @@
       e6label: 'v3.30 → v3.43　<span class="text-white/30 font-normal">一日 15 バージョン</span>',
       e6desc: 'セキュリティ強化 · Retina WYSIWYG · 複数選択 / 整列ツールバー · Smart Snap · ベジェ曲線 · 新規キャンバス · QR コードスキャン · ツールバー入口 · バッチ上限 · XSS セキュリティパッチ · トリミングツール完成 · テンプレートジョイスティック',
       e7label: 'v3.43　初公開',
-      e7desc: '最初の公開バージョンが正式リリース。VAS に実際のユーザーが生まれた。',
+      e7desc: '最初の公開バージョンが正式リリース。VAS に実際の外部ユーザーが生まれた。',
+      e7blabel: 'v3.44 — 整備アップデート',
+      e7bdesc: 'Tauri 移植完了後、蓄積した経験を携えて Electron に戻り整備。フロントエンド共有のおかげで新機能もおまけ付き。Tauri の経験が出発点にフィードバックされた。',
       e8label: 'v3.45.0　正式パッケージリリース 🎉',
-      e8desc: '呼吸ライト自動非表示 · 全画面 screen-select overlay · Electron バージョンアーカイブ。機能完全、永久無料、入口として長期メンテナンス。',
+      e8desc: '呼吸ライト自動非表示 · 全画面 screen-select overlay · Electron がより安定し、エディタ機能完全。永久無料。',
 
       tauriTag: 'Tauri 版',
       tauriH2: '7 日間、9 スプリント、~80 デリバラブル',
@@ -341,33 +348,23 @@
     },
   };
 
+  // 合併 sharedT（footer / privacyLink）
+  var s = window.VASShared.sharedT;
+  ['zh', 'en', 'ja'].forEach(function (l) { Object.assign(pageT[l], s[l]); });
+
   function applyLang(lang) {
-    var t = translations[lang];
+    var t = pageT[lang];
     if (!t) return;
     document.querySelectorAll('[data-lang-key]').forEach(function (el) {
       var key = el.getAttribute('data-lang-key');
       if (t[key] !== undefined) el.innerHTML = t[key];
     });
     document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : lang;
-    ['zh', 'en', 'ja'].forEach(function (l) {
-      var btn = document.getElementById('lang-' + l);
-      if (!btn) return;
-      btn.classList.toggle('active', l === lang);
-      btn.setAttribute('aria-pressed', String(l === lang));
-    });
+    window.VASShared.updateDropdown(lang);
     try { localStorage.setItem('vasLang', lang); } catch (e) {}
   }
 
-  function init() {
-    ['zh', 'en', 'ja'].forEach(function (lang) {
-      var btn = document.getElementById('lang-' + lang);
-      if (btn) btn.addEventListener('click', function () { applyLang(lang); });
-    });
-    try {
-      var saved = localStorage.getItem('vasLang');
-      if (saved && translations[saved]) applyLang(saved);
-    } catch (e) {}
-  }
+  function init() { window.VASShared.initDropdown(applyLang); }
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
