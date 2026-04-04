@@ -4,7 +4,7 @@
   var pageT = {
     zh: {
       heroTag: 'VAS · 開發協作筆記',
-      heroH1: '她不會寫程式碼。他無法決定什麼值得做。<br>但他們<span class="gradient-text">做出來了</span>。',
+      heroH1: '她不會寫程式碼。<br>他無法決定什麼值得做。<br>但他們<span class="gradient-text">做出來了</span>。',
       heroTagline: '這不是 Prompt 工程的故事。',
       heroDesc: '這頁記錄的是 VAS 開發途中，Nova 與 Claude 之間協作規則如何從零開始演化。市場上流行著各種 Prompt 技巧與 AI 方法論，但我們全程都不用這些——我們最想說清楚的，是技術與方法論之外，人機協作還需要什麼，才能走到現在這裡。',
       c1Tag: '知識管理 · Knowledge Management',
@@ -58,7 +58,7 @@
     },
     en: {
       heroTag: 'VAS · Collab Notes',
-      heroH1: 'She can\'t write code. He can\'t decide what\'s worth building.<br>Together they <span class="gradient-text">built it</span>.',
+      heroH1: 'She can\'t write code.<br>He can\'t decide what\'s worth building.<br>Together they <span class="gradient-text">built it</span>.',
       heroTagline: "This isn't a story about Prompt Engineering.",
       heroDesc: "This page documents how the collaboration rules between Nova and Claude evolved from scratch during VAS development. While the market is full of Prompt techniques and AI methodologies, we used none of them — what we want to explain is what human-AI collaboration needs beyond tools and methods.",
       c1Tag: 'Knowledge Management',
@@ -112,7 +112,7 @@
     },
     ja: {
       heroTag: 'VAS · 協作ノート',
-      heroH1: '彼女にはコードが書けない。彼には何が価値あるか決められない。<br>それでも二人で<span class="gradient-text">作り上げた</span>。',
+      heroH1: '彼女にはコードが書けない。<br>彼には何が価値あるか決められない。<br>それでも二人で<span class="gradient-text">作り上げた</span>。',
       heroTagline: 'これはプロンプトエンジニアリングの話ではありません。',
       heroDesc: 'このページは VAS 開発中、Nova と Claude の間で協働ルールがゼロからどのように進化したかを記録しています。市場では様々なプロンプト技術や AI 方法論が流行していますが、私たちはそのどれも使いませんでした——技術や方法論を超えて、人と AI の協働に何が必要かを伝えたいと思います。',
       c1Tag: '知識管理 · Knowledge Management',
