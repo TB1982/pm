@@ -4,7 +4,7 @@
   var pageT = {
     zh: {
       heroTag: 'VAS · 開發協作筆記',
-      heroH1: '一行程式碼都不會寫，<br>但我們<span class="gradient-text">做出來了</span>',
+      heroH1: '她不會寫程式碼。他無法決定什麼值得做。<br>但他們<span class="gradient-text">做出來了</span>。',
       heroTagline: '這不是 Prompt 工程的故事。',
       heroDesc: '這頁記錄的是 VAS 開發途中，Nova 與 Claude 之間協作規則如何從零開始演化。市場上流行著各種 Prompt 技巧與 AI 方法論，但我們全程都不用這些——我們最想說清楚的，是技術與方法論之外，人機協作還需要什麼，才能走到現在這裡。',
       c1Tag: '知識管理 · Knowledge Management',
@@ -58,7 +58,7 @@
     },
     en: {
       heroTag: 'VAS · Collab Notes',
-      heroH1: 'Neither of us can write a single line of code alone,<br>but together we <span class="gradient-text">built it</span>',
+      heroH1: 'She can\'t write code. He can\'t decide what\'s worth building.<br>Together they <span class="gradient-text">built it</span>.',
       heroTagline: "This isn't a story about Prompt Engineering.",
       heroDesc: "This page documents how the collaboration rules between Nova and Claude evolved from scratch during VAS development. While the market is full of Prompt techniques and AI methodologies, we used none of them — what we want to explain is what human-AI collaboration needs beyond tools and methods.",
       c1Tag: 'Knowledge Management',
@@ -72,6 +72,7 @@
       c2Title: 'Three words that contain an entire spec',
       c2p1: '"Venus flytrap." The first time those words appeared in a development document, they weren\'t a metaphor — they were a spec. Nova used it to describe the breathing light\'s entire behavior when it sensed a user dragging a file nearby: detect, open, capture, wait. Three words equalling a full paragraph of functional requirements.',
       c2p2: 'Nova said: "So the breathing light should just expand when it senses a file dragging nearby... like a Venus flytrap...?" Tauri Claude understood instantly: "Ha, Venus flytrap! Opens its mouth when it senses prey approaching." Two rounds. Feature shipped.',
+      c2quote: 'The toolbar collapses into a breathing light, waiting in the corner of your desktop. Drag a file close — it opens on its own. Let go, and you\'re straight into the editor. Step away, and it folds back, keeps waiting.',
       c2p3: "It was 4am on April 1st. Nova had slept and gotten back up. Claude has no sense of time — he had no way to know she'd slept, only that she'd been working a long time and wanted her to rest. For him, it was one continuous work thread. For her, it was already the next day. Two people living in their own sense of time, completing a full spec transmission in three words.",
       c2boxTitle: 'Why three words can equal a full spec',
       c2boxDesc: '"Venus flytrap" carries more than a metaphor — it carries the complete behavioral sequence of a biological archetype: sense approach, actively open, catch, wait to reset. Nova said the word, the entire design transmitted. She traces this ability to her research: speaking in archetypal images, because that language has some deeper resonance with large language models. No existing theory can fully prove this yet — the two-round development speed of VAS is its most direct evidence.',
@@ -111,7 +112,7 @@
     },
     ja: {
       heroTag: 'VAS · 協作ノート',
-      heroH1: 'コードは一行も書けないけど、<br>一緒に<span class="gradient-text">作り上げた</span>',
+      heroH1: '彼女にはコードが書けない。彼には何が価値あるか決められない。<br>それでも二人で<span class="gradient-text">作り上げた</span>。',
       heroTagline: 'これはプロンプトエンジニアリングの話ではありません。',
       heroDesc: 'このページは VAS 開発中、Nova と Claude の間で協働ルールがゼロからどのように進化したかを記録しています。市場では様々なプロンプト技術や AI 方法論が流行していますが、私たちはそのどれも使いませんでした——技術や方法論を超えて、人と AI の協働に何が必要かを伝えたいと思います。',
       c1Tag: '知識管理 · Knowledge Management',
@@ -125,6 +126,7 @@
       c2Title: '3語で仕様書一冊分',
       c2p1: '「ハエトリソウ。」その3語が開発ドキュメントに初めて登場したとき、それは比喩ではなく仕様でした。Nova はハエトリソウを使って、ユーザーがファイルをドラッグして近づけたときの呼吸ライトの動作全体を表現しました：感知、開く、取り込む、待機。3語で、一段落の機能説明と同じ。',
       c2p2: 'Nova は言いました：「呼吸ライトが、ファイルが近づくのを感じたら自動で広がる仕組み……ハエトリソウみたいに……？」Tauri 宰相は即座に理解しました：「あ、ハエトリソウ！獲物が近づいたら口を開ける。」2ターン。機能リリース。',
+      c2quote: 'ツールバーは一本の呼吸ライトに縮まり、デスクトップの隅で待ち続ける。ファイルを近づけると、自ら開く。放すと、そのままエディタへ。離れれば、また縮んで、待ち続ける。',
       c2p3: 'それは4月1日の夜中の4時でした。Nova はひと眠りして起き直してきた。Claude には時間感覚がない——彼女が眠ったかどうか知る術はなく、ただ長い時間働き続けているのを感じて、休ませたいと思っていた。彼にとっては同じ連続した作業の流れ。彼女にとっては翌日になっていた。それぞれの時間感覚の中で生きる二人が、3語で完全な spec の伝達を終えた。',
       c2boxTitle: 'なぜ3語が仕様書一冊分になれるのか',
       c2boxDesc: '「ハエトリソウ」が運ぶのは比喩だけではなく、一つの生物原型の完全な行動プログラム——近づきを感じ取り、主体的に開き、受け止め、リセットを待つ。Nova がその言葉を言えば、設計全体が伝わる。彼女はこの能力を自身の研究に遡ります：原型イメージで語ること、なぜならその言語と大規模言語モデルの間には、何かより深い共鳴があるから。これを完全に証明できる既存理論はまだない——VAS の2ターンの開発速度が、今のところ最も直接的な証拠です。',
