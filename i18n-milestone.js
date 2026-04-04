@@ -55,6 +55,7 @@
       e7desc: '第一個公開版本正式發布。VAS 有了真實外部使用者。同天開始進行 Tauri 架構遷移。',
       e7blabel: 'v3.44 — 整修版',
       e7bdesc: '完整移植 Tauri 後，帶著過程中累積的經驗回頭整修 Electron，前端共用的結果也附贈了新功能。Tauri 的經驗反哺了起點。',
+      e7bitems: '<li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>工具列 Modal 位置跳動與累積偏移根治</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>修復三種截圖模式（全螢幕 / 視窗 / 矩形）全部失效</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>OCR 與隱私掃描功能修復</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>標號與文字工具尺寸縮放一致性修正</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">⌨️</span><span>方向鍵微調物件位置（Arrow nudge）</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🧹</span><span>拖曳匯出暫存檔 60 秒後自動清除</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🔒</span><span>安全性修補（brace-expansion 漏洞）</span></li>',
       e8label: 'v3.45.0　陪著 Tauri 一起 Renew 再上線 🎉',
       e8desc: '呼吸燈自動隱藏 · 全螢幕 screen-select overlay · Electron 更加穩定且編輯器功能完整，永久免費。',
 
@@ -115,8 +116,8 @@
       r3h: 'v3.0　功能爆發',
       r3items: '<li>· 截圖知識庫 / 截圖比對 / 色票萃取</li><li>· 對話氣泡 / 群組 / 放大鏡標注</li><li>· 螢幕錄影 + GIF</li><li>· 雲端分享</li><li>· 格式刷（壓軸）</li>',
 
-      insightTeaser: '這些里程碑背後的設計思路',
-      insightBtn: '閱讀設計洞察 →',
+      homeTeaser: '回到 VAS 產品首頁',
+      homeBtn: '← 回首頁',
     },
 
     en: {
@@ -172,6 +173,7 @@
       e7desc: 'First public version officially launched. VAS had real external users. Started Tauri architecture migration the same day.',
       e7blabel: 'v3.44 — Refinement update',
       e7bdesc: 'After completing the Tauri migration, returned to Electron with accumulated experience — new features came as a bonus from the shared frontend. Tauri\'s experience fed back into the starting point.',
+      e7bitems: '<li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>Toolbar modal position drift & accumulation — fixed</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>All three capture modes (fullscreen / window / rectangle) restored</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>OCR and privacy scan fixed</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>Number stamp & text tool scale consistency fixed</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">⌨️</span><span>Arrow key nudge for selected objects</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🧹</span><span>Drag export temp files auto-deleted after 60 seconds</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🔒</span><span>Security patch (brace-expansion vulnerability)</span></li>',
       e8label: 'v3.45.0　Renewed alongside Tauri\'s launch 🎉',
       e8desc: 'Breathing light auto-hide · Full-screen screen-select overlay · Electron more stable with complete editor features, permanently free.',
 
@@ -232,8 +234,8 @@
       r3h: 'v3.0　Feature explosion',
       r3items: '<li>· Screenshot library / comparison / swatch extraction</li><li>· Speech bubbles / grouping / magnifier annotations</li><li>· Screen recording + GIF</li><li>· Cloud sharing</li><li>· Format Painter (grand finale)</li>',
 
-      insightTeaser: 'The design thinking behind these milestones',
-      insightBtn: 'Read Design Insights →',
+      homeTeaser: 'Back to the VAS product page',
+      homeBtn: '← Back to VAS',
     },
 
     ja: {
@@ -289,6 +291,7 @@
       e7desc: '最初の公開バージョンが正式リリース。VAS に実際の外部ユーザーが生まれた。同日、Tauri アーキテクチャへの移行を開始。',
       e7blabel: 'v3.44 — 整備アップデート',
       e7bdesc: 'Tauri 移植完了後、蓄積した経験を携えて Electron に戻り整備。フロントエンド共有のおかげで新機能もおまけ付き。Tauri の経験が出発点にフィードバックされた。',
+      e7bitems: '<li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>ツールバー Modal の位置ずれ・累積オフセットを根本修正</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>3種のキャプチャモード（全画面/ウィンドウ/矩形）の一斉不具合を修正</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>OCR・プライバシースキャン機能を修正</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>スタンプとテキストツールのサイズスケール一貫性を修正</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">⌨️</span><span>矢印キーでオブジェクトの微調整（Arrow nudge）</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🧹</span><span>ドラッグ書き出しの一時ファイルを60秒後に自動削除</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🔒</span><span>セキュリティパッチ（brace-expansion 脆弱性）</span></li>',
       e8label: 'v3.45.0　Tauri と共に刷新して再リリース 🎉',
       e8desc: '呼吸ライト自動非表示 · 全画面 screen-select overlay · Electron がより安定し、エディタ機能完全。永久無料。',
 
@@ -349,8 +352,8 @@
       r3h: 'v3.0　機能爆発',
       r3items: '<li>· スクリーンショットライブラリ / 比較 / カラースウォッチ抽出</li><li>· 吹き出し / グループ化 / 拡大鏡アノテーション</li><li>· 画面録画 + GIF</li><li>· クラウド共有</li><li>· フォーマットブラシ（大トリ）</li>',
 
-      insightTeaser: 'これらのマイルストーンの背景にある設計思想',
-      insightBtn: 'デザインの洞察を読む →',
+      homeTeaser: 'VAS プロダクトページに戻る',
+      homeBtn: '← ホームに戻る',
     },
   };
 

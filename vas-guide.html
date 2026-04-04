@@ -274,8 +274,8 @@
 <body class="gradient-bg min-h-screen text-white">
 
   <!-- Nav -->
-  <nav class="border-b border-white/8 px-6 py-4 flex items-center justify-between gap-4 max-w-4xl mx-auto">
-    <div class="flex items-center gap-1.5 flex-1 min-w-0" aria-label="VAS 子頁面">
+  <header class="sticky top-0 z-50 px-6 py-4 flex items-center justify-between gap-4" style="background: rgba(15,12,41,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.08);">
+    <nav class="flex items-center gap-1.5 flex-1 min-w-0" aria-label="VAS 子頁面">
       <a href="vas.html" class="text-white/40 hover:text-white/70 transition-colors text-xs font-medium shrink-0">VAS</a>
       <span class="text-white/20 text-xs shrink-0">›</span>
       <a href="vas-guide.html" class="nav-sub-link active shrink-0" aria-current="page">
@@ -288,11 +288,16 @@
         <span class="hidden sm:inline" data-lang-key="navInsight">設計洞察</span>
       </a>
       <span class="text-white/20 text-xs shrink-0">·</span>
+      <a href="collab.html" class="nav-sub-link shrink-0">
+        <span class="sm:hidden" data-lang-key="navCollabShort">協作</span>
+        <span class="hidden sm:inline" data-lang-key="navCollab">協作筆記</span>
+      </a>
+      <span class="text-white/20 text-xs shrink-0">·</span>
       <a href="milestone.html" class="nav-sub-link shrink-0">
         <span class="sm:hidden" data-lang-key="navMilestoneShort">里程碑</span>
         <span class="hidden sm:inline" data-lang-key="navMilestone">里程碑</span>
       </a>
-    </div>
+    </nav>
     <div class="relative shrink-0" id="langDropdownWrap">
       <button id="langDropdownBtn" class="lang-dropdown-btn" aria-haspopup="listbox" aria-expanded="false" aria-label="語言切換">
         <span id="langDropdownLabel">中</span>
@@ -304,7 +309,7 @@
         <button class="lang-opt" data-lang="ja" role="option">日本語</button>
       </div>
     </div>
-  </nav>
+  </header>
 
   <main class="max-w-4xl mx-auto px-6 py-12 space-y-16">
 
@@ -554,6 +559,12 @@
       </div>
     </section>
 
+    <!-- 設計洞察連結 -->
+    <div class="text-center py-4">
+      <p class="text-white/30 text-sm mb-4" data-lang-key="insightTeaser">VAS 設計決策背後的思路</p>
+      <a href="insight.html" class="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold text-white/70 hover:text-white transition-colors" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);" data-lang-key="insightBtn">閱讀設計洞察 →</a>
+    </div>
+
   </main>
 
   <!-- Tool Popup Modal -->
@@ -638,6 +649,8 @@
         kb_r3: '裸字母或數字',
         kb_r4: '系統保留快捷鍵',
         kb_r5: '單獨修飾鍵',
+        insightTeaser: 'VAS 設計決策背後的思路',
+        insightBtn: '閱讀設計洞察 →',
         footer: '由 GitHub 部署　｜　Claude Code 傾力打造　｜　<a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a> 最後更新於 2026',
         privacyLink: '隱私權政策'
       },
@@ -699,6 +712,8 @@
         kb_r3: 'Bare letter or number',
         kb_r4: 'System-reserved shortcut',
         kb_r5: 'Modifier key alone',
+        insightTeaser: 'The thinking behind VAS design decisions',
+        insightBtn: 'Read Design Insights →',
         footer: 'Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by <a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a>',
         privacyLink: 'Privacy Policy'
       },
@@ -760,6 +775,8 @@
         kb_r3: '裸の文字または数字',
         kb_r4: 'システム予約ショートカット',
         kb_r5: '修飾キー単独',
+        insightTeaser: 'VAS の設計判断の背景にある思考',
+        insightBtn: 'デザインの洞察を読む →',
         footer: 'GitHub でデプロイ　｜　Claude Code で構築　｜　2026年 <a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a> 最終更新',
         privacyLink: 'プライバシーポリシー'
       }

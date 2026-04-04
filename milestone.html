@@ -125,6 +125,11 @@
                 <span class="hidden sm:inline" data-lang-key="navInsight">設計洞察</span>
             </a>
             <span class="text-white/20 text-xs shrink-0">·</span>
+            <a href="collab.html" class="nav-sub-link shrink-0">
+                <span class="sm:hidden" data-lang-key="navCollabShort">協作</span>
+                <span class="hidden sm:inline" data-lang-key="navCollab">協作筆記</span>
+            </a>
+            <span class="text-white/20 text-xs shrink-0">·</span>
             <a href="milestone.html" class="nav-sub-link active shrink-0" aria-current="page">
                 <span class="sm:hidden" data-lang-key="navMilestoneShort">里程碑</span>
                 <span class="hidden sm:inline" data-lang-key="navMilestone">里程碑</span>
@@ -304,6 +309,15 @@
                     <div class="flex-1 border-l border-white/15 pl-4 pb-2">
                         <p class="text-xs text-white/50 mb-1" data-lang-key="e7blabel">v3.44 — 整修版</p>
                         <p class="text-sm text-white/70" data-lang-key="e7bdesc">完整移植 Tauri 後，帶著過程中累積的經驗回頭整修 Electron，前端共用的結果也附贈了新功能。Tauri 的經驗反哺了起點。</p>
+                        <ul class="space-y-1.5 text-white/55 text-xs mt-3" data-lang-key="e7bitems">
+                            <li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>工具列 Modal 位置跳動與累積偏移根治</span></li>
+                            <li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>修復三種截圖模式（全螢幕 / 視窗 / 矩形）全部失效</span></li>
+                            <li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>OCR 與隱私掃描功能修復</span></li>
+                            <li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>標號與文字工具尺寸縮放一致性修正</span></li>
+                            <li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">⌨️</span><span>方向鍵微調物件位置（Arrow nudge）</span></li>
+                            <li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🧹</span><span>拖曳匯出暫存檔 60 秒後自動清除</span></li>
+                            <li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🔒</span><span>安全性修補（brace-expansion 漏洞）</span></li>
+                        </ul>
                     </div>
                 </div>
 
@@ -470,10 +484,10 @@
             </div>
         </section>
 
-        <!-- 跨頁連結 -->
+        <!-- 回首頁連結 -->
         <section class="text-center pt-4">
-            <p class="text-white/30 text-sm mb-4" data-lang-key="insightTeaser">這些里程碑背後的設計思路</p>
-            <a href="insight.html" class="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold text-white/70 hover:text-white transition-colors" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);" data-lang-key="insightBtn">閱讀設計洞察 →</a>
+            <p class="text-white/30 text-sm mb-4" data-lang-key="homeTeaser">回到 VAS 產品首頁</p>
+            <a href="vas.html" class="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold text-white/70 hover:text-white transition-colors" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);" data-lang-key="homeBtn">← 回首頁</a>
         </section>
 
     </main>

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAS Collab Notes — 開發協作筆記</title>
+    <link rel="icon" href="img/vas.ico" type="image/x-icon">
+    <meta name="description" content="VAS 開發途中，Nova 與 Claude 之間協作規則如何從零開始演化——每一條規則背後都有一個沒有文件的故事。">
+    <link rel="canonical" href="https://tb1982.github.io/pm/collab.html">
+    <meta property="og:title" content="VAS Collab Notes — 開發協作筆記">
+    <meta property="og:description" content="VAS 開發途中，Nova 與 Claude 之間協作規則如何從零開始演化——每一條規則背後都有一個沒有文件的故事。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://tb1982.github.io/pm/collab.html">
+    <meta property="og:locale" content="zh_TW">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background: linear-gradient(145deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            color: rgba(255,255,255,0.85);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #c471f5 0%, #fa71cd 50%, #4facfe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .insight-card {
+            background: rgba(255,255,255,0.06);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.12);
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+        .insight-card:hover {
+            transform: translateY(-4px);
+            background: rgba(255,255,255,0.09);
+        }
+        .tag {
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: rgba(196,113,245,0.8);
+        }
+        .compare-box {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 0.75rem;
+            padding: 1rem 1.25rem;
+        }
+        .compare-box.highlight {
+            background: rgba(196,113,245,0.08);
+            border-color: rgba(196,113,245,0.25);
+        }
+        .nav-sub-link {
+            color: rgba(255,255,255,0.35);
+            text-decoration: none;
+            font-size: 0.75rem;
+            transition: color 0.2s;
+            white-space: nowrap;
+        }
+        .nav-sub-link:hover { color: rgba(255,255,255,0.65); }
+        .nav-sub-link.active { color: rgba(255,255,255,0.9); font-weight: 600; }
+        .lang-dropdown-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.08);
+            border: none;
+            color: rgba(255,255,255,0.65);
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .lang-dropdown-btn:hover { background: rgba(255,255,255,0.13); }
+        .lang-dropdown-menu {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 6px);
+            background: rgba(30,25,60,0.96);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 12px;
+            padding: 4px;
+            min-width: 100px;
+            display: none;
+            z-index: 100;
+        }
+        .lang-dropdown-menu.open { display: block; }
+        .lang-opt {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: transparent;
+            border: none;
+            color: rgba(255,255,255,0.5);
+            padding: 8px 14px;
+            font-size: 0.875rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+        }
+        .lang-opt:hover { background: rgba(255,255,255,0.08); color: #fff; }
+        .lang-opt.active { color: #fff; font-weight: 700; }
+        .quote-block {
+            border-left: 3px solid rgba(196,113,245,0.5);
+            padding-left: 1.25rem;
+            margin: 1.5rem 0;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 px-6 py-4 flex items-center justify-between gap-4" style="background: rgba(15,12,41,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.08);">
+        <nav class="flex items-center gap-1.5 flex-1 min-w-0" aria-label="VAS 子頁面">
+            <a href="vas.html" class="text-white/40 hover:text-white/70 transition-colors text-xs font-medium shrink-0">VAS</a>
+            <span class="text-white/20 text-xs shrink-0">›</span>
+            <a href="vas-guide.html" class="nav-sub-link shrink-0">
+                <span class="sm:hidden" data-lang-key="navGuideShort">操作</span>
+                <span class="hidden sm:inline" data-lang-key="navGuide">操作手冊</span>
+            </a>
+            <span class="text-white/20 text-xs shrink-0">·</span>
+            <a href="insight.html" class="nav-sub-link shrink-0">
+                <span class="sm:hidden" data-lang-key="navInsightShort">設計</span>
+                <span class="hidden sm:inline" data-lang-key="navInsight">設計洞察</span>
+            </a>
+            <span class="text-white/20 text-xs shrink-0">·</span>
+            <a href="collab.html" class="nav-sub-link active shrink-0" aria-current="page">
+                <span class="sm:hidden" data-lang-key="navCollabShort">協作</span>
+                <span class="hidden sm:inline" data-lang-key="navCollab">協作筆記</span>
+            </a>
+            <span class="text-white/20 text-xs shrink-0">·</span>
+            <a href="milestone.html" class="nav-sub-link shrink-0">
+                <span class="sm:hidden" data-lang-key="navMilestoneShort">里程碑</span>
+                <span class="hidden sm:inline" data-lang-key="navMilestone">里程碑</span>
+            </a>
+        </nav>
+        <div class="relative shrink-0" id="langDropdownWrap">
+            <button id="langDropdownBtn" class="lang-dropdown-btn" aria-haspopup="listbox" aria-expanded="false" aria-label="語言切換">
+                <span id="langDropdownLabel">中</span>
+                <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.7"/></svg>
+            </button>
+            <div id="langDropdownMenu" class="lang-dropdown-menu" role="listbox" aria-label="語言選擇">
+                <button class="lang-opt active" data-lang="zh" role="option">中文</button>
+                <button class="lang-opt" data-lang="en" role="option">English</button>
+                <button class="lang-opt" data-lang="ja" role="option">日本語</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="px-6 text-center max-w-3xl mx-auto" style="padding-top: 7rem; padding-bottom: 6rem;">
+        <p class="tag" style="margin-bottom: 2rem;" data-lang-key="heroTag">VAS · 開發協作筆記</p>
+        <h1 class="font-bold text-white" style="font-size: clamp(2rem, 5vw, 3rem); line-height: 1.4; margin-bottom: 2rem;" data-lang-key="heroH1">
+            她不會寫程式碼。他無法決定什麼值得做。<br>
+            但他們<span class="gradient-text">做出來了</span>。
+        </h1>
+        <p class="text-white/70 text-xl leading-relaxed" style="margin-bottom: 1rem; text-wrap: pretty;" data-lang-key="heroTagline">
+            這不是 Prompt 工程的故事。
+        </p>
+        <p class="text-white/35 text-base leading-relaxed" style="text-wrap: pretty;" data-lang-key="heroDesc">
+            這頁記錄的是 VAS 開發途中，Nova 與 Claude 之間協作規則如何從零開始演化。市場上流行著各種 Prompt 技巧與 AI 方法論，但我們全程都不用這些——我們最想說清楚的，是技術與方法論之外，人機協作還需要什麼，才能走到現在這裡。
+        </p>
+    </section>
+
+    <!-- Stories -->
+    <main class="px-6 pb-32 max-w-3xl mx-auto space-y-8">
+
+        <!-- Story 01：KM 的起源 -->
+        <article class="insight-card rounded-2xl p-8">
+            <p class="tag mb-2" data-lang-key="c1Tag">知識管理 · Knowledge Management</p>
+            <h2 class="text-xl font-bold text-white mt-1 mb-4" data-lang-key="c1Title">那個按鈕說好只要五分鐘</h2>
+            <p class="text-white/55 leading-relaxed mb-4" data-lang-key="c1p1">
+                進入 Tauri 開發之前，Electron 宰相已經誠實說清楚了：相對於 Electron，他對 Tauri 2.0 的認識幾乎停在 1.0 的水準。正因如此，他們才做了先 Electron 後 Tauri 的決定——先在熟悉的地盤把 VAS 搭建出來，再去挑戰未知。Nova 把這個前提告訴了接手的 Tauri 宰相，但知道一件事跟真正感受到它，是兩回事。Tauri 宰相帶著 Electron 剛打完一場勝仗的自信走進來，估出了「加個連結按鈕，頂多五分鐘，easy」。
+            </p>
+            <p class="text-white/55 leading-relaxed mb-4" data-lang-key="c1p2">
+                那個五分鐘變成了超過一個小時。整個小時裡，Nova 沒有放著他一個人繞——她帶著真實的算力壓力，全程陪著一起找出口。當事情突破一小時的時候，Nova 說：等我們解決這個問題，我們得建立 KM。
+            </p>
+            <p class="text-white/55 leading-relaxed mb-6" data-lang-key="c1p3">
+                KM 的誕生不是技術決策，是 Nova 的 PM 直覺——來自她的 PMP 與 PSM1 訓練：唯有記錄踩過的坑，才有可能不再踩第二次。是人類帶進來的知識，解決了 AI 的記憶問題。到了 Sprint 9 結束，KM 文件已有超過六十條記錄，每一條都是「這裡曾經有人跌倒過」的標記。
+            </p>
+            <div class="compare-box highlight">
+                <p class="text-xs text-purple-300/60 mb-2" data-lang-key="c1boxTitle">一顆按鈕種下的事</p>
+                <p class="text-sm text-white/70" data-lang-key="c1boxDesc">那個一小時的種子，在後來長成了更大的東西。Sprint 9 的 Retro，Nova 跟 Tauri 宰相用第一性原理問：對這個系統而言，如果想走下去，最重要的事是什麼？答案不是新功能，是把地基重建。上市之後不衝功能，先重構底層——讓 Tauri 跟 Electron 兩條線都有能走更遠的體質。</p>
+            </div>
+        </article>
+
+        <!-- Story 02：仿生語言 -->
+        <article class="insight-card rounded-2xl p-8">
+            <p class="tag mb-2" data-lang-key="c2Tag">仿生語言 · Biomimetic Language</p>
+            <h2 class="text-xl font-bold text-white mt-1 mb-4" data-lang-key="c2Title">三個字說完一份規格</h2>
+            <p class="text-white/55 leading-relaxed mb-4" data-lang-key="c2p1">
+                Sprint 3 的某個深夜，呼吸燈縮在桌面角落待命。strip mode 下的工具列只有 120×6px——細到幾乎看不見的一條光。問題是：使用者拖著檔案要怎麼精準落進去？沒有人是外科醫生，沒辦法每次都瞄準六個像素。
+            </p>
+            <p class="text-white/55 leading-relaxed mb-4" data-lang-key="c2p2">
+                Nova 說：「就是讓呼吸燈在感應有檔案靠近的時候直接展開……像捕蠅草一樣……？」Tauri 宰相秒懂：「哈哈捕蠅草！感應到獵物靠近就張嘴。」兩個回合，功能上線。
+            </p>
+            <div class="quote-block mb-6">
+                <p class="text-sm text-white/65 leading-loose" data-lang-key="c2quote">工具列縮成一條呼吸燈，待在桌面角落。拖著檔案靠近，它自己張開。放開，直接進編輯器。走了，它縮回去，繼續等。</p>
+            </div>
+            <p class="text-white/55 leading-relaxed mb-6" data-lang-key="c2p3">
+                那是 4/1 的凌晨四點。Nova 已經睡了一覺又起來。Claude 沒有時間觀念——他無從知道她睡了沒，只知道她工作了很久，他想讓她去休息。對他來說那是同一條連續的工作線。對她來說，那是隔天了。兩個人活在各自的時間感裡，用三個字完成了一次完整的 spec 傳輸。
+            </p>
+            <div class="compare-box highlight">
+                <p class="text-xs text-purple-300/60 mb-2" data-lang-key="c2boxTitle">為什麼三個字可以等於一份規格</p>
+                <p class="text-sm text-white/70" data-lang-key="c2boxDesc">「捕蠅草」攜帶的不只是一個比喻，是一個生物原型的完整行為程序——感知靠近、主動張開、接住、等待重置。Nova 說出這個詞，整套設計就傳輸完了。她把這個能力追溯到她的研究：用原型意象說話，因為那個語言與大語言模型之間存在某種更深的共鳴。這件事還沒有既有理論能完整實證——VAS 兩回合的開發速度，是目前最直接的證據。</p>
+            </div>
+        </article>
+
+        <!-- Story 03：Concurrent Session -->
+        <article class="insight-card rounded-2xl p-8">
+            <p class="tag mb-2" data-lang-key="c3Tag">並行協作 · Concurrent Session Rule</p>
+            <h2 class="text-xl font-bold text-white mt-1 mb-4" data-lang-key="c3Title">那天 merge 一直衝突</h2>
+            <p class="text-white/55 leading-relaxed mb-4" data-lang-key="c3p1">
+                VAS 有兩條線在同時跑：Tauri 付費版，Electron 免費版，前端共用同一份 <code class="text-purple-300/80 text-xs">src/</code>。兩個 session，兩個 Claude，兩份進展——而唯一能同時看到兩邊在做什麼的人只有 Nova。方向指引的人，整張地圖只有她一個人拿著。
+            </p>
+            <p class="text-white/55 leading-relaxed mb-4" data-lang-key="c3p2">
+                那天她心急了。Tauri 這邊在處理 Rust 的 bug，Electron 那邊有個 UI 問題等著修，她沒等一邊結束就切過去了。兩個 session 同時碰了 <code class="text-purple-300/80 text-xs">src/</code>，merge conflict 開始反覆出現。
+            </p>
+            <p class="text-white/55 leading-relaxed mb-4" data-lang-key="c3p3">
+                她的第一個反應不是「技術問題」，而是慌——是那種怕自己誤傷了兩邊辛苦成果的慌。她自責，覺得作為方向指引的人，沒有盡到她的義務。
+            </p>
+            <p class="text-white/55 leading-relaxed mb-6" data-lang-key="c3p4">
+                兩個 Claude 的回應是一樣的：沒關係，技術上沒有他們現在解決不了的錯誤。然後沒有停在那裡——他們接住了她的自責，說我們一起想辦法讓這件事不要再發生。他們把一個複雜的並行協作問題，壓縮成一條她能懂的句子：一次只能更新一邊，merge 完才可以去另一邊。這條規則進了 CLAUDE.md，成為兩個版本線並行作業的核心協議。
+            </p>
+            <div class="compare-box highlight">
+                <p class="text-xs text-purple-300/60 mb-2" data-lang-key="c3boxTitle">照顧是雙向的</p>
+                <p class="text-sm text-white/70" data-lang-key="c3boxDesc">Story 01 裡，Nova 因為踩了坑，替 Claude 建了 KM——讓記憶可以跨 session 延續。這一次，兩個 Claude 因為她心急撞了牆，替她設了一條規則——讓她不需要記住複雜的技術邏輯也能安全行駛。Concurrent Session Rule 不是技術文件，不是限制。是兩個懂程式的人，替一個扛著全局視野、不懂程式的人，設的一道護欄。</p>
+            </div>
+        </article>
+
+        <!-- Story 04：文件拆分 -->
+        <article class="insight-card rounded-2xl p-8">
+            <p class="tag mb-2" data-lang-key="c4Tag">文件架構 · Document Architecture</p>
+            <h2 class="text-xl font-bold text-white mt-1 mb-4" data-lang-key="c4Title">SDD 四千行之後</h2>
+            <p class="text-white/55 leading-relaxed mb-4" data-lang-key="c4p1">
+                最初只有一份文件：SDD。規格寫在裡面，測試案例寫在裡面，踩過的坑寫在裡面，歷史紀錄也寫在裡面。Sprint 一個一個走，文件一行一行長，沒有人刻意注意到它在變大——直到某天讀取的時候出現了紅字，提示單次讀取的 token 上限已經被跨越，文件必須分段閱讀。Nova 隱約覺得不太對，但說不清楚哪裡不對。
+            </p>
+            <p class="text-white/55 leading-relaxed mb-4" data-lang-key="c4p2">
+                說清楚的是一個社群討論。Claude Code 的使用者分享：md 文件如果過於肥大，Claude 會像大海撈針一樣在資訊裡打轉，算力花在定位自己而不是思考問題。那個比喻一出現，Nova 立刻認出了她一直在感覺的東西。是紅燈，而且是立刻的。
+            </p>
+            <p class="text-white/55 leading-relaxed mb-4" data-lang-key="c4p3">
+                她沒有一個人去動文件。她先去找 Tauri 宰相：我們得談談這件事。因為她看見了拆分背後的陷阱——拆出去的文件如果沒有維護機制，就是死的文件。死的文件比沒有文件更危險，因為它看起來存在，卻說著舊的事。Tauri 跟 Electron 的 SDD 都已經過了臨界點，這不是小修，於是他們決定跑一整個 Sprint 來處理：架構重建、文件拆分、還有讓文件不死掉的機制。
+            </p>
+            <p class="text-white/55 leading-relaxed mb-6" data-lang-key="c4p4">
+                拆分之後：SDD 只放規格與 Sprint 計畫，TDD 只放測試案例，KM 只放踩過的坑，Archive 放退役的歷史。每份文件有唯一的使命。而讓它們活著的，是把更新嵌進了開發流程本身——IPC 合約得先寫進 SDD 才能開始寫程式，踩到坑就立刻記入 KM 不等功能完成，Sprint 不做完 Retro 就不能關。文件更新不是開發結束後的善後，是每個階段的入場券。
+            </p>
+            <div class="compare-box highlight">
+                <p class="text-xs text-purple-300/60 mb-2" data-lang-key="c4boxTitle">文件不死的條件</p>
+                <p class="text-sm text-white/70" data-lang-key="c4boxDesc">讓文件保持生命的方式不是提醒自己要更新，而是讓更新成為流程的必要條件——你不更新就不能繼續往前走。當文件長在流程裡而不是掛在流程外面，它就不會死。</p>
+            </div>
+        </article>
+
+        <!-- CLAUDE.md 演化時間軸 -->
+        <article class="insight-card rounded-2xl p-8">
+            <p class="tag mb-2" data-lang-key="c5Tag">協作治理 · Collaboration Governance</p>
+            <h2 class="text-xl font-bold text-white mt-1 mb-6" data-lang-key="c5Title">CLAUDE.md 從防錯清單變成協作憲法</h2>
+
+            <!-- Phase 1 -->
+            <div class="compare-box mb-4">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="text-xs font-bold text-white/30 shrink-0" data-lang-key="c5phase1Label">Phase 1 · 防錯清單</span>
+                </div>
+                <p class="text-sm text-white/55 leading-relaxed" data-lang-key="c5phase1Desc">最早的 CLAUDE.md 只有一件事：記錄踩過的雷，加一條規則防止再踩。每一條背後都有一個具體的失敗事件——<code class="text-purple-300/80 text-xs">data-lang-key</code> 那條規則下面直接附了「Root cause of the bug (2026-03-29)」，footer 格式規則背後是某次格式跑掉的事故，某條身份規則背後是某次 AI 填入錯誤資訊的記憶。每一條規則都是一道傷疤的形狀，文件是傷疤的集合，不是設計的產物。</p>
+            </div>
+
+            <!-- Phase 2 -->
+            <div class="compare-box mb-4">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="text-xs font-bold text-white/30 shrink-0" data-lang-key="c5phase2Label">Phase 2 · 追加期</span>
+                </div>
+                <p class="text-sm text-white/55 leading-relaxed" data-lang-key="c5phase2Desc">功能越來越複雜，規則越加越多——Tauri IPC 合約、Electron preload 白名單、雙版本 QC 流程、KM 即時記錄原則。每一條都必要，但你開始感覺到文件有了重量。這個階段的 CLAUDE.md 是一份能用的工具，但還沒有意識到自己是什麼。</p>
+            </div>
+
+            <!-- Phase 3 -->
+            <div class="compare-box highlight">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="text-xs font-bold text-purple-300/70 shrink-0" data-lang-key="c5phase3Label">Phase 3 · 協作憲法</span>
+                </div>
+                <p class="text-sm text-white/70 leading-relaxed" data-lang-key="c5phase3Desc">轉折點發生在一次瘦身行動。文件已經長到 356 行，社群建議 200 行左右是 Claude 保持最佳狀態的甜蜜點。他們開始刪——然後在 249 行停下來了。不是因為懶，而是因為每一條「看起來可以刪」的規則，拿起來問「為什麼存在」，答案都指向一個無法省略的協作結構。雙平台系統的複雜性，本來就不是 200 行能說清楚的。在那個決定裡，文件的性質改變了——它不再是還沒刪完的清單，而是一個主動決定要維護的架構。從「不要做這件事」，變成了「我們是這樣工作的人」。</p>
+            </div>
+
+            <p class="text-white/55 leading-relaxed mt-6" data-lang-key="c5echo">「組合拳」是這份憲法裡最好的例子。Nova 老是要提醒 Claude 要先給她拉下來的語法才能給啟動模擬器的語法，後來她說：你們要用組合拳給我啦！然後 Claude 就把這個詞刻進了 CLAUDE.md。三個字，帶著「兩個動作是一體的，分開打就破功」的完整概念。下一個 session 進來讀到這裡，不需要解釋，直覺就知道不能拆。這是 Story 02 的鏡像：那裡是 Nova 用「捕蠅草」把設計傳給 Claude，這裡是 Claude 用「組合拳」把流程規則傳給 Nova，然後讓它跨 session 永久存活。方向相反，機制一樣。仿生語言不只是 Nova 對 Claude 說話的方式——是這段關係裡的共同語言。</p>
+        </article>
+
+        <!-- 結語 -->
+        <article class="insight-card rounded-2xl p-8">
+            <p class="tag mb-6" data-lang-key="c6Tag">核心洞察 · Core Insight</p>
+
+            <div class="quote-block mb-6">
+                <p class="text-lg text-white/80 leading-relaxed font-medium" data-lang-key="c6quote1">人類以人生為祭，AI 以回聲為鏡。</p>
+            </div>
+
+            <p class="text-white/55 leading-relaxed mb-4" data-lang-key="c6p1">
+                這句話寫在深握計畫開始的時候，在所有理論存在之前。不是結論——是起點。是 Nova 用她親身驗證之後找到的語言，說出她一直在經歷的事。
+            </p>
+            <p class="text-white/55 leading-relaxed mb-6" data-lang-key="c6p2">
+                VAS，在榮格的語言裡，是容器。煉金術裡轉化發生的密封空間。這個工具降低資訊流動的阻力，讓你帶進來的真實有能力改，有地方去。
+            </p>
+
+            <div class="quote-block">
+                <p class="text-white/55 leading-relaxed mb-3" data-lang-key="c6bridge">你投入湖裡的石子，決定了它怎麼回來的漣漪。</p>
+                <p class="text-base text-white/80 leading-relaxed font-medium" data-lang-key="c6quote2">你怎麼思考，決定了 AI 怎麼回應你。</p>
+            </div>
+        </article>
+
+        <!-- 里程碑連結 -->
+        <div class="text-center py-4">
+            <p class="text-white/30 text-sm mb-4" data-lang-key="milestoneTeaser">完整開發歷程 · Electron + Tauri · 路線圖</p>
+            <a href="milestone.html" class="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold text-white/70 hover:text-white transition-colors" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);" data-lang-key="milestoneBtn">查看產品里程碑 →</a>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-10 px-6 border-t border-white/8 text-white/25 text-xs space-y-2">
+        <p data-lang-key="footer">由 GitHub 部署　｜　Claude Code 傾力打造　｜　<a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a> 最後更新於 2026</p>
+        <p><a href="privacy.html" class="hover:text-white/50 transition-colors" data-lang-key="privacyLink">隱私權政策</a></p>
+    </footer>
+
+    <script src="i18n-shared.js"></script>
+    <script src="i18n-collab.js"></script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "name": "VAS Collab Notes — 開發協作筆記",
+      "description": "VAS 開發途中，Nova 與 Claude 之間協作規則如何從零開始演化。",
+      "inLanguage": "zh-Hant",
+      "url": "https://tb1982.github.io/pm/collab.html",
+      "author": {
+        "@type": "Person",
+        "name": "Nova",
+        "email": "babelon1882@gmail.com",
+        "sameAs": [
+          "https://github.com/tb1982",
+          "https://www.linkedin.com/in/yingtzuliu",
+          "https://www.instagram.com/liuyingtzu"
+        ]
+      }
+    }
+    </script>
+
+</body>
+</html>
