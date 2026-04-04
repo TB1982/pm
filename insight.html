@@ -298,13 +298,13 @@
                 VAS 的呼吸燈不只是等待的象徵——它在偵測環境。當使用者複製了一個網址靠近，呼吸燈會輕輕詢問：「要幫你截這個網頁嗎？」使用者同意，截圖完成，編輯器打開。
             </p>
             <p class="text-white/55 leading-relaxed mb-4" data-lang-key="i3p2">
-                而當使用者帶著一個檔案靠近呼吸燈時，呼吸燈就會像張開雙手擁抱檔案一樣，張開工具列收納檔案並立刻展開編輯器，等待使用者下一步的操作。
-            </p>
-            <p class="text-white/55 leading-relaxed mb-4" data-lang-key="i3p3">
                 這個設計源自一個觀察：原本的網頁截圖流程需要複製網址 → 呼叫工具列 → 按截圖 → 貼上網址——四個步驟，全部是「為了工具而做的事」。但使用者複製網址，是為了他自己的事，不是為了 VAS。
             </p>
+            <p class="text-white/55 leading-relaxed mb-4" data-lang-key="i3p3">
+                而當使用者帶著一個檔案靠近呼吸燈時，呼吸燈就會像張開雙手擁抱檔案一樣，張開工具列收納檔案並立刻展開編輯器，等待使用者下一步的操作。
+            </p>
             <p class="text-white/55 leading-relaxed mb-8" data-lang-key="i3p4">
-                最好的工具不讓你切換到「工具模式」。它待在你的環境裡，讀懂你在做什麼，然後輕聲問你一句。
+                最好的工具不讓你切換到「工具模式」。它待在你的環境裡，讀懂你在做什麼，然後再用行動回應。
             </p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div class="compare-box">
@@ -342,7 +342,7 @@
                 延遲截圖是為了捕捉滑鼠事件——報錯狀態、hover 效果、debug 瞬間而誕生的功能。使用者倒數等待，滑鼠必須留在螢幕的某個角落。但原生的雙螢幕選單在讀秒結束後要求在截圖前先回去工具列選擇要截哪個螢幕——就像你自拍已經設定好相機秒數，結果相機結束讀秒時卻在預覽螢幕問你「你要拍哪邊？」一樣荒謬。
             </p>
             <p class="text-white/55 leading-relaxed mb-4" data-lang-key="i4p3">
-                VAS 捨棄原生選單，改用自製圖層遮罩覆蓋全螢幕：延遲開始之前就決定好，點哪個螢幕就截哪個，按 Enter 合併雙螢幕。倒數期間滑鼠哪都不用去，繼續擺著等就好。
+                VAS 捨棄 Apple 原生選單，改用自製圖層遮罩覆蓋全螢幕：沒有延遲時點哪個螢幕就截哪個，按 Enter 直接合併成雙螢幕截圖。設定延遲模式後倒數期間滑鼠哪都不用去，繼續擺著等就好，VAS 會自動擷取滑鼠所在的螢幕。
             </p>
             <p class="text-white/55 leading-relaxed mb-6" data-lang-key="i4p4">
                 更進一步：當使用者設了延遲規則，VAS 會默認截取滑鼠當下所在的螢幕——連選都不用選，工具自己判斷。使用者根本不會意識到這個決策發生過。
@@ -350,11 +350,11 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                 <figure>
                     <img src="img/fullscreenmodal.png" alt="原生雙螢幕選單：延遲截圖倒數期間跳出「請選擇要截哪個螢幕」——使用者不得不放棄姿勢，回去工具列點選後才能繼續" class="w-full rounded-xl" style="border: 1px solid rgba(255,255,255,0.1);" loading="lazy">
-                    <figcaption class="text-xs text-white/30 text-center mt-2" data-lang-key="i4imgCaption">這個選單就像計時自拍時——相機等倒數完才問你要拍哪邊。</figcaption>
+                    <figcaption class="text-xs text-white/30 text-center mt-2" data-lang-key="i4imgCaption">這個選單就像計時自拍時——<br>相機等你擺好pose，倒數完才問你要拍哪邊。</figcaption>
                 </figure>
                 <figure>
                     <img src="img/screenshot.png" alt="VAS 自製全螢幕遮罩：延遲截圖開始前即選定螢幕，倒數期間滑鼠不需移動" class="w-full rounded-xl" style="border: 1px solid rgba(255,255,255,0.1);" loading="lazy">
-                    <figcaption class="text-xs text-white/30 text-center mt-2" data-lang-key="i4imgCaption2">VAS 解法：無延遲狀態你點哪個螢幕我截哪個螢幕；延遲模式不用選，你在哪我就截哪。</figcaption>
+                    <figcaption class="text-xs text-white/30 text-center mt-2" data-lang-key="i4imgCaption2">VAS 解法：無延遲狀態你點哪個螢幕我截哪個螢幕；<br>延遲模式不用選，你在哪我就截哪。</figcaption>
                 </figure>
             </div>
             <div class="space-y-3">
