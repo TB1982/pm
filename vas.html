@@ -585,6 +585,11 @@
             </div>
         </section>
 
+        <!-- 完整版本歷史 -->
+        <div class="text-center mt-8 mb-2">
+            <a href="milestone.html" class="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold text-white/60 hover:text-white transition-colors" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);" data-lang-key="milestoneBtn">完整版本歷史 →</a>
+        </div>
+
         <!-- Early Bird Survey CTA -->
         <section class="max-w-2xl mx-auto px-6 mt-16 mb-4">
             <div class="rounded-2xl border border-purple-400/20 bg-white/5 backdrop-blur-sm p-8 text-center">
@@ -595,50 +600,6 @@
                    class="inline-block px-8 py-3 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-semibold text-sm hover:from-purple-400 hover:to-indigo-400 transition-all duration-200 shadow-lg shadow-purple-900/30"
                    data-lang-key="surveyBtn">前往填寫問卷</a>
                 <p class="text-white/25 text-xs mt-4" data-lang-key="surveyNote">E-mail 僅用於 Tauri 版推出時寄送優惠碼，不作其他用途。</p>
-            </div>
-        </section>
-
-        <!-- Changelog -->
-        <section class="container mx-auto px-6 py-16 max-w-2xl" aria-labelledby="changelog-heading">
-            <div class="divider mx-auto mb-8"></div>
-            <h2 id="changelog-heading" class="text-xl font-bold mb-2 text-white/60 tracking-widest uppercase text-sm text-center" data-lang-key="changelogTitle">Changelog</h2>
-            <p class="text-white/40 text-sm text-center mb-10" data-lang-key="changelogSub">一萬次迭代而非一萬個小時</p>
-
-            <div class="space-y-6">
-                <!-- v3.44.0 -->
-                <div class="glass-section rounded-2xl p-6 border border-white/10">
-                    <div class="flex items-center gap-3 mb-4">
-                        <span class="text-xs font-bold bg-green-400 text-black px-2 py-0.5 rounded-full">NEW</span>
-                        <span class="text-white font-bold">v3.44.0</span>
-                        <span class="text-white/30 text-xs" data-lang-key="cl44date">2026-03-31</span>
-                    </div>
-                    <ul class="space-y-2 text-white/60 text-sm" data-lang-key="cl44items">
-                        <li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>工具列 Modal 位置跳動與累積偏移根治</span></li>
-                        <li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>修復三種截圖模式（全螢幕 / 視窗 / 矩形）全部失效</span></li>
-                        <li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>OCR 與隱私掃描功能修復</span></li>
-                        <li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>標號與文字工具尺寸縮放一致性修正</span></li>
-                        <li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">⌨️</span><span>方向鍵微調物件位置（Arrow nudge）</span></li>
-                        <li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🧹</span><span>拖曳匯出暫存檔 60 秒後自動清除</span></li>
-                        <li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🔒</span><span>安全性修補（brace-expansion 漏洞）</span></li>
-                    </ul>
-                </div>
-
-                <!-- v3.43.0 -->
-                <div class="glass-section rounded-2xl p-6 border border-white/10">
-                    <div class="flex items-center gap-3 mb-4">
-                        <span class="text-white font-bold">v3.43.0</span>
-                        <span class="text-white/30 text-xs" data-lang-key="cl43date">2026-03-29</span>
-                    </div>
-                    <ul class="space-y-2 text-white/60 text-sm" data-lang-key="cl43items">
-                        <li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>首次公開發布</span></li>
-                        <li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>截圖 + 標注 + OCR + 隱私掃描 + 批次轉檔全功能收錄</span></li>
-                        <li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>智慧磁吸、物件旋轉、QR Code 掃描、貝茲曲線箭頭</span></li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="text-center mt-10">
-                <a href="milestone.html" class="inline-flex items-center gap-2 px-6 py-3 rounded-full text-sm font-semibold text-white/60 hover:text-white transition-colors" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);">完整版本歷史 →</a>
             </div>
         </section>
 
@@ -733,7 +694,8 @@
                 gkDesc: 'macOS 可能顯示「無法開啟」。這是正常的安全機制，不代表檔案有問題。按照以下任一方式即可解決：',
                 gkSteps: '<li><strong class="text-white/70">右鍵開啟：</strong>在 Finder 找到 Vas.app → 按住 Control 點一下 → 選「開啟」→ 再點「開啟」確認</li><li><strong class="text-white/70">終端機指令：</strong>執行 <code class="bg-white/10 px-1.5 py-0.5 rounded text-white/80">xattr -cr /Applications/Vas.app</code></li>',
                 roadmapTitle: 'Roadmap &amp; Pricing',
-                roadmapSub: '兩個版本，一個故事',
+                roadmapSub: '一萬次迭代而非一萬個小時',
+                milestoneBtn: '完整版本歷史 →',
                 planElectronName: 'Electron 版（現行）',
                 planElectronPriceBadge: '免費 · 完整功能',
                 planElectronFeatures: '<li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>所有現有功能完整收錄</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>無使用期限，永久免費</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">△</span><span>安裝包體積較大（~113 MB）</span></li><li class="flex gap-2"><span class="text-white/30 mt-0.5" aria-hidden="true">—</span><span>前端共用，隨 Tauri 版同步受惠</span></li>',
@@ -746,13 +708,7 @@
                 surveyTitle: '填問卷，換早鳥優惠碼',
                 surveyDesc: '6 道題，每一道都值得好好想想。你的答案直接影響 Tauri 版的功能優先順序——Tauri 版推出時，我們會同步以 E-mail 寄送早鳥優惠碼。',
                 surveyBtn: '前往填寫問卷',
-                surveyNote: 'E-mail 僅用於 Tauri 版推出時寄送優惠碼，不作其他用途。',
-                changelogTitle: 'Changelog',
-                changelogSub: '一萬次迭代而非一萬個小時',
-                cl44date: '2026-03-31',
-                cl44items: '<li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>工具列 Modal 位置跳動與累積偏移根治</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>修復三種截圖模式（全螢幕 / 視窗 / 矩形）全部失效</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>OCR 與隱私掃描功能修復</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>標號與文字工具尺寸縮放一致性修正</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">⌨️</span><span>方向鍵微調物件位置（Arrow nudge）</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🧹</span><span>拖曳匯出暫存檔 60 秒後自動清除</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🔒</span><span>安全性修補（brace-expansion 漏洞）</span></li>',
-                cl43date: '2026-03-29',
-                cl43items: '<li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>首次公開發布</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>截圖 + 標注 + OCR + 隱私掃描 + 批次轉檔全功能收錄</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>智慧磁吸、物件旋轉、QR Code 掃描、貝茲曲線箭頭</span></li>'
+                surveyNote: 'E-mail 僅用於 Tauri 版推出時寄送優惠碼，不作其他用途。'
             },
             en: {
                 backLabel: 'Deep Holding Project',
@@ -834,7 +790,8 @@
                 gkDesc: 'macOS may show "cannot be opened". This is a normal security check — not a problem with the file. Fix it with either method below:',
                 gkSteps: '<li><strong class="text-white/70">Right-click to open:</strong> Find Vas.app in Finder → Control-click → select "Open" → click "Open" to confirm</li><li><strong class="text-white/70">Terminal command:</strong> Run <code class="bg-white/10 px-1.5 py-0.5 rounded text-white/80">xattr -cr /Applications/Vas.app</code></li>',
                 roadmapTitle: 'Roadmap &amp; Pricing',
-                roadmapSub: 'Two versions, one story',
+                roadmapSub: '10,000 iterations, not 10,000 hours.',
+                milestoneBtn: 'Full Version History →',
                 planElectronName: 'Electron (Current)',
                 planElectronPriceBadge: 'Free · Full-featured',
                 planElectronFeatures: '<li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>All current features included</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>No expiry — free forever</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">△</span><span>Larger install size (~113 MB)</span></li><li class="flex gap-2"><span class="text-white/30 mt-0.5" aria-hidden="true">—</span><span>Shared frontend — benefits from Tauri updates too</span></li>',
@@ -847,13 +804,7 @@
                 surveyTitle: 'Fill the Survey, Get Early Bird Code',
                 surveyDesc: '6 questions — each one worth a moment of thought. Your answers directly shape what lands in the Tauri version first. When Tauri launches, we\'ll send your early bird discount code by email.',
                 surveyBtn: 'Take the Survey',
-                surveyNote: 'Your email will only be used to send the discount code when Tauri launches — nothing else.',
-                changelogTitle: 'Changelog',
-                changelogSub: '10,000 iterations, not 10,000 hours.',
-                cl44date: '2026-03-31',
-                cl44items: '<li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>Toolbar modal position drift & accumulation — fixed</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>All three capture modes (fullscreen / window / rectangle) restored</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>OCR and privacy scan fixed</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>Number stamp & text tool scale consistency fixed</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">⌨️</span><span>Arrow key nudge for selected objects</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🧹</span><span>Drag export temp files auto-deleted after 60 seconds</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🔒</span><span>Security patch (brace-expansion vulnerability)</span></li>',
-                cl43date: '2026-03-29',
-                cl43items: '<li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>Initial public release</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>Full feature set: capture, annotation, OCR, privacy scan, batch convert</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>Smart snap, object rotation, QR Code scan, Bezier curve arrows</span></li>'
+                surveyNote: 'Your email will only be used to send the discount code when Tauri launches — nothing else.'
             },
             ja: {
                 backLabel: '深握プロジェクト',
@@ -935,7 +886,8 @@
                 gkDesc: 'macOS が「開けません」と表示することがあります。これは通常のセキュリティ機能で、ファイルに問題があるわけではありません。以下のいずれかで解決できます：',
                 gkSteps: '<li><strong class="text-white/70">右クリックで開く：</strong>Finder で Vas.app を探す → Control キーを押しながらクリック → 「開く」を選択 → 確認画面で再度「開く」をクリック</li><li><strong class="text-white/70">ターミナルコマンド：</strong><code class="bg-white/10 px-1.5 py-0.5 rounded text-white/80">xattr -cr /Applications/Vas.app</code> を実行</li>',
                 roadmapTitle: 'Roadmap &amp; Pricing',
-                roadmapSub: '2つのバージョン、1つのストーリー',
+                roadmapSub: '1万時間ではなく、1万回のイテレーション',
+                milestoneBtn: '完全なバージョン履歴 →',
                 planElectronName: 'Electron 版（現行）',
                 planElectronPriceBadge: '無料 · 全機能',
                 planElectronFeatures: '<li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>すべての現行機能を完全収録</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✓</span><span>使用期限なし、永久無料</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">△</span><span>インストールサイズが大きめ（約113 MB）</span></li><li class="flex gap-2"><span class="text-white/30 mt-0.5" aria-hidden="true">—</span><span>フロントエンド共有により、Tauri 版の更新も反映</span></li>',
@@ -948,13 +900,7 @@
                 surveyTitle: 'アンケートに答えて、早期割引コードをゲット',
                 surveyDesc: '6つの質問。どれも真剣に考える価値があります。あなたの回答が Tauri 版の機能優先順位に直接影響します——Tauri 版リリース時に、早期割引コードをメールでお送りします。',
                 surveyBtn: 'アンケートに回答する',
-                surveyNote: 'メールアドレスは Tauri 版リリース時の割引コード送付のみに使用します。',
-                changelogTitle: 'Changelog',
-                changelogSub: '1万時間ではなく、1万回のイテレーション',
-                cl44date: '2026-03-31',
-                cl44items: '<li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>ツールバー Modal の位置ずれ・累積オフセットを根本修正</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>3種のキャプチャモード（全画面/ウィンドウ/矩形）の一斉不具合を修正</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>OCR・プライバシースキャン機能を修正</span></li><li class="flex gap-2"><span class="text-yellow-400/80 mt-0.5" aria-hidden="true">🔧</span><span>スタンプとテキストツールのサイズスケール一貫性を修正</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">⌨️</span><span>矢印キーでオブジェクトの微調整（Arrow nudge）</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🧹</span><span>ドラッグ書き出しの一時ファイルを60秒後に自動削除</span></li><li class="flex gap-2"><span class="text-blue-400/80 mt-0.5" aria-hidden="true">🔒</span><span>セキュリティパッチ（brace-expansion 脆弱性）</span></li>',
-                cl43date: '2026-03-29',
-                cl43items: '<li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>初回公開リリース</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>キャプチャ・アノテーション・OCR・プライバシースキャン・バッチ変換を全収録</span></li><li class="flex gap-2"><span class="text-green-400 mt-0.5" aria-hidden="true">✦</span><span>スマートスナップ・オブジェクト回転・QR Code スキャン・ベジェ曲線矢印</span></li>'
+                surveyNote: 'メールアドレスは Tauri 版リリース時の割引コード送付のみに使用します。'
             }
         };
 
