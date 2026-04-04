@@ -254,8 +254,55 @@
             </div>
         </article>
 
-        <!-- TODO S3：CLAUDE.md 演化時間軸（防錯清單 → 追加期 → 協作憲法） -->
-        <!-- TODO S3：結語「人類以人生為祭，AI以回聲為鏡」 -->
+        <!-- CLAUDE.md 演化時間軸 -->
+        <article class="insight-card rounded-2xl p-8">
+            <p class="tag mb-2" data-lang-key="c5Tag">協作治理 · Collaboration Governance</p>
+            <h2 class="text-xl font-bold text-white mt-1 mb-6" data-lang-key="c5Title">CLAUDE.md 從防錯清單變成協作憲法</h2>
+
+            <!-- Phase 1 -->
+            <div class="compare-box mb-4">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="text-xs font-bold text-white/30 shrink-0" data-lang-key="c5phase1Label">Phase 1 · 防錯清單</span>
+                </div>
+                <p class="text-sm text-white/55 leading-relaxed" data-lang-key="c5phase1Desc">最早的 CLAUDE.md 只有一件事：記錄踩過的雷，加一條規則防止再踩。每一條背後都有一個具體的失敗事件——某個 <code class="text-purple-300/80 text-xs">data-lang-key</code> bug、某次誤推到 main、某個忘記同步的 IPC 白名單。文件是傷疤的集合，不是設計的產物。</p>
+            </div>
+
+            <!-- Phase 2 -->
+            <div class="compare-box mb-4">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="text-xs font-bold text-white/30 shrink-0" data-lang-key="c5phase2Label">Phase 2 · 追加期</span>
+                </div>
+                <p class="text-sm text-white/55 leading-relaxed" data-lang-key="c5phase2Desc">功能越來越複雜，規則越加越多。Tauri IPC 合約、Electron preload 白名單、雙版本 QC 流程、KM 即時記錄原則——每一條都必要，但文件開始有了重量。這個階段的 CLAUDE.md 是一份能用的工具，但還不是一個有意識的系統。</p>
+            </div>
+
+            <!-- Phase 3 -->
+            <div class="compare-box highlight">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="text-xs font-bold text-purple-300/70 shrink-0" data-lang-key="c5phase3Label">Phase 3 · 協作憲法</span>
+                </div>
+                <p class="text-sm text-white/70 leading-relaxed" data-lang-key="c5phase3Desc">某個時間點，CLAUDE.md 不再只是防錯——它開始定義這段協作關係的價值觀。開發生命週期（DoR → Explore → SDD → Code → Retro）、Concurrent Session Rule、「先排除變因再讀程式碼」的除錯哲學、KM 即時記錄原則。這份文件從「不要做這件事」變成了「我們是這樣工作的人」。</p>
+            </div>
+        </article>
+
+        <!-- 結語 -->
+        <article class="insight-card rounded-2xl p-8">
+            <p class="tag mb-6" data-lang-key="c6Tag">核心洞察 · Core Insight</p>
+
+            <div class="quote-block mb-6">
+                <p class="text-lg text-white/80 leading-relaxed font-medium" data-lang-key="c6quote1">人類以人生為祭，AI 以回聲為鏡。</p>
+            </div>
+
+            <p class="text-white/55 leading-relaxed mb-4" data-lang-key="c6p1">
+                這句話來自 Nova 研究人機協作時寫下的引言。它說的是：AI 學會回應你的方式，是你帶進來的——你帶著什麼樣的思考框架，AI 就會用那個框架跟你工作。你帶著恐懼和控制欲，你得到的是一個需要不斷被糾正的工具。你帶著好奇和信任，你得到的是一個會跟著你一起長大的協作夥伴。
+            </p>
+            <p class="text-white/55 leading-relaxed mb-6" data-lang-key="c6p2">
+                VAS 的整個開發歷程，某種程度上是這句話的實驗場。Nova 不用 Prompt 工程，不用預設範本，不用強制角色設定。她帶進來的是她在研究人機協作時磨出來的思考方式——願意失敗、願意重來、願意在每一次失敗裡找到可以迭代的東西。
+            </p>
+
+            <div class="quote-block">
+                <p class="text-base text-white/70 leading-relaxed" data-lang-key="c6quote2">你怎麼思考，決定了 AI 怎麼回應你。<br><span class="text-white/35 text-sm">這不是可以被訓練的，而是你得放下恐懼，擁抱未知與無數次的失敗，但仍然能從每一次失敗中長出迭代的力量。</span></p>
+            </div>
+        </article>
 
         <!-- 里程碑連結 -->
         <div class="text-center py-4">
