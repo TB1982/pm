@@ -228,6 +228,18 @@
       color: rgba(251,191,36,0.85);
       text-transform: uppercase;
     }
+    .badge-all {
+      flex-shrink: 0;
+      font-size: 0.55rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: rgba(74,222,128,0.12);
+      border: 1px solid rgba(74,222,128,0.3);
+      color: rgba(134,239,172,0.9);
+      text-transform: uppercase;
+    }
     .badge-section-coming {
       display: inline-flex;
       align-items: center;
@@ -357,7 +369,7 @@
           <span class="badge-all" data-lang-key="allVersions">全版本</span>
         </div>
         <div class="flex gap-4 items-start">
-          <img src="img/breathlightfinal.jpg" alt="VAS 呼吸燈" class="rounded-lg shrink-0" style="width:72px;height:72px;object-fit:cover;border:1px solid rgba(255,255,255,0.1);" loading="lazy">
+          <img src="img/breathlightfinal.jpg" alt="VAS 呼吸燈" class="rounded-lg shrink-0" style="width:72px;height:72px;object-fit:cover;object-position:right center;border:1px solid rgba(255,255,255,0.1);" loading="lazy">
           <p class="text-white/45 text-xs leading-relaxed"><span style="display:inline-flex;align-items:center;justify-content:center;width:1.2em;height:1.2em;border:1px solid rgba(255,255,255,0.35);border-radius:50%;font-size:0.7em;color:rgba(255,255,255,0.5);vertical-align:middle;margin-right:4px;line-height:1;">?</span><span data-lang-key="bl_desc">可設定將工具列縮小成為呼吸燈，在桌面角落靜默待機，不佔空間。</span></p>
         </div>
         <ul class="space-y-2 text-white/45 text-xs leading-relaxed mt-3">
@@ -986,9 +998,9 @@
             </div>`
         },
         privacy: {
-          icon: '文', title: '隱私遮蔽', shortcut: 'K',
+          icon: '文', title: '隱私遮蔽', shortcut: 'K', strikeIcon: true,
           body: `
-            <div class="modal-tauri-notice"><span class="badge-all" style="font-size:0.6rem;padding:2px 8px;border-radius:999px;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.3);color:rgba(134,239,172,0.9);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">全版本</span><span class="text-white/50 text-xs" style="margin-left:6px;">Electron 使用 Vision Framework，Tauri 另支援五層偵測（含日文）</span></div>
+            <div class="modal-tauri-notice"><span class="badge-all" style="flex-shrink:0;font-size:0.6rem;padding:2px 8px;border-radius:999px;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.3);color:rgba(134,239,172,0.9);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">全版本</span><span class="text-white/50 text-xs" style="margin-left:6px;">Electron 使用 Vision Framework，Tauri 另支援五層偵測（含日文）</span></div>
             <div>
               <p class="modal-section-label">操作方式</p>
               <ul class="space-y-1 text-white/55 text-xs leading-relaxed list-disc list-inside">
@@ -1351,9 +1363,9 @@
             </div>`
         },
         privacy: {
-          icon: '文', title: 'Privacy Mask', shortcut: 'K',
+          icon: '文', title: 'Privacy Mask', shortcut: 'K', strikeIcon: true,
           body: `
-            <div class="modal-tauri-notice"><span class="badge-all" style="font-size:0.6rem;padding:2px 8px;border-radius:999px;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.3);color:rgba(134,239,172,0.9);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">All Versions</span><span class="text-white/50 text-xs" style="margin-left:6px;">Electron uses Vision Framework; Tauri adds 5-layer detection (incl. Japanese)</span></div>
+            <div class="modal-tauri-notice"><span class="badge-all" style="flex-shrink:0;font-size:0.6rem;padding:2px 8px;border-radius:999px;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.3);color:rgba(134,239,172,0.9);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">All Versions</span><span class="text-white/50 text-xs" style="margin-left:6px;">Electron uses Vision Framework; Tauri adds 5-layer detection (incl. Japanese)</span></div>
             <div>
               <p class="modal-section-label">How to use</p>
               <ul class="space-y-1 text-white/55 text-xs leading-relaxed list-disc list-inside">
@@ -1715,9 +1727,9 @@
             </div>`
         },
         privacy: {
-          icon: '文', title: 'プライバシー遮蔽', shortcut: 'K',
+          icon: '文', title: 'プライバシー遮蔽', shortcut: 'K', strikeIcon: true,
           body: `
-            <div class="modal-tauri-notice"><span class="badge-all" style="font-size:0.6rem;padding:2px 8px;border-radius:999px;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.3);color:rgba(134,239,172,0.9);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">全バージョン</span><span class="text-white/50 text-xs" style="margin-left:6px;">Electron は Vision Framework を使用；Tauri は5層検出（日本語含む）を追加</span></div>
+            <div class="modal-tauri-notice"><span class="badge-all" style="flex-shrink:0;font-size:0.6rem;padding:2px 8px;border-radius:999px;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.3);color:rgba(134,239,172,0.9);font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">全バージョン</span><span class="text-white/50 text-xs" style="margin-left:6px;">Electron は Vision Framework を使用；Tauri は5層検出（日本語含む）を追加</span></div>
             <div>
               <p class="modal-section-label">操作方法</p>
               <ul class="space-y-1 text-white/55 text-xs leading-relaxed list-disc list-inside">
@@ -1890,7 +1902,10 @@
       const lang = currentLang;
       const data = popupData[lang][toolKey];
       if (!data) return;
-      document.getElementById('modalIcon').textContent = data.icon;
+      const iconEl = document.getElementById('modalIcon');
+      iconEl.innerHTML = data.strikeIcon
+        ? `<span style="text-decoration:line-through">${data.icon}</span>`
+        : data.icon;
       document.getElementById('modalTitle').textContent = data.title;
       document.getElementById('modalShortcut').textContent = data.shortcut || '';
       document.getElementById('modalBody').innerHTML = data.body;
