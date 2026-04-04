@@ -11,6 +11,7 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://tb1982.github.io/pm/privacy.html">
     <meta property="og:locale" content="zh_TW">
+    <link rel="icon" href="img/vas.ico" type="image/x-icon">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -118,6 +119,63 @@
             padding: 32px 24px;
             border-top: 1px solid rgba(255,255,255,0.06);
         }
+        nav.site-nav {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 24px;
+            background: rgba(15,12,41,0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        /* ── Language dropdown ── */
+        .lang-dropdown-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.08);
+            border: none;
+            color: rgba(255,255,255,0.65);
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .lang-dropdown-btn:hover { background: rgba(255,255,255,0.13); }
+        .lang-dropdown-menu {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 6px);
+            background: rgba(30,25,60,0.96);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 12px;
+            padding: 4px;
+            min-width: 100px;
+            display: none;
+            z-index: 100;
+        }
+        .lang-dropdown-menu.open { display: block; }
+        .lang-opt {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: transparent;
+            border: none;
+            color: rgba(255,255,255,0.5);
+            padding: 8px 14px;
+            font-size: 0.875rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+        }
+        .lang-opt:hover { background: rgba(255,255,255,0.08); color: #fff; }
+        .lang-opt.active { color: #fff; font-weight: 700; }
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
                 animation-duration: 0.01ms !important;
@@ -127,17 +185,30 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <nav class="site-nav">
         <a href="vas.html" class="back-link">← VAS</a>
+        <div class="relative" id="langDropdownWrap">
+            <button id="langDropdownBtn" class="lang-dropdown-btn" aria-haspopup="listbox" aria-expanded="false" aria-label="語言切換">
+                <span id="langDropdownLabel">中</span>
+                <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.7"/></svg>
+            </button>
+            <div id="langDropdownMenu" class="lang-dropdown-menu" role="listbox" aria-label="語言選擇">
+                <button class="lang-opt active" data-lang="zh" role="option">中文</button>
+                <button class="lang-opt" data-lang="en" role="option">English</button>
+                <button class="lang-opt" data-lang="ja" role="option">日本語</button>
+            </div>
+        </div>
+    </nav>
 
-        <p class="page-title">Legal</p>
-        <h1 class="app-name">VAS Privacy Policy</h1>
-        <p class="updated">最後更新 Last updated 最終更新：2026-04-03</p>
+    <div class="container">
+
+        <p class="page-title" data-lang-key="pageLabel">Legal</p>
+        <h1 class="app-name" data-lang-key="appName">VAS Privacy Policy</h1>
+        <p class="updated" data-lang-key="updatedDate">最後更新：2026-04-03</p>
         <div class="divider"></div>
 
         <!-- 中文 -->
         <section class="lang-block" lang="zh-Hant">
-            <span class="lang-label">繁體中文</span>
             <p class="intro">VAS — Visual Annotation Studio（以下簡稱「本應用程式」）尊重您的隱私。</p>
 
             <h2>資料收集</h2>
@@ -158,7 +229,6 @@
 
         <!-- English -->
         <section class="lang-block" lang="en">
-            <span class="lang-label">English</span>
             <p class="intro">VAS — Visual Annotation Studio ("the App") respects your privacy.</p>
 
             <h2>Data Collection</h2>
@@ -179,7 +249,6 @@
 
         <!-- 日本語 -->
         <section class="lang-block" lang="ja">
-            <span class="lang-label">日本語</span>
             <p class="intro">VAS — Visual Annotation Studio（以下「本アプリ」）はお客様のプライバシーを尊重します。</p>
 
             <h2>データ収集</h2>
@@ -200,8 +269,42 @@
     </div>
 
     <footer>
-        由 GitHub 部署　｜　Claude Code 傾力打造　｜　<a href="mailto:babelon1882@gmail.com">Nova</a> 最後更新於 2026
+        <p data-lang-key="footer">由 GitHub 部署　｜　Claude Code 傾力打造　｜　<a href="mailto:babelon1882@gmail.com" style="color:rgba(196,113,245,0.6)">Nova</a> 最後更新於 2026</p>
     </footer>
+
+    <script src="i18n-shared.js"></script>
+    <script>
+      (function () {
+        var pageT = {
+          zh: { pageLabel: 'Legal', appName: 'VAS 隱私權政策', updatedDate: '最後更新：2026-04-03' },
+          en: { pageLabel: 'Legal', appName: 'VAS Privacy Policy', updatedDate: 'Last updated: 2026-04-03' },
+          ja: { pageLabel: 'Legal', appName: 'VAS プライバシーポリシー', updatedDate: '最終更新：2026-04-03' }
+        };
+        // 合併 sharedT（footer）
+        ['zh', 'en', 'ja'].forEach(function (l) {
+          Object.assign(pageT[l], window.VASShared.sharedT[l]);
+        });
+
+        function applyLang(lang) {
+          // 顯示對應 lang-block，隱藏其他
+          document.querySelectorAll('.lang-block').forEach(function (sec) {
+            sec.style.display = (sec.getAttribute('lang') === (lang === 'zh' ? 'zh-Hant' : lang)) ? '' : 'none';
+          });
+          // 套用翻譯
+          var t = pageT[lang];
+          if (t) {
+            document.querySelectorAll('[data-lang-key]').forEach(function (el) {
+              var key = el.getAttribute('data-lang-key');
+              if (t[key] !== undefined) el.innerHTML = t[key];
+            });
+          }
+          document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : lang;
+          window.VASShared.updateDropdown(lang);
+          try { localStorage.setItem('vasLang', lang); } catch (e) {}
+        }
+        window.VASShared.initDropdown(applyLang);
+      })();
+    </script>
 
     <script type="application/ld+json">
     {

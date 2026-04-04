@@ -61,21 +61,51 @@
             transition: color 0.2s;
         }
         .back-link:hover { color: rgba(255,255,255,0.75); }
-        .lang-switcher button {
+        /* ── Language dropdown ── */
+        .lang-dropdown-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.08);
+            border: none;
+            color: rgba(255,255,255,0.65);
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: background 0.2s;
+            white-space: nowrap;
+        }
+        .lang-dropdown-btn:hover { background: rgba(255,255,255,0.13); }
+        .lang-dropdown-menu {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 6px);
+            background: rgba(30,25,60,0.96);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 12px;
+            padding: 4px;
+            min-width: 100px;
+            display: none;
+            z-index: 100;
+        }
+        .lang-dropdown-menu.open { display: block; }
+        .lang-opt {
+            display: block;
+            width: 100%;
+            text-align: left;
             background: transparent;
             border: none;
             color: rgba(255,255,255,0.5);
-            padding: 6px 14px;
-            cursor: pointer;
+            padding: 8px 14px;
             font-size: 0.875rem;
-            border-radius: 14px;
-            transition: color 0.2s, background 0.2s;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
         }
-        .lang-switcher button.active {
-            background: rgba(255,255,255,0.15);
-            color: #ffffff;
-            font-weight: 700;
-        }
+        .lang-opt:hover { background: rgba(255,255,255,0.08); color: #fff; }
+        .lang-opt.active { color: #fff; font-weight: 700; }
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
                 animation-duration: 0.01ms !important;
@@ -90,11 +120,19 @@
     <header class="sticky top-0 z-50 px-6 py-4 flex items-center justify-between" style="background: rgba(15,12,41,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.08);">
         <a href="vas.html" class="back-link flex-1">← VAS</a>
         <p class="text-xs text-white/30 tracking-widest uppercase">Design Insights</p>
-        <div class="flex-1 flex justify-end"><div class="lang-switcher flex items-center rounded-full p-1" style="background: rgba(255,255,255,0.08);" role="group" aria-label="語言切換">
-            <button id="lang-zh" class="active" aria-pressed="true">中</button>
-            <button id="lang-en" aria-pressed="false">EN</button>
-            <button id="lang-ja" aria-pressed="false">日</button>
-        </div></div>
+        <div class="flex-1 flex justify-end">
+            <div class="relative" id="langDropdownWrap">
+                <button id="langDropdownBtn" class="lang-dropdown-btn" aria-haspopup="listbox" aria-expanded="false" aria-label="語言切換">
+                    <span id="langDropdownLabel">中</span>
+                    <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.7"/></svg>
+                </button>
+                <div id="langDropdownMenu" class="lang-dropdown-menu" role="listbox" aria-label="語言選擇">
+                    <button class="lang-opt active" data-lang="zh" role="option">中文</button>
+                    <button class="lang-opt" data-lang="en" role="option">English</button>
+                    <button class="lang-opt" data-lang="ja" role="option">日本語</button>
+                </div>
+            </div>
+        </div>
     </header>
 
     <!-- Hero -->
@@ -305,10 +343,11 @@
 
     <!-- Footer -->
     <footer class="text-center py-10 px-6 border-t border-white/8 text-white/25 text-xs space-y-2">
-        <p>Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by Nova (babelon1882@gmail.com)</p>
-        <p><a href="privacy.html" class="hover:text-white/50 transition-colors">隱私權政策 · Privacy Policy · プライバシーポリシー</a></p>
+        <p data-lang-key="footer">由 GitHub 部署　｜　Claude Code 傾力打造　｜　<a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a> 最後更新於 2026</p>
+        <p><a href="privacy.html" class="hover:text-white/50 transition-colors" data-lang-key="privacyLink">隱私權政策</a></p>
     </footer>
 
+    <script src="i18n-shared.js"></script>
     <script src="i18n-insight.js"></script>
 
     <script type="application/ld+json">

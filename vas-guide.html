@@ -57,22 +57,51 @@
       color: rgba(255,255,255,0.5);
     }
 
-    .lang-btn {
-      padding: 4px 14px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: rgba(255,255,255,0.4);
-      border: 1px solid transparent;
-      cursor: pointer;
-      transition: all 0.2s;
-      background: transparent;
-    }
-    .lang-btn.active {
-      color: #fff;
-      border-color: rgba(255,255,255,0.2);
+    /* ── Language dropdown ── */
+    .lang-dropdown-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
       background: rgba(255,255,255,0.08);
+      border: none;
+      color: rgba(255,255,255,0.65);
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: background 0.2s;
+      white-space: nowrap;
     }
+    .lang-dropdown-btn:hover { background: rgba(255,255,255,0.13); }
+    .lang-dropdown-menu {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 6px);
+      background: rgba(30,25,60,0.96);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      padding: 4px;
+      min-width: 100px;
+      display: none;
+      z-index: 100;
+    }
+    .lang-dropdown-menu.open { display: block; }
+    .lang-opt {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      border: none;
+      color: rgba(255,255,255,0.5);
+      padding: 8px 14px;
+      font-size: 0.875rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .lang-opt:hover { background: rgba(255,255,255,0.08); color: #fff; }
+    .lang-opt.active { color: #fff; font-weight: 700; }
 
     .guide-img {
       width: 100%;
@@ -228,10 +257,16 @@
     <a href="vas.html" class="text-white/40 hover:text-white/70 text-sm transition-colors flex items-center gap-2">
       ← <span data-lang-key="backLabel">VAS</span>
     </a>
-    <div class="flex gap-1">
-      <button class="lang-btn active" id="lang-zh" aria-pressed="true">中</button>
-      <button class="lang-btn" id="lang-en" aria-pressed="false">EN</button>
-      <button class="lang-btn" id="lang-ja" aria-pressed="false">日</button>
+    <div class="relative" id="langDropdownWrap">
+      <button id="langDropdownBtn" class="lang-dropdown-btn" aria-haspopup="listbox" aria-expanded="false" aria-label="語言切換">
+        <span id="langDropdownLabel">中</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.7"/></svg>
+      </button>
+      <div id="langDropdownMenu" class="lang-dropdown-menu" role="listbox" aria-label="語言選擇">
+        <button class="lang-opt active" data-lang="zh" role="option">中文</button>
+        <button class="lang-opt" data-lang="en" role="option">English</button>
+        <button class="lang-opt" data-lang="ja" role="option">日本語</button>
+      </div>
     </div>
   </nav>
 
@@ -486,9 +521,10 @@
   <!-- Footer -->
   <footer class="border-t border-white/10 mt-16 py-10 text-center text-white/25 text-xs space-y-2">
     <p data-lang-key="footer">由 GitHub 部署　｜　Claude Code 傾力打造　｜　<a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a> 最後更新於 2026</p>
-    <p><a href="privacy.html" class="hover:text-white/50 transition-colors">隱私權政策 · Privacy Policy · プライバシーポリシー</a></p>
+    <p><a href="privacy.html" class="hover:text-white/50 transition-colors" data-lang-key="privacyLink">隱私權政策</a></p>
   </footer>
 
+  <script src="i18n-shared.js"></script>
   <script>
     const translations = {
       zh: {
@@ -546,7 +582,8 @@
         kb_r3: '裸字母或數字',
         kb_r4: '系統保留快捷鍵',
         kb_r5: '單獨修飾鍵',
-        footer: '由 GitHub 部署　｜　Claude Code 傾力打造　｜　<a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a> 最後更新於 2026'
+        footer: '由 GitHub 部署　｜　Claude Code 傾力打造　｜　<a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a> 最後更新於 2026',
+        privacyLink: '隱私權政策'
       },
       en: {
         backLabel: 'VAS',
@@ -603,7 +640,8 @@
         kb_r3: 'Bare letter or number',
         kb_r4: 'System-reserved shortcut',
         kb_r5: 'Modifier key alone',
-        footer: 'Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by <a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a>'
+        footer: 'Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by <a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a>',
+        privacyLink: 'Privacy Policy'
       },
       ja: {
         backLabel: 'VAS',
@@ -660,13 +698,12 @@
         kb_r3: '裸の文字または数字',
         kb_r4: 'システム予約ショートカット',
         kb_r5: '修飾キー単独',
-        footer: 'GitHub でデプロイ　｜　Claude Code で構築　｜　2026年 最終更新　<a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a>'
+        footer: 'GitHub でデプロイ　｜　Claude Code で構築　｜　2026年 <a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a> 最終更新',
+        privacyLink: 'プライバシーポリシー'
       }
     };
 
-    const langZhBtn = document.getElementById('lang-zh');
-    const langEnBtn = document.getElementById('lang-en');
-    const langJaBtn = document.getElementById('lang-ja');
+    let currentLang = 'zh';
 
     function switchLanguage(lang) {
       document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : lang === 'ja' ? 'ja' : 'en';
@@ -686,17 +723,12 @@
       const toolbarImg = document.getElementById('toolbarImg');
       toolbarImg.src = lang === 'zh' ? 'img/vastoolbar.png' : lang === 'ja' ? 'img/vastoolbar-jp.png' : 'img/vastoolbar-en.png';
       toolbarImg.alt = lang === 'zh' ? 'VAS 浮動工作列' : lang === 'ja' ? 'VAS キャプチャツールバー' : 'VAS capture toolbar';
-      langZhBtn.classList.toggle('active', lang === 'zh');
-      langEnBtn.classList.toggle('active', lang === 'en');
-      langJaBtn.classList.toggle('active', lang === 'ja');
-      langZhBtn.setAttribute('aria-pressed', lang === 'zh');
-      langEnBtn.setAttribute('aria-pressed', lang === 'en');
-      langJaBtn.setAttribute('aria-pressed', lang === 'ja');
+      currentLang = lang;
+      window.VASShared.updateDropdown(lang);
+      try { localStorage.setItem('vasLang', lang); } catch (e) {}
     }
 
-    langZhBtn.addEventListener('click', () => switchLanguage('zh'));
-    langEnBtn.addEventListener('click', () => switchLanguage('en'));
-    langJaBtn.addEventListener('click', () => switchLanguage('ja'));
+    window.VASShared.initDropdown(switchLanguage);
 
     // ── Popup Data ──────────────────────────────────────────────
     const popupData = {
@@ -1798,7 +1830,6 @@
     // ── Modal Logic ───────────────────────────────────────────────
     const modal = document.getElementById('toolModal');
     const modalClose = document.getElementById('modalClose');
-    let currentLang = 'zh';
 
     function openModal(toolKey) {
       const lang = currentLang;
@@ -1829,10 +1860,7 @@
       });
     });
 
-    // keep currentLang in sync when user switches language
-    langZhBtn.addEventListener('click', () => { currentLang = 'zh'; });
-    langEnBtn.addEventListener('click', () => { currentLang = 'en'; });
-    langJaBtn.addEventListener('click', () => { currentLang = 'ja'; });
+    // currentLang is kept in sync inside switchLanguage()
   </script>
 
 </body>

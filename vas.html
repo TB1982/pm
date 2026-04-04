@@ -643,9 +643,10 @@
     <!-- Footer -->
     <footer class="border-t border-white/10 mt-16 py-10 text-center text-white/25 text-xs space-y-2">
         <p data-lang-key="footer">由 GitHub 部署　｜　Claude Code 傾力打造　｜　<a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a> 最後更新於 2026</p>
-        <p><a href="privacy.html" class="hover:text-white/50 transition-colors">隱私權政策 · Privacy Policy · プライバシーポリシー</a></p>
+        <p><a href="privacy.html" class="hover:text-white/50 transition-colors" data-lang-key="privacyLink">隱私權政策</a></p>
     </footer>
 
+    <script src="i18n-shared.js"></script>
     <script>
         const translations = {
             zh: {
@@ -721,6 +722,7 @@
                 storyBody: '來自一位<strong class="text-white">一行程式碼都不會寫的 PM</strong>，<br>以及 Claude Code 的 Claude，<br>人機協作 <strong class="gradient-text text-2xl font-bold">一週</strong> 內迭代至 v3.43 而誕生的作品。',
                 storyByline: '— Nova & Claude，2026',
                 footer: '由 GitHub 部署　｜　Claude Code 傾力打造　｜　<a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a> 最後更新於 2026',
+                privacyLink: '隱私權政策',
                 gkTitle: '⚠️ 第一次開啟 VAS',
                 gkDesc: 'macOS 可能顯示「無法開啟」。這是正常的安全機制，不代表檔案有問題。按照以下任一方式即可解決：',
                 gkSteps: '<li><strong class="text-white/70">右鍵開啟：</strong>在 Finder 找到 Vas.app → 按住 Control 點一下 → 選「開啟」→ 再點「開啟」確認</li><li><strong class="text-white/70">終端機指令：</strong>執行 <code class="bg-white/10 px-1.5 py-0.5 rounded text-white/80">xattr -cr /Applications/Vas.app</code></li>',
@@ -819,6 +821,7 @@
                 storyBody: 'Born from a collaboration between <strong class="text-white">a PM who can\'t write a single line of code</strong> and Claude from Claude Code —<br>iterated together to v3.43 in <strong class="gradient-text text-2xl font-bold">one week</strong>.',
                 storyByline: '— Nova & Claude, 2026',
                 footer: 'Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by <a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a>',
+                privacyLink: 'Privacy Policy',
                 gkTitle: '⚠️ First time opening VAS',
                 gkDesc: 'macOS may show "cannot be opened". This is a normal security check — not a problem with the file. Fix it with either method below:',
                 gkSteps: '<li><strong class="text-white/70">Right-click to open:</strong> Find Vas.app in Finder → Control-click → select "Open" → click "Open" to confirm</li><li><strong class="text-white/70">Terminal command:</strong> Run <code class="bg-white/10 px-1.5 py-0.5 rounded text-white/80">xattr -cr /Applications/Vas.app</code></li>',
@@ -916,7 +919,8 @@
                 storyTitle: 'Origin',
                 storyBody: '<strong class="text-white">コードを一行も書けない PM</strong> と、<br>Claude Code の Claude が組んで、<br>人と AI の協働で <strong class="gradient-text text-2xl font-bold">1週間</strong> で v3.43 まで育てた作品。',
                 storyByline: '— Nova & Claude, 2026',
-                footer: 'GitHub でデプロイ　｜　Claude Code で構築　｜　2026年 最終更新　<a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a>',
+                footer: 'GitHub でデプロイ　｜　Claude Code で構築　｜　2026年 <a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a> 最終更新',
+                privacyLink: 'プライバシーポリシー',
                 gkTitle: '⚠️ VAS を初めて開く場合',
                 gkDesc: 'macOS が「開けません」と表示することがあります。これは通常のセキュリティ機能で、ファイルに問題があるわけではありません。以下のいずれかで解決できます：',
                 gkSteps: '<li><strong class="text-white/70">右クリックで開く：</strong>Finder で Vas.app を探す → Control キーを押しながらクリック → 「開く」を選択 → 確認画面で再度「開く」をクリック</li><li><strong class="text-white/70">ターミナルコマンド：</strong><code class="bg-white/10 px-1.5 py-0.5 rounded text-white/80">xattr -cr /Applications/Vas.app</code> を実行</li>',
@@ -944,11 +948,6 @@
             }
         };
 
-        const langDropdownBtn   = document.getElementById('langDropdownBtn');
-        const langDropdownMenu  = document.getElementById('langDropdownMenu');
-        const langDropdownLabel = document.getElementById('langDropdownLabel');
-        const langLabels = { zh: '中', en: 'EN', ja: '日' };
-
         const surveyLinks = {
             zh: 'https://forms.gle/5xWyyvehF1HSAyDu7',
             en: 'https://forms.gle/qgzfrBA9MbHK1fb4A',
@@ -972,35 +971,10 @@
             if (sharesheetImg) sharesheetImg.src = lang === 'zh' ? 'img/sharesheet.png' : lang === 'ja' ? 'img/sharesheet-jp.png' : 'img/sharesheet-en.png';
             const fastImg = document.getElementById('fastImg');
             if (fastImg) fastImg.src = lang === 'zh' ? 'img/fast.png' : lang === 'ja' ? 'img/fast-jp.jpg' : 'img/fast-en.png';
-            if (langDropdownLabel) langDropdownLabel.textContent = langLabels[lang];
-            document.querySelectorAll('.lang-opt').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.lang === lang);
-            });
             document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : lang === 'ja' ? 'ja' : 'en';
+            window.VASShared.updateDropdown(lang);
+            try { localStorage.setItem('vasLang', lang); } catch (e) {}
         }
-
-        // ── Dropdown open / close ──────────────────────────────────────────────
-        if (langDropdownBtn) {
-            langDropdownBtn.addEventListener('click', function (e) {
-                e.stopPropagation();
-                const isOpen = langDropdownMenu.classList.contains('open');
-                langDropdownMenu.classList.toggle('open', !isOpen);
-                langDropdownBtn.setAttribute('aria-expanded', String(!isOpen));
-            });
-        }
-        document.querySelectorAll('.lang-opt').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                switchLanguage(btn.dataset.lang);
-                langDropdownMenu.classList.remove('open');
-                langDropdownBtn.setAttribute('aria-expanded', 'false');
-            });
-        });
-        document.addEventListener('click', function () {
-            if (langDropdownMenu.classList.contains('open')) {
-                langDropdownMenu.classList.remove('open');
-                langDropdownBtn.setAttribute('aria-expanded', 'false');
-            }
-        });
 
         // ── Floating pill nav ─────────────────────────────────────────────────
         (function() {
@@ -1034,6 +1008,7 @@
         })();
 
         switchLanguage('zh'); // 初始化：套用 zh i18n key，確保硬寫內容與翻譯一致
+        window.VASShared.initDropdown(switchLanguage); // 綁定 dropdown 事件 + 恢復 localStorage 語言
 
         // ── Persona Tab switching ──────────────────────────────────────────────
         document.querySelectorAll('.tab-btn').forEach(btn => {

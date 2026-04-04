@@ -1,6 +1,7 @@
 // i18n-milestone.js — VAS 產品里程碑 三語翻譯 (zh / en / ja)
+// 載入順序：i18n-shared.js 必須先載入
 (function () {
-  const translations = {
+  var pageT = {
     zh: {
       pageLabel: 'Milestone',
       insightLink: '設計洞察 →',
@@ -341,33 +342,23 @@
     },
   };
 
+  // 合併 sharedT（footer / privacyLink）
+  var s = window.VASShared.sharedT;
+  ['zh', 'en', 'ja'].forEach(function (l) { Object.assign(pageT[l], s[l]); });
+
   function applyLang(lang) {
-    var t = translations[lang];
+    var t = pageT[lang];
     if (!t) return;
     document.querySelectorAll('[data-lang-key]').forEach(function (el) {
       var key = el.getAttribute('data-lang-key');
       if (t[key] !== undefined) el.innerHTML = t[key];
     });
     document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : lang;
-    ['zh', 'en', 'ja'].forEach(function (l) {
-      var btn = document.getElementById('lang-' + l);
-      if (!btn) return;
-      btn.classList.toggle('active', l === lang);
-      btn.setAttribute('aria-pressed', String(l === lang));
-    });
+    window.VASShared.updateDropdown(lang);
     try { localStorage.setItem('vasLang', lang); } catch (e) {}
   }
 
-  function init() {
-    ['zh', 'en', 'ja'].forEach(function (lang) {
-      var btn = document.getElementById('lang-' + lang);
-      if (btn) btn.addEventListener('click', function () { applyLang(lang); });
-    });
-    try {
-      var saved = localStorage.getItem('vasLang');
-      if (saved && translations[saved]) applyLang(saved);
-    } catch (e) {}
-  }
+  function init() { window.VASShared.initDropdown(applyLang); }
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
