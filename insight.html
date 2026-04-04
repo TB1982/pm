@@ -54,6 +54,34 @@
             background: rgba(196,113,245,0.08);
             border-color: rgba(196,113,245,0.25);
         }
+        .badge-tauri {
+            display: inline-flex;
+            align-items: center;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: rgba(251,191,36,0.12);
+            border: 1px solid rgba(251,191,36,0.25);
+            color: rgba(251,191,36,0.85);
+            text-transform: uppercase;
+            vertical-align: middle;
+        }
+        .badge-all {
+            display: inline-flex;
+            align-items: center;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: rgba(74,222,128,0.12);
+            border: 1px solid rgba(74,222,128,0.3);
+            color: rgba(134,239,172,0.9);
+            text-transform: uppercase;
+            vertical-align: middle;
+        }
         .nav-sub-link {
             color: rgba(255,255,255,0.35);
             text-decoration: none;
@@ -171,7 +199,10 @@
 
         <!-- Insight 01：承認不完美 -->
         <article class="insight-card rounded-2xl p-8">
-            <p class="tag mb-2" data-lang-key="i1Tag">人機協作 · Human-AI Collaboration</p>
+            <div class="flex items-center gap-2 mb-2">
+                <p class="tag" data-lang-key="i1Tag">人機協作 · Human-AI Collaboration</p>
+                <span class="badge-all" data-lang-key="allVersions">全版本</span>
+            </div>
             <h2 class="text-xl font-bold text-white mt-1 mb-4" data-lang-key="i1Title">沒有完美的人機，但有完整的協作關係</h2>
             <p class="text-white/55 leading-relaxed mb-4" data-lang-key="i1p1">
                 OCR 隱私辨識會自動偵測畫面中的敏感文字，並自動標記需要遮蔽的區域。但開發過程中我們發現 OCR 仍有它的先天極限，偶有辨識不到或辨識錯的地方，但我們並不繼續 push 工具必須完美。
@@ -206,7 +237,10 @@
 
         <!-- Insight 02：學會讀人 -->
         <article class="insight-card rounded-2xl p-8">
-            <p class="tag mb-2" data-lang-key="i2Tag">信心度感知 · Confidence-Aware Interaction</p>
+            <div class="flex items-center gap-2 mb-2">
+                <p class="tag" data-lang-key="i2Tag">信心度感知 · Confidence-Aware Interaction</p>
+                <span class="badge-all" data-lang-key="allVersions">全版本</span>
+            </div>
             <h2 class="text-xl font-bold text-white mt-1 mb-4" data-lang-key="i2Title">QR Code 掃到了，但它有多確定？</h2>
             <p class="text-white/55 leading-relaxed mb-4" data-lang-key="i2p1">
                 掃 QR Code 這件事，表面上只有「掃到」和「沒掃到」兩種結果。但 VAS 不這樣看——它看的是使用者意圖，然後根據意圖決定下一步要做什麼。
@@ -223,6 +257,7 @@
             <p class="text-white/55 leading-relaxed mb-8" data-lang-key="i2p5">
                 工具不應該在自己不確定的時候假裝確定。確定你要 QR Code，就直接行動開啟連結；信心度模糊，就先問你是否要開啟連結；信心度太低，靜默開啟編輯器交給你判斷。每一個閾值背後，都是一個「我知道自己知道多少」的誠實設計。
             </p>
+            <p class="text-xs text-white/30 mb-3" data-lang-key="i2cardLabel">QR Code 佔框選面積對應行為邏輯：</p>
             <div class="space-y-3">
                 <div class="compare-box highlight flex items-center gap-4">
                     <div class="text-2xl font-bold text-purple-300 w-16 shrink-0">&gt; 70%</div>
@@ -235,14 +270,14 @@
                     <div class="text-2xl font-bold text-yellow-300/80 w-16 shrink-0">21–69%</div>
                     <div>
                         <p class="text-xs text-white/30 mb-0.5" data-lang-key="i2midLabel">中信心 · 主動詢問</p>
-                        <p class="text-sm text-white/70" data-lang-key="i2midDesc">輕聲問你：「這是你要的連結嗎？」</p>
+                        <p class="text-sm text-white/70" data-lang-key="i2midDesc">開啟編輯器後輕聲問你：「這是你要的連結嗎？」</p>
                     </div>
                 </div>
                 <div class="compare-box flex items-center gap-4">
                     <div class="text-2xl font-bold text-white/30 w-16 shrink-0">≤ 20%</div>
                     <div>
                         <p class="text-xs text-white/30 mb-0.5" data-lang-key="i2lowLabel">低信心 · 靜默交手</p>
-                        <p class="text-sm text-white/70" data-lang-key="i2lowDesc">不猜測、不行動，直接把圖打開給你判斷</p>
+                        <p class="text-sm text-white/70" data-lang-key="i2lowDesc">不猜測、不行動，直接把編輯器打開給你接續接下來的行動</p>
                     </div>
                 </div>
             </div>
@@ -256,7 +291,7 @@
         <article class="insight-card rounded-2xl p-8">
             <div class="flex items-center gap-2 mb-2">
                 <p class="tag" data-lang-key="i3Tag">零摩擦觸發 · Proactive Ambient Computing</p>
-                <span class="text-xs font-bold px-2 py-0.5 rounded-full shrink-0" style="background: rgba(251,191,36,0.12); color: rgba(251,191,36,0.8); border: 1px solid rgba(251,191,36,0.22);" data-lang-key="tauriOnly">Tauri 專屬</span>
+                <span class="badge-tauri" data-lang-key="tauriOnly">Tauri 專屬</span>
             </div>
             <h2 class="text-xl font-bold text-white mt-1 mb-4" data-lang-key="i3Title">呼吸燈讀懂你的意圖，再開口問你</h2>
             <p class="text-white/55 leading-relaxed mb-4" data-lang-key="i3p1">
@@ -295,7 +330,10 @@
 
         <!-- Insight 04：不打擾 -->
         <article class="insight-card rounded-2xl p-8">
-            <p class="tag mb-2" data-lang-key="i4Tag">消除中斷 · Eliminating Interruption</p>
+            <div class="flex items-center gap-2 mb-2">
+                <p class="tag" data-lang-key="i4Tag">消除中斷 · Eliminating Interruption</p>
+                <span class="badge-all" data-lang-key="allVersions">全版本</span>
+            </div>
             <h2 class="text-xl font-bold text-white mt-1 mb-4" data-lang-key="i4Title">擺好 pose 在那邊等，工具不應該叫你回來選</h2>
             <p class="text-white/55 leading-relaxed mb-4" data-lang-key="i4p1">
                 當我們開發出了「延遲截圖」後，原生的螢幕截圖選單反而變成了摩擦力。
@@ -340,7 +378,10 @@
 
         <!-- Insight 05：走得遠 -->
         <article class="insight-card rounded-2xl p-8">
-            <p class="tag mb-2" data-lang-key="i5Tag">系統架構 · Design Token Architecture</p>
+            <div class="flex items-center gap-2 mb-2">
+                <p class="tag" data-lang-key="i5Tag">系統架構 · Design Token Architecture</p>
+                <span class="badge-all" data-lang-key="allVersions">全版本</span>
+            </div>
             <h2 class="text-xl font-bold text-white mt-1 mb-4" data-lang-key="i5Title">功能可以一直加，但底層要先說同一種語言</h2>
             <p class="text-white/55 leading-relaxed mb-4" data-lang-key="i5p1">
                 當工具種類越來越多——點、線、面、文字、符號——每個物件都有顏色、線條、大小、方向這些屬性。如果每個工具各自管自己的屬性，加功能就是更多的技術；但如果這些屬性是共享的、模組化的，改一個地方，全體同步，而Electron VAS也能無痛renew。
