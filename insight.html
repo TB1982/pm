@@ -54,13 +54,15 @@
             background: rgba(196,113,245,0.08);
             border-color: rgba(196,113,245,0.25);
         }
-        .back-link {
-            color: rgba(255,255,255,0.4);
-            font-size: 0.875rem;
+        .nav-sub-link {
+            color: rgba(255,255,255,0.35);
             text-decoration: none;
+            font-size: 0.75rem;
             transition: color 0.2s;
+            white-space: nowrap;
         }
-        .back-link:hover { color: rgba(255,255,255,0.75); }
+        .nav-sub-link:hover { color: rgba(255,255,255,0.65); }
+        .nav-sub-link.active { color: rgba(255,255,255,0.9); font-weight: 600; }
         /* ── Language dropdown ── */
         .lang-dropdown-btn {
             display: flex;
@@ -117,11 +119,26 @@
 <body>
 
     <!-- Header -->
-    <header class="sticky top-0 z-50 px-6 py-4 flex items-center justify-between" style="background: rgba(15,12,41,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.08);">
-        <a href="vas.html" class="back-link flex-1">← VAS</a>
-        <p class="text-xs text-white/30 tracking-widest uppercase">Design Insights</p>
-        <div class="flex-1 flex justify-end">
-            <div class="relative" id="langDropdownWrap">
+    <header class="sticky top-0 z-50 px-6 py-4 flex items-center justify-between gap-4" style="background: rgba(15,12,41,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.08);">
+        <nav class="flex items-center gap-1.5 flex-1 min-w-0" aria-label="VAS 子頁面">
+            <a href="vas.html" class="text-white/40 hover:text-white/70 transition-colors text-xs font-medium shrink-0">VAS</a>
+            <span class="text-white/20 text-xs shrink-0">›</span>
+            <a href="vas-guide.html" class="nav-sub-link shrink-0">
+                <span class="sm:hidden" data-lang-key="navGuideShort">操作</span>
+                <span class="hidden sm:inline" data-lang-key="navGuide">操作手冊</span>
+            </a>
+            <span class="text-white/20 text-xs shrink-0">·</span>
+            <a href="insight.html" class="nav-sub-link active shrink-0" aria-current="page">
+                <span class="sm:hidden" data-lang-key="navInsightShort">設計</span>
+                <span class="hidden sm:inline" data-lang-key="navInsight">設計洞察</span>
+            </a>
+            <span class="text-white/20 text-xs shrink-0">·</span>
+            <a href="milestone.html" class="nav-sub-link shrink-0">
+                <span class="sm:hidden" data-lang-key="navMilestoneShort">里程碑</span>
+                <span class="hidden sm:inline" data-lang-key="navMilestone">里程碑</span>
+            </a>
+        </nav>
+        <div class="relative shrink-0" id="langDropdownWrap">
                 <button id="langDropdownBtn" class="lang-dropdown-btn" aria-haspopup="listbox" aria-expanded="false" aria-label="語言切換">
                     <span id="langDropdownLabel">中</span>
                     <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.7"/></svg>
@@ -132,7 +149,6 @@
                     <button class="lang-opt" data-lang="ja" role="option">日本語</button>
                 </div>
             </div>
-        </div>
     </header>
 
     <!-- Hero -->

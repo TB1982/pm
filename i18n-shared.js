@@ -7,15 +7,24 @@ window.VASShared = (function () {
   var sharedT = {
     zh: {
       footer: '由 GitHub 部署　｜　Claude Code 傾力打造　｜　<a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a> 最後更新於 2026',
-      privacyLink: '隱私權政策'
+      privacyLink: '隱私權政策',
+      navGuide: '操作手冊', navGuideShort: '操作',
+      navInsight: '設計洞察', navInsightShort: '設計',
+      navMilestone: '里程碑',  navMilestoneShort: '里程碑'
     },
     en: {
       footer: 'Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by <a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a>',
-      privacyLink: 'Privacy Policy'
+      privacyLink: 'Privacy Policy',
+      navGuide: 'User Guide',      navGuideShort: 'Guide',
+      navInsight: 'Design Insights', navInsightShort: 'Insights',
+      navMilestone: 'Milestones',  navMilestoneShort: 'Milestone'
     },
     ja: {
       footer: 'GitHub でデプロイ　｜　Claude Code で構築　｜　2026年 <a href="mailto:babelon1882@gmail.com" class="hover:text-white/50 transition-colors">Nova</a> 最終更新',
-      privacyLink: 'プライバシーポリシー'
+      privacyLink: 'プライバシーポリシー',
+      navGuide: '操作マニュアル', navGuideShort: '操作',
+      navInsight: 'デザインの洞察', navInsightShort: '洞察',
+      navMilestone: 'マイルストーン', navMilestoneShort: 'マイル'
     }
   };
 
