@@ -350,15 +350,19 @@
         </div>
       </div>
 
-      <!-- Breathing Light — Tauri Exclusive -->
-      <div class="glass-card rounded-xl p-5 mt-4" style="border-color: rgba(251,191,36,0.2);">
+      <!-- Breathing Light -->
+      <div class="glass-card rounded-xl p-5 mt-4">
         <div class="flex items-center gap-2 mb-3">
           <p class="text-sm font-semibold text-white/80" data-lang-key="bl_title">呼吸燈</p>
-          <span class="badge-tauri" data-lang-key="tauriOnlyBadge">Tauri 專屬</span>
+          <span class="badge-all" data-lang-key="allVersions">全版本</span>
         </div>
-        <ul class="space-y-2 text-white/45 text-xs leading-relaxed">
-          <li data-lang-key="bl_url">複製連結後靠近呼吸燈，會詢問是否進行網址截圖</li>
-          <li data-lang-key="bl_file">拖曳檔案靠近呼吸燈，會自動展開編輯器並載入檔案</li>
+        <div class="flex gap-4 items-start">
+          <img src="img/breathlightfinal.jpg" alt="VAS 呼吸燈" class="rounded-lg shrink-0" style="width:72px;height:72px;object-fit:cover;border:1px solid rgba(255,255,255,0.1);" loading="lazy">
+          <p class="text-white/45 text-xs leading-relaxed"><span style="display:inline-flex;align-items:center;justify-content:center;width:1.2em;height:1.2em;border:1px solid rgba(255,255,255,0.35);border-radius:50%;font-size:0.7em;color:rgba(255,255,255,0.5);vertical-align:middle;margin-right:4px;line-height:1;">?</span><span data-lang-key="bl_desc">可設定將工具列縮小成為呼吸燈，在桌面角落靜默待機，不佔空間。</span></p>
+        </div>
+        <ul class="space-y-2 text-white/45 text-xs leading-relaxed mt-3">
+          <li class="flex items-start gap-2"><span class="badge-tauri shrink-0" data-lang-key="tauriOnlyBadge">Tauri 專屬</span><span data-lang-key="bl_url">複製連結後靠近呼吸燈，會詢問是否進行網址截圖</span></li>
+          <li class="flex items-start gap-2"><span class="badge-tauri shrink-0" data-lang-key="tauriOnlyBadge">Tauri 專屬</span><span data-lang-key="bl_file">拖曳檔案靠近呼吸燈，會自動展開編輯器並載入檔案</span></li>
         </ul>
       </div>
     </section>
@@ -607,7 +611,8 @@
         cb_whiteboard: '白板', cb_whiteboard_desc: '開啟空白畫布，從零開始建立圖像內容。',
         cb_batch: '批次轉', cb_batch_desc: '拖入多張圖片，一次轉換為 JPG、PNG、WebP 等格式，支援浮水印與尺寸調整。',
         cb_help: '說明', cb_help_desc: '顯示快捷鍵一覽，並提供操作手冊連結。',
-        bl_title: '呼吸燈', bl_url: '複製連結後靠近呼吸燈，會詢問是否進行網址截圖', bl_file: '拖曳檔案靠近呼吸燈，會自動展開編輯器並載入檔案',
+        allVersions: '全版本',
+        bl_title: '呼吸燈', bl_desc: '可設定將工具列縮小成為呼吸燈，在桌面角落靜默待機，不佔空間。', bl_url: '複製連結後靠近呼吸燈，會詢問是否進行網址截圖', bl_file: '拖曳檔案靠近呼吸燈，會自動展開編輯器並載入檔案',
         s4Label: 'Section 04',
         tauriOnlyBadge: 'Tauri 專屬',
         s4Title: '自定義全域快捷鍵',
@@ -667,7 +672,8 @@
         cb_whiteboard: 'Whiteboard', cb_whiteboard_desc: 'Open a blank canvas to build visuals from scratch.',
         cb_batch: 'Batch', cb_batch_desc: 'Drop multiple images to convert them all at once to JPG, PNG, WebP, and more — with watermark and resize support.',
         cb_help: 'Help', cb_help_desc: 'Show keyboard shortcuts and link to this user guide.',
-        bl_title: 'Breathing Light', bl_url: 'Copy a URL then hover over the breathing light — it will ask if you want to capture that webpage', bl_file: 'Drag a file toward the breathing light — the editor opens automatically and loads the file',
+        allVersions: 'All Versions',
+        bl_title: 'Breathing Light', bl_desc: 'The toolbar can be minimised into a breathing light — sitting quietly in a corner of your desktop, out of the way.', bl_url: 'Copy a URL then hover over the breathing light — it will ask if you want to capture that webpage', bl_file: 'Drag a file toward the breathing light — the editor opens automatically and loads the file',
         s4Label: 'Section 04',
         tauriOnlyBadge: 'Tauri Exclusive',
         s4Title: 'Custom Global Shortcuts',
@@ -727,7 +733,8 @@
         cb_whiteboard: 'ホワイトボード', cb_whiteboard_desc: '白紙のキャンバスを開き、ゼロからビジュアルを作成します。',
         cb_batch: 'バッチ', cb_batch_desc: '複数の画像をドロップして JPG・PNG・WebP などに一括変換。透かしとリサイズにも対応。',
         cb_help: 'ヘルプ', cb_help_desc: 'キーボードショートカット一覧を表示し、このマニュアルへのリンクを提供します。',
-        bl_title: '呼吸ライト', bl_url: 'URLをコピーして呼吸ライトに近づけると、ウェブページキャプチャを行うか確認します', bl_file: 'ファイルを呼吸ライトにドラッグすると、エディターが自動的に開きファイルを読み込みます',
+        allVersions: '全バージョン',
+        bl_title: '呼吸ライト', bl_desc: 'ツールバーを呼吸ライトに縮小して、デスクトップの隅で静かに待機させることができます。', bl_url: 'URLをコピーして呼吸ライトに近づけると、ウェブページキャプチャを行うか確認します', bl_file: 'ファイルを呼吸ライトにドラッグすると、エディターが自動的に開きファイルを読み込みます',
         s4Label: 'Section 04',
         tauriOnlyBadge: 'Tauri 専用',
         s4Title: 'カスタムグローバルショートカット',
