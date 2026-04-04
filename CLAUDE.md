@@ -376,6 +376,17 @@ Add this block to the `<style>` section of any page with CSS transitions or `tra
 }
 ```
 
+### Orphan Prevention — `text-wrap: pretty`
+**Every page must include this rule** in its `<style>` block to prevent single-word/character orphans at paragraph endings (especially problematic in Japanese):
+```css
+p {
+  text-wrap: pretty;
+}
+```
+- Apply to the most specific container selector available (e.g. `.card p`, `.insight-card p`) to avoid unintended side effects on UI elements.
+- If a paragraph still produces orphans in one language (typically Japanese, which has longer text), add `max-width: 54ch` to that specific element.
+- This rule must be added whenever a new page or new card component is created.
+
 ### Canvas Pages
 `deepholding.html` uses `<canvas>` which is opaque to screen readers. Minimum required:
 ```html
