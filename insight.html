@@ -336,16 +336,16 @@
             </div>
             <h2 class="text-xl font-bold text-white mt-1 mb-4" data-lang-key="i4Title">擺好 pose 在那邊等，工具不應該叫你回來選</h2>
             <p class="text-white/55 leading-relaxed mb-4" data-lang-key="i4p1">
-                當我們開發出了「延遲截圖」後，原生的螢幕截圖選單反而變成了摩擦力。
+                當我們開發出了「延遲截圖」後，全螢幕截圖功能在雙螢幕模式時提供的 Apple 原生選單反而變成了摩擦力。
             </p>
             <p class="text-white/55 leading-relaxed mb-4" data-lang-key="i4p2">
-                延遲截圖是為了捕捉滑鼠事件——報錯狀態、hover 效果、debug 瞬間而誕生的功能。使用者倒數等待，滑鼠必須留在螢幕的某個角落。但原生的雙螢幕選單在讀秒結束後要求在截圖前先回去工具列選擇要截哪個螢幕——就像你自拍已經設定好相機秒數，結果相機結束讀秒時卻在預覽螢幕問你「你要拍哪邊？」一樣荒謬。
+                延遲截圖是為了捕捉滑鼠事件——報錯狀態、hover 效果、debug 瞬間而誕生的功能。使用者設定倒數等待時，滑鼠必須留在螢幕的某個角落。但原生的雙螢幕選單在讀秒結束後，卻會從工具列跳出來要求使用者在截圖前先回去工具列選擇要截哪個螢幕——就像你自拍已經設定好相機秒數，結果相機結束讀秒時卻在預覽螢幕問你「你要拍哪邊？」一樣荒謬。
             </p>
             <p class="text-white/55 leading-relaxed mb-4" data-lang-key="i4p3">
-                VAS 捨棄 Apple 原生選單，改用自製圖層遮罩覆蓋全螢幕：沒有延遲時點哪個螢幕就截哪個，按 Enter 直接合併成雙螢幕截圖。設定延遲模式後倒數期間滑鼠哪都不用去，繼續擺著等就好，VAS 會自動擷取滑鼠所在的螢幕。
+                VAS 捨棄 Apple 原生選單，改用自製圖層遮罩覆蓋全螢幕：沒有延遲時點哪個螢幕就截哪個，按 Enter 直接合併成雙螢幕截圖。
             </p>
             <p class="text-white/55 leading-relaxed mb-6" data-lang-key="i4p4">
-                更進一步：當使用者設了延遲規則，VAS 會默認截取滑鼠當下所在的螢幕——連選都不用選，工具自己判斷。使用者根本不會意識到這個決策發生過。
+                更進一步：當使用者設了延遲規則，VAS 會默認截取滑鼠當下所在的螢幕——連選都不用選，工具自己判斷。使用者根本不會意識到這個決策在背景發生過。
             </p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                 <figure>
@@ -362,21 +362,21 @@
                     <div class="text-lg font-bold text-white/30 w-6 shrink-0 mt-0.5">1</div>
                     <div>
                         <p class="text-xs text-white/30 mb-0.5" data-lang-key="i4step1Label">延遲截圖</p>
-                        <p class="text-sm text-white/70" data-lang-key="i4step1Desc">為了截滑鼠事件，給自己備戰時間</p>
+                        <p class="text-sm text-white/70" data-lang-key="i4step1Desc">單螢幕設定延遲時，自動在時間倒數後選取當下螢幕截圖</p>
                     </div>
                 </div>
                 <div class="compare-box flex items-start gap-4">
                     <div class="text-lg font-bold text-white/30 w-6 shrink-0 mt-0.5">2</div>
                     <div>
                         <p class="text-xs text-white/30 mb-0.5" data-lang-key="i4step2Label">自製遮罩</p>
-                        <p class="text-sm text-white/70" data-lang-key="i4step2Desc">延遲開始前就選好螢幕，倒數期間滑鼠不離場</p>
+                        <p class="text-sm text-white/70" data-lang-key="i4step2Desc">雙螢幕無延遲模式時，可自由選擇螢幕，或按 Enter 全選所有螢幕</p>
                     </div>
                 </div>
                 <div class="compare-box highlight flex items-start gap-4">
                     <div class="text-lg font-bold text-purple-300 w-6 shrink-0 mt-0.5">3</div>
                     <div>
                         <p class="text-xs text-purple-300/60 mb-0.5" data-lang-key="i4step3Label">滑鼠位置默認</p>
-                        <p class="text-sm text-white" data-lang-key="i4step3Desc">連選都不用選，工具讀你在哪，就截哪裡</p>
+                        <p class="text-sm text-white" data-lang-key="i4step3Desc">雙螢幕設定延遲模式時，連選都不用選，工具讀你游標在哪，就自動截哪裡</p>
                     </div>
                 </div>
             </div>
