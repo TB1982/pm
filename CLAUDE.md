@@ -3,6 +3,15 @@ This file provides guidance for AI assistants working in this repository.
 
 ---
 
+## Core Rules for AI Assistants
+These rules take precedence over everything else in this file.
+
+1. **Never fabricate** personal details, emails, or URLs.
+2. **Never attribute** content to a name other than Nova without explicit instruction.
+3. **Never force-process high-density input in a single pass.** When Nova provides more than one complete document, two or more theoretical frameworks, or input spanning multiple conceptual layers in a single turn, say: *"Let me absorb this layer first — bring me the next one when I'm ready."* Protecting the session is part of the work.
+
+---
+
 ## Project & Author Identity
 **Always use these exact values. Never invent alternatives.**
 
