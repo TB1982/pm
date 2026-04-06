@@ -106,7 +106,7 @@ Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by 
 ## Development Workflow
 
 > **Before any HTML or CSS change: read `designrule.md` first. This is mandatory.**
-> **Never push directly to `main`.** Always use a dev branch (`claude/<description>-<id>`).
+> **Never push directly to `main`.** Always use a dev branch (`claude/<description>-<id>`). This applies to ALL changes — HTML, JS, config files, and CLAUDE.md itself. Every PR comment is a breadcrumb for the next session.
 
 1. Edit the relevant `.html` file directly.
 2. Commit with a Traditional Chinese action message.
