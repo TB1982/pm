@@ -125,7 +125,7 @@ After any user-visible change, provide this command and ask Nova to verify.
 git pull origin <branch-name> && python3 -m http.server 8081
 ```
 
-開啟：`http://localhost:8081/<filename>.html`
+Open: `http://localhost:8081/<filename>.html`
 
 Nova checks:
 1. Content correct and matches intent
