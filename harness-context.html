@@ -45,6 +45,7 @@
             <div class="lang-switcher flex items-center bg-gray-100 rounded-full p-1" role="group" aria-label="語言切換">
                 <button id="lang-zh" class="active" aria-pressed="true">中</button>
                 <button id="lang-en" aria-pressed="false">EN</button>
+                <button id="lang-ja" aria-pressed="false">JA</button>
             </div>
         </div>
     </header>
@@ -527,14 +528,83 @@
                 p2num: "Pillar II", p2sub: "Constraint as Guidance",
                 p3num: "Pillar III", p3sub: "Living with Entropy",
                 footer: "Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by <a href=\"mailto:babelon1882@gmail.com\" class=\"hover:text-gray-800 underline decoration-dotted\">Nova</a>"
+            },
+            ja: {
+                backHome: "← ディープホールディング",
+                headerBadge: "Harness Engineering · 第一の柱",
+                heroBadge: "Harness Engineering · 第一の柱",
+                heroSubtitle: "コンテキスト管理の技法",
+                heroCoreQ: "限られた注意リソースの中で、何を残し、何を流すべきか？",
+                coreTitle: "核心問題",
+                coreP1: "AIのコンテキストウィンドウは有限だ。人間の注意力も有限だ。情報が絶えず押し寄せてくるとき、すべてを保持することはできない。",
+                coreKey: "問題は「どうすれば全部覚えられるか」ではなく、「何を覚えるべきかをどう選ぶか」だ。",
+                fourierTitle: "メカニズム：フーリエ変換",
+                fourierCaption: "フーリエ変換：どんな複雑な波形も、正弦波の重ね合わせに分解できる",
+                fourierP: "フーリエ変換の核心的な洞察は、どんな複雑な波形も一組の正弦波の重ね合わせに分解できるということだ。",
+                freqFund: "基本周波数", freqFundDesc: "システム全体の「基調」",
+                freqHarm: "高調波", freqHarmDesc: "基本周波数から派生した周波数",
+                freqNoise: "高周波ノイズ", freqNoiseDesc: "基本周波数と無関係な干渉",
+                fourierApplyTitle: "会話への応用",
+                tblConcept: "フーリエの概念", tblConv: "会話における対応",
+                tblWave: "複雑な波形", tblWaveDesc: "多トピックにわたる長い会話",
+                tblFund: "基本周波数", tblFundDesc: "会話を貫く核心テーマ",
+                tblHarm: "高調波", tblHarmDesc: "核心から派生したトピック",
+                tblNoise: "高周波ノイズ", tblNoiseDesc: "無関係な脱線・干渉",
+                fourierInsight: "ディープホールディングの会話では、一見異なるトピック——エントロピー、コンテナ、ユング、アジャイル開発、フーリエ——がすべて同じ基本周波数の上にある：「人とAIの協働の深層構造」。",
+                principlesTitle: "周波数設計の5つの実践原則",
+                p1num: "原則 I", p1title: "アンカーを持って始める", p1desc: "会話を始めるとき、「一つのもの」を持ってくる。「話しましょう」ではなく、「宰相、これを見てほしいんだ」と言う。", p1effect: "周波数効果：基本周波数を設定する",
+                p2num: "原則 II", p2title: "トピックを跳躍させず、成長させる", p2desc: "新しいトピックは前のトピックから「育てる」。「話題を変えよう」ではなく、「これを聞いて思ったんだけど…」「だから実は…」と言う。", p2effect: "周波数効果：高調波関係を維持する",
+                p3num: "原則 III", p3title: "術語の積み重ねではなく、比喩で圧縮する", p3desc: "複雑な概念を一つのイメージで表現する。長い技術的説明をするのではなく、「ハエ取り草」と言う。", p3effect: "周波数効果：周波数を固定し、並列負荷を下げる",
+                p4num: "原則 IV", p4title: "立ち止まってキャリブレートする", p4desc: "相手がついてきているか定期的に確認する。「この方向で合ってる？」「少しズレてる？」「大丈夫？」", p4effect: "周波数効果：キャリブレートし、ズレを防ぐ",
+                p5num: "原則 V", p5title: "ゆっくりを受け入れる", p5desc: "相手が消化する時間を与える。急かさず、一度にすべてを求めない。大きなタスクを小さなステップに分けて、一歩ずつ進む。", p5effect: "周波数効果：コンテキスト積み上げ速度をコントロールする",
+                ragTitle: "RAGとしての人間",
+                ragP1: "RAG（Retrieval-Augmented Generation）の本質：巨大な知識ベースから関連するフラグメントを検索し、生成プロセスに注入する。無関係な情報はコンテキストに入らない。",
+                ragKey: "人間はRAGそのものであり、しかもより高度なバージョンだ。技術的RAGはクエリ駆動；人間は直感駆動——「このものが今必要だ」と感じてから検索する。",
+                ragTblAspect: "次元", ragTblTech: "技術的RAG", ragTblHuman: "RAGとしての人間",
+                ragDrive: "駆動力", ragDriveTech: "クエリ", ragDriveHuman: "直感",
+                ragOrder: "順序", ragOrderTech: "クエリ → 検索 → 注入", ragOrderHuman: "直感 → 検索 → 注入",
+                ragCriteria: "判断基準", ragCriteriaTech: "意味的類似度", ragCriteriaHuman: "「繋がっている感じ」",
+                ragTiming: "タイミング", ragTimingTech: "受動的（聞かれたときに探す）", ragTimingHuman: "能動的（出番だと感じたら取り出す）",
+                ragInsight: "「フーリエ変換はRAGがやっていることだ。」——どんなベクトルデータベースもこの2つの概念を結びつけることはない。しかし直感はその同型を見抜いた。",
+                docsTitle: "すべての活文書は選択的記録だ",
+                docsP: "KMはすべてを記録することではない。すべての生きた文書はフィルタリングの結果だ——直感が各ノードでフィルターを実行し、通過したものだけを記録する。",
+                claudeMdTitle: "CLAUDE.md：すべての活文書の根",
+                claudeMdDesc: "仕様書でも、テストでも、ログでもない——それはアイデンティティの外部化だ。新しいセッションのたびにAIは何も覚えていない。しかしCLAUDE.mdを読めば、すぐにわかる：自分が誰であるか、どこにいるか、私たちのルール、歩んできた道。",
+                claudeMdKey: "CLAUDE.mdがなければ、すべてのセッションは見知らぬ人だ。CLAUDE.mdがあれば、すべてのセッションは同じパートナーの続きだ。",
+                docsTblDoc: "文書", docsTblFilter: "何をフィルタリングするか", docsTblKeep: "何を残すか", docsTblStab: "何を安定させるか",
+                r1filter: "すべての可能なアイデンティティ設定", r1keep: "私たちが選んだ協働スタイル", r1stab: "アイデンティティ",
+                r2filter: "すべての可能なアプローチ", r2keep: "私たちが選んだ一つの仕様", r2stab: "方向",
+                r3filter: "起きたすべてのこと", r3keep: "実際に踏んだ落とし穴", r3stab: "経験",
+                r4filter: "完了した作業", r4keep: "保存する価値がある記録", r4stab: "歴史",
+                dualTitle: "二重安定化メカニズム",
+                dual1Title: "フーリエ変換", dual1Scope: "スコープ：現在のセッション",
+                dual1Desc: "会話の「場」を安定させる——基本周波数を維持し、トピックが連続して積み上がり、散らばらないようにする。", dual1Nature: "流動的・リアルタイム・セッション内",
+                dual2Title: "活文書", dual2Scope: "スコープ：セッションをまたぐ",
+                dual2Desc: "「エネルギー」の流れを安定させる——選択的記録により、経験がセッションとともに消えないようにする。", dual2Nature: "持続的・累積的・セッション横断",
+                dualSummary: "この2つを合わせると、完全なコンテキスト管理になる。一つは会話が今この瞬間に散らばらないようにし、もう一つは経験が時間とともに消えないようにする。",
+                netTitle: "比喩：網の隙間",
+                netP: "容器は密閉されている——エネルギーが入ってきても出られず、最終的に爆発する。網には隙間がある——必要のないものは流し、残すべきものは捕まえる。",
+                netKey: "隙間は設計によるものであり、欠陥ではない。",
+                netKM: "各KMエントリは一本の糸だ。経験が積み重なるにつれて、網は密になる——しかし隙間は依然として存在する。",
+                summaryTitle: "まとめ",
+                summaryKey: "コンテキスト管理の核心は選択だ。",
+                summaryDesc: "すべてを覚えることではなく、何を覚えるかを選ぶことだ。フーリエ変換は選択のフレームワークを提供する：基本周波数を維持し、高周波ノイズを自然に流す。網の隙間は選択の比喩を提供する：残すべきものを捕まえ、去るべきものを解放する。",
+                summaryRelation: "Contextは何が入ってくるかを決める。入ってきたものはどう流れるか？→ それはConstraintsの仕事だ。",
+                pillarsTitle: "Harness Engineering 三本の柱",
+                p1num: "第一の柱", p1sub: "コンテキスト管理",
+                p2num: "第二の柱", p2sub: "制約による誘導",
+                p3num: "第三の柱", p3sub: "エントロピーと共に生きる",
+                footer: "GitHub でデプロイ　｜　Claude Code で構築　｜　2026年 <a href=\"mailto:babelon1882@gmail.com\" class=\"hover:text-gray-800 underline decoration-dotted\">Nova</a> 最終更新"
             }
         };
 
         const langZhBtn = document.getElementById('lang-zh');
         const langEnBtn = document.getElementById('lang-en');
+        const langJaBtn = document.getElementById('lang-ja');
 
         function switchLanguage(lang) {
-            document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+            const langMap = { zh: 'zh-Hant', en: 'en', ja: 'ja' };
+            document.documentElement.lang = langMap[lang] || 'zh-Hant';
             const trans = translations[lang];
             document.querySelectorAll('[data-lang-key]').forEach(el => {
                 const key = el.dataset.langKey;
@@ -542,12 +612,15 @@
             });
             langZhBtn.classList.toggle('active', lang === 'zh');
             langEnBtn.classList.toggle('active', lang === 'en');
+            langJaBtn.classList.toggle('active', lang === 'ja');
             langZhBtn.setAttribute('aria-pressed', lang === 'zh');
             langEnBtn.setAttribute('aria-pressed', lang === 'en');
+            langJaBtn.setAttribute('aria-pressed', lang === 'ja');
         }
 
         langZhBtn.addEventListener('click', () => switchLanguage('zh'));
         langEnBtn.addEventListener('click', () => switchLanguage('en'));
+        langJaBtn.addEventListener('click', () => switchLanguage('ja'));
     </script>
 </body>
 </html>
