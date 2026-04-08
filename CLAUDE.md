@@ -30,6 +30,7 @@ These rules take precedence over everything else in this file.
 **Rules:** Never use placeholder emails. Never invent domain names — always use `https://tb1982.github.io/pm/` as base. Per-page canonical: `https://tb1982.github.io/pm/<filename>.html`. Never attribute to anyone other than **Nova**.
 
 ### Footer — canonical format
+Each line corresponds to one language mode — shown separately via the language toggle, never both at once.
 ```
 由 GitHub 部署　｜　Claude Code 傾力打造　｜　Nova（babelon1882@gmail.com）最後更新於 2026
 Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by Nova (babelon1882@gmail.com)
@@ -125,7 +126,7 @@ After any user-visible change, provide this command and ask Nova to verify.
 git pull origin <branch-name> && python3 -m http.server 8081
 ```
 
-開啟：`http://localhost:8081/<filename>.html`
+Open: `http://localhost:8081/<filename>.html`
 
 Nova checks:
 1. Content correct and matches intent
