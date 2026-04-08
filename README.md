@@ -45,13 +45,16 @@
 
 ---
 
-## 本地預覽
+<details>
+<summary>本地預覽</summary>
 
 ```bash
 python3 -m http.server 8081
 ```
 
 開啟：`http://localhost:8081`
+
+</details>
 
 ---
 
