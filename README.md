@@ -45,14 +45,6 @@
 
 ---
 
-## 本地預覽
-
-```bash
-python3 -m http.server 8081
-```
-
-開啟：`http://localhost:8081`
-
 ---
 
 ## 聯絡
