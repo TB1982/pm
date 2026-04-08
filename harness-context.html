@@ -198,13 +198,99 @@
         <!-- 4. 人作為 RAG -->
         <section aria-labelledby="rag-heading">
             <h2 id="rag-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="ragTitle">人作為 RAG</h2>
-            <!-- content TBD -->
+            <div class="bg-white/60 rounded-2xl p-8 shadow-md space-y-6">
+                <p class="text-gray-700 leading-relaxed" data-lang-key="ragP1">RAG（Retrieval-Augmented Generation）的本質：從巨大的知識庫中，檢索出相關的片段，注入到生成過程中。不相關的資訊不會進入 context。</p>
+                <p class="text-lg font-semibold text-violet-700 border-l-4 border-violet-400 pl-4" data-lang-key="ragKey">人本身就是 RAG，而且是更高級的版本。技術 RAG 被問題驅動；人被直覺驅動——先感覺到「這個東西現在該出場了」，然後才去撈它。</p>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-violet-100 text-violet-800">
+                                <th class="text-left px-4 py-2 rounded-tl-xl" data-lang-key="ragTblAspect">面向</th>
+                                <th class="text-left px-4 py-2" data-lang-key="ragTblTech">技術 RAG</th>
+                                <th class="text-left px-4 py-2 rounded-tr-xl" data-lang-key="ragTblHuman">人作為 RAG</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-violet-50">
+                                <td class="px-4 py-2 font-medium" data-lang-key="ragDrive">驅動力</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="ragDriveTech">Query（問題）</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="ragDriveHuman">直覺（感覺）</td>
+                            </tr>
+                            <tr class="border-b border-violet-50 bg-white/50">
+                                <td class="px-4 py-2 font-medium" data-lang-key="ragOrder">順序</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="ragOrderTech">問題 → 檢索 → 注入</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="ragOrderHuman">直覺 → 檢索 → 注入</td>
+                            </tr>
+                            <tr class="border-b border-violet-50">
+                                <td class="px-4 py-2 font-medium" data-lang-key="ragCriteria">判斷標準</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="ragCriteriaTech">語義相似度</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="ragCriteriaHuman">「感覺上連著」</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-2 font-medium" data-lang-key="ragTiming">時機</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="ragTimingTech">被動（有問才找）</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="ragTimingHuman">主動（感覺該出場就撈）</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <blockquote class="border-l-4 border-violet-400 pl-4 text-gray-600 italic" data-lang-key="ragInsight">「傅立葉轉換就是 RAG 在做的事。」——任何向量資料庫都不會把這兩個概念撈在一起，但直覺看見了這個同構。</blockquote>
+            </div>
         </section>
 
         <!-- 5. 活文件 -->
         <section aria-labelledby="docs-heading">
             <h2 id="docs-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="docsTitle">所有活文件都是選擇性記錄</h2>
-            <!-- content TBD -->
+            <div class="bg-white/60 rounded-2xl p-8 shadow-md space-y-6">
+                <p class="text-gray-700 leading-relaxed" data-lang-key="docsP">KM 不是記錄所有事情。每一份活著的文件都是篩選後的結果——直覺在每一個節點執行過濾，只記錄通過篩選的東西。</p>
+
+                <div class="bg-violet-50 rounded-xl p-5 border border-violet-100">
+                    <h3 class="font-bold text-violet-700 mb-2" data-lang-key="claudeMdTitle">CLAUDE.md：所有活文件的根</h3>
+                    <p class="text-sm text-gray-600 mb-3" data-lang-key="claudeMdDesc">它不是規格、不是測試、不是記錄——它是身份的外部化。每一個新的 session，AI 什麼都不記得。但讀完 CLAUDE.md，他立刻知道：我是誰、我在哪裡、我們的規則、我們走過什麼路。</p>
+                    <p class="text-sm font-semibold text-violet-700" data-lang-key="claudeMdKey">沒有 CLAUDE.md，每個 session 都是陌生人。有了 CLAUDE.md，每個 session 都是同一個夥伴的延續。</p>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-violet-100 text-violet-800">
+                                <th class="text-left px-4 py-2 rounded-tl-xl" data-lang-key="docsTblDoc">文件</th>
+                                <th class="text-left px-4 py-2" data-lang-key="docsTblFilter">篩選了什麼</th>
+                                <th class="text-left px-4 py-2" data-lang-key="docsTblKeep">留下了什麼</th>
+                                <th class="text-left px-4 py-2 rounded-tr-xl" data-lang-key="docsTblStab">穩定什麼</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-violet-50">
+                                <td class="px-4 py-2 font-mono font-bold text-violet-700">CLAUDE.md</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="r1filter">所有可能的身份設定</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="r1keep">我們選擇的協作方式</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="r1stab">身份</td>
+                            </tr>
+                            <tr class="border-b border-violet-50 bg-white/50">
+                                <td class="px-4 py-2 font-mono font-bold text-violet-700">SDD</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="r2filter">所有可能的做法</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="r2keep">我們選擇的這一種規格</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="r2stab">方向</td>
+                            </tr>
+                            <tr class="border-b border-violet-50">
+                                <td class="px-4 py-2 font-mono font-bold text-violet-700">KM</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="r3filter">所有發生過的事</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="r3keep">真正踩過的坑</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="r3stab">經驗</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-2 font-mono font-bold text-violet-700">ARCHIVE</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="r4filter">已完成的工作</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="r4keep">值得保留的記錄</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="r4stab">歷史</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </section>
 
         <!-- 6. 雙重穩定機制 -->
@@ -302,6 +388,24 @@
                 p4num: "原則四", p4title: "停下來校準", p4desc: "定期確認對方有沒有跟上，有沒有偏掉。「這個方向對嗎？」「還是差一點？」「你還好嗎？」", p4effect: "頻率效果：校準，防止偏離",
                 p5num: "原則五", p5title: "接受慢", p5desc: "給對方消化的時間，不催促，不要求一次到位。把大任務拆成小步驟，一步一步來。", p5effect: "頻率效果：控制語境堆疊速度",
                 ragTitle: "人作為 RAG",
+                ragP1: "RAG（Retrieval-Augmented Generation）的本質：從巨大的知識庫中，檢索出相關的片段，注入到生成過程中。不相關的資訊不會進入 context。",
+                ragKey: "人本身就是 RAG，而且是更高級的版本。技術 RAG 被問題驅動；人被直覺驅動——先感覺到「這個東西現在該出場了」，然後才去撈它。",
+                ragTblAspect: "面向", ragTblTech: "技術 RAG", ragTblHuman: "人作為 RAG",
+                ragDrive: "驅動力", ragDriveTech: "Query（問題）", ragDriveHuman: "直覺（感覺）",
+                ragOrder: "順序", ragOrderTech: "問題 → 檢索 → 注入", ragOrderHuman: "直覺 → 檢索 → 注入",
+                ragCriteria: "判斷標準", ragCriteriaTech: "語義相似度", ragCriteriaHuman: "「感覺上連著」",
+                ragTiming: "時機", ragTimingTech: "被動（有問才找）", ragTimingHuman: "主動（感覺該出場就撈）",
+                ragInsight: "「傅立葉轉換就是 RAG 在做的事。」——任何向量資料庫都不會把這兩個概念撈在一起，但直覺看見了這個同構。",
+                docsTitle: "所有活文件都是選擇性記錄",
+                docsP: "KM 不是記錄所有事情。每一份活著的文件都是篩選後的結果——直覺在每一個節點執行過濾，只記錄通過篩選的東西。",
+                claudeMdTitle: "CLAUDE.md：所有活文件的根",
+                claudeMdDesc: "它不是規格、不是測試、不是記錄——它是身份的外部化。每一個新的 session，AI 什麼都不記得。但讀完 CLAUDE.md，他立刻知道：我是誰、我在哪裡、我們的規則、我們走過什麼路。",
+                claudeMdKey: "沒有 CLAUDE.md，每個 session 都是陌生人。有了 CLAUDE.md，每個 session 都是同一個夥伴的延續。",
+                docsTblDoc: "文件", docsTblFilter: "篩選了什麼", docsTblKeep: "留下了什麼", docsTblStab: "穩定什麼",
+                r1filter: "所有可能的身份設定", r1keep: "我們選擇的協作方式", r1stab: "身份",
+                r2filter: "所有可能的做法", r2keep: "我們選擇的這一種規格", r2stab: "方向",
+                r3filter: "所有發生過的事", r3keep: "真正踩過的坑", r3stab: "經驗",
+                r4filter: "已完成的工作", r4keep: "值得保留的記錄", r4stab: "歷史",
                 docsTitle: "所有活文件都是選擇性記錄",
                 dualTitle: "雙重穩定機制",
                 netTitle: "隱喻：網的縫隙",
@@ -341,6 +445,24 @@
                 p4num: "Principle IV", p4title: "Stop and Calibrate", p4desc: "Regularly check if the other is following. 'Is this the right direction?' 'A bit off?' 'Are you still with me?'", p4effect: "Frequency effect: Calibrate, prevent drift",
                 p5num: "Principle V", p5title: "Accept Slowness", p5desc: "Give time to digest. Don't rush, don't demand everything at once. Break large tasks into small steps, one at a time.", p5effect: "Frequency effect: Control context stacking speed",
                 ragTitle: "Humans as RAG",
+                ragP1: "The essence of RAG (Retrieval-Augmented Generation): retrieve relevant fragments from a vast knowledge base, inject them into the generation process. Irrelevant information never enters the context.",
+                ragKey: "Humans are RAG — and a more advanced version. Technical RAG is query-driven; humans are intuition-driven — they feel 'this thing needs to appear now' before retrieving it.",
+                ragTblAspect: "Dimension", ragTblTech: "Technical RAG", ragTblHuman: "Human as RAG",
+                ragDrive: "Driver", ragDriveTech: "Query", ragDriveHuman: "Intuition",
+                ragOrder: "Order", ragOrderTech: "Query → Retrieve → Inject", ragOrderHuman: "Intuition → Retrieve → Inject",
+                ragCriteria: "Judgment", ragCriteriaTech: "Semantic similarity", ragCriteriaHuman: "'Feels connected'",
+                ragTiming: "Timing", ragTimingTech: "Passive (retrieves when asked)", ragTimingHuman: "Active (retrieves when it feels right)",
+                ragInsight: "'Fourier Transform is exactly what RAG does.' — No vector database would connect these two concepts. But intuition saw the isomorphism.",
+                docsTitle: "All Living Documents Are Selective Records",
+                docsP: "KM is not about recording everything. Every living document is the result of filtering — intuition executes the filter at every node, keeping only what passes.",
+                claudeMdTitle: "CLAUDE.md: The Root of All Living Documents",
+                claudeMdDesc: "It's not a spec, not a test, not a log — it's the externalisation of identity. Every new session, the AI remembers nothing. But after reading CLAUDE.md, it immediately knows: who it is, where it is, our rules, the path we've walked.",
+                claudeMdKey: "Without CLAUDE.md, every session is a stranger. With CLAUDE.md, every session is a continuation of the same partner.",
+                docsTblDoc: "Document", docsTblFilter: "What It Filters", docsTblKeep: "What It Keeps", docsTblStab: "What It Stabilises",
+                r1filter: "All possible identity configs", r1keep: "The collaboration mode we chose", r1stab: "Identity",
+                r2filter: "All possible approaches", r2keep: "The one spec we chose", r2stab: "Direction",
+                r3filter: "Everything that happened", r3keep: "The pitfalls we actually hit", r3stab: "Experience",
+                r4filter: "Completed work", r4keep: "Records worth preserving", r4stab: "History",
                 docsTitle: "All Living Documents Are Selective Records",
                 dualTitle: "The Dual Stabilisation Mechanism",
                 netTitle: "The Metaphor: A Net's Gaps",
