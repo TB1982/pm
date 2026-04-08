@@ -113,6 +113,9 @@ Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by 
 2. Commit with a Traditional Chinese action message.
 3. Push to dev branch; merge to `main` when ready.
 
+<details>
+<summary>Local preview &amp; QC Checklist</summary>
+
 ```bash
 # Local preview — always use port 8081
 python3 -m http.server 8081
@@ -134,6 +137,8 @@ Nova checks:
 3. External links correct
 4. RWD at ~375px — no horizontal overflow
 5. EN version renders correctly
+
+</details>
 
 ---
 
