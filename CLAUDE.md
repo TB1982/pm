@@ -62,14 +62,14 @@ Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by 
 ## Repository Structure
 ```
 /
-├── index.html          # Main dashboard (project hub)
-├── pm.html             # AI Collaboration / cross-functional productivity
-├── scrummaster.html    # Scrum Master methodology
-├── deepholding.html    # Interactive canvas: "Inner Universe Cycle"
-├── distillation.html   # Knowledge distillation
-├── journal.html        # Journal
-├── lottery.html        # Lottery number picker
-├── mandal_chart.html   # Mandala 9-grid chart tool
+├── index.html              # Main dashboard (project hub)
+├── harness-context.html    # Harness Engineering Pillar I: Context
+├── harness-constraints.html# Harness Engineering Pillar II: Constraints
+├── harness-entropy.html    # Harness Engineering Pillar III: Entropy
+├── deepholding.html        # Interactive canvas: "Inner Universe Cycle"
+├── journal.html            # Journal
+├── lottery.html            # Lottery number picker
+├── mandal_chart.html       # Mandala 9-grid chart tool
 │
 ├── collab.html         # → redirect to tb1982.github.io/vas/collab.html
 ├── insight.html        # → redirect to tb1982.github.io/vas/insight.html
@@ -171,7 +171,9 @@ Traditional Chinese, action-oriented: `更新手機版顯示數字大小` / `新
 | File | Note |
 |------|------|
 | `index.html` | Main entry point; GitHub commit stats widget |
-| `pm.html` | Core PM methodology content |
+| `harness-context.html` | Harness Engineering Pillar I |
+| `harness-constraints.html` | Harness Engineering Pillar II |
+| `harness-entropy.html` | Harness Engineering Pillar III |
 | `deepholding.html` | Complex standalone canvas JS — test carefully after edits |
 | `mandal_chart.html` | Interactive Mandala grid tool |
 | `lottery.html` | Client-side lottery picker |
