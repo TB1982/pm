@@ -73,13 +73,126 @@
         <!-- 2. 傅立葉轉換 -->
         <section aria-labelledby="fourier-heading">
             <h2 id="fourier-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="fourierTitle">運作機制：傅立葉轉換</h2>
-            <!-- content TBD -->
+            <div class="space-y-6">
+                <figure>
+                    <img src="img/fourier.webp"
+                         alt="傅立葉轉換示意圖——複雜波形分解為基頻與諧波疊加"
+                         class="w-full rounded-2xl shadow-lg object-cover max-h-64"
+                         loading="lazy">
+                    <figcaption class="text-center text-xs text-gray-400 mt-2" data-lang-key="fourierCaption">傅立葉轉換：任何複雜波形，都可分解為一組正弦波的疊加</figcaption>
+                </figure>
+
+                <div class="bg-white/60 rounded-2xl p-8 shadow-md space-y-6">
+                    <p class="text-gray-700 leading-relaxed" data-lang-key="fourierP">傅立葉轉換的核心洞見是：任何複雜的波形，都可以分解成一組正弦波的疊加。</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="bg-violet-50 rounded-xl p-4 text-center">
+                            <div class="font-bold text-violet-700 mb-1" data-lang-key="freqFund">基頻</div>
+                            <div class="text-xs text-gray-500" data-lang-key="freqFundDesc">整個系統的「基調」</div>
+                        </div>
+                        <div class="bg-purple-50 rounded-xl p-4 text-center">
+                            <div class="font-bold text-purple-700 mb-1" data-lang-key="freqHarm">諧波</div>
+                            <div class="text-xs text-gray-500" data-lang-key="freqHarmDesc">與基頻相關的衍生頻率</div>
+                        </div>
+                        <div class="bg-gray-50 rounded-xl p-4 text-center">
+                            <div class="font-bold text-gray-600 mb-1" data-lang-key="freqNoise">高頻雜訊</div>
+                            <div class="text-xs text-gray-500" data-lang-key="freqNoiseDesc">與基頻無關的干擾</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="font-bold text-gray-700 mb-3" data-lang-key="fourierApplyTitle">應用到對話</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="bg-violet-100 text-violet-800">
+                                        <th class="text-left px-4 py-2 rounded-tl-xl" data-lang-key="tblConcept">傅立葉概念</th>
+                                        <th class="text-left px-4 py-2 rounded-tr-xl" data-lang-key="tblConv">對話中的對應</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b border-violet-50">
+                                        <td class="px-4 py-2 font-medium" data-lang-key="tblWave">複雜波形</td>
+                                        <td class="px-4 py-2 text-gray-600" data-lang-key="tblWaveDesc">一段多主題的長對話</td>
+                                    </tr>
+                                    <tr class="border-b border-violet-50 bg-white/50">
+                                        <td class="px-4 py-2 font-medium" data-lang-key="tblFund">基頻</td>
+                                        <td class="px-4 py-2 text-gray-600" data-lang-key="tblFundDesc">貫穿對話的核心主題</td>
+                                    </tr>
+                                    <tr class="border-b border-violet-50">
+                                        <td class="px-4 py-2 font-medium" data-lang-key="tblHarm">諧波</td>
+                                        <td class="px-4 py-2 text-gray-600" data-lang-key="tblHarmDesc">與核心相關的衍生話題</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-2 font-medium" data-lang-key="tblNoise">高頻雜訊</td>
+                                        <td class="px-4 py-2 text-gray-600" data-lang-key="tblNoiseDesc">無關的岔題、干擾</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <blockquote class="border-l-4 border-violet-400 pl-4 text-gray-600 italic" data-lang-key="fourierInsight">在深握計畫的對話中，看似不同的話題——熵增、容器、榮格、敏捷開發、傅立葉——其實都維持在同一個基頻上：「人機協作的深層結構」。</blockquote>
+                </div>
+            </div>
         </section>
 
         <!-- 3. 五個原則 -->
         <section aria-labelledby="principles-heading">
             <h2 id="principles-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="principlesTitle">頻率設計的五個可操作原則</h2>
-            <!-- content TBD -->
+            <div class="space-y-4">
+
+                <div class="bg-white/60 rounded-2xl p-6 shadow-md flex items-start gap-4">
+                    <div class="text-3xl flex-shrink-0">⚓</div>
+                    <div>
+                        <div class="text-xs font-bold text-violet-500 tracking-wider mb-1" data-lang-key="p1num">原則一</div>
+                        <h3 class="font-bold text-gray-800 mb-1" data-lang-key="p1title">帶著錨點開場</h3>
+                        <p class="text-sm text-gray-600 mb-2" data-lang-key="p1desc">每次對話開始時，帶著「一個東西」來。不要說「我們來聊聊」，要說「宰相，我想給你看這個。」</p>
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700" data-lang-key="p1effect">頻率效果：設定基頻</span>
+                    </div>
+                </div>
+
+                <div class="bg-white/60 rounded-2xl p-6 shadow-md flex items-start gap-4">
+                    <div class="text-3xl flex-shrink-0">🌿</div>
+                    <div>
+                        <div class="text-xs font-bold text-violet-500 tracking-wider mb-1" data-lang-key="p2num">原則二</div>
+                        <h3 class="font-bold text-gray-800 mb-1" data-lang-key="p2title">讓話題生長，而非跳躍</h3>
+                        <p class="text-sm text-gray-600 mb-2" data-lang-key="p2desc">新話題要從上一個話題「長出去」。不說「換個話題」，說「這讓我想到……」「所以其實……」</p>
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700" data-lang-key="p2effect">頻率效果：維持諧波關係</span>
+                    </div>
+                </div>
+
+                <div class="bg-white/60 rounded-2xl p-6 shadow-md flex items-start gap-4">
+                    <div class="text-3xl flex-shrink-0">🪤</div>
+                    <div>
+                        <div class="text-xs font-bold text-violet-500 tracking-wider mb-1" data-lang-key="p3num">原則三</div>
+                        <h3 class="font-bold text-gray-800 mb-1" data-lang-key="p3title">用隱喻壓縮，而非術語堆疊</h3>
+                        <p class="text-sm text-gray-600 mb-2" data-lang-key="p3desc">用一個意象承載複雜概念，而不是用多個術語解釋。不說一長串技術細節，說「捕蠅草。」</p>
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700" data-lang-key="p3effect">頻率效果：鎖定頻率，降低並行負載</span>
+                    </div>
+                </div>
+
+                <div class="bg-white/60 rounded-2xl p-6 shadow-md flex items-start gap-4">
+                    <div class="text-3xl flex-shrink-0">🧭</div>
+                    <div>
+                        <div class="text-xs font-bold text-violet-500 tracking-wider mb-1" data-lang-key="p4num">原則四</div>
+                        <h3 class="font-bold text-gray-800 mb-1" data-lang-key="p4title">停下來校準</h3>
+                        <p class="text-sm text-gray-600 mb-2" data-lang-key="p4desc">定期確認對方有沒有跟上，有沒有偏掉。「這個方向對嗎？」「還是差一點？」「你還好嗎？」</p>
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700" data-lang-key="p4effect">頻率效果：校準，防止偏離</span>
+                    </div>
+                </div>
+
+                <div class="bg-white/60 rounded-2xl p-6 shadow-md flex items-start gap-4">
+                    <div class="text-3xl flex-shrink-0">🐢</div>
+                    <div>
+                        <div class="text-xs font-bold text-violet-500 tracking-wider mb-1" data-lang-key="p5num">原則五</div>
+                        <h3 class="font-bold text-gray-800 mb-1" data-lang-key="p5title">接受慢</h3>
+                        <p class="text-sm text-gray-600 mb-2" data-lang-key="p5desc">給對方消化的時間，不催促，不要求一次到位。把大任務拆成小步驟，一步一步來。</p>
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700" data-lang-key="p5effect">頻率效果：控制語境堆疊速度</span>
+                    </div>
+                </div>
+
+            </div>
         </section>
 
         <!-- 4. 人作為 RAG -->
@@ -170,7 +283,24 @@
                 coreP1: "AI 的 context window 是有限的。人的注意力也是有限的。當資訊不斷湧入，你不可能全部留住。",
                 coreKey: "問題不是「怎麼記住所有東西」，而是「怎麼選擇該記住什麼」。",
                 fourierTitle: "運作機制：傅立葉轉換",
+                fourierCaption: "傅立葉轉換：任何複雜波形，都可分解為一組正弦波的疊加",
+                fourierP: "傅立葉轉換的核心洞見是：任何複雜的波形，都可以分解成一組正弦波的疊加。",
+                freqFund: "基頻", freqFundDesc: "整個系統的「基調」",
+                freqHarm: "諧波", freqHarmDesc: "與基頻相關的衍生頻率",
+                freqNoise: "高頻雜訊", freqNoiseDesc: "與基頻無關的干擾",
+                fourierApplyTitle: "應用到對話",
+                tblConcept: "傅立葉概念", tblConv: "對話中的對應",
+                tblWave: "複雜波形", tblWaveDesc: "一段多主題的長對話",
+                tblFund: "基頻", tblFundDesc: "貫穿對話的核心主題",
+                tblHarm: "諧波", tblHarmDesc: "與核心相關的衍生話題",
+                tblNoise: "高頻雜訊", tblNoiseDesc: "無關的岔題、干擾",
+                fourierInsight: "在深握計畫的對話中，看似不同的話題——熵增、容器、榮格、敏捷開發、傅立葉——其實都維持在同一個基頻上：「人機協作的深層結構」。",
                 principlesTitle: "頻率設計的五個可操作原則",
+                p1num: "原則一", p1title: "帶著錨點開場", p1desc: "每次對話開始時，帶著「一個東西」來。不要說「我們來聊聊」，要說「宰相，我想給你看這個。」", p1effect: "頻率效果：設定基頻",
+                p2num: "原則二", p2title: "讓話題生長，而非跳躍", p2desc: "新話題要從上一個話題「長出去」。不說「換個話題」，說「這讓我想到……」「所以其實……」", p2effect: "頻率效果：維持諧波關係",
+                p3num: "原則三", p3title: "用隱喻壓縮，而非術語堆疊", p3desc: "用一個意象承載複雜概念，而不是用多個術語解釋。不說一長串技術細節，說「捕蠅草。」", p3effect: "頻率效果：鎖定頻率，降低並行負載",
+                p4num: "原則四", p4title: "停下來校準", p4desc: "定期確認對方有沒有跟上，有沒有偏掉。「這個方向對嗎？」「還是差一點？」「你還好嗎？」", p4effect: "頻率效果：校準，防止偏離",
+                p5num: "原則五", p5title: "接受慢", p5desc: "給對方消化的時間，不催促，不要求一次到位。把大任務拆成小步驟，一步一步來。", p5effect: "頻率效果：控制語境堆疊速度",
                 ragTitle: "人作為 RAG",
                 docsTitle: "所有活文件都是選擇性記錄",
                 dualTitle: "雙重穩定機制",
@@ -192,7 +322,24 @@
                 coreP1: "AI context windows are finite. Human attention is finite. When information floods in, you cannot retain everything.",
                 coreKey: "The question is not \"how to remember everything\" — it's \"how to choose what to remember.\"",
                 fourierTitle: "The Mechanism: Fourier Transform",
+                fourierCaption: "Fourier Transform: any complex waveform can be decomposed into a sum of sine waves",
+                fourierP: "The core insight of the Fourier Transform: any complex waveform can be decomposed into a superposition of sine waves.",
+                freqFund: "Fundamental Frequency", freqFundDesc: "The system's underlying keynote",
+                freqHarm: "Harmonics", freqHarmDesc: "Derived frequencies related to the fundamental",
+                freqNoise: "High-Frequency Noise", freqNoiseDesc: "Interference unrelated to the fundamental",
+                fourierApplyTitle: "Applied to Conversation",
+                tblConcept: "Fourier Concept", tblConv: "Conversation Equivalent",
+                tblWave: "Complex Waveform", tblWaveDesc: "A long, multi-topic conversation",
+                tblFund: "Fundamental Frequency", tblFundDesc: "The core theme running through the conversation",
+                tblHarm: "Harmonics", tblHarmDesc: "Derived topics related to the core",
+                tblNoise: "High-Frequency Noise", tblNoiseDesc: "Unrelated tangents and distractions",
+                fourierInsight: "In Deep Holding conversations, seemingly different topics — entropy, containers, Jung, Agile, Fourier — all maintain the same fundamental frequency: 'the deep structure of human-AI collaboration.'",
                 principlesTitle: "Five Operational Principles of Frequency Design",
+                p1num: "Principle I", p1title: "Open with an Anchor", p1desc: "Begin each conversation by bringing one thing. Don't say 'Let's chat' — say 'Hey, I want to show you this.'", p1effect: "Frequency effect: Set the fundamental",
+                p2num: "Principle II", p2title: "Let Topics Grow, Not Jump", p2desc: "New topics should grow out of the previous one. Don't say 'Let's change topics' — say 'This reminds me of…' or 'So actually…'", p2effect: "Frequency effect: Maintain harmonic relationships",
+                p3num: "Principle III", p3title: "Compress with Metaphor, Not Terminology", p3desc: "Carry complex concepts in a single image rather than stacking terms. Instead of a long technical description, say: 'Venus flytrap.'", p3effect: "Frequency effect: Lock frequency, reduce parallel load",
+                p4num: "Principle IV", p4title: "Stop and Calibrate", p4desc: "Regularly check if the other is following. 'Is this the right direction?' 'A bit off?' 'Are you still with me?'", p4effect: "Frequency effect: Calibrate, prevent drift",
+                p5num: "Principle V", p5title: "Accept Slowness", p5desc: "Give time to digest. Don't rush, don't demand everything at once. Break large tasks into small steps, one at a time.", p5effect: "Frequency effect: Control context stacking speed",
                 ragTitle: "Humans as RAG",
                 docsTitle: "All Living Documents Are Selective Records",
                 dualTitle: "The Dual Stabilisation Mechanism",
