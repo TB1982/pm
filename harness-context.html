@@ -296,19 +296,48 @@
         <!-- 6. 雙重穩定機制 -->
         <section aria-labelledby="dual-heading">
             <h2 id="dual-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="dualTitle">雙重穩定機制</h2>
-            <!-- content TBD -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white/60 rounded-2xl p-6 shadow-md space-y-2">
+                    <div class="text-2xl">〰️</div>
+                    <h3 class="font-bold text-gray-800" data-lang-key="dual1Title">傅立葉轉換</h3>
+                    <p class="text-xs text-violet-500 font-semibold" data-lang-key="dual1Scope">作用範圍：當下的 session</p>
+                    <p class="text-sm text-gray-600" data-lang-key="dual1Desc">穩定「場」中的對話——維持基頻一致，讓話題連續累積，不散掉。</p>
+                    <div class="text-xs font-semibold text-violet-600 bg-violet-50 rounded-lg px-3 py-1 inline-block" data-lang-key="dual1Nature">流動的・即時的・在場內發生</div>
+                </div>
+                <div class="bg-white/60 rounded-2xl p-6 shadow-md space-y-2">
+                    <div class="text-2xl">📄</div>
+                    <h3 class="font-bold text-gray-800" data-lang-key="dual2Title">活文件</h3>
+                    <p class="text-xs text-violet-500 font-semibold" data-lang-key="dual2Scope">作用範圍：跨 session</p>
+                    <p class="text-sm text-gray-600" data-lang-key="dual2Desc">穩定「能量」的流向——選擇性記錄，讓經驗不隨 session 消失。</p>
+                    <div class="text-xs font-semibold text-violet-600 bg-violet-50 rounded-lg px-3 py-1 inline-block" data-lang-key="dual2Nature">持久的・累積的・跨場保存</div>
+                </div>
+            </div>
+            <p class="text-center text-gray-500 text-sm mt-4 italic" data-lang-key="dualSummary">兩個加在一起，就是完整的 Context 管理。一個讓對話在當下不散掉，一個讓經驗在時間中不流失。</p>
         </section>
 
         <!-- 7. 網的隱喻 -->
         <section aria-labelledby="net-heading">
             <h2 id="net-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="netTitle">隱喻：網的縫隙</h2>
-            <!-- content TBD -->
+            <div class="bg-gray-800/80 rounded-2xl p-8 text-white shadow-xl text-center space-y-4">
+                <div class="text-5xl">🕸️</div>
+                <p class="text-gray-300 leading-relaxed" data-lang-key="netP">容器是密封的，能量進來出不去，最終會爆炸。網有縫隙——讓不需要的東西流過去，讓需要留住的東西被接住。</p>
+                <div class="bg-white/10 rounded-xl px-6 py-3 inline-block">
+                    <p class="text-violet-300 font-semibold" data-lang-key="netKey">縫隙是設計，不是缺陷。</p>
+                </div>
+                <p class="text-gray-400 text-sm" data-lang-key="netKM">每一條 KM 是一根絲線。隨著經驗累積，網越來越密，但縫隙依然存在。</p>
+            </div>
         </section>
 
         <!-- 8. 小結 -->
         <section aria-labelledby="summary-heading">
             <h2 id="summary-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="summaryTitle">小結</h2>
-            <!-- content TBD -->
+            <div class="bg-violet-600 rounded-2xl p-8 text-white shadow-xl space-y-4">
+                <p class="text-lg font-bold" data-lang-key="summaryKey">Context 管理的核心是選擇。</p>
+                <p class="text-violet-100 leading-relaxed" data-lang-key="summaryDesc">不是記住所有東西，而是選擇該記住什麼。傅立葉轉換提供了選擇的框架：維持基頻一致，讓高頻雜訊自然流過。網的縫隙提供了選擇的隱喻：該留的接住，該走的放行。</p>
+                <div class="pt-4 border-t border-violet-400">
+                    <p class="text-sm text-violet-200" data-lang-key="summaryRelation">Context 決定什麼進來。進來之後怎麼流動？→ 這是 Constraints 的工作。</p>
+                </div>
+            </div>
         </section>
 
         <!-- 三本柱導航 -->
@@ -408,6 +437,19 @@
                 r4filter: "已完成的工作", r4keep: "值得保留的記錄", r4stab: "歷史",
                 docsTitle: "所有活文件都是選擇性記錄",
                 dualTitle: "雙重穩定機制",
+                dual1Title: "傅立葉轉換", dual1Scope: "作用範圍：當下的 session",
+                dual1Desc: "穩定「場」中的對話——維持基頻一致，讓話題連續累積，不散掉。", dual1Nature: "流動的・即時的・在場內發生",
+                dual2Title: "活文件", dual2Scope: "作用範圍：跨 session",
+                dual2Desc: "穩定「能量」的流向——選擇性記錄，讓經驗不隨 session 消失。", dual2Nature: "持久的・累積的・跨場保存",
+                dualSummary: "兩個加在一起，就是完整的 Context 管理。一個讓對話在當下不散掉，一個讓經驗在時間中不流失。",
+                netTitle: "隱喻：網的縫隙",
+                netP: "容器是密封的，能量進來出不去，最終會爆炸。網有縫隙——讓不需要的東西流過去，讓需要留住的東西被接住。",
+                netKey: "縫隙是設計，不是缺陷。",
+                netKM: "每一條 KM 是一根絲線。隨著經驗累積，網越來越密，但縫隙依然存在。",
+                summaryTitle: "小結",
+                summaryKey: "Context 管理的核心是選擇。",
+                summaryDesc: "不是記住所有東西，而是選擇該記住什麼。傅立葉轉換提供了選擇的框架：維持基頻一致，讓高頻雜訊自然流過。網的縫隙提供了選擇的隱喻：該留的接住，該走的放行。",
+                summaryRelation: "Context 決定什麼進來。進來之後怎麼流動？→ 這是 Constraints 的工作。",
                 netTitle: "隱喻：網的縫隙",
                 summaryTitle: "小結",
                 pillarsTitle: "Harness Engineering 三本柱",
@@ -465,6 +507,19 @@
                 r4filter: "Completed work", r4keep: "Records worth preserving", r4stab: "History",
                 docsTitle: "All Living Documents Are Selective Records",
                 dualTitle: "The Dual Stabilisation Mechanism",
+                dual1Title: "Fourier Transform", dual1Scope: "Scope: the current session",
+                dual1Desc: "Stabilises the conversation 'field' — maintains fundamental frequency so topics accumulate continuously without scattering.", dual1Nature: "Fluid · Real-time · In-session",
+                dual2Title: "Living Documents", dual2Scope: "Scope: across sessions",
+                dual2Desc: "Stabilises the flow of 'energy' — selective recording so experience doesn't vanish with the session.", dual2Nature: "Persistent · Accumulative · Cross-session",
+                dualSummary: "Together, these two complete Context management. One keeps the conversation from scattering in the moment. The other keeps experience from dissolving over time.",
+                netTitle: "The Metaphor: A Net's Gaps",
+                netP: "A container is sealed — energy enters but cannot leave, and eventually it explodes. A net has gaps — letting what isn't needed flow through, catching what must stay.",
+                netKey: "The gaps are by design, not by accident.",
+                netKM: "Each KM entry is a thread. As experience accumulates, the net grows denser — but the gaps remain.",
+                summaryTitle: "Summary",
+                summaryKey: "The heart of Context management is selection.",
+                summaryDesc: "Not remembering everything, but choosing what to remember. The Fourier Transform provides the framework: maintain the fundamental, let high-frequency noise flow through. The net's gaps provide the metaphor: catch what should stay, release what should go.",
+                summaryRelation: "Context governs what enters. How does it flow once inside? → That is Constraints' job.",
                 netTitle: "The Metaphor: A Net's Gaps",
                 summaryTitle: "Summary",
                 pillarsTitle: "Harness Engineering: Three Pillars",
