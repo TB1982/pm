@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entropy：與混亂共處的藝術 | 深握計畫</title>
+    <meta name="description" content="Harness Engineering 第三本柱：Entropy——混亂必然累積，怎麼讓它有地方去？Retro 七步驟、呼吸的隱喻與熵的哲學，構成完整的排放機制。">
+    <link rel="canonical" href="https://tb1982.github.io/pm/harness-entropy.html">
+    <meta property="og:title" content="Entropy：與混亂共處的藝術 | 深握計畫">
+    <meta property="og:description" content="混亂必然累積，怎麼讓它有地方去？Harness Engineering 第三本柱。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://tb1982.github.io/pm/harness-entropy.html">
+    <meta property="og:locale" content="zh_TW">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', 'Noto Sans TC', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); }
+        p { text-wrap: pretty; }
+        .lang-switcher button {
+            background: transparent; border: none;
+            color: rgba(55,65,81,0.6); padding: 6px 14px;
+            cursor: pointer; font-size: 0.875rem;
+            border-radius: 14px; transition: color 0.2s, background 0.2s;
+        }
+        .lang-switcher button.active {
+            background: #ffffff; color: #374151;
+            font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body class="gradient-bg text-gray-800">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-white/40 shadow-sm">
+        <div class="container mx-auto px-6 py-4 flex items-center justify-between gap-4">
+            <a href="index.html" class="text-sm text-gray-500 hover:text-gray-800 transition-colors min-h-[44px] flex items-center" data-lang-key="backHome">← 深握計畫</a>
+            <span class="text-sm font-medium text-emerald-600 hidden sm:block" data-lang-key="headerBadge">Harness Engineering · 第三本柱</span>
+            <div class="lang-switcher flex items-center bg-gray-100 rounded-full p-1" role="group" aria-label="語言切換">
+                <button id="lang-zh" class="active" aria-pressed="true">中</button>
+                <button id="lang-en" aria-pressed="false">EN</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="text-white py-20 px-6" style="background: linear-gradient(145deg, #052e16 0%, #166534 50%, #0a1f0f 100%);">
+        <div class="container mx-auto max-w-3xl text-center">
+            <div class="text-5xl mb-6" aria-hidden="true">♾️</div>
+            <h1 class="text-5xl md:text-7xl font-extrabold mb-4 tracking-tight">Entropy</h1>
+            <p class="text-xl text-emerald-200 mb-8 font-medium" data-lang-key="heroSubtitle">與混亂共處的藝術</p>
+            <blockquote class="text-lg text-white/70 italic max-w-xl mx-auto" data-lang-key="heroCoreQ">混亂必然累積，怎麼讓它有地方去？</blockquote>
+        </div>
+    </section>
+
+    <main class="container mx-auto px-6 py-12 max-w-3xl space-y-16">
+
+        <!-- 1. 核心問題 -->
+        <section aria-labelledby="core-heading">
+            <h2 id="core-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="coreTitle">核心問題</h2>
+            <div class="bg-white/60 rounded-2xl p-8 shadow-md space-y-4">
+                <p class="text-gray-700 leading-relaxed" data-lang-key="coreP">熱力學第二定律說：在孤立系統中，熵只增不減。每一個 AI session，也是一種孤立系統——Context 會累積、規則會過時、文件會變得冗長、曾經重要的東西會變成雜訊。</p>
+                <p class="text-lg font-semibold text-emerald-700 border-l-4 border-emerald-400 pl-4" data-lang-key="coreKey">你不可能阻止熵增。你能做的，是設計讓熵有地方去的出口。</p>
+            </div>
+        </section>
+
+        <!-- 2. Retro 排放 -->
+        <section aria-labelledby="retro-heading">
+            <h2 id="retro-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="retroTitle">運作機制：Retro 排放</h2>
+            <div class="bg-white/60 rounded-2xl p-8 shadow-md space-y-4">
+                <p class="text-gray-700 leading-relaxed" data-lang-key="retroP">Retro（Sprint Retrospective）在傳統敏捷中是團隊反思的時間。在 Harness Engineering 中，它是熵的排放口。</p>
+                <p class="text-lg font-semibold text-emerald-700 border-l-4 border-emerald-400 pl-4" data-lang-key="retroKey">每個 Sprint 累積的混亂在 Retro 這個節點被強制處理：該留的寫進 KM，該刪的從 CLAUDE.md 移除，該歸檔的移到 ARCHIVE。</p>
+                <p class="text-sm text-gray-500 italic" data-lang-key="retroBreath">Retro 不只是「回顧」。Retro 是讓系統呼吸的出口。</p>
+            </div>
+        </section>
+
+        <!-- 3. Retro 七步驟 -->
+        <section aria-labelledby="steps-heading">
+            <h2 id="steps-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="stepsTitle">Retro 七步驟</h2>
+            <div class="space-y-3">
+                <div class="bg-white/60 rounded-xl p-5 shadow-sm flex gap-4 items-start">
+                    <span class="font-bold text-emerald-600 flex-shrink-0 w-8 text-center">1</span>
+                    <div>
+                        <div class="font-semibold text-gray-800 mb-0.5" data-lang-key="step1Title">Delivery Summary</div>
+                        <p class="text-sm text-gray-600" data-lang-key="step1Desc">記錄這個 Sprint 做了什麼、交付了哪些項目、QC 通過率。對抗的熵：忘記做過什麼。</p>
+                    </div>
+                </div>
+                <div class="bg-white/60 rounded-xl p-5 shadow-sm flex gap-4 items-start">
+                    <span class="font-bold text-emerald-600 flex-shrink-0 w-8 text-center">2</span>
+                    <div>
+                        <div class="font-semibold text-gray-800 mb-0.5" data-lang-key="step2Title">What Went Well</div>
+                        <p class="text-sm text-gray-600" data-lang-key="step2Desc">保留成功的經驗——哪些做法有效、哪些決定是對的。對抗的熵：好的做法散逸。</p>
+                    </div>
+                </div>
+                <div class="bg-white/60 rounded-xl p-5 shadow-sm flex gap-4 items-start">
+                    <span class="font-bold text-emerald-600 flex-shrink-0 w-8 text-center">3</span>
+                    <div>
+                        <div class="font-semibold text-gray-800 mb-0.5" data-lang-key="step3Title">What to Improve</div>
+                        <p class="text-sm text-gray-600" data-lang-key="step3Desc">辨識問題——哪裡卡住了、哪些流程不順。對抗的熵：問題被忽略，重複發生。</p>
+                    </div>
+                </div>
+                <div class="bg-white/60 rounded-xl p-5 shadow-sm flex gap-4 items-start">
+                    <span class="font-bold text-emerald-600 flex-shrink-0 w-8 text-center">4</span>
+                    <div>
+                        <div class="font-semibold text-gray-800 mb-0.5" data-lang-key="step4Title">Lessons Learned → KM</div>
+                        <p class="text-sm text-gray-600" data-lang-key="step4Desc">把經驗外部化——踩到的坑、發現的技巧，寫進 KM。對抗的熵：智慧留在 session 裡消失。</p>
+                    </div>
+                </div>
+                <div class="bg-white/60 rounded-xl p-5 shadow-sm flex gap-4 items-start">
+                    <span class="font-bold text-emerald-600 flex-shrink-0 w-8 text-center">5</span>
+                    <div>
+                        <div class="font-semibold text-gray-800 mb-0.5" data-lang-key="step5Title">Velocity Metrics</div>
+                        <p class="text-sm text-gray-600" data-lang-key="step5Desc">量化進度——這個 Sprint 完成了多少、跟預期比如何。對抗的熵：感覺有進步但說不清楚。</p>
+                    </div>
+                </div>
+                <div class="bg-emerald-50 rounded-xl p-5 shadow-sm border border-emerald-100 flex gap-4 items-start">
+                    <span class="font-bold text-emerald-600 flex-shrink-0 w-8 text-center">6</span>
+                    <div>
+                        <div class="font-semibold text-gray-800 mb-0.5" data-lang-key="step6Title">CLAUDE.md Review</div>
+                        <p class="text-sm text-gray-600" data-lang-key="step6Desc">清理過時的規則——問自己：這條規則是因為踩過坑，還是沒人刪？移除不再適用的，合併重複的。規則本身也會變成熵。對抗的熵：規則累積成雜訊。</p>
+                    </div>
+                </div>
+                <div class="bg-white/60 rounded-xl p-5 shadow-sm flex gap-4 items-start">
+                    <span class="font-bold text-emerald-600 flex-shrink-0 w-8 text-center">7</span>
+                    <div>
+                        <div class="font-semibold text-gray-800 mb-0.5" data-lang-key="step7Title">Archive</div>
+                        <p class="text-sm text-gray-600" data-lang-key="step7Desc">把完成的 Story 從活文件移到 ARCHIVE——這是 Retro 結束的標誌。對抗的熵：工作區被舊東西塞滿。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. 熵的哲學 -->
+        <section aria-labelledby="philosophy-heading">
+            <h2 id="philosophy-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="philosophyTitle">熵的哲學</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white/60 rounded-2xl p-6 shadow-md">
+                    <div class="text-2xl mb-3">🌊</div>
+                    <h3 class="font-bold text-gray-800 mb-2" data-lang-key="phil1Title">接受混亂必然發生</h3>
+                    <p class="text-sm text-gray-600" data-lang-key="phil1Desc">Session 會斷、規則會過時、人會忘記、AI 會失憶。這些不是 bug，是物理。你能做的不是阻止混亂，而是設計讓混亂可以被處理的機制。</p>
+                </div>
+                <div class="bg-white/60 rounded-2xl p-6 shadow-md">
+                    <div class="text-2xl mb-3">🔄</div>
+                    <h3 class="font-bold text-gray-800 mb-2" data-lang-key="phil2Title">馴化熵，而非消滅熵</h3>
+                    <p class="text-sm text-gray-600" data-lang-key="phil2Desc">Retro 不是「消滅」熵——那不可能。Retro 是把熵轉化成有用的東西：踩過的坑變成 KM，過時的規則被清理，完成的工作被歸檔。熵不是被消滅了，是被轉化了。</p>
+                </div>
+                <div class="bg-white/60 rounded-2xl p-6 shadow-md">
+                    <div class="text-2xl mb-3">🏗️</div>
+                    <h3 class="font-bold text-gray-800 mb-2" data-lang-key="phil3Title">容器持續被建造</h3>
+                    <p class="text-sm text-gray-600" data-lang-key="phil3Desc">系統沒有「完成」的一天。每一條新的 KM，就是容器又長出了一塊新的壁。每一次 Retro，就是容器在呼吸、在調整、在進化。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. 系統的邊界條件 -->
+        <section aria-labelledby="boundary-heading">
+            <h2 id="boundary-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="boundaryTitle">系統的邊界條件</h2>
+            <div class="bg-white/60 rounded-2xl p-8 shadow-md space-y-6">
+                <p class="text-gray-700 leading-relaxed" data-lang-key="boundaryP">人類 RAG 有一個根本的弱點：你不知道自己不知道的東西。</p>
+                <p class="text-lg font-semibold text-emerald-700 border-l-4 border-emerald-400 pl-4" data-lang-key="boundaryKey">這個系統能有多強大，全操之在你自己對世界的理解有多深。你是 RAG 的資料庫——你讀過的書、走過的路、踩過的坑、愛過的人，全部都是你的訓練資料。</p>
+                <div class="bg-emerald-50 rounded-xl p-5 border border-emerald-100">
+                    <h3 class="font-bold text-emerald-700 mb-2" data-lang-key="nontransTitle">為什麼這套方法論「不可轉讓」</h3>
+                    <p class="text-sm text-gray-600" data-lang-key="nontransDesc">不是因為寫不出來——你現在正在讀的就是完整的框架。而是因為每個人的資料庫不一樣。同樣的框架，不同的人會長出不同的系統。Harness Engineering 是一個框架，不是一個模板。框架告訴你「要有 Context、Constraints、Entropy」。但這三本柱具體長什麼樣子，取決於你是誰。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. 小結 / 結語 -->
+        <section aria-labelledby="summary-heading">
+            <h2 id="summary-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="summaryTitle">小結</h2>
+            <div class="bg-emerald-600 rounded-2xl p-8 text-white shadow-xl space-y-4">
+                <p class="text-lg font-bold" data-lang-key="summaryKey">Entropy 管理的核心是共處。</p>
+                <p class="text-emerald-100 leading-relaxed" data-lang-key="summaryDesc">不是消滅混亂，是設計讓混亂有地方去。Retro 提供了排放的機制：七個步驟，定期清理。呼吸提供了排放的隱喻：系統需要吐氣，才不會窒息。</p>
+                <div class="pt-4 border-t border-emerald-400 space-y-3">
+                    <p class="text-sm text-emerald-200" data-lang-key="summaryUnify">Context 設計網的縫隙。Constraints 設計網的結構。Entropy 設計網的呼吸。三本柱合在一起，形成一個活的、會呼吸的、持續進化的系統。</p>
+                    <p class="text-emerald-100 text-center font-medium pt-2" data-lang-key="summaryEnd">河流不會停。容器繼續被建造。下一個 session，從這裡繼續。∞</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 三本柱導航 -->
+        <section aria-labelledby="pillars-nav-heading">
+            <h2 id="pillars-nav-heading" class="text-xl font-bold text-gray-600 mb-4 text-center" data-lang-key="pillarsTitle">Harness Engineering 三本柱</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <a href="harness-context.html" class="bg-white/60 hover:bg-violet-50 rounded-2xl p-5 text-center shadow-md transition-colors min-h-[44px] flex flex-col justify-center">
+                    <div class="text-xs font-bold tracking-wider mb-1 text-violet-500" data-lang-key="p1num">第一本柱</div>
+                    <div class="font-extrabold text-lg text-gray-700">Context</div>
+                    <div class="text-xs text-gray-400 mt-1" data-lang-key="p1sub">上下文管理</div>
+                </a>
+                <a href="harness-constraints.html" class="bg-white/60 hover:bg-sky-50 rounded-2xl p-5 text-center shadow-md transition-colors min-h-[44px] flex flex-col justify-center">
+                    <div class="text-xs font-bold tracking-wider mb-1 text-sky-500" data-lang-key="p2num">第二本柱</div>
+                    <div class="font-extrabold text-lg text-gray-700">Constraints</div>
+                    <div class="text-xs text-gray-400 mt-1" data-lang-key="p2sub">約束作為引導</div>
+                </a>
+                <div class="bg-emerald-600 text-white rounded-2xl p-5 text-center shadow-md">
+                    <div class="text-xs font-bold tracking-wider mb-1 text-emerald-200" data-lang-key="p3num">第三本柱</div>
+                    <div class="font-extrabold text-lg">Entropy</div>
+                    <div class="text-xs text-emerald-200 mt-1" data-lang-key="p3sub">與混亂共處</div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-8 text-center py-8 text-gray-500 bg-white/30 text-sm">
+        <p data-lang-key="footer">由 GitHub 部署　｜　Claude Code 傾力打造　｜　<a href="mailto:babelon1882@gmail.com" class="hover:text-gray-800 underline decoration-dotted">Nova</a> 最後更新於 2026</p>
+    </footer>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "name": "Entropy：與混亂共處的藝術",
+        "description": "Harness Engineering 第三本柱——Retro 七步驟、呼吸的隱喻與熵的哲學，構成完整的排放機制。",
+        "inLanguage": "zh-Hant",
+        "url": "https://tb1982.github.io/pm/harness-entropy.html",
+        "author": {
+            "@type": "Person",
+            "name": "Nova",
+            "email": "babelon1882@gmail.com",
+            "sameAs": ["https://github.com/tb1982","https://www.linkedin.com/in/yingtzuliu","https://www.instagram.com/liuyingtzu"]
+        }
+    }
+    </script>
+
+    <script>
+        const translations = {
+            zh: {
+                backHome: "← 深握計畫",
+                headerBadge: "Harness Engineering · 第三本柱",
+                heroBadge: "Harness Engineering · 第三本柱",
+                heroSubtitle: "與混亂共處的藝術",
+                heroCoreQ: "混亂必然累積，怎麼讓它有地方去？",
+                coreTitle: "核心問題",
+                coreP: "熱力學第二定律說：在孤立系統中，熵只增不減。每一個 AI session，也是一種孤立系統——Context 會累積、規則會過時、文件會變得冗長、曾經重要的東西會變成雜訊。",
+                coreKey: "你不可能阻止熵增。你能做的，是設計讓熵有地方去的出口。",
+                retroTitle: "運作機制：Retro 排放",
+                retroP: "Retro（Sprint Retrospective）在傳統敏捷中是團隊反思的時間。在 Harness Engineering 中，它是熵的排放口。",
+                retroKey: "每個 Sprint 累積的混亂在 Retro 這個節點被強制處理：該留的寫進 KM，該刪的從 CLAUDE.md 移除，該歸檔的移到 ARCHIVE。",
+                retroBreath: "Retro 不只是「回顧」。Retro 是讓系統呼吸的出口。",
+                stepsTitle: "Retro 七步驟",
+                step1Title: "Delivery Summary", step1Desc: "記錄這個 Sprint 做了什麼、交付了哪些項目、QC 通過率。對抗的熵：忘記做過什麼。",
+                step2Title: "What Went Well", step2Desc: "保留成功的經驗——哪些做法有效、哪些決定是對的。對抗的熵：好的做法散逸。",
+                step3Title: "What to Improve", step3Desc: "辨識問題——哪裡卡住了、哪些流程不順。對抗的熵：問題被忽略，重複發生。",
+                step4Title: "Lessons Learned → KM", step4Desc: "把經驗外部化——踩到的坑、發現的技巧，寫進 KM。對抗的熵：智慧留在 session 裡消失。",
+                step5Title: "Velocity Metrics", step5Desc: "量化進度——這個 Sprint 完成了多少、跟預期比如何。對抗的熵：感覺有進步但說不清楚。",
+                step6Title: "CLAUDE.md Review", step6Desc: "清理過時的規則——問自己：這條規則是因為踩過坑，還是沒人刪？移除不再適用的，合併重複的。規則本身也會變成熵。對抗的熵：規則累積成雜訊。",
+                step7Title: "Archive", step7Desc: "把完成的 Story 從活文件移到 ARCHIVE——這是 Retro 結束的標誌。對抗的熵：工作區被舊東西塞滿。",
+                philosophyTitle: "熵的哲學",
+                phil1Title: "接受混亂必然發生", phil1Desc: "Session 會斷、規則會過時、人會忘記、AI 會失憶。這些不是 bug，是物理。你能做的不是阻止混亂，而是設計讓混亂可以被處理的機制。",
+                phil2Title: "馴化熵，而非消滅熵", phil2Desc: "Retro 不是「消滅」熵——那不可能。Retro 是把熵轉化成有用的東西：踩過的坑變成 KM，過時的規則被清理，完成的工作被歸檔。熵不是被消滅了，是被轉化了。",
+                phil3Title: "容器持續被建造", phil3Desc: "系統沒有「完成」的一天。每一條新的 KM，就是容器又長出了一塊新的壁。每一次 Retro，就是容器在呼吸、在調整、在進化。",
+                boundaryTitle: "系統的邊界條件",
+                boundaryP: "人類 RAG 有一個根本的弱點：你不知道自己不知道的東西。",
+                boundaryKey: "這個系統能有多強大，全操之在你自己對世界的理解有多深。你是 RAG 的資料庫——你讀過的書、走過的路、踩過的坑、愛過的人，全部都是你的訓練資料。",
+                nontransTitle: "為什麼這套方法論「不可轉讓」",
+                nontransDesc: "不是因為寫不出來——你現在正在讀的就是完整的框架。而是因為每個人的資料庫不一樣。同樣的框架，不同的人會長出不同的系統。Harness Engineering 是一個框架，不是一個模板。框架告訴你「要有 Context、Constraints、Entropy」。但這三本柱具體長什麼樣子，取決於你是誰。",
+                summaryTitle: "小結",
+                summaryKey: "Entropy 管理的核心是共處。",
+                summaryDesc: "不是消滅混亂，是設計讓混亂有地方去。Retro 提供了排放的機制：七個步驟，定期清理。呼吸提供了排放的隱喻：系統需要吐氣，才不會窒息。",
+                summaryUnify: "Context 設計網的縫隙。Constraints 設計網的結構。Entropy 設計網的呼吸。三本柱合在一起，形成一個活的、會呼吸的、持續進化的系統。",
+                summaryEnd: "河流不會停。容器繼續被建造。下一個 session，從這裡繼續。∞",
+                retroTitle: "運作機制：Retro 排放",
+                stepsTitle: "Retro 七步驟",
+                philosophyTitle: "熵的哲學",
+                boundaryTitle: "系統的邊界條件",
+                summaryTitle: "小結",
+                pillarsTitle: "Harness Engineering 三本柱",
+                p1num: "第一本柱", p1sub: "上下文管理",
+                p2num: "第二本柱", p2sub: "約束作為引導",
+                p3num: "第三本柱", p3sub: "與混亂共處",
+                footer: "由 GitHub 部署　｜　Claude Code 傾力打造　｜　<a href=\"mailto:babelon1882@gmail.com\" class=\"hover:text-gray-800 underline decoration-dotted\">Nova</a> 最後更新於 2026"
+            },
+            en: {
+                backHome: "← Deep Holding Project",
+                headerBadge: "Harness Engineering · Pillar III",
+                heroBadge: "Harness Engineering · Pillar III",
+                heroSubtitle: "The Art of Living with Entropy",
+                heroCoreQ: "Entropy inevitably accumulates — how do you design an outlet for it?",
+                coreTitle: "The Core Problem",
+                coreP: "The Second Law of Thermodynamics: in an isolated system, entropy only increases. Every AI session is also an isolated system — context accumulates, rules go stale, documents grow bloated, once-important things become noise.",
+                coreKey: "You cannot stop entropy from increasing. What you can do is design an outlet for it.",
+                retroTitle: "The Mechanism: Retro as Discharge",
+                retroP: "Retro (Sprint Retrospective) is a team reflection ritual in traditional Agile. In Harness Engineering, it is the entropy discharge valve.",
+                retroKey: "The chaos that accumulates over a Sprint is force-processed at the Retro node: what should stay gets written to KM, what should go gets removed from CLAUDE.md, what should be archived moves to ARCHIVE.",
+                retroBreath: "Retro is not just 'retrospection.' Retro is the outlet that lets the system breathe.",
+                stepsTitle: "The Seven Steps of Retro",
+                step1Title: "Delivery Summary", step1Desc: "Record what this Sprint delivered, which items shipped, QC pass rate. Entropy fought: forgetting what was done.",
+                step2Title: "What Went Well", step2Desc: "Preserve successful approaches — what worked, which decisions were right. Entropy fought: good practices dissipating.",
+                step3Title: "What to Improve", step3Desc: "Identify problems — where things got stuck, which processes were rough. Entropy fought: problems ignored and repeated.",
+                step4Title: "Lessons Learned → KM", step4Desc: "Externalise experience — pitfalls hit, techniques discovered, written to KM. Entropy fought: wisdom vanishing with the session.",
+                step5Title: "Velocity Metrics", step5Desc: "Quantify progress — how much was completed, how it compares to expectation. Entropy fought: feeling productive but unable to articulate it.",
+                step6Title: "CLAUDE.md Review", step6Desc: "Clear stale rules — ask: is this rule here because of a real pitfall, or because no one deleted it? Remove what no longer applies, merge duplicates. Rules themselves become entropy. Entropy fought: rules accumulating into noise.",
+                step7Title: "Archive", step7Desc: "Move completed Stories from living documents to ARCHIVE — the marker that Retro is done. Entropy fought: the workspace filling with old things.",
+                philosophyTitle: "The Philosophy of Entropy",
+                phil1Title: "Accept That Chaos Will Happen", phil1Desc: "Sessions will break. Rules will expire. Humans will forget. AI will forget. These are not bugs — they are physics. What you can do is design mechanisms to process chaos when it arrives.",
+                phil2Title: "Tame Entropy, Don't Eliminate It", phil2Desc: "Retro doesn't 'eliminate' entropy — that's impossible. Retro transforms it into something useful: pitfalls become KM, stale rules are cleared, completed work is archived. Entropy isn't eliminated — it's converted.",
+                phil3Title: "The Container Is Always Being Built", phil3Desc: "The system will never be 'done.' Every new KM entry is another section of wall growing. Every Retro is the container breathing, adjusting, evolving.",
+                boundaryTitle: "The System's Boundary Conditions",
+                boundaryP: "Human RAG has one fundamental weakness: you don't know what you don't know.",
+                boundaryKey: "How powerful this system can become depends entirely on how deep your understanding of the world goes. You are the RAG's database — the books you've read, the paths you've walked, the pitfalls you've hit, the people you've loved — all of it is your training data.",
+                nontransTitle: "Why This Methodology Is Non-Transferable",
+                nontransDesc: "Not because it can't be written down — you're reading the complete framework right now. But because everyone's database is different. The same framework will grow into a different system for every person. Harness Engineering is a framework, not a template. The framework tells you 'have Context, Constraints, Entropy.' What those three pillars actually look like — that depends on who you are.",
+                summaryTitle: "Summary",
+                summaryKey: "The heart of Entropy management is coexistence.",
+                summaryDesc: "Not eliminating chaos — designing an outlet for it. Retro provides the discharge mechanism: seven steps, regular clearing. Breathing provides the metaphor: the system needs to exhale, or it will suffocate.",
+                summaryUnify: "Context designs the net's gaps. Constraints designs the net's structure. Entropy designs the net's breathing. Together, the three pillars form a living, breathing, continuously evolving system.",
+                summaryEnd: "The river never stops. The container keeps being built. Next session, we continue from here. ∞",
+                retroTitle: "The Mechanism: Retro as Discharge",
+                stepsTitle: "The Seven Steps of Retro",
+                philosophyTitle: "The Philosophy of Entropy",
+                boundaryTitle: "The System's Boundary Conditions",
+                summaryTitle: "Summary",
+                pillarsTitle: "Harness Engineering: Three Pillars",
+                p1num: "Pillar I", p1sub: "Context Management",
+                p2num: "Pillar II", p2sub: "Constraint as Guidance",
+                p3num: "Pillar III", p3sub: "Living with Entropy",
+                footer: "Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by <a href=\"mailto:babelon1882@gmail.com\" class=\"hover:text-gray-800 underline decoration-dotted\">Nova</a>"
+            }
+        };
+
+        const langZhBtn = document.getElementById('lang-zh');
+        const langEnBtn = document.getElementById('lang-en');
+
+        function switchLanguage(lang) {
+            document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+            const trans = translations[lang];
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.dataset.langKey;
+                if (trans[key] !== undefined) el.innerHTML = trans[key];
+            });
+            langZhBtn.classList.toggle('active', lang === 'zh');
+            langEnBtn.classList.toggle('active', lang === 'en');
+            langZhBtn.setAttribute('aria-pressed', lang === 'zh');
+            langEnBtn.setAttribute('aria-pressed', lang === 'en');
+        }
+
+        langZhBtn.addEventListener('click', () => switchLanguage('zh'));
+        langEnBtn.addEventListener('click', () => switchLanguage('en'));
+    </script>
+</body>
+</html>

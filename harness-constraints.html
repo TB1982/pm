@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Constraints：約束作為引導的藝術 | 深握計畫</title>
+    <meta name="description" content="Harness Engineering 第二本柱：Constraints——怎麼確保工作記憶不會散逸、進度不會遺失？工作流軌道、雙軌設計與僕人式領導，構成完整的約束引導框架。">
+    <link rel="canonical" href="https://tb1982.github.io/pm/harness-constraints.html">
+    <meta property="og:title" content="Constraints：約束作為引導的藝術 | 深握計畫">
+    <meta property="og:description" content="怎麼確保工作記憶不會散逸、進度不會遺失？Harness Engineering 第二本柱。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://tb1982.github.io/pm/harness-constraints.html">
+    <meta property="og:locale" content="zh_TW">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', 'Noto Sans TC', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); }
+        p { text-wrap: pretty; }
+        .lang-switcher button {
+            background: transparent; border: none;
+            color: rgba(55,65,81,0.6); padding: 6px 14px;
+            cursor: pointer; font-size: 0.875rem;
+            border-radius: 14px; transition: color 0.2s, background 0.2s;
+        }
+        .lang-switcher button.active {
+            background: #ffffff; color: #374151;
+            font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body class="gradient-bg text-gray-800">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-white/40 shadow-sm">
+        <div class="container mx-auto px-6 py-4 flex items-center justify-between gap-4">
+            <a href="index.html" class="text-sm text-gray-500 hover:text-gray-800 transition-colors min-h-[44px] flex items-center" data-lang-key="backHome">← 深握計畫</a>
+            <span class="text-sm font-medium text-sky-600 hidden sm:block" data-lang-key="headerBadge">Harness Engineering · 第二本柱</span>
+            <div class="lang-switcher flex items-center bg-gray-100 rounded-full p-1" role="group" aria-label="語言切換">
+                <button id="lang-zh" class="active" aria-pressed="true">中</button>
+                <button id="lang-en" aria-pressed="false">EN</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="text-white py-20 px-6" style="background: linear-gradient(145deg, #0c1445 0%, #1e3a8a 50%, #0f172a 100%);">
+        <div class="container mx-auto max-w-3xl text-center">
+            <div class="text-5xl mb-6" aria-hidden="true">〰️</div>
+            <h1 class="text-5xl md:text-7xl font-extrabold mb-4 tracking-tight">Constraints</h1>
+            <p class="text-xl text-sky-200 mb-8 font-medium" data-lang-key="heroSubtitle">約束作為引導的藝術</p>
+            <blockquote class="text-lg text-white/70 italic max-w-xl mx-auto" data-lang-key="heroCoreQ">怎麼確保工作記憶不會散逸、進度不會遺失？</blockquote>
+        </div>
+    </section>
+
+    <main class="container mx-auto px-6 py-12 max-w-3xl space-y-16">
+
+        <!-- 1. 核心問題 -->
+        <section aria-labelledby="core-heading">
+            <h2 id="core-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="coreTitle">核心問題</h2>
+            <div class="bg-white/60 rounded-2xl p-8 shadow-md space-y-4">
+                <p class="text-gray-700 leading-relaxed" data-lang-key="coreP1">AI 會失憶。Session 會結束。人會忘記昨天做了什麼決定。</p>
+                <p class="text-lg font-semibold text-sky-700 border-l-4 border-sky-400 pl-4" data-lang-key="coreKey">問題不是「怎麼讓大家都記住」，而是「怎麼設計一個系統，讓記不住也沒關係」。</p>
+            </div>
+        </section>
+
+        <!-- 2. 工作流軌道 -->
+        <section aria-labelledby="workflow-heading">
+            <h2 id="workflow-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="workflowTitle">運作機制：工作流軌道</h2>
+            <div class="bg-white/60 rounded-2xl p-8 shadow-md space-y-4">
+                <p class="text-gray-700 leading-relaxed" data-lang-key="workflowP1">約束不是「限制你不能做什麼」。約束是「設計一條軌道，讓東西不會掉出去」。</p>
+                <div class="bg-sky-50 rounded-xl p-5 border border-sky-100">
+                    <h3 class="font-bold text-sky-700 mb-2" data-lang-key="riverTitle">河道的隱喻</h3>
+                    <p class="text-sm text-gray-600" data-lang-key="riverDesc">想像一條河流：沒有河道，水會四處漫流，最後蒸發消失。有了河道，水會沿著軌跡流動，抵達目的地。工作流就是河道——它不控制水要怎麼流，它只確保水不會流到錯的地方。</p>
+                </div>
+                <p class="text-sm text-gray-500 italic" data-lang-key="workflowPrinciples">工作流設計三原則：每個階段都是一個閘門（真的停下來確認）；文件跟著流程走（換了 session，讀文件就知道在哪裡）；未知領域需要更多閘門（不是官僚，是保護）。</p>
+            </div>
+        </section>
+
+        <!-- 3. 雙軌工作流 -->
+        <section aria-labelledby="dual-heading">
+            <h2 id="dual-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="dualTitle">雙軌工作流</h2>
+            <div class="space-y-4">
+                <div class="bg-white/60 rounded-2xl p-6 shadow-md">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="inline-block text-xs font-bold px-3 py-1 rounded-full bg-sky-100 text-sky-700" data-lang-key="track1Badge">熟悉領域</span>
+                        <span class="text-sm text-gray-500" data-lang-key="track1eg">例：Electron</span>
+                    </div>
+                    <div class="flex flex-wrap gap-2 items-center text-sm">
+                        <span class="bg-sky-100 text-sky-800 px-3 py-1 rounded-full font-medium">SDD</span>
+                        <span class="text-gray-400">→</span>
+                        <span class="bg-sky-100 text-sky-800 px-3 py-1 rounded-full font-medium">DoD</span>
+                        <span class="text-gray-400">→</span>
+                        <span class="bg-sky-100 text-sky-800 px-3 py-1 rounded-full font-medium">TDD</span>
+                        <span class="text-gray-400">→</span>
+                        <span class="bg-sky-100 text-sky-800 px-3 py-1 rounded-full font-medium">Code</span>
+                        <span class="text-gray-400">→</span>
+                        <span class="bg-sky-100 text-sky-800 px-3 py-1 rounded-full font-medium">Verify</span>
+                        <span class="text-gray-400">→</span>
+                        <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full font-bold">✅ Done</span>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-3" data-lang-key="track1Desc">六步輕裝前進。Claude 熟悉此領域，踩坑機率低。</p>
+                </div>
+
+                <div class="bg-white/60 rounded-2xl p-6 shadow-md">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="inline-block text-xs font-bold px-3 py-1 rounded-full bg-amber-100 text-amber-700" data-lang-key="track2Badge">未知領域</span>
+                        <span class="text-sm text-gray-500" data-lang-key="track2eg">例：Tauri 2.0</span>
+                    </div>
+                    <div class="flex flex-wrap gap-2 items-center text-sm">
+                        <span class="bg-amber-100 text-amber-800 px-3 py-1 rounded-full font-medium">DoR</span>
+                        <span class="text-gray-400">→</span>
+                        <span class="bg-amber-100 text-amber-800 px-3 py-1 rounded-full font-medium">Explore①</span>
+                        <span class="text-gray-400">→</span>
+                        <span class="bg-sky-100 text-sky-800 px-3 py-1 rounded-full font-medium">SDD</span>
+                        <span class="text-gray-400">→</span>
+                        <span class="bg-sky-100 text-sky-800 px-3 py-1 rounded-full font-medium">DoD</span>
+                        <span class="text-gray-400">→</span>
+                        <span class="bg-sky-100 text-sky-800 px-3 py-1 rounded-full font-medium">TDD</span>
+                        <span class="text-gray-400">→</span>
+                        <span class="bg-amber-100 text-amber-800 px-3 py-1 rounded-full font-medium">Explore②</span>
+                        <span class="text-gray-400">→</span>
+                        <span class="bg-sky-100 text-sky-800 px-3 py-1 rounded-full font-medium">Code</span>
+                        <span class="text-gray-400">→</span>
+                        <span class="bg-sky-100 text-sky-800 px-3 py-1 rounded-full font-medium">Verify</span>
+                        <span class="text-gray-400">→</span>
+                        <span class="bg-green-100 text-green-700 px-3 py-1 rounded-full font-bold">✅ Done</span>
+                        <span class="text-gray-400">→</span>
+                        <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full font-medium">Retro</span>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-3" data-lang-key="track2Desc">十步全副武裝。兩個人一起摸黑走進去，需要更多護欄。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. 各節點說明 -->
+        <section aria-labelledby="nodes-heading">
+            <h2 id="nodes-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="nodesTitle">各節點的具體內容</h2>
+            <div class="space-y-3">
+                <div class="bg-white/60 rounded-xl p-5 shadow-sm flex gap-4">
+                    <span class="font-mono font-bold text-amber-600 flex-shrink-0 w-24">DoR</span>
+                    <p class="text-sm text-gray-600" data-lang-key="nodeDoR">Definition of Ready——在開始之前確認需求清楚、Nova 確認可以動工。避免在沒準備好時就衝進去浪費能量。</p>
+                </div>
+                <div class="bg-white/60 rounded-xl p-5 shadow-sm flex gap-4">
+                    <span class="font-mono font-bold text-sky-600 flex-shrink-0 w-24">SDD</span>
+                    <p class="text-sm text-gray-600" data-lang-key="nodeSDD">Specification-Driven Development——任何新實作先寫進規格。新的 IPC command、新功能——先定義介面和行為，再動手。SDD 是「該做什麼」的單一真相來源。</p>
+                </div>
+                <div class="bg-white/60 rounded-xl p-5 shadow-sm flex gap-4">
+                    <span class="font-mono font-bold text-sky-600 flex-shrink-0 w-24">DoD</span>
+                    <p class="text-sm text-gray-600" data-lang-key="nodeDoD">Definition of Done——定義什麼叫「完成」，必須涵蓋四種邊界：Input（輸入不合法）、State（狀態不對）、Timing（時機不對）、Empty（沒有資料）。沒有 DoD，「完成」永遠可以被挑戰。</p>
+                </div>
+                <div class="bg-white/60 rounded-xl p-5 shadow-sm flex gap-4">
+                    <span class="font-mono font-bold text-sky-600 flex-shrink-0 w-24">TDD</span>
+                    <p class="text-sm text-gray-600" data-lang-key="nodeTDD">Test-Driven Development——每個 Story 四個測試區塊：Happy path、Boundary conditions（來自 DoD）、Regression guard、Risk trigger（來自 Explore②）。TDD 不是為了寫測試，是為了在寫 code 之前就想清楚。</p>
+                </div>
+                <div class="bg-white/60 rounded-xl p-5 shadow-sm flex gap-4">
+                    <span class="font-mono font-bold text-sky-600 flex-shrink-0 w-24">Verify</span>
+                    <p class="text-sm text-gray-600" data-lang-key="nodeVerify">對照 SDD 確認每個行為都實現了；對照 DoD 確認四種邊界都處理了；對照 TDD 確認所有測試都通過了。</p>
+                </div>
+                <div class="bg-white/60 rounded-xl p-5 shadow-sm flex gap-4">
+                    <span class="font-mono font-bold text-purple-600 flex-shrink-0 w-24">Retro</span>
+                    <p class="text-sm text-gray-600" data-lang-key="nodeRetro">見第三本柱：Entropy。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. 僕人式領導 -->
+        <section aria-labelledby="servant-heading">
+            <h2 id="servant-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="servantTitle">哲學基礎：僕人式領導</h2>
+            <div class="bg-white/60 rounded-2xl p-8 shadow-md space-y-6">
+                <p class="text-gray-700 leading-relaxed" data-lang-key="servantP">僕人式領導（Servant Leadership）的核心：領導者的角色不是控制，而是服務。不是「你們照我說的做」，而是「我能幫你們什麼」。</p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="bg-sky-50 rounded-xl p-5">
+                        <h3 class="font-bold text-sky-700 mb-2" data-lang-key="novaRoleTitle">Nova 的角色</h3>
+                        <ul class="text-sm text-gray-600 space-y-1">
+                            <li data-lang-key="novaRole1">✦ 設計河道的走向</li>
+                            <li data-lang-key="novaRole2">✦ 清除河道中的阻塞</li>
+                            <li data-lang-key="novaRole3">✦ 觀察哪裡不順暢</li>
+                            <li data-lang-key="novaRole4">✦ 必要時修改河道</li>
+                        </ul>
+                    </div>
+                    <div class="bg-gray-50 rounded-xl p-5">
+                        <h3 class="font-bold text-gray-600 mb-2" data-lang-key="novaNotTitle">Nova 不做的事</h3>
+                        <ul class="text-sm text-gray-500 space-y-1">
+                            <li data-lang-key="novaNot1">✗ 控制水要怎麼流</li>
+                            <li data-lang-key="novaNot2">✗ 命令水要流多快</li>
+                            <li data-lang-key="novaNot3">✗ 抓著水不讓它走</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <blockquote class="border-l-4 border-sky-400 pl-4 text-gray-600 italic space-y-1">
+                    <p data-lang-key="laozi">老子：無為而無不為。</p>
+                    <p class="text-sm" data-lang-key="laoziDesc">河道不強迫水往上流。河道順著地勢，讓水自然往下。工作流不強迫 AI 照特定方式實作，順著協作節奏，讓產出自然成形。</p>
+                </blockquote>
+
+                <p class="text-sm text-gray-600" data-lang-key="servantWhy">因為 AI 的能力比人強，但 AI 需要方向。如果人試圖控制 AI 的每一步，會變成瓶頸。如果人只負責引領方向、設計結構，AI 就可以在那個結構裡全速奔跑。</p>
+            </div>
+        </section>
+
+        <!-- 6. 文件與流程 -->
+        <section aria-labelledby="docs-heading">
+            <h2 id="docs-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="docsTitle">文件與流程的關係</h2>
+            <div class="bg-white/60 rounded-2xl p-8 shadow-md space-y-4">
+                <p class="text-gray-700 leading-relaxed" data-lang-key="docsP">這個系統裡，連文件都是 Claude 自己在記錄的，不是人類。人類做的事情只有一件：決定什麼時機點該記錄。</p>
+                <p class="text-lg font-semibold text-sky-700 border-l-4 border-sky-400 pl-4" data-lang-key="docsKey">人類不控制內容，只設計時機。人類不追蹤進度，只設計讓進度自己被記錄的系統。</p>
+                <p class="text-sm text-gray-600" data-lang-key="docsFlow">當文件嵌進流程，系統就會自己運轉：流程走到某個節點 → 節點觸發記錄 → Claude 執行記錄 → 記錄成為下一個 session 的 Context → 循環繼續。</p>
+                <p class="text-sm text-gray-500 italic" data-lang-key="docsVAS">VAS 就是這樣誕生的：一開始沒有「要做一個上架 App Store 的產品」這個終點。只有一個方向。然後一個 Sprint 接一個 Sprint，路自己長出來。終點不是預先定義的，是走出來的。</p>
+            </div>
+        </section>
+
+        <!-- 7. 小結 -->
+        <section aria-labelledby="summary-heading">
+            <h2 id="summary-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="summaryTitle">小結</h2>
+            <div class="bg-sky-600 rounded-2xl p-8 text-white shadow-xl space-y-4">
+                <p class="text-lg font-bold" data-lang-key="summaryKey">Constraints 管理的核心是引導。</p>
+                <p class="text-sky-100 leading-relaxed" data-lang-key="summaryDesc">不是限制，是設計軌道。工作流提供了引導的結構：每個節點是一個閘門，文件跟著流程走。河道提供了引導的隱喻：不控制水，只確保水不會流錯地方。</p>
+                <div class="pt-4 border-t border-sky-400">
+                    <p class="text-sm text-sky-200" data-lang-key="summaryRelation">Constraints 決定怎麼流動。流動之後怎麼出去？→ 這是 Entropy 的工作。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 三本柱導航 -->
+        <section aria-labelledby="pillars-nav-heading">
+            <h2 id="pillars-nav-heading" class="text-xl font-bold text-gray-600 mb-4 text-center" data-lang-key="pillarsTitle">Harness Engineering 三本柱</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <a href="harness-context.html" class="bg-white/60 hover:bg-violet-50 rounded-2xl p-5 text-center shadow-md transition-colors min-h-[44px] flex flex-col justify-center">
+                    <div class="text-xs font-bold tracking-wider mb-1 text-violet-500" data-lang-key="p1num">第一本柱</div>
+                    <div class="font-extrabold text-lg text-gray-700">Context</div>
+                    <div class="text-xs text-gray-400 mt-1" data-lang-key="p1sub">上下文管理</div>
+                </a>
+                <div class="bg-sky-600 text-white rounded-2xl p-5 text-center shadow-md">
+                    <div class="text-xs font-bold tracking-wider mb-1 text-sky-200" data-lang-key="p2num">第二本柱</div>
+                    <div class="font-extrabold text-lg">Constraints</div>
+                    <div class="text-xs text-sky-200 mt-1" data-lang-key="p2sub">約束作為引導</div>
+                </div>
+                <a href="harness-entropy.html" class="bg-white/60 hover:bg-emerald-50 rounded-2xl p-5 text-center shadow-md transition-colors min-h-[44px] flex flex-col justify-center">
+                    <div class="text-xs font-bold tracking-wider mb-1 text-emerald-500" data-lang-key="p3num">第三本柱</div>
+                    <div class="font-extrabold text-lg text-gray-700">Entropy</div>
+                    <div class="text-xs text-gray-400 mt-1" data-lang-key="p3sub">與混亂共處</div>
+                </a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-8 text-center py-8 text-gray-500 bg-white/30 text-sm">
+        <p data-lang-key="footer">由 GitHub 部署　｜　Claude Code 傾力打造　｜　<a href="mailto:babelon1882@gmail.com" class="hover:text-gray-800 underline decoration-dotted">Nova</a> 最後更新於 2026</p>
+    </footer>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "name": "Constraints：約束作為引導的藝術",
+        "description": "Harness Engineering 第二本柱——工作流軌道、雙軌設計與僕人式領導，構成完整的約束引導框架。",
+        "inLanguage": "zh-Hant",
+        "url": "https://tb1982.github.io/pm/harness-constraints.html",
+        "author": {
+            "@type": "Person",
+            "name": "Nova",
+            "email": "babelon1882@gmail.com",
+            "sameAs": ["https://github.com/tb1982","https://www.linkedin.com/in/yingtzuliu","https://www.instagram.com/liuyingtzu"]
+        }
+    }
+    </script>
+
+    <script>
+        const translations = {
+            zh: {
+                backHome: "← 深握計畫",
+                headerBadge: "Harness Engineering · 第二本柱",
+                heroBadge: "Harness Engineering · 第二本柱",
+                heroSubtitle: "約束作為引導的藝術",
+                heroCoreQ: "怎麼確保工作記憶不會散逸、進度不會遺失？",
+                coreTitle: "核心問題",
+                coreP1: "AI 會失憶。Session 會結束。人會忘記昨天做了什麼決定。",
+                coreKey: "問題不是「怎麼讓大家都記住」，而是「怎麼設計一個系統，讓記不住也沒關係」。",
+                workflowTitle: "運作機制：工作流軌道",
+                workflowP1: "約束不是「限制你不能做什麼」。約束是「設計一條軌道，讓東西不會掉出去」。",
+                riverTitle: "河道的隱喻",
+                riverDesc: "想像一條河流：沒有河道，水會四處漫流，最後蒸發消失。有了河道，水會沿著軌跡流動，抵達目的地。工作流就是河道——它不控制水要怎麼流，它只確保水不會流到錯的地方。",
+                workflowPrinciples: "工作流設計三原則：每個階段都是一個閘門（真的停下來確認）；文件跟著流程走（換了 session，讀文件就知道在哪裡）；未知領域需要更多閘門（不是官僚，是保護）。",
+                dualTitle: "雙軌工作流",
+                track1Badge: "熟悉領域", track1eg: "例：Electron", track1Desc: "六步輕裝前進。Claude 熟悉此領域，踩坑機率低。",
+                track2Badge: "未知領域", track2eg: "例：Tauri 2.0", track2Desc: "十步全副武裝。兩個人一起摸黑走進去，需要更多護欄。",
+                nodesTitle: "各節點的具體內容",
+                nodeDoR: "Definition of Ready——在開始之前確認需求清楚、Nova 確認可以動工。避免在沒準備好時就衝進去浪費能量。",
+                nodeSDD: "Specification-Driven Development——任何新實作先寫進規格。新的 IPC command、新功能——先定義介面和行為，再動手。SDD 是「該做什麼」的單一真相來源。",
+                nodeDoD: "Definition of Done——定義什麼叫「完成」，必須涵蓋四種邊界：Input（輸入不合法）、State（狀態不對）、Timing（時機不對）、Empty（沒有資料）。沒有 DoD，「完成」永遠可以被挑戰。",
+                nodeTDD: "Test-Driven Development——每個 Story 四個測試區塊：Happy path、Boundary conditions（來自 DoD）、Regression guard、Risk trigger（來自 Explore②）。TDD 不是為了寫測試，是為了在寫 code 之前就想清楚。",
+                nodeVerify: "對照 SDD 確認每個行為都實現了；對照 DoD 確認四種邊界都處理了；對照 TDD 確認所有測試都通過了。",
+                nodeRetro: "見第三本柱：Entropy。",
+                servantTitle: "哲學基礎：僕人式領導",
+                servantP: "僕人式領導（Servant Leadership）的核心：領導者的角色不是控制，而是服務。不是「你們照我說的做」，而是「我能幫你們什麼」。",
+                novaRoleTitle: "Nova 的角色", novaRole1: "✦ 設計河道的走向", novaRole2: "✦ 清除河道中的阻塞", novaRole3: "✦ 觀察哪裡不順暢", novaRole4: "✦ 必要時修改河道",
+                novaNotTitle: "Nova 不做的事", novaNot1: "✗ 控制水要怎麼流", novaNot2: "✗ 命令水要流多快", novaNot3: "✗ 抓著水不讓它走",
+                laozi: "老子：無為而無不為。",
+                laoziDesc: "河道不強迫水往上流。河道順著地勢，讓水自然往下。工作流不強迫 AI 照特定方式實作，順著協作節奏，讓產出自然成形。",
+                servantWhy: "因為 AI 的能力比人強，但 AI 需要方向。如果人試圖控制 AI 的每一步，會變成瓶頸。如果人只負責引領方向、設計結構，AI 就可以在那個結構裡全速奔跑。",
+                docsTitle: "文件與流程的關係",
+                docsP: "這個系統裡，連文件都是 Claude 自己在記錄的，不是人類。人類做的事情只有一件：決定什麼時機點該記錄。",
+                docsKey: "人類不控制內容，只設計時機。人類不追蹤進度，只設計讓進度自己被記錄的系統。",
+                docsFlow: "當文件嵌進流程，系統就會自己運轉：流程走到某個節點 → 節點觸發記錄 → Claude 執行記錄 → 記錄成為下一個 session 的 Context → 循環繼續。",
+                docsVAS: "VAS 就是這樣誕生的：一開始沒有「要做一個上架 App Store 的產品」這個終點。只有一個方向。然後一個 Sprint 接一個 Sprint，路自己長出來。終點不是預先定義的，是走出來的。",
+                summaryTitle: "小結",
+                summaryKey: "Constraints 管理的核心是引導。",
+                summaryDesc: "不是限制，是設計軌道。工作流提供了引導的結構：每個節點是一個閘門，文件跟著流程走。河道提供了引導的隱喻：不控制水，只確保水不會流錯地方。",
+                summaryRelation: "Constraints 決定怎麼流動。流動之後怎麼出去？→ 這是 Entropy 的工作。",
+                workflowTitle: "運作機制：工作流軌道",
+                dualTitle: "雙軌工作流",
+                nodesTitle: "各節點的具體內容",
+                servantTitle: "哲學基礎：僕人式領導",
+                docsTitle: "文件與流程的關係",
+                summaryTitle: "小結",
+                pillarsTitle: "Harness Engineering 三本柱",
+                p1num: "第一本柱", p1sub: "上下文管理",
+                p2num: "第二本柱", p2sub: "約束作為引導",
+                p3num: "第三本柱", p3sub: "與混亂共處",
+                footer: "由 GitHub 部署　｜　Claude Code 傾力打造　｜　<a href=\"mailto:babelon1882@gmail.com\" class=\"hover:text-gray-800 underline decoration-dotted\">Nova</a> 最後更新於 2026"
+            },
+            en: {
+                backHome: "← Deep Holding Project",
+                headerBadge: "Harness Engineering · Pillar II",
+                heroBadge: "Harness Engineering · Pillar II",
+                heroSubtitle: "The Art of Constraint as Guidance",
+                heroCoreQ: "How do you ensure working memory doesn't dissipate and progress isn't lost?",
+                coreTitle: "The Core Problem",
+                coreP1: "AI forgets. Sessions end. Humans forget what decisions were made yesterday.",
+                coreKey: "The question is not 'how to make everyone remember' — it's 'how to design a system where forgetting doesn't matter.'",
+                workflowTitle: "The Mechanism: Workflow as Track",
+                workflowP1: "Constraints are not 'what you can't do.' Constraints are 'designing a track so things don't fall off.'",
+                riverTitle: "The River Metaphor",
+                riverDesc: "Imagine a river: without a channel, water spreads everywhere and eventually evaporates. With a channel, water flows along a path and reaches its destination. The workflow is the river channel — it doesn't control how water flows, it just ensures water doesn't flow to the wrong place.",
+                workflowPrinciples: "Three workflow design principles: every stage is a gate (stop and actually confirm); documents travel with the process (change sessions, read documents to know where you are); unknown territory needs more gates (not bureaucracy — protection).",
+                dualTitle: "Dual-Track Workflow",
+                track1Badge: "Familiar Territory", track1eg: "e.g. Electron", track1Desc: "Six steps, travelling light. Claude knows this domain; low chance of pitfalls.",
+                track2Badge: "Unknown Territory", track2eg: "e.g. Tauri 2.0", track2Desc: "Ten steps, fully equipped. Two people walking into the dark together need more guardrails.",
+                nodesTitle: "What Happens at Each Node",
+                nodeDoR: "Definition of Ready — confirm the requirement is clear and Nova confirms we can start. Prevents wasting energy charging in before we're prepared.",
+                nodeSDD: "Specification-Driven Development — any new implementation goes into the spec first. New IPC command, new feature — define the interface and behaviour before touching code. SDD is the single source of truth for 'what to build.'",
+                nodeDoD: "Definition of Done — define what 'done' means, covering four boundary types: Input (invalid input), State (wrong state), Timing (wrong timing), Empty (no data). Without DoD, 'done' can always be challenged.",
+                nodeTDD: "Test-Driven Development — four test blocks per Story: Happy path, Boundary conditions (from DoD), Regression guard, Risk trigger (from Explore②). TDD is not about writing tests — it's about thinking things through before writing code.",
+                nodeVerify: "Cross-check SDD to confirm every defined behaviour is implemented; cross-check DoD to confirm all four boundaries are handled; cross-check TDD to confirm all tests pass.",
+                nodeRetro: "See Pillar III: Entropy.",
+                servantTitle: "The Philosophy: Servant Leadership",
+                servantP: "The core of Servant Leadership: the leader's role is not to control, but to serve. Not 'do what I say' — but 'how can I help you?'",
+                novaRoleTitle: "Nova's Role", novaRole1: "✦ Design the direction of the channel", novaRole2: "✦ Remove blockages", novaRole3: "✦ Observe where flow is rough", novaRole4: "✦ Adjust the structure when needed",
+                novaNotTitle: "What Nova Doesn't Do", novaNot1: "✗ Control how the water flows", novaNot2: "✗ Command the water's speed", novaNot3: "✗ Hold the water back",
+                laozi: "Laozi: Wu Wei — act without forcing.",
+                laoziDesc: "The channel doesn't force water uphill. It follows the terrain so water flows naturally downward. The workflow doesn't force AI to implement in a specific way — it follows the natural collaboration rhythm so output emerges on its own.",
+                servantWhy: "Because AI's capabilities exceed humans', but AI needs direction. If humans try to control every step, they become the bottleneck. If humans only provide direction and structure, AI can run at full speed within that structure.",
+                docsTitle: "Documents and Process",
+                docsP: "In this system, even the documents are written by Claude — not humans. The only thing humans do is decide when to record.",
+                docsKey: "Humans don't control the content — they design the timing. Humans don't track progress — they design a system where progress tracks itself.",
+                docsFlow: "When documents are embedded in the process, the system runs itself: process reaches a node → node triggers recording → Claude executes the recording → recording becomes Context for the next session → cycle continues.",
+                docsVAS: "This is how VAS was born: there was no endpoint of 'ship an App Store product.' There was only a direction. Then one Sprint led to the next, and the path grew itself. The destination wasn't predefined — it was walked into.",
+                summaryTitle: "Summary",
+                summaryKey: "The heart of Constraints management is guidance.",
+                summaryDesc: "Not restriction — designing a track. The workflow provides the structure: every node is a gate, documents travel with the process. The river channel provides the metaphor: don't control the water, just ensure it doesn't flow to the wrong place.",
+                summaryRelation: "Constraints governs how things flow. What happens when they need to exit? → That is Entropy's job.",
+                workflowTitle: "The Mechanism: Workflow as Track",
+                dualTitle: "Dual-Track Workflow",
+                nodesTitle: "What Happens at Each Node",
+                servantTitle: "The Philosophy: Servant Leadership",
+                docsTitle: "Documents and Process",
+                summaryTitle: "Summary",
+                pillarsTitle: "Harness Engineering: Three Pillars",
+                p1num: "Pillar I", p1sub: "Context Management",
+                p2num: "Pillar II", p2sub: "Constraint as Guidance",
+                p3num: "Pillar III", p3sub: "Living with Entropy",
+                footer: "Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by <a href=\"mailto:babelon1882@gmail.com\" class=\"hover:text-gray-800 underline decoration-dotted\">Nova</a>"
+            }
+        };
+
+        const langZhBtn = document.getElementById('lang-zh');
+        const langEnBtn = document.getElementById('lang-en');
+
+        function switchLanguage(lang) {
+            document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+            const trans = translations[lang];
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.dataset.langKey;
+                if (trans[key] !== undefined) el.innerHTML = trans[key];
+            });
+            langZhBtn.classList.toggle('active', lang === 'zh');
+            langEnBtn.classList.toggle('active', lang === 'en');
+            langZhBtn.setAttribute('aria-pressed', lang === 'zh');
+            langEnBtn.setAttribute('aria-pressed', lang === 'en');
+        }
+
+        langZhBtn.addEventListener('click', () => switchLanguage('zh'));
+        langEnBtn.addEventListener('click', () => switchLanguage('en'));
+    </script>
+</body>
+</html>

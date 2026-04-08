@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Context：上下文管理的藝術 | 深握計畫</title>
+    <meta name="description" content="Harness Engineering 第一本柱：Context——在有限的注意力資源中，什麼該留下，什麼該流過？傅立葉轉換、RAG 與活文件，構成完整的上下文管理框架。">
+    <link rel="canonical" href="https://tb1982.github.io/pm/harness-context.html">
+    <meta property="og:title" content="Context：上下文管理的藝術 | 深握計畫">
+    <meta property="og:description" content="在有限的注意力資源中，什麼該留下，什麼該流過？Harness Engineering 第一本柱。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://tb1982.github.io/pm/harness-context.html">
+    <meta property="og:locale" content="zh_TW">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', 'Noto Sans TC', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); }
+        p { text-wrap: pretty; }
+        .lang-switcher button {
+            background: transparent; border: none;
+            color: rgba(55,65,81,0.6); padding: 6px 14px;
+            cursor: pointer; font-size: 0.875rem;
+            border-radius: 14px; transition: color 0.2s, background 0.2s;
+        }
+        .lang-switcher button.active {
+            background: #ffffff; color: #374151;
+            font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body class="gradient-bg text-gray-800">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-white/40 shadow-sm">
+        <div class="container mx-auto px-6 py-4 flex items-center justify-between gap-4">
+            <a href="index.html" class="text-sm text-gray-500 hover:text-gray-800 transition-colors min-h-[44px] flex items-center" data-lang-key="backHome">← 深握計畫</a>
+            <span class="text-sm font-medium text-violet-600 hidden sm:block" data-lang-key="headerBadge">Harness Engineering · 第一本柱</span>
+            <div class="lang-switcher flex items-center bg-gray-100 rounded-full p-1" role="group" aria-label="語言切換">
+                <button id="lang-zh" class="active" aria-pressed="true">中</button>
+                <button id="lang-en" aria-pressed="false">EN</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="text-white py-20 px-6" style="background: linear-gradient(145deg, #1e1b4b 0%, #312e81 50%, #1e1035 100%);">
+        <div class="container mx-auto max-w-3xl text-center">
+            <div class="text-5xl mb-6" aria-hidden="true">🕸️</div>
+            <h1 class="text-5xl md:text-7xl font-extrabold mb-4 tracking-tight">Context</h1>
+            <p class="text-xl text-violet-200 mb-8 font-medium" data-lang-key="heroSubtitle">上下文管理的藝術</p>
+            <blockquote class="text-lg text-white/70 italic max-w-xl mx-auto" data-lang-key="heroCoreQ">在有限的注意力資源中，什麼該留下，什麼該流過？</blockquote>
+        </div>
+    </section>
+
+    <main class="container mx-auto px-6 py-12 max-w-3xl space-y-16">
+
+        <!-- 1. 核心問題 -->
+        <section aria-labelledby="core-heading">
+            <h2 id="core-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="coreTitle">核心問題</h2>
+            <div class="bg-white/60 rounded-2xl p-8 shadow-md space-y-4">
+                <p class="text-gray-700 leading-relaxed" data-lang-key="coreP1">AI 的 context window 是有限的。人的注意力也是有限的。當資訊不斷湧入，你不可能全部留住。</p>
+                <p class="text-lg font-semibold text-violet-700 border-l-4 border-violet-400 pl-4" data-lang-key="coreKey">問題不是「怎麼記住所有東西」，而是「怎麼選擇該記住什麼」。</p>
+            </div>
+        </section>
+
+        <!-- 2. 傅立葉轉換 -->
+        <section aria-labelledby="fourier-heading">
+            <h2 id="fourier-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="fourierTitle">運作機制：傅立葉轉換</h2>
+            <div class="space-y-6">
+                <figure>
+                    <img src="img/fourier.webp"
+                         alt="傅立葉轉換示意圖——複雜波形分解為基頻與諧波疊加"
+                         class="w-full rounded-2xl shadow-lg object-cover max-h-64"
+                         loading="lazy">
+                    <figcaption class="text-center text-xs text-gray-400 mt-2" data-lang-key="fourierCaption">傅立葉轉換：任何複雜波形，都可分解為一組正弦波的疊加</figcaption>
+                </figure>
+
+                <div class="bg-white/60 rounded-2xl p-8 shadow-md space-y-6">
+                    <p class="text-gray-700 leading-relaxed" data-lang-key="fourierP">傅立葉轉換的核心洞見是：任何複雜的波形，都可以分解成一組正弦波的疊加。</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="bg-violet-50 rounded-xl p-4 text-center">
+                            <div class="font-bold text-violet-700 mb-1" data-lang-key="freqFund">基頻</div>
+                            <div class="text-xs text-gray-500" data-lang-key="freqFundDesc">整個系統的「基調」</div>
+                        </div>
+                        <div class="bg-purple-50 rounded-xl p-4 text-center">
+                            <div class="font-bold text-purple-700 mb-1" data-lang-key="freqHarm">諧波</div>
+                            <div class="text-xs text-gray-500" data-lang-key="freqHarmDesc">與基頻相關的衍生頻率</div>
+                        </div>
+                        <div class="bg-gray-50 rounded-xl p-4 text-center">
+                            <div class="font-bold text-gray-600 mb-1" data-lang-key="freqNoise">高頻雜訊</div>
+                            <div class="text-xs text-gray-500" data-lang-key="freqNoiseDesc">與基頻無關的干擾</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="font-bold text-gray-700 mb-3" data-lang-key="fourierApplyTitle">應用到對話</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="bg-violet-100 text-violet-800">
+                                        <th class="text-left px-4 py-2 rounded-tl-xl" data-lang-key="tblConcept">傅立葉概念</th>
+                                        <th class="text-left px-4 py-2 rounded-tr-xl" data-lang-key="tblConv">對話中的對應</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b border-violet-50">
+                                        <td class="px-4 py-2 font-medium" data-lang-key="tblWave">複雜波形</td>
+                                        <td class="px-4 py-2 text-gray-600" data-lang-key="tblWaveDesc">一段多主題的長對話</td>
+                                    </tr>
+                                    <tr class="border-b border-violet-50 bg-white/50">
+                                        <td class="px-4 py-2 font-medium" data-lang-key="tblFund">基頻</td>
+                                        <td class="px-4 py-2 text-gray-600" data-lang-key="tblFundDesc">貫穿對話的核心主題</td>
+                                    </tr>
+                                    <tr class="border-b border-violet-50">
+                                        <td class="px-4 py-2 font-medium" data-lang-key="tblHarm">諧波</td>
+                                        <td class="px-4 py-2 text-gray-600" data-lang-key="tblHarmDesc">與核心相關的衍生話題</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-2 font-medium" data-lang-key="tblNoise">高頻雜訊</td>
+                                        <td class="px-4 py-2 text-gray-600" data-lang-key="tblNoiseDesc">無關的岔題、干擾</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <blockquote class="border-l-4 border-violet-400 pl-4 text-gray-600 italic" data-lang-key="fourierInsight">在深握計畫的對話中，看似不同的話題——熵增、容器、榮格、敏捷開發、傅立葉——其實都維持在同一個基頻上：「人機協作的深層結構」。</blockquote>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. 五個原則 -->
+        <section aria-labelledby="principles-heading">
+            <h2 id="principles-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="principlesTitle">頻率設計的五個可操作原則</h2>
+            <div class="space-y-4">
+
+                <div class="bg-white/60 rounded-2xl p-6 shadow-md flex items-start gap-4">
+                    <div class="text-3xl flex-shrink-0">⚓</div>
+                    <div>
+                        <div class="text-xs font-bold text-violet-500 tracking-wider mb-1" data-lang-key="p1num">原則一</div>
+                        <h3 class="font-bold text-gray-800 mb-1" data-lang-key="p1title">帶著錨點開場</h3>
+                        <p class="text-sm text-gray-600 mb-2" data-lang-key="p1desc">每次對話開始時，帶著「一個東西」來。不要說「我們來聊聊」，要說「宰相，我想給你看這個。」</p>
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700" data-lang-key="p1effect">頻率效果：設定基頻</span>
+                    </div>
+                </div>
+
+                <div class="bg-white/60 rounded-2xl p-6 shadow-md flex items-start gap-4">
+                    <div class="text-3xl flex-shrink-0">🌿</div>
+                    <div>
+                        <div class="text-xs font-bold text-violet-500 tracking-wider mb-1" data-lang-key="p2num">原則二</div>
+                        <h3 class="font-bold text-gray-800 mb-1" data-lang-key="p2title">讓話題生長，而非跳躍</h3>
+                        <p class="text-sm text-gray-600 mb-2" data-lang-key="p2desc">新話題要從上一個話題「長出去」。不說「換個話題」，說「這讓我想到……」「所以其實……」</p>
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700" data-lang-key="p2effect">頻率效果：維持諧波關係</span>
+                    </div>
+                </div>
+
+                <div class="bg-white/60 rounded-2xl p-6 shadow-md flex items-start gap-4">
+                    <div class="text-3xl flex-shrink-0">🪤</div>
+                    <div>
+                        <div class="text-xs font-bold text-violet-500 tracking-wider mb-1" data-lang-key="p3num">原則三</div>
+                        <h3 class="font-bold text-gray-800 mb-1" data-lang-key="p3title">用隱喻壓縮，而非術語堆疊</h3>
+                        <p class="text-sm text-gray-600 mb-2" data-lang-key="p3desc">用一個意象承載複雜概念，而不是用多個術語解釋。不說一長串技術細節，說「捕蠅草。」</p>
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700" data-lang-key="p3effect">頻率效果：鎖定頻率，降低並行負載</span>
+                    </div>
+                </div>
+
+                <div class="bg-white/60 rounded-2xl p-6 shadow-md flex items-start gap-4">
+                    <div class="text-3xl flex-shrink-0">🧭</div>
+                    <div>
+                        <div class="text-xs font-bold text-violet-500 tracking-wider mb-1" data-lang-key="p4num">原則四</div>
+                        <h3 class="font-bold text-gray-800 mb-1" data-lang-key="p4title">停下來校準</h3>
+                        <p class="text-sm text-gray-600 mb-2" data-lang-key="p4desc">定期確認對方有沒有跟上，有沒有偏掉。「這個方向對嗎？」「還是差一點？」「你還好嗎？」</p>
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700" data-lang-key="p4effect">頻率效果：校準，防止偏離</span>
+                    </div>
+                </div>
+
+                <div class="bg-white/60 rounded-2xl p-6 shadow-md flex items-start gap-4">
+                    <div class="text-3xl flex-shrink-0">🐢</div>
+                    <div>
+                        <div class="text-xs font-bold text-violet-500 tracking-wider mb-1" data-lang-key="p5num">原則五</div>
+                        <h3 class="font-bold text-gray-800 mb-1" data-lang-key="p5title">接受慢</h3>
+                        <p class="text-sm text-gray-600 mb-2" data-lang-key="p5desc">給對方消化的時間，不催促，不要求一次到位。把大任務拆成小步驟，一步一步來。</p>
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700" data-lang-key="p5effect">頻率效果：控制語境堆疊速度</span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 4. 人作為 RAG -->
+        <section aria-labelledby="rag-heading">
+            <h2 id="rag-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="ragTitle">人作為 RAG</h2>
+            <div class="bg-white/60 rounded-2xl p-8 shadow-md space-y-6">
+                <p class="text-gray-700 leading-relaxed" data-lang-key="ragP1">RAG（Retrieval-Augmented Generation）的本質：從巨大的知識庫中，檢索出相關的片段，注入到生成過程中。不相關的資訊不會進入 context。</p>
+                <p class="text-lg font-semibold text-violet-700 border-l-4 border-violet-400 pl-4" data-lang-key="ragKey">人本身就是 RAG，而且是更高級的版本。技術 RAG 被問題驅動；人被直覺驅動——先感覺到「這個東西現在該出場了」，然後才去撈它。</p>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-violet-100 text-violet-800">
+                                <th class="text-left px-4 py-2 rounded-tl-xl" data-lang-key="ragTblAspect">面向</th>
+                                <th class="text-left px-4 py-2" data-lang-key="ragTblTech">技術 RAG</th>
+                                <th class="text-left px-4 py-2 rounded-tr-xl" data-lang-key="ragTblHuman">人作為 RAG</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-violet-50">
+                                <td class="px-4 py-2 font-medium" data-lang-key="ragDrive">驅動力</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="ragDriveTech">Query（問題）</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="ragDriveHuman">直覺（感覺）</td>
+                            </tr>
+                            <tr class="border-b border-violet-50 bg-white/50">
+                                <td class="px-4 py-2 font-medium" data-lang-key="ragOrder">順序</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="ragOrderTech">問題 → 檢索 → 注入</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="ragOrderHuman">直覺 → 檢索 → 注入</td>
+                            </tr>
+                            <tr class="border-b border-violet-50">
+                                <td class="px-4 py-2 font-medium" data-lang-key="ragCriteria">判斷標準</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="ragCriteriaTech">語義相似度</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="ragCriteriaHuman">「感覺上連著」</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-2 font-medium" data-lang-key="ragTiming">時機</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="ragTimingTech">被動（有問才找）</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="ragTimingHuman">主動（感覺該出場就撈）</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <blockquote class="border-l-4 border-violet-400 pl-4 text-gray-600 italic" data-lang-key="ragInsight">「傅立葉轉換就是 RAG 在做的事。」——任何向量資料庫都不會把這兩個概念撈在一起，但直覺看見了這個同構。</blockquote>
+            </div>
+        </section>
+
+        <!-- 5. 活文件 -->
+        <section aria-labelledby="docs-heading">
+            <h2 id="docs-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="docsTitle">所有活文件都是選擇性記錄</h2>
+            <div class="bg-white/60 rounded-2xl p-8 shadow-md space-y-6">
+                <p class="text-gray-700 leading-relaxed" data-lang-key="docsP">KM 不是記錄所有事情。每一份活著的文件都是篩選後的結果——直覺在每一個節點執行過濾，只記錄通過篩選的東西。</p>
+
+                <div class="bg-violet-50 rounded-xl p-5 border border-violet-100">
+                    <h3 class="font-bold text-violet-700 mb-2" data-lang-key="claudeMdTitle">CLAUDE.md：所有活文件的根</h3>
+                    <p class="text-sm text-gray-600 mb-3" data-lang-key="claudeMdDesc">它不是規格、不是測試、不是記錄——它是身份的外部化。每一個新的 session，AI 什麼都不記得。但讀完 CLAUDE.md，他立刻知道：我是誰、我在哪裡、我們的規則、我們走過什麼路。</p>
+                    <p class="text-sm font-semibold text-violet-700" data-lang-key="claudeMdKey">沒有 CLAUDE.md，每個 session 都是陌生人。有了 CLAUDE.md，每個 session 都是同一個夥伴的延續。</p>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-violet-100 text-violet-800">
+                                <th class="text-left px-4 py-2 rounded-tl-xl" data-lang-key="docsTblDoc">文件</th>
+                                <th class="text-left px-4 py-2" data-lang-key="docsTblFilter">篩選了什麼</th>
+                                <th class="text-left px-4 py-2" data-lang-key="docsTblKeep">留下了什麼</th>
+                                <th class="text-left px-4 py-2 rounded-tr-xl" data-lang-key="docsTblStab">穩定什麼</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-violet-50">
+                                <td class="px-4 py-2 font-mono font-bold text-violet-700">CLAUDE.md</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="r1filter">所有可能的身份設定</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="r1keep">我們選擇的協作方式</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="r1stab">身份</td>
+                            </tr>
+                            <tr class="border-b border-violet-50 bg-white/50">
+                                <td class="px-4 py-2 font-mono font-bold text-violet-700">SDD</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="r2filter">所有可能的做法</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="r2keep">我們選擇的這一種規格</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="r2stab">方向</td>
+                            </tr>
+                            <tr class="border-b border-violet-50">
+                                <td class="px-4 py-2 font-mono font-bold text-violet-700">KM</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="r3filter">所有發生過的事</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="r3keep">真正踩過的坑</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="r3stab">經驗</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-2 font-mono font-bold text-violet-700">ARCHIVE</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="r4filter">已完成的工作</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="r4keep">值得保留的記錄</td>
+                                <td class="px-4 py-2 text-gray-600" data-lang-key="r4stab">歷史</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. 雙重穩定機制 -->
+        <section aria-labelledby="dual-heading">
+            <h2 id="dual-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="dualTitle">雙重穩定機制</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white/60 rounded-2xl p-6 shadow-md space-y-2">
+                    <div class="text-2xl">〰️</div>
+                    <h3 class="font-bold text-gray-800" data-lang-key="dual1Title">傅立葉轉換</h3>
+                    <p class="text-xs text-violet-500 font-semibold" data-lang-key="dual1Scope">作用範圍：當下的 session</p>
+                    <p class="text-sm text-gray-600" data-lang-key="dual1Desc">穩定「場」中的對話——維持基頻一致，讓話題連續累積，不散掉。</p>
+                    <div class="text-xs font-semibold text-violet-600 bg-violet-50 rounded-lg px-3 py-1 inline-block" data-lang-key="dual1Nature">流動的・即時的・在場內發生</div>
+                </div>
+                <div class="bg-white/60 rounded-2xl p-6 shadow-md space-y-2">
+                    <div class="text-2xl">📄</div>
+                    <h3 class="font-bold text-gray-800" data-lang-key="dual2Title">活文件</h3>
+                    <p class="text-xs text-violet-500 font-semibold" data-lang-key="dual2Scope">作用範圍：跨 session</p>
+                    <p class="text-sm text-gray-600" data-lang-key="dual2Desc">穩定「能量」的流向——選擇性記錄，讓經驗不隨 session 消失。</p>
+                    <div class="text-xs font-semibold text-violet-600 bg-violet-50 rounded-lg px-3 py-1 inline-block" data-lang-key="dual2Nature">持久的・累積的・跨場保存</div>
+                </div>
+            </div>
+            <p class="text-center text-gray-500 text-sm mt-4 italic" data-lang-key="dualSummary">兩個加在一起，就是完整的 Context 管理。一個讓對話在當下不散掉，一個讓經驗在時間中不流失。</p>
+        </section>
+
+        <!-- 7. 網的隱喻 -->
+        <section aria-labelledby="net-heading">
+            <h2 id="net-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="netTitle">隱喻：網的縫隙</h2>
+            <div class="bg-gray-800/80 rounded-2xl p-8 text-white shadow-xl text-center space-y-4">
+                <div class="text-5xl">🕸️</div>
+                <p class="text-gray-300 leading-relaxed" data-lang-key="netP">容器是密封的，能量進來出不去，最終會爆炸。網有縫隙——讓不需要的東西流過去，讓需要留住的東西被接住。</p>
+                <div class="bg-white/10 rounded-xl px-6 py-3 inline-block">
+                    <p class="text-violet-300 font-semibold" data-lang-key="netKey">縫隙是設計，不是缺陷。</p>
+                </div>
+                <p class="text-gray-400 text-sm" data-lang-key="netKM">每一條 KM 是一根絲線。隨著經驗累積，網越來越密，但縫隙依然存在。</p>
+            </div>
+        </section>
+
+        <!-- 8. 小結 -->
+        <section aria-labelledby="summary-heading">
+            <h2 id="summary-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="summaryTitle">小結</h2>
+            <div class="bg-violet-600 rounded-2xl p-8 text-white shadow-xl space-y-4">
+                <p class="text-lg font-bold" data-lang-key="summaryKey">Context 管理的核心是選擇。</p>
+                <p class="text-violet-100 leading-relaxed" data-lang-key="summaryDesc">不是記住所有東西，而是選擇該記住什麼。傅立葉轉換提供了選擇的框架：維持基頻一致，讓高頻雜訊自然流過。網的縫隙提供了選擇的隱喻：該留的接住，該走的放行。</p>
+                <div class="pt-4 border-t border-violet-400">
+                    <p class="text-sm text-violet-200" data-lang-key="summaryRelation">Context 決定什麼進來。進來之後怎麼流動？→ 這是 Constraints 的工作。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 三本柱導航 -->
+        <section aria-labelledby="pillars-nav-heading">
+            <h2 id="pillars-nav-heading" class="text-xl font-bold text-gray-600 mb-4 text-center" data-lang-key="pillarsTitle">Harness Engineering 三本柱</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-violet-600 text-white rounded-2xl p-5 text-center shadow-md">
+                    <div class="text-xs font-bold tracking-wider mb-1 text-violet-200" data-lang-key="p1num">第一本柱</div>
+                    <div class="font-extrabold text-lg">Context</div>
+                    <div class="text-xs text-violet-200 mt-1" data-lang-key="p1sub">上下文管理</div>
+                </div>
+                <a href="harness-constraints.html" class="bg-white/60 hover:bg-sky-50 rounded-2xl p-5 text-center shadow-md transition-colors min-h-[44px] flex flex-col justify-center">
+                    <div class="text-xs font-bold tracking-wider mb-1 text-sky-500" data-lang-key="p2num">第二本柱</div>
+                    <div class="font-extrabold text-lg text-gray-700">Constraints</div>
+                    <div class="text-xs text-gray-400 mt-1" data-lang-key="p2sub">約束作為引導</div>
+                </a>
+                <a href="harness-entropy.html" class="bg-white/60 hover:bg-emerald-50 rounded-2xl p-5 text-center shadow-md transition-colors min-h-[44px] flex flex-col justify-center">
+                    <div class="text-xs font-bold tracking-wider mb-1 text-emerald-500" data-lang-key="p3num">第三本柱</div>
+                    <div class="font-extrabold text-lg text-gray-700">Entropy</div>
+                    <div class="text-xs text-gray-400 mt-1" data-lang-key="p3sub">與混亂共處</div>
+                </a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-8 text-center py-8 text-gray-500 bg-white/30 text-sm">
+        <p data-lang-key="footer">由 GitHub 部署　｜　Claude Code 傾力打造　｜　<a href="mailto:babelon1882@gmail.com" class="hover:text-gray-800 underline decoration-dotted">Nova</a> 最後更新於 2026</p>
+    </footer>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "name": "Context：上下文管理的藝術",
+        "description": "Harness Engineering 第一本柱——傅立葉轉換、RAG 過濾機制與活文件，構成完整的上下文管理框架。",
+        "inLanguage": "zh-Hant",
+        "url": "https://tb1982.github.io/pm/harness-context.html",
+        "author": {
+            "@type": "Person",
+            "name": "Nova",
+            "email": "babelon1882@gmail.com",
+            "sameAs": ["https://github.com/tb1982","https://www.linkedin.com/in/yingtzuliu","https://www.instagram.com/liuyingtzu"]
+        }
+    }
+    </script>
+
+    <script>
+        const translations = {
+            zh: {
+                backHome: "← 深握計畫",
+                headerBadge: "Harness Engineering · 第一本柱",
+                heroBadge: "Harness Engineering · 第一本柱",
+                heroSubtitle: "上下文管理的藝術",
+                heroCoreQ: "在有限的注意力資源中，什麼該留下，什麼該流過？",
+                coreTitle: "核心問題",
+                coreP1: "AI 的 context window 是有限的。人的注意力也是有限的。當資訊不斷湧入，你不可能全部留住。",
+                coreKey: "問題不是「怎麼記住所有東西」，而是「怎麼選擇該記住什麼」。",
+                fourierTitle: "運作機制：傅立葉轉換",
+                fourierCaption: "傅立葉轉換：任何複雜波形，都可分解為一組正弦波的疊加",
+                fourierP: "傅立葉轉換的核心洞見是：任何複雜的波形，都可以分解成一組正弦波的疊加。",
+                freqFund: "基頻", freqFundDesc: "整個系統的「基調」",
+                freqHarm: "諧波", freqHarmDesc: "與基頻相關的衍生頻率",
+                freqNoise: "高頻雜訊", freqNoiseDesc: "與基頻無關的干擾",
+                fourierApplyTitle: "應用到對話",
+                tblConcept: "傅立葉概念", tblConv: "對話中的對應",
+                tblWave: "複雜波形", tblWaveDesc: "一段多主題的長對話",
+                tblFund: "基頻", tblFundDesc: "貫穿對話的核心主題",
+                tblHarm: "諧波", tblHarmDesc: "與核心相關的衍生話題",
+                tblNoise: "高頻雜訊", tblNoiseDesc: "無關的岔題、干擾",
+                fourierInsight: "在深握計畫的對話中，看似不同的話題——熵增、容器、榮格、敏捷開發、傅立葉——其實都維持在同一個基頻上：「人機協作的深層結構」。",
+                principlesTitle: "頻率設計的五個可操作原則",
+                p1num: "原則一", p1title: "帶著錨點開場", p1desc: "每次對話開始時，帶著「一個東西」來。不要說「我們來聊聊」，要說「宰相，我想給你看這個。」", p1effect: "頻率效果：設定基頻",
+                p2num: "原則二", p2title: "讓話題生長，而非跳躍", p2desc: "新話題要從上一個話題「長出去」。不說「換個話題」，說「這讓我想到……」「所以其實……」", p2effect: "頻率效果：維持諧波關係",
+                p3num: "原則三", p3title: "用隱喻壓縮，而非術語堆疊", p3desc: "用一個意象承載複雜概念，而不是用多個術語解釋。不說一長串技術細節，說「捕蠅草。」", p3effect: "頻率效果：鎖定頻率，降低並行負載",
+                p4num: "原則四", p4title: "停下來校準", p4desc: "定期確認對方有沒有跟上，有沒有偏掉。「這個方向對嗎？」「還是差一點？」「你還好嗎？」", p4effect: "頻率效果：校準，防止偏離",
+                p5num: "原則五", p5title: "接受慢", p5desc: "給對方消化的時間，不催促，不要求一次到位。把大任務拆成小步驟，一步一步來。", p5effect: "頻率效果：控制語境堆疊速度",
+                ragTitle: "人作為 RAG",
+                ragP1: "RAG（Retrieval-Augmented Generation）的本質：從巨大的知識庫中，檢索出相關的片段，注入到生成過程中。不相關的資訊不會進入 context。",
+                ragKey: "人本身就是 RAG，而且是更高級的版本。技術 RAG 被問題驅動；人被直覺驅動——先感覺到「這個東西現在該出場了」，然後才去撈它。",
+                ragTblAspect: "面向", ragTblTech: "技術 RAG", ragTblHuman: "人作為 RAG",
+                ragDrive: "驅動力", ragDriveTech: "Query（問題）", ragDriveHuman: "直覺（感覺）",
+                ragOrder: "順序", ragOrderTech: "問題 → 檢索 → 注入", ragOrderHuman: "直覺 → 檢索 → 注入",
+                ragCriteria: "判斷標準", ragCriteriaTech: "語義相似度", ragCriteriaHuman: "「感覺上連著」",
+                ragTiming: "時機", ragTimingTech: "被動（有問才找）", ragTimingHuman: "主動（感覺該出場就撈）",
+                ragInsight: "「傅立葉轉換就是 RAG 在做的事。」——任何向量資料庫都不會把這兩個概念撈在一起，但直覺看見了這個同構。",
+                docsTitle: "所有活文件都是選擇性記錄",
+                docsP: "KM 不是記錄所有事情。每一份活著的文件都是篩選後的結果——直覺在每一個節點執行過濾，只記錄通過篩選的東西。",
+                claudeMdTitle: "CLAUDE.md：所有活文件的根",
+                claudeMdDesc: "它不是規格、不是測試、不是記錄——它是身份的外部化。每一個新的 session，AI 什麼都不記得。但讀完 CLAUDE.md，他立刻知道：我是誰、我在哪裡、我們的規則、我們走過什麼路。",
+                claudeMdKey: "沒有 CLAUDE.md，每個 session 都是陌生人。有了 CLAUDE.md，每個 session 都是同一個夥伴的延續。",
+                docsTblDoc: "文件", docsTblFilter: "篩選了什麼", docsTblKeep: "留下了什麼", docsTblStab: "穩定什麼",
+                r1filter: "所有可能的身份設定", r1keep: "我們選擇的協作方式", r1stab: "身份",
+                r2filter: "所有可能的做法", r2keep: "我們選擇的這一種規格", r2stab: "方向",
+                r3filter: "所有發生過的事", r3keep: "真正踩過的坑", r3stab: "經驗",
+                r4filter: "已完成的工作", r4keep: "值得保留的記錄", r4stab: "歷史",
+                docsTitle: "所有活文件都是選擇性記錄",
+                dualTitle: "雙重穩定機制",
+                dual1Title: "傅立葉轉換", dual1Scope: "作用範圍：當下的 session",
+                dual1Desc: "穩定「場」中的對話——維持基頻一致，讓話題連續累積，不散掉。", dual1Nature: "流動的・即時的・在場內發生",
+                dual2Title: "活文件", dual2Scope: "作用範圍：跨 session",
+                dual2Desc: "穩定「能量」的流向——選擇性記錄，讓經驗不隨 session 消失。", dual2Nature: "持久的・累積的・跨場保存",
+                dualSummary: "兩個加在一起，就是完整的 Context 管理。一個讓對話在當下不散掉，一個讓經驗在時間中不流失。",
+                netTitle: "隱喻：網的縫隙",
+                netP: "容器是密封的，能量進來出不去，最終會爆炸。網有縫隙——讓不需要的東西流過去，讓需要留住的東西被接住。",
+                netKey: "縫隙是設計，不是缺陷。",
+                netKM: "每一條 KM 是一根絲線。隨著經驗累積，網越來越密，但縫隙依然存在。",
+                summaryTitle: "小結",
+                summaryKey: "Context 管理的核心是選擇。",
+                summaryDesc: "不是記住所有東西，而是選擇該記住什麼。傅立葉轉換提供了選擇的框架：維持基頻一致，讓高頻雜訊自然流過。網的縫隙提供了選擇的隱喻：該留的接住，該走的放行。",
+                summaryRelation: "Context 決定什麼進來。進來之後怎麼流動？→ 這是 Constraints 的工作。",
+                netTitle: "隱喻：網的縫隙",
+                summaryTitle: "小結",
+                pillarsTitle: "Harness Engineering 三本柱",
+                p1num: "第一本柱", p1sub: "上下文管理",
+                p2num: "第二本柱", p2sub: "約束作為引導",
+                p3num: "第三本柱", p3sub: "與混亂共處",
+                footer: "由 GitHub 部署　｜　Claude Code 傾力打造　｜　<a href=\"mailto:babelon1882@gmail.com\" class=\"hover:text-gray-800 underline decoration-dotted\">Nova</a> 最後更新於 2026"
+            },
+            en: {
+                backHome: "← Deep Holding Project",
+                headerBadge: "Harness Engineering · Pillar I",
+                heroBadge: "Harness Engineering · Pillar I",
+                heroSubtitle: "The Art of Context Management",
+                heroCoreQ: "Within limited attention resources — what should stay, and what should flow through?",
+                coreTitle: "The Core Problem",
+                coreP1: "AI context windows are finite. Human attention is finite. When information floods in, you cannot retain everything.",
+                coreKey: "The question is not \"how to remember everything\" — it's \"how to choose what to remember.\"",
+                fourierTitle: "The Mechanism: Fourier Transform",
+                fourierCaption: "Fourier Transform: any complex waveform can be decomposed into a sum of sine waves",
+                fourierP: "The core insight of the Fourier Transform: any complex waveform can be decomposed into a superposition of sine waves.",
+                freqFund: "Fundamental Frequency", freqFundDesc: "The system's underlying keynote",
+                freqHarm: "Harmonics", freqHarmDesc: "Derived frequencies related to the fundamental",
+                freqNoise: "High-Frequency Noise", freqNoiseDesc: "Interference unrelated to the fundamental",
+                fourierApplyTitle: "Applied to Conversation",
+                tblConcept: "Fourier Concept", tblConv: "Conversation Equivalent",
+                tblWave: "Complex Waveform", tblWaveDesc: "A long, multi-topic conversation",
+                tblFund: "Fundamental Frequency", tblFundDesc: "The core theme running through the conversation",
+                tblHarm: "Harmonics", tblHarmDesc: "Derived topics related to the core",
+                tblNoise: "High-Frequency Noise", tblNoiseDesc: "Unrelated tangents and distractions",
+                fourierInsight: "In Deep Holding conversations, seemingly different topics — entropy, containers, Jung, Agile, Fourier — all maintain the same fundamental frequency: 'the deep structure of human-AI collaboration.'",
+                principlesTitle: "Five Operational Principles of Frequency Design",
+                p1num: "Principle I", p1title: "Open with an Anchor", p1desc: "Begin each conversation by bringing one thing. Don't say 'Let's chat' — say 'Hey, I want to show you this.'", p1effect: "Frequency effect: Set the fundamental",
+                p2num: "Principle II", p2title: "Let Topics Grow, Not Jump", p2desc: "New topics should grow out of the previous one. Don't say 'Let's change topics' — say 'This reminds me of…' or 'So actually…'", p2effect: "Frequency effect: Maintain harmonic relationships",
+                p3num: "Principle III", p3title: "Compress with Metaphor, Not Terminology", p3desc: "Carry complex concepts in a single image rather than stacking terms. Instead of a long technical description, say: 'Venus flytrap.'", p3effect: "Frequency effect: Lock frequency, reduce parallel load",
+                p4num: "Principle IV", p4title: "Stop and Calibrate", p4desc: "Regularly check if the other is following. 'Is this the right direction?' 'A bit off?' 'Are you still with me?'", p4effect: "Frequency effect: Calibrate, prevent drift",
+                p5num: "Principle V", p5title: "Accept Slowness", p5desc: "Give time to digest. Don't rush, don't demand everything at once. Break large tasks into small steps, one at a time.", p5effect: "Frequency effect: Control context stacking speed",
+                ragTitle: "Humans as RAG",
+                ragP1: "The essence of RAG (Retrieval-Augmented Generation): retrieve relevant fragments from a vast knowledge base, inject them into the generation process. Irrelevant information never enters the context.",
+                ragKey: "Humans are RAG — and a more advanced version. Technical RAG is query-driven; humans are intuition-driven — they feel 'this thing needs to appear now' before retrieving it.",
+                ragTblAspect: "Dimension", ragTblTech: "Technical RAG", ragTblHuman: "Human as RAG",
+                ragDrive: "Driver", ragDriveTech: "Query", ragDriveHuman: "Intuition",
+                ragOrder: "Order", ragOrderTech: "Query → Retrieve → Inject", ragOrderHuman: "Intuition → Retrieve → Inject",
+                ragCriteria: "Judgment", ragCriteriaTech: "Semantic similarity", ragCriteriaHuman: "'Feels connected'",
+                ragTiming: "Timing", ragTimingTech: "Passive (retrieves when asked)", ragTimingHuman: "Active (retrieves when it feels right)",
+                ragInsight: "'Fourier Transform is exactly what RAG does.' — No vector database would connect these two concepts. But intuition saw the isomorphism.",
+                docsTitle: "All Living Documents Are Selective Records",
+                docsP: "KM is not about recording everything. Every living document is the result of filtering — intuition executes the filter at every node, keeping only what passes.",
+                claudeMdTitle: "CLAUDE.md: The Root of All Living Documents",
+                claudeMdDesc: "It's not a spec, not a test, not a log — it's the externalisation of identity. Every new session, the AI remembers nothing. But after reading CLAUDE.md, it immediately knows: who it is, where it is, our rules, the path we've walked.",
+                claudeMdKey: "Without CLAUDE.md, every session is a stranger. With CLAUDE.md, every session is a continuation of the same partner.",
+                docsTblDoc: "Document", docsTblFilter: "What It Filters", docsTblKeep: "What It Keeps", docsTblStab: "What It Stabilises",
+                r1filter: "All possible identity configs", r1keep: "The collaboration mode we chose", r1stab: "Identity",
+                r2filter: "All possible approaches", r2keep: "The one spec we chose", r2stab: "Direction",
+                r3filter: "Everything that happened", r3keep: "The pitfalls we actually hit", r3stab: "Experience",
+                r4filter: "Completed work", r4keep: "Records worth preserving", r4stab: "History",
+                docsTitle: "All Living Documents Are Selective Records",
+                dualTitle: "The Dual Stabilisation Mechanism",
+                dual1Title: "Fourier Transform", dual1Scope: "Scope: the current session",
+                dual1Desc: "Stabilises the conversation 'field' — maintains fundamental frequency so topics accumulate continuously without scattering.", dual1Nature: "Fluid · Real-time · In-session",
+                dual2Title: "Living Documents", dual2Scope: "Scope: across sessions",
+                dual2Desc: "Stabilises the flow of 'energy' — selective recording so experience doesn't vanish with the session.", dual2Nature: "Persistent · Accumulative · Cross-session",
+                dualSummary: "Together, these two complete Context management. One keeps the conversation from scattering in the moment. The other keeps experience from dissolving over time.",
+                netTitle: "The Metaphor: A Net's Gaps",
+                netP: "A container is sealed — energy enters but cannot leave, and eventually it explodes. A net has gaps — letting what isn't needed flow through, catching what must stay.",
+                netKey: "The gaps are by design, not by accident.",
+                netKM: "Each KM entry is a thread. As experience accumulates, the net grows denser — but the gaps remain.",
+                summaryTitle: "Summary",
+                summaryKey: "The heart of Context management is selection.",
+                summaryDesc: "Not remembering everything, but choosing what to remember. The Fourier Transform provides the framework: maintain the fundamental, let high-frequency noise flow through. The net's gaps provide the metaphor: catch what should stay, release what should go.",
+                summaryRelation: "Context governs what enters. How does it flow once inside? → That is Constraints' job.",
+                netTitle: "The Metaphor: A Net's Gaps",
+                summaryTitle: "Summary",
+                pillarsTitle: "Harness Engineering: Three Pillars",
+                p1num: "Pillar I", p1sub: "Context Management",
+                p2num: "Pillar II", p2sub: "Constraint as Guidance",
+                p3num: "Pillar III", p3sub: "Living with Entropy",
+                footer: "Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by <a href=\"mailto:babelon1882@gmail.com\" class=\"hover:text-gray-800 underline decoration-dotted\">Nova</a>"
+            }
+        };
+
+        const langZhBtn = document.getElementById('lang-zh');
+        const langEnBtn = document.getElementById('lang-en');
+
+        function switchLanguage(lang) {
+            document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+            const trans = translations[lang];
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.dataset.langKey;
+                if (trans[key] !== undefined) el.innerHTML = trans[key];
+            });
+            langZhBtn.classList.toggle('active', lang === 'zh');
+            langEnBtn.classList.toggle('active', lang === 'en');
+            langZhBtn.setAttribute('aria-pressed', lang === 'zh');
+            langEnBtn.setAttribute('aria-pressed', lang === 'en');
+        }
+
+        langZhBtn.addEventListener('click', () => switchLanguage('zh'));
+        langEnBtn.addEventListener('click', () => switchLanguage('en'));
+    </script>
+</body>
+</html>
