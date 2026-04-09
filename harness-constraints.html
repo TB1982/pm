@@ -45,6 +45,7 @@
             <div class="lang-switcher flex items-center bg-gray-100 rounded-full p-1" role="group" aria-label="語言切換">
                 <button id="lang-zh" class="active" aria-pressed="true">中</button>
                 <button id="lang-en" aria-pressed="false">EN</button>
+                <button id="lang-ja" aria-pressed="false">JA</button>
             </div>
         </div>
     </header>
@@ -379,14 +380,62 @@
                 p2num: "Pillar II", p2sub: "Constraint as Guidance",
                 p3num: "Pillar III", p3sub: "Living with Entropy",
                 footer: "Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by <a href=\"mailto:babelon1882@gmail.com\" class=\"hover:text-gray-800 underline decoration-dotted\">Nova</a>"
+            },
+            ja: {
+                backHome: "← ディープホールディング",
+                headerBadge: "Harness Engineering · 第二の柱",
+                heroBadge: "Harness Engineering · 第二の柱",
+                heroSubtitle: "制約を誘導として活かす技法",
+                heroCoreQ: "作業記憶が散逸せず、進捗が失われないようにするにはどうすればよいか？",
+                coreTitle: "核心問題",
+                coreP1: "AIは記憶を失う。セッションは終わる。人間は昨日下した決定を忘れる。",
+                coreKey: "問題は「どうすれば全員が覚えていられるか」ではなく、「覚えていなくても大丈夫なシステムをどう設計するか」だ。",
+                workflowTitle: "メカニズム：ワークフローをトラックとして",
+                workflowP1: "制約とは「できないことの制限」ではない。制約とは「物が外に落ちないトラックを設計すること」だ。",
+                riverTitle: "川の比喩",
+                riverDesc: "川を想像してほしい：川床がなければ、水はあちこちに広がり、最終的に蒸発する。川床があれば、水は道に沿って流れ、目的地に到達する。ワークフローは川床だ——水の流れ方を制御するのではなく、水が間違った場所に流れないようにするだけだ。",
+                workflowPrinciples: "ワークフロー設計の3原則：各フェーズはゲートだ（本当に立ち止まって確認する）；文書はプロセスと共に移動する（セッションが変わっても、文書を読めば今どこにいるかわかる）；未知の領域にはより多くのゲートが必要だ（官僚主義ではなく、保護だ）。",
+                dualTitle: "デュアルトラックワークフロー",
+                track1Badge: "慣れた領域", track1eg: "例：Electron", track1Desc: "6ステップ、軽装前進。Claudeはこの領域に慣れており、落とし穴の可能性は低い。",
+                track2Badge: "未知の領域", track2eg: "例：Tauri 2.0", track2Desc: "10ステップ、フル装備。暗闇の中を2人で一緒に進む、より多くのガードレールが必要だ。",
+                nodesTitle: "各ノードで何が起きるか",
+                nodeDoR: "Definition of Ready——開始前に要件が明確であることを確認し、Nova が着手可能であることを確認する。準備ができていない状態でエネルギーを浪費しないようにする。",
+                nodeSDD: "Specification-Driven Development——新しい実装はすべて先に仕様を書く。新しいIPCコマンド、新機能——コードに触れる前にインターフェースと動作を定義する。SDDは「何を作るか」の唯一の真実の源だ。",
+                nodeDoD: "Definition of Done——「完了」とは何かを定義し、4種類の境界をカバーする：Input（不正入力）、State（間違った状態）、Timing（間違いタイミング）、Empty（データなし）。DoDがなければ、「完了」は常に疑われ得る。",
+                nodeTDD: "Test-Driven Development——各ストーリーに4つのテストブロック：ハッピーパス、境界条件（DoDより）、リグレッションガード、リスクトリガー（Explore②より）。TDDはテストを書くためではなく、コードを書く前に考え抜くためだ。",
+                nodeVerify: "SDDと照合して定義されたすべての動作が実装されているか確認する；DoDと照合して4種類の境界すべてが処理されているか確認する；TDDと照合してすべてのテストが通過しているか確認する。",
+                nodeRetro: "第三の柱「Entropy」を参照。",
+                servantTitle: "哲学：サーバント・リーダーシップ",
+                servantP: "サーバント・リーダーシップの核心：リーダーの役割は制御ではなく、サービスだ。「私の言う通りにしろ」ではなく「あなたをどう助けられるか？」",
+                novaRoleTitle: "Novaの役割", novaRole1: "✦ チャンネルの方向を設計する", novaRole2: "✦ 詰まりを取り除く", novaRole3: "✦ 流れが滞っている場所を観察する", novaRole4: "✦ 必要に応じて構造を調整する",
+                novaNotTitle: "Novaがしないこと", novaNot1: "✗ 水の流れ方を制御する", novaNot2: "✗ 水の速さを命令する", novaNot3: "✗ 水を引き止める",
+                laozi: "老子：無為にして為さざるなし。",
+                laoziDesc: "川床は水を上流に押し流そうとしない。地形に従い、水が自然に下流へ流れるようにする。ワークフローはAIに特定の方法で実装させようとしない——自然な協働リズムに従い、成果が自然と生まれるようにする。",
+                servantWhy: "AIの能力は人間を超えているが、AIには方向性が必要だ。人間がAIのすべてのステップを制御しようとすると、ボトルネックになる。人間が方向性と構造だけを提供すれば、AIはその構造の中でフルスピードで走れる。",
+                docsTitle: "文書とプロセスの関係",
+                docsP: "このシステムでは、文書さえもClaudeが記録する——人間ではない。人間がすることは一つだけ：いつ記録すべきかを決めることだ。",
+                docsKey: "人間はコンテンツをコントロールせず、タイミングを設計する。人間は進捗を追跡せず、進捗が自動的に記録されるシステムを設計する。",
+                docsFlow: "文書がプロセスに組み込まれると、システムは自動で動く：プロセスがノードに到達 → ノードが記録をトリガー → Claudeが記録を実行 → 記録が次のセッションのContextになる → サイクルが続く。",
+                docsVAS: "VASはこうして生まれた：最初から「App Storeに出す製品を作る」というゴールはなかった。あったのは方向性だけ。そして一つのSprintが次のSprintに繋がり、道が自分で育っていった。ゴールは予め定義されたのではなく、歩みの中で生まれた。",
+                summaryTitle: "まとめ",
+                summaryKey: "Constraints管理の核心は誘導だ。",
+                summaryDesc: "制限ではなく、トラックを設計することだ。ワークフローは誘導の構造を提供する：各ノードはゲートであり、文書はプロセスと共に移動する。川の比喩は誘導の意味を提供する：水を制御するのではなく、水が間違った場所に流れないようにする。",
+                summaryRelation: "Constraintsはどう流れるかを決める。流れた後どう出るか？→ それはEntropyの仕事だ。",
+                pillarsTitle: "Harness Engineering 三本の柱",
+                p1num: "第一の柱", p1sub: "コンテキスト管理",
+                p2num: "第二の柱", p2sub: "制約による誘導",
+                p3num: "第三の柱", p3sub: "エントロピーと共に生きる",
+                footer: "GitHub でデプロイ　｜　Claude Code で構築　｜　2026年 <a href=\"mailto:babelon1882@gmail.com\" class=\"hover:text-gray-800 underline decoration-dotted\">Nova</a> 最終更新"
             }
         };
 
         const langZhBtn = document.getElementById('lang-zh');
         const langEnBtn = document.getElementById('lang-en');
+        const langJaBtn = document.getElementById('lang-ja');
 
         function switchLanguage(lang) {
-            document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+            const langMap = { zh: 'zh-Hant', en: 'en', ja: 'ja' };
+            document.documentElement.lang = langMap[lang] || 'zh-Hant';
             const trans = translations[lang];
             document.querySelectorAll('[data-lang-key]').forEach(el => {
                 const key = el.dataset.langKey;
@@ -394,12 +443,15 @@
             });
             langZhBtn.classList.toggle('active', lang === 'zh');
             langEnBtn.classList.toggle('active', lang === 'en');
+            langJaBtn.classList.toggle('active', lang === 'ja');
             langZhBtn.setAttribute('aria-pressed', lang === 'zh');
             langEnBtn.setAttribute('aria-pressed', lang === 'en');
+            langJaBtn.setAttribute('aria-pressed', lang === 'ja');
         }
 
         langZhBtn.addEventListener('click', () => switchLanguage('zh'));
         langEnBtn.addEventListener('click', () => switchLanguage('en'));
+        langJaBtn.addEventListener('click', () => switchLanguage('ja'));
     </script>
 </body>
 </html>

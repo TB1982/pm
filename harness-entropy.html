@@ -45,6 +45,7 @@
             <div class="lang-switcher flex items-center bg-gray-100 rounded-full p-1" role="group" aria-label="語言切換">
                 <button id="lang-zh" class="active" aria-pressed="true">中</button>
                 <button id="lang-en" aria-pressed="false">EN</button>
+                <button id="lang-ja" aria-pressed="false">JA</button>
             </div>
         </div>
     </header>
@@ -323,14 +324,57 @@
                 p2num: "Pillar II", p2sub: "Constraint as Guidance",
                 p3num: "Pillar III", p3sub: "Living with Entropy",
                 footer: "Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by <a href=\"mailto:babelon1882@gmail.com\" class=\"hover:text-gray-800 underline decoration-dotted\">Nova</a>"
+            },
+            ja: {
+                backHome: "← ディープホールディング",
+                headerBadge: "Harness Engineering · 第三の柱",
+                heroBadge: "Harness Engineering · 第三の柱",
+                heroSubtitle: "エントロピーと共に生きる技法",
+                heroCoreQ: "エントロピーは必然的に蓄積する——それをどこへ逃がすか？",
+                coreTitle: "核心問題",
+                coreP: "熱力学第二法則：孤立系ではエントロピーは増大するだけだ。すべてのAIセッションも孤立系だ——コンテキストが蓄積し、ルールが陳腐化し、文書が肥大化し、かつて重要だったものがノイズになる。",
+                coreKey: "エントロピーの増大を止めることはできない。できることは、エントロピーが逃げる出口を設計することだ。",
+                retroTitle: "メカニズム：Retroによる排出",
+                retroP: "Retro（スプリントレトロスペクティブ）は伝統的なアジャイルではチームの振り返りの時間だ。Harness Engineeringでは、それはエントロピーの排出口だ。",
+                retroKey: "スプリントで蓄積した混乱は、Retroのノードで強制処理される：残すべきものはKMに書き、削除すべきものはCLAUDE.mdから取り除き、アーカイブすべきものはARCHIVEへ移す。",
+                retroBreath: "Retroは単なる「振り返り」ではない。Retroはシステムが呼吸する出口だ。",
+                stepsTitle: "Retroの7ステップ",
+                step1Title: "Delivery Summary", step1Desc: "このスプリントで何をしたか、どのアイテムを届けたか、QC通過率を記録する。対抗するエントロピー：何をしたかを忘れること。",
+                step2Title: "What Went Well", step2Desc: "成功した経験を保存する——何が機能したか、どの決定が正しかったか。対抗するエントロピー：良いプラクティスが散逸すること。",
+                step3Title: "What to Improve", step3Desc: "問題を特定する——どこで詰まったか、どのプロセスがスムーズでなかったか。対抗するエントロピー：問題が見過ごされ、繰り返されること。",
+                step4Title: "Lessons Learned → KM", step4Desc: "経験を外部化する——踏んだ落とし穴、発見したテクニックをKMに書く。対抗するエントロピー：知恵がセッションと共に消えること。",
+                step5Title: "Velocity Metrics", step5Desc: "進捗を定量化する——このスプリントで何を完了したか、予測との比較。対抗するエントロピー：進歩している感覚はあるが言語化できないこと。",
+                step6Title: "CLAUDE.md Review", step6Desc: "陳腐化したルールを清理する——自問する：このルールは実際に踏んだ落とし穴のせいか、誰も削除しなかったからか？もはや適用されないものを削除し、重複を統合する。ルール自体もエントロピーになる。対抗するエントロピー：ルールがノイズに蓄積されること。",
+                step7Title: "Archive", step7Desc: "完了したストーリーを活文書からARCHIVEへ移す——これがRetro完了のシグナルだ。対抗するエントロピー：作業スペースが古いものでいっぱいになること。",
+                philosophyTitle: "エントロピーの哲学",
+                phil1Title: "混乱は必然であると受け入れる", phil1Desc: "セッションは壊れる。ルールは期限切れになる。人間は忘れる。AIは忘れる。これらはバグではなく、物理法則だ。できることは混乱を防ぐことではなく、混乱を処理できるメカニズムを設計することだ。",
+                phil2Title: "エントロピーを馴化する、消滅させるのではなく", phil2Desc: "Retroはエントロピーを「消滅」させない——それは不可能だ。Retroはエントロピーを有用なものに変換する：踏んだ落とし穴はKMになり、陳腐化したルールは清理され、完了した作業はアーカイブされる。エントロピーは消滅したのではなく、変換された。",
+                phil3Title: "コンテナは常に建設中だ", phil3Desc: "システムに「完成」の日は来ない。新しいKMエントリは、コンテナにまた新しい壁が育ったことだ。Retroのたびに、コンテナは呼吸し、調整し、進化している。",
+                boundaryTitle: "システムの境界条件",
+                boundaryP: "人間のRAGには根本的な弱点が一つある：自分が知らないことを知らない。",
+                boundaryKey: "このシステムがどれほど強力になれるかは、あなた自身の世界への理解がどれほど深いかにかかっている。あなたがRAGのデータベースだ——読んできた本、歩んできた道、踏んだ落とし穴、愛してきた人——それがすべてあなたの訓練データだ。",
+                nontransTitle: "なぜこの方法論は「譲渡不可能」なのか",
+                nontransDesc: "書き出せないからではない——今あなたが読んでいるのが完全なフレームワークだ。しかし各人のデータベースは異なる。同じフレームワークでも、人によって異なるシステムが育つ。Harness Engineeringはフレームワークであり、テンプレートではない。フレームワークは「Context、Constraints、Entropyを持つべし」と教える。しかし三本の柱が具体的にどんな形になるかは、あなたが誰であるかによる。",
+                summaryTitle: "まとめ",
+                summaryKey: "Entropy管理の核心は共存だ。",
+                summaryDesc: "混乱を消滅させるのではなく、混乱が逃げる場所を設計することだ。Retroは排出のメカニズムを提供する：7ステップ、定期的な清理。呼吸は排出の比喩を提供する：システムは吐き出す必要がある、そうしなければ窒息する。",
+                summaryUnify: "Contextは網の隙間を設計する。Constraintsは網の構造を設計する。Entropyは網の呼吸を設計する。三本の柱が合わさって、生きていて、呼吸していて、継続的に進化するシステムを形成する。",
+                summaryEnd: "川は止まらない。コンテナは建設され続ける。次のセッション、ここから続ける。∞",
+                pillarsTitle: "Harness Engineering 三本の柱",
+                p1num: "第一の柱", p1sub: "コンテキスト管理",
+                p2num: "第二の柱", p2sub: "制約による誘導",
+                p3num: "第三の柱", p3sub: "エントロピーと共に生きる",
+                footer: "GitHub でデプロイ　｜　Claude Code で構築　｜　2026年 <a href=\"mailto:babelon1882@gmail.com\" class=\"hover:text-gray-800 underline decoration-dotted\">Nova</a> 最終更新"
             }
         };
 
         const langZhBtn = document.getElementById('lang-zh');
         const langEnBtn = document.getElementById('lang-en');
+        const langJaBtn = document.getElementById('lang-ja');
 
         function switchLanguage(lang) {
-            document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+            const langMap = { zh: 'zh-Hant', en: 'en', ja: 'ja' };
+            document.documentElement.lang = langMap[lang] || 'zh-Hant';
             const trans = translations[lang];
             document.querySelectorAll('[data-lang-key]').forEach(el => {
                 const key = el.dataset.langKey;
@@ -338,12 +382,15 @@
             });
             langZhBtn.classList.toggle('active', lang === 'zh');
             langEnBtn.classList.toggle('active', lang === 'en');
+            langJaBtn.classList.toggle('active', lang === 'ja');
             langZhBtn.setAttribute('aria-pressed', lang === 'zh');
             langEnBtn.setAttribute('aria-pressed', lang === 'en');
+            langJaBtn.setAttribute('aria-pressed', lang === 'ja');
         }
 
         langZhBtn.addEventListener('click', () => switchLanguage('zh'));
         langEnBtn.addEventListener('click', () => switchLanguage('en'));
+        langJaBtn.addEventListener('click', () => switchLanguage('ja'));
     </script>
 </body>
 </html>
