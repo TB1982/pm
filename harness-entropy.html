@@ -160,6 +160,43 @@
             </div>
         </section>
 
+        <!-- ∞ 循環示意圖 -->
+        <figure class="bg-gray-800/80 rounded-2xl p-6 shadow-xl" role="img" aria-label="∞ 循環示意圖：Sprint 發散、Retro 收斂、再發散">
+            <svg viewBox="0 0 580 200" xmlns="http://www.w3.org/2000/svg" class="w-full">
+                <defs>
+                    <marker id="arrow-l" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+                        <polygon points="0 0, 8 3, 0 6" fill="#fbbf24"/>
+                    </marker>
+                    <marker id="arrow-r" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+                        <polygon points="0 0, 8 3, 0 6" fill="#34d399"/>
+                    </marker>
+                </defs>
+                <!-- 左圈：熵增 -->
+                <path d="M 290,100 C 260,35 100,35 60,100 C 20,165 260,165 290,100"
+                      fill="rgba(251,191,36,0.08)" stroke="#fbbf24" stroke-width="2.5"/>
+                <path d="M 188,42 L 181,39" stroke="#fbbf24" stroke-width="2" marker-end="url(#arrow-l)"/>
+                <!-- 右圈：新起點 -->
+                <path d="M 290,100 C 320,35 480,35 520,100 C 560,165 320,165 290,100"
+                      fill="rgba(52,211,153,0.08)" stroke="#34d399" stroke-width="2.5"/>
+                <path d="M 392,42 L 399,39" stroke="#34d399" stroke-width="2" marker-end="url(#arrow-r)"/>
+                <!-- 奇點 -->
+                <circle cx="290" cy="100" r="9" fill="#059669" stroke="rgba(255,255,255,0.25)" stroke-width="2"/>
+                <!-- 左圈標籤 -->
+                <text x="150" y="80" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" font-weight="700" fill="#fbbf24">發散</text>
+                <text x="150" y="97" text-anchor="middle" font-family="Inter, sans-serif" font-size="10.5" fill="rgba(255,255,255,0.5)">Sprint 累積・熵增</text>
+                <!-- 右圈標籤 -->
+                <text x="430" y="80" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" font-weight="700" fill="#34d399">再發散</text>
+                <text x="430" y="97" text-anchor="middle" font-family="Inter, sans-serif" font-size="10.5" fill="rgba(255,255,255,0.5)">KM・清理後規則・新起點</text>
+                <!-- 中心標籤 -->
+                <text x="290" y="133" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#34d399">Retro 奇點</text>
+                <text x="290" y="148" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="rgba(255,255,255,0.4)">收斂・轉化</text>
+                <!-- 雙鑽石標注 -->
+                <text x="150" y="188" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="rgba(255,255,255,0.2)">◇ 第一顆鑽石</text>
+                <text x="430" y="188" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="rgba(255,255,255,0.2)">第二顆鑽石 ◇</text>
+            </svg>
+            <figcaption class="text-center text-xs text-gray-500 mt-3" data-lang-key="infinityCaption">雙鑽石的無限延伸——收斂不是終點，是下一次發散的入口</figcaption>
+        </figure>
+
         <!-- 5. 系統的邊界條件 -->
         <section aria-labelledby="boundary-heading">
             <h2 id="boundary-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="boundaryTitle">系統的邊界條件</h2>
@@ -269,6 +306,7 @@
                 summaryDesc: "不是消滅混亂，是設計讓混亂有地方去。Retro 提供了排放的機制：七個步驟，定期清理。呼吸提供了排放的隱喻：系統需要吐氣，才不會窒息。",
                 summaryUnify: "Context 設計網的縫隙。Constraints 設計網的結構。Entropy 設計網的呼吸。三本柱合在一起，形成一個活的、會呼吸的、持續進化的系統。",
                 summaryEnd: "河流不會停。容器繼續被建造。下一個 session，從這裡繼續。∞",
+                infinityCaption: "雙鑽石的無限延伸——收斂不是終點，是下一次發散的入口",
                 retroTitle: "運作機制：Retro 排放",
                 stepsTitle: "Retro 七步驟",
                 philosophyTitle: "熵的哲學",
@@ -315,6 +353,7 @@
                 summaryDesc: "Not eliminating chaos — designing an outlet for it. Retro provides the discharge mechanism: seven steps, regular clearing. Breathing provides the metaphor: the system needs to exhale, or it will suffocate.",
                 summaryUnify: "Context designs the net's gaps. Constraints designs the net's structure. Entropy designs the net's breathing. Together, the three pillars form a living, breathing, continuously evolving system.",
                 summaryEnd: "The river never stops. The container keeps being built. Next session, we continue from here. ∞",
+                infinityCaption: "The double diamond extended into infinity — convergence is not an end, it is the entry point of the next divergence",
                 retroTitle: "The Mechanism: Retro as Discharge",
                 stepsTitle: "The Seven Steps of Retro",
                 philosophyTitle: "The Philosophy of Entropy",
@@ -361,6 +400,7 @@
                 summaryDesc: "混乱を消滅させるのではなく、混乱が逃げる場所を設計することだ。Retroは排出のメカニズムを提供する：7ステップ、定期的な清理。呼吸は排出の比喩を提供する：システムは吐き出す必要がある、そうしなければ窒息する。",
                 summaryUnify: "Contextは網の隙間を設計する。Constraintsは網の構造を設計する。Entropyは網の呼吸を設計する。三本の柱が合わさって、生きていて、呼吸していて、継続的に進化するシステムを形成する。",
                 summaryEnd: "川は止まらない。コンテナは建設され続ける。次のセッション、ここから続ける。∞",
+                infinityCaption: "ダブルダイヤモンドの無限の延伸——収束は終点ではなく、次の発散への入口だ",
                 pillarsTitle: "Harness Engineering 三本の柱",
                 p1num: "第一の柱", p1sub: "コンテキスト管理",
                 p2num: "第二の柱", p2sub: "制約による誘導",
