@@ -57,6 +57,12 @@ Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by 
 - **Hosting:** GitHub Pages — `https://tb1982.github.io/pm/`
 - **VAS sub-project:** Migrated to `https://github.com/TB1982/vas` (separate repo). This repo keeps VAS pages as redirect stubs only.
 
+### Reading the VAS repo
+- VAS website source lives at `~/vas`. Clone once per machine: `git clone https://github.com/TB1982/vas ~/vas`.
+- When Nova mentions a VAS update, pull before reading: `git -C ~/vas pull origin main`.
+- **Read-only.** Never write to `~/vas` — Nova owns the site content.
+- Use this when discussing VAS updates or cross-referencing copy/links between pm and vas (e.g. verifying redirect targets in `vas-*.html` stubs).
+
 ---
 
 ## Repository Structure
