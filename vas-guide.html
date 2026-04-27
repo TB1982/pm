@@ -2,13 +2,37 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="0; url=https://tb1982.github.io/vas/guide.html">
-  <link rel="canonical" href="https://tb1982.github.io/vas/guide.html">
+  <meta http-equiv="refresh" content="0; url=https://yoursvas.app/guide.html">
+  <link rel="canonical" href="https://yoursvas.app/guide.html">
+  <link rel="alternate" hreflang="zh-Hant" href="https://yoursvas.app/guide.html">
+  <link rel="alternate" hreflang="zh-Hans" href="https://yoursvas.app/cn/guide.html">
+  <link rel="alternate" hreflang="en" href="https://yoursvas.app/en/guide.html">
+  <link rel="alternate" hreflang="ja" href="https://yoursvas.app/ja/guide.html">
+  <link rel="alternate" hreflang="x-default" href="https://yoursvas.app/guide.html">
   <title>VAS 操作手冊 — 已搬移</title>
-  <script>window.location.replace("https://tb1982.github.io/vas/guide.html");</script>
+  <script>
+    (function () {
+      var lang = (navigator.language || navigator.userLanguage || '').toLowerCase();
+      var target = 'https://yoursvas.app/guide.html';
+      if (lang.indexOf('zh') === 0) {
+        if (lang.indexOf('zh-cn') === 0 || lang.indexOf('zh-sg') === 0 || lang.indexOf('zh-hans') === 0) {
+          target = 'https://yoursvas.app/cn/guide.html';
+        }
+      } else if (lang.indexOf('ja') === 0) {
+        target = 'https://yoursvas.app/ja/guide.html';
+      } else if (lang.indexOf('en') === 0) {
+        target = 'https://yoursvas.app/en/guide.html';
+      }
+      window.location.replace(target);
+    })();
+  </script>
 </head>
 <body>
   <p>頁面已搬移，正在跳轉…<br>
-  如未自動跳轉，請點擊 <a href="https://tb1982.github.io/vas/guide.html">這裡</a>。</p>
+  如未自動跳轉，請選擇語言：
+  <a href="https://yoursvas.app/guide.html">繁體中文</a> ｜
+  <a href="https://yoursvas.app/en/guide.html">English</a> ｜
+  <a href="https://yoursvas.app/ja/guide.html">日本語</a> ｜
+  <a href="https://yoursvas.app/cn/guide.html">简体中文</a></p>
 </body>
 </html>
