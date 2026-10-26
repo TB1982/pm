@@ -55,7 +55,7 @@ This file provides guidance for AI assistants working in this repository.
 
 - **Site type:** Static HTML — no backend, no build system, no package manager
 - **Hosting:** GitHub Pages — `https://tb1982.github.io/pm/`
-- **VAS sub-project:** Migrated to `https://github.com/TB1982/vas` (separate public repo). This repo keeps VAS pages as redirect stubs only.
+- **VAS sub-project:** Migrated to `https://github.com/TB1982/vas` (separate public repo), served at `https://yoursvas.app/`. This repo keeps VAS pages — and the three Harness Engineering pages, which now live on VAS — as redirect stubs only.
 
 ### Reading the VAS website repo
 - VAS website source lives at `~/vas`. Clone once per machine: `git clone https://github.com/TB1982/vas ~/vas`.
@@ -101,20 +101,20 @@ Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by 
 ```
 /
 ├── index.html              # Main dashboard (project hub)
-├── harness-context.html    # Harness Engineering Pillar I: Context
-├── harness-constraints.html# Harness Engineering Pillar II: Constraints
-├── harness-entropy.html    # Harness Engineering Pillar III: Entropy
 ├── deepholding.html        # Interactive canvas: "Inner Universe Cycle"
 ├── journal.html            # Journal
 ├── lottery.html            # Lottery number picker
 ├── mandal_chart.html       # Mandala 9-grid chart tool
 │
-├── collab.html         # → redirect to tb1982.github.io/vas/collab.html
-├── insight.html        # → redirect to tb1982.github.io/vas/insight.html
-├── milestone.html      # → redirect to tb1982.github.io/vas/milestone.html
-├── privacy.html        # → redirect to tb1982.github.io/vas/privacy.html
-├── vas.html            # → redirect to tb1982.github.io/vas/
-├── vas-guide.html      # → redirect (browser-language-aware) to yoursvas.app/<lang>/guide.html
+├── harness-context.html    # → redirect to yoursvas.app/harness/context
+├── harness-constraints.html# → redirect to yoursvas.app/harness/constraints
+├── harness-entropy.html    # → redirect to yoursvas.app/harness/entropy
+├── collab.html         # → redirect to yoursvas.app/collab
+├── insight.html        # → redirect to yoursvas.app/insight
+├── milestone.html      # → redirect to yoursvas.app/milestone
+├── privacy.html        # → redirect to yoursvas.app/privacy
+├── vas.html            # → redirect to yoursvas.app/
+├── vas-guide.html      # → redirect (browser-language-aware) to yoursvas.app/<lang>/guide/
 │
 ├── archive/            # Archived pages — do not edit
 ├── img/                # Shared image assets
@@ -208,10 +208,7 @@ Traditional Chinese, action-oriented: `更新手機版顯示數字大小` / `新
 
 | File | Note |
 |------|------|
-| `index.html` | Main entry point; GitHub commit stats widget |
-| `harness-context.html` | Harness Engineering Pillar I |
-| `harness-constraints.html` | Harness Engineering Pillar II |
-| `harness-entropy.html` | Harness Engineering Pillar III |
+| `index.html` | Main entry point; GitHub commit stats widget; Harness cards link straight to yoursvas.app |
 | `deepholding.html` | Complex standalone canvas JS — test carefully after edits |
 | `mandal_chart.html` | Interactive Mandala grid tool |
 | `lottery.html` | Client-side lottery picker |
