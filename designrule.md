@@ -10,7 +10,7 @@ Read this before any HTML or CSS change.
 
 ### Visual language — aligned with VAS (2026-10)
 `index.html` and `journal.html` follow VAS's current design (source of truth: `~/vas/css/tokens.css` dark, `~/vas/css/theme.css` light).
-`deepholding.html`, `lottery.html`, `mandal_chart.html` still use their own older styles — not yet migrated.
+`deepholding.html`, `lottery.html`, `mandal_chart.html` **intentionally keep their own styles** — each tool has its own personality. Do not migrate them to the VAS look unless Nova asks (decided 2026-10-26).
 
 | Token | Dark「器」(index, journal dark) | Light「思」(journal light) |
 |-------|------|-------|
