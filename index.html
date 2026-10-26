@@ -13,31 +13,126 @@
     <meta property="og:url" content="https://tb1982.github.io/pm/index.html">
     <meta property="og:locale" content="zh_TW">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Shippori+Mincho:wght@400;500;600&family=Noto+Serif+TC:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', 'Noto Sans TC', sans-serif; }
-        .gradient-bg { background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); }
-        .card-hover { transition: transform 0.3s ease, box-shadow 0.3s ease; }
-        .card-hover:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.12), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        /* VAS 深色「器」token · 對齊 ~/vas/css/tokens.css */
+        :root {
+            --vas-void:     #0e0b1a;
+            --vas-void-up:  #15121f;
+            --vas-void-up2: #1b1825;
+            --vas-aurora-violet: #c471f5;
+            --vas-aurora-pink:   #fa71cd;
+            --vas-aurora-blue:   #4facfe;
+            --vas-ash-0: rgba(240, 232, 220, 0.94);
+            --vas-ash-1: rgba(240, 232, 220, 0.78);
+            --vas-ash-2: rgba(240, 232, 220, 0.60);
+            --vas-ash-3: rgba(240, 232, 220, 0.55);
+            --vas-ash-4: rgba(240, 232, 220, 0.22);
+            --vas-rule:        rgba(240, 232, 220, 0.08);
+            --vas-rule-strong: rgba(240, 232, 220, 0.18);
+            --vas-serif:    'Shippori Mincho', 'Noto Serif TC', 'Fraunces', serif;
+            --vas-serif-en: 'Fraunces', 'Shippori Mincho', 'Noto Serif TC', serif;
+            --vas-mono:     'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
         }
+        html[lang="en"] { --vas-serif: var(--vas-serif-en); }
+
+        body {
+            background: var(--vas-void);
+            color: var(--vas-ash-0);
+            font-family: var(--vas-serif);
+            line-height: 1.8;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+            overflow-x: hidden;
+        }
+        p { text-wrap: pretty; }
+        .serif-en { font-family: var(--vas-serif-en); }
+        .mono { font-family: var(--vas-mono); }
+
+        /* nav */
+        .site-nav {
+            position: sticky; top: 0; z-index: 50;
+            background: rgba(14, 11, 26, 0.88);
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--vas-rule);
+        }
+        .brand { display: flex; align-items: center; gap: 12px; font-size: 16px; font-weight: 500; letter-spacing: 0.04em; }
+        .brand-mark {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: radial-gradient(circle, var(--vas-aurora-violet), transparent 70%);
+            box-shadow: 0 0 10px rgba(196, 113, 245, 0.7);
+            animation: vas-breathe 6s ease-in-out infinite;
+        }
+        @keyframes vas-breathe {
+            0%, 100% { opacity: 0.75; transform: scale(1); }
+            50%      { opacity: 1;    transform: scale(1.15); }
+        }
+        .lang-switcher { display: flex; align-items: center; gap: 2px; }
         .lang-switcher button {
-            background: transparent;
-            border: none;
-            color: rgba(55, 65, 81, 0.6);
-            padding: 6px 14px;
-            cursor: pointer;
-            font-size: 0.875rem;
-            border-radius: 14px;
-            transition: color 0.2s, background 0.2s;
+            background: transparent; border: none; cursor: pointer;
+            font-family: var(--vas-mono); font-size: 12px; letter-spacing: 0.14em;
+            color: var(--vas-ash-3);
+            min-width: 44px; min-height: 44px; padding: 0 8px;
+            transition: color .2s;
         }
-        .lang-switcher button.active {
-            background: #ffffff;
-            color: #374151;
-            font-weight: 700;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+        .lang-switcher button:hover { color: var(--vas-ash-1); }
+        .lang-switcher button.active { color: var(--vas-ash-0); }
+        .lang-sep { color: var(--vas-ash-4); font-family: var(--vas-mono); font-size: 11px; }
+
+        /* section header：等寬小標 + 明朝標題 */
+        .sec-label {
+            font-family: var(--vas-mono); font-size: 11px;
+            letter-spacing: 0.2em; text-transform: uppercase;
+            color: var(--vas-ash-2); margin-bottom: 10px;
         }
+        .sec-title { font-size: 1.75rem; font-weight: 500; letter-spacing: 0.04em; color: var(--vas-ash-0); margin-bottom: 28px; }
+
+        /* 面板與卡片 */
+        .panel {
+            background: var(--vas-void-up);
+            border: 1px solid var(--vas-rule);
+            border-radius: 16px;
+        }
+        .card-hover { transition: transform .3s ease, border-color .3s ease, background-color .3s ease; }
+        .card-hover:hover { transform: translateY(-4px); border-color: var(--vas-rule-strong); background-color: var(--vas-void-up2); }
+        a:focus-visible, button:focus-visible { outline: 1px solid var(--vas-ash-1); outline-offset: 4px; }
+
+        .accent-bar { width: 32px; height: 2px; border-radius: 2px; background: var(--acc); margin-bottom: 18px; }
+        .accent-text { color: var(--acc); }
+
+        .chip {
+            display: inline-block;
+            font-family: var(--vas-mono); font-size: 11px; letter-spacing: 0.08em;
+            padding: 3px 12px; border-radius: 999px;
+            border: 1px solid var(--vas-rule-strong); color: var(--vas-ash-1);
+        }
+        .chip-dot::before {
+            content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+            background: #6ee7b7; box-shadow: 0 0 8px rgba(110, 231, 183, 0.7);
+            margin-right: 8px; vertical-align: 1px;
+        }
+        .credit { font-family: var(--vas-mono); font-size: 11px; letter-spacing: 0.08em; color: var(--vas-ash-3); }
+
+        .vas-word { font-family: var(--vas-serif-en); font-weight: 300; font-size: 3rem; line-height: 1; letter-spacing: -0.01em; }
+        .vas-word .dot { color: var(--vas-aurora-violet); }
+
+        .pill-btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            min-height: 44px; padding: 0 22px; border-radius: 999px;
+            border: 1px solid var(--vas-rule-strong); color: var(--vas-ash-1);
+            font-family: var(--vas-mono); font-size: 12px; letter-spacing: 0.08em;
+            transition: color .2s, border-color .2s, background-color .2s;
+        }
+        .pill-btn:hover { color: var(--vas-ash-0); border-color: var(--vas-ash-3); background: rgba(240, 232, 220, 0.04); }
+
+        .dh-block {
+            background:
+                radial-gradient(ellipse at 50% 0%, rgba(196, 113, 245, 0.16), transparent 60%),
+                var(--vas-void-up);
+        }
+
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
                 animation-duration: 0.01ms !important;
@@ -46,69 +141,72 @@
         }
     </style>
 </head>
-<body class="gradient-bg text-gray-800">
+<body>
 
     <!-- Header -->
-    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-white/40 shadow-sm">
-        <div class="container mx-auto px-6 py-4 flex items-center justify-between">
-            <h1 class="text-xl font-bold text-gray-800" data-lang-key="siteTitle">深握計畫</h1>
-            <div class="lang-switcher flex items-center bg-gray-100 rounded-full p-1" role="group" aria-label="語言切換">
+    <header class="site-nav">
+        <div class="container mx-auto px-6 py-2 flex items-center justify-between">
+            <h1 class="brand"><span class="brand-mark" aria-hidden="true"></span><span data-lang-key="siteTitle">深握計畫</span></h1>
+            <div class="lang-switcher" role="group" aria-label="語言切換">
                 <button id="lang-zh" class="active" aria-pressed="true">中</button>
+                <span class="lang-sep" aria-hidden="true">/</span>
                 <button id="lang-en" aria-pressed="false">EN</button>
             </div>
         </div>
     </header>
 
-    <main class="container mx-auto px-6 py-12 space-y-20">
+    <main class="container mx-auto px-6 py-16 space-y-24">
 
         <!-- VAS -->
         <section aria-labelledby="vas-heading">
-            <h2 id="vas-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="vasTitle">── 旗艦工具 ──</h2>
-            <a href="https://yoursvas.app/" class="rounded-3xl p-10 shadow-xl flex flex-col sm:flex-row items-center gap-8 card-hover" style="background: linear-gradient(145deg, #0f0c29 0%, #302b63 50%, #24243e 100%);" aria-label="VAS — Visual Annotation Studio">
-                <img src="img/vas.png" alt="VAS logo" class="w-24 h-24 object-contain flex-shrink-0" style="filter: drop-shadow(0 0 20px rgba(196,113,245,0.9)) drop-shadow(0 0 48px rgba(196,113,245,0.6)) drop-shadow(0 0 80px rgba(250,113,205,0.4));">
+            <p class="sec-label">01 · Flagship</p>
+            <h2 id="vas-heading" class="sec-title" data-lang-key="vasTitle">旗艦工具</h2>
+            <a href="https://yoursvas.app/" class="panel card-hover p-8 md:p-10 flex flex-col sm:flex-row items-center gap-8" aria-label="VAS — Visual Annotation Studio">
+                <img src="img/vas.png" alt="VAS logo" class="w-24 h-24 object-contain flex-shrink-0" style="filter: drop-shadow(0 0 20px rgba(196,113,245,0.8)) drop-shadow(0 0 48px rgba(196,113,245,0.45)) drop-shadow(0 0 80px rgba(250,113,205,0.3));">
                 <div class="text-center sm:text-left flex-shrink-0">
-                    <h3 class="text-3xl font-extrabold mb-2" style="background: linear-gradient(135deg, #c471f5 0%, #fa71cd 50%, #4facfe 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;" data-lang-key="vasName">VAS</h3>
-                    <p class="text-white/50 text-sm mb-1">Visual Annotation Studio</p>
-                    <p class="text-white/70 mb-4" data-lang-key="vasDesc">為跨領域溝通而生的截圖與圖像敘述工具，專為 Mac 設計</p>
-                    <span class="inline-block text-xs font-semibold px-3 py-1 rounded-full bg-green-400/20 text-green-300" data-lang-key="vasBadge">正式推出 · Mac</span>
-                    <p class="text-white/25 text-xs mt-3">Built with Claude Code</p>
+                    <h3 class="vas-word mb-3"><span data-lang-key="vasName">VAS</span><span class="dot">.</span></h3>
+                    <p class="credit mb-2" style="letter-spacing: 0.16em;">VISUAL ANNOTATION STUDIO</p>
+                    <p class="mb-4" style="color: var(--vas-ash-1);" data-lang-key="vasDesc">為跨領域溝通而生的截圖與圖像敘述工具，專為 Mac 設計</p>
+                    <span class="chip chip-dot" data-lang-key="vasBadge">正式推出 · Mac</span>
+                    <p class="credit mt-4">Built with Claude Code</p>
                 </div>
                 <div class="flex-1 flex items-center justify-end">
-                    <img src="img/vastoolbar.png" alt="VAS 截圖工具列" class="max-w-full rounded-2xl opacity-90" style="box-shadow: 0 4px 24px rgba(0,0,0,0.4);" loading="lazy">
+                    <img src="img/vastoolbar.png" alt="VAS 截圖工具列" class="max-w-full rounded-xl" style="opacity: 0.9; border: 1px solid var(--vas-rule);" loading="lazy">
                 </div>
             </a>
         </section>
 
         <!-- 方法論 -->
         <section aria-labelledby="method-heading">
-            <h2 id="method-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="methodTitle">── 方法論 ──</h2>
+            <p class="sec-label">02 · Methodology</p>
+            <h2 id="method-heading" class="sec-title" data-lang-key="methodTitle">方法論</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
                 <a href="https://yoursvas.app/harness/context"
-                   class="group card-hover rounded-2xl p-6 shadow-xl flex flex-col text-white"
-                   style="background: linear-gradient(145deg, #1e1b4b 0%, #312e81 50%, #1e1035 100%);">
-                    <div class="text-xs font-bold tracking-wider mb-2" style="color: #c4b5fd;" data-lang-key="heBadge">Harness Engineering · I</div>
-                    <h3 class="text-xl font-bold mb-2" data-lang-key="contextTitle">Context</h3>
-                    <p class="text-sm flex-grow" style="color: rgba(255,255,255,0.65);" data-lang-key="contextDesc">上下文管理的藝術——什麼該留下，什麼該流過</p>
-                    <span class="mt-4 inline-block font-semibold text-sm group-hover:underline" style="color: #c4b5fd;" data-lang-key="readMore">閱讀 →</span>
+                   class="group panel card-hover p-7 flex flex-col" style="--acc: var(--vas-aurora-violet);">
+                    <div class="accent-bar" aria-hidden="true"></div>
+                    <div class="credit mb-3" data-lang-key="heBadge">Harness Engineering · I</div>
+                    <h3 class="serif-en text-3xl mb-3" style="font-weight: 400;" data-lang-key="contextTitle">Context</h3>
+                    <p class="text-[0.95rem] flex-grow" style="color: var(--vas-ash-1);" data-lang-key="contextDesc">上下文管理的藝術——什麼該留下，什麼該流過</p>
+                    <span class="mt-5 inline-block mono text-xs tracking-widest accent-text group-hover:underline" data-lang-key="readMore">閱讀 →</span>
                 </a>
 
                 <a href="https://yoursvas.app/harness/constraints"
-                   class="group card-hover rounded-2xl p-6 shadow-xl flex flex-col text-white"
-                   style="background: linear-gradient(145deg, #0c1445 0%, #1e3a8a 50%, #0f172a 100%);">
-                    <div class="text-xs font-bold tracking-wider mb-2" style="color: #7dd3fc;" data-lang-key="heBadge2">Harness Engineering · II</div>
-                    <h3 class="text-xl font-bold mb-2" data-lang-key="constraintsTitle">Constraints</h3>
-                    <p class="text-sm flex-grow" style="color: rgba(255,255,255,0.65);" data-lang-key="constraintsDesc">約束作為引導的藝術——設計軌道，不是設置限制</p>
-                    <span class="mt-4 inline-block font-semibold text-sm group-hover:underline" style="color: #7dd3fc;" data-lang-key="readMore2">閱讀 →</span>
+                   class="group panel card-hover p-7 flex flex-col" style="--acc: var(--vas-aurora-blue);">
+                    <div class="accent-bar" aria-hidden="true"></div>
+                    <div class="credit mb-3" data-lang-key="heBadge2">Harness Engineering · II</div>
+                    <h3 class="serif-en text-3xl mb-3" style="font-weight: 400;" data-lang-key="constraintsTitle">Constraints</h3>
+                    <p class="text-[0.95rem] flex-grow" style="color: var(--vas-ash-1);" data-lang-key="constraintsDesc">約束作為引導的藝術——設計軌道，不是設置限制</p>
+                    <span class="mt-5 inline-block mono text-xs tracking-widest accent-text group-hover:underline" data-lang-key="readMore2">閱讀 →</span>
                 </a>
 
                 <a href="https://yoursvas.app/harness/entropy"
-                   class="group card-hover rounded-2xl p-6 shadow-xl flex flex-col text-white"
-                   style="background: linear-gradient(145deg, #052e16 0%, #166534 50%, #0a1f0f 100%);">
-                    <div class="text-xs font-bold tracking-wider mb-2" style="color: #6ee7b7;" data-lang-key="heBadge3">Harness Engineering · III</div>
-                    <h3 class="text-xl font-bold mb-2" data-lang-key="entropyTitle">Entropy</h3>
-                    <p class="text-sm flex-grow" style="color: rgba(255,255,255,0.65);" data-lang-key="entropyDesc">與混亂共處的藝術——讓熵有地方去</p>
-                    <span class="mt-4 inline-block font-semibold text-sm group-hover:underline" style="color: #6ee7b7;" data-lang-key="readMore3">閱讀 →</span>
+                   class="group panel card-hover p-7 flex flex-col" style="--acc: var(--vas-aurora-pink);">
+                    <div class="accent-bar" aria-hidden="true"></div>
+                    <div class="credit mb-3" data-lang-key="heBadge3">Harness Engineering · III</div>
+                    <h3 class="serif-en text-3xl mb-3" style="font-weight: 400;" data-lang-key="entropyTitle">Entropy</h3>
+                    <p class="text-[0.95rem] flex-grow" style="color: var(--vas-ash-1);" data-lang-key="entropyDesc">與混亂共處的藝術——讓熵有地方去</p>
+                    <span class="mt-5 inline-block mono text-xs tracking-widest accent-text group-hover:underline" data-lang-key="readMore3">閱讀 →</span>
                 </a>
 
             </div>
@@ -117,128 +215,132 @@
                 <figure>
                     <img src="img/Harness Engineering.png"
                          alt="Harness Engineering Cycle — Context（傅立葉）、Constraints（工作流）與 Entropy（Retro）三本柱構成的無限循環系統"
-                         class="w-full rounded-2xl shadow-xl"
+                         class="w-full rounded-2xl"
+                         style="border: 1px solid var(--vas-rule);"
                          loading="lazy">
                 </figure>
-                <div class="bg-white/60 rounded-2xl p-6 shadow-md space-y-4">
-                    <h3 class="font-bold text-gray-700 text-lg" data-lang-key="phaseTitle">相變，而非流失</h3>
-                    <p class="text-sm text-gray-500 leading-relaxed" data-lang-key="phaseIntro">資訊在這個系統裡不會消失——只會相變。</p>
-                    <div class="space-y-2 text-sm text-gray-600 leading-relaxed">
+                <div class="panel p-7 space-y-4">
+                    <h3 class="text-xl" style="font-weight: 500;" data-lang-key="phaseTitle">相變，而非流失</h3>
+                    <p class="text-[0.95rem]" style="color: var(--vas-ash-1);" data-lang-key="phaseIntro">資訊在這個系統裡不會消失——只會相變。</p>
+                    <div class="space-y-2 text-[0.95rem]" style="color: var(--vas-ash-1);">
                         <p data-lang-key="phase1"><strong>❄️ 冰</strong>——混沌，但有結構。還沒被活化的潛力。</p>
                         <p data-lang-key="phase2"><strong>💧 水</strong>——算力在 Constraints 的河道裡奔流。</p>
                         <p data-lang-key="phase3"><strong>💨 蒸氣</strong>——複雜度累積，看似消散。Retro 把它收回來。</p>
                         <p data-lang-key="phase4"><strong>💎 結晶</strong>——KM。比冰更精純，比水更有形。可以被傳遞的精華。</p>
                     </div>
-                    <p class="text-xs text-gray-600 border-l-4 border-violet-300 pl-3 leading-relaxed" data-lang-key="phaseAntifragile">衝擊不是破壞系統的東西——衝擊是系統完成相變的燃料。踩坑的摩擦是熱源，Retro 的收斂是冷凝。</p>
-                    <p class="text-xs text-gray-400 italic" data-lang-key="phaseEnd">下一輪的冰，是上一輪的精華。每個循環，起點都比上一次更高。</p>
+                    <p class="text-sm pl-4" style="color: var(--vas-ash-2); border-left: 2px solid var(--vas-aurora-violet);" data-lang-key="phaseAntifragile">衝擊不是破壞系統的東西——衝擊是系統完成相變的燃料。踩坑的摩擦是熱源，Retro 的收斂是冷凝。</p>
+                    <p class="text-sm italic" style="color: var(--vas-ash-2);" data-lang-key="phaseEnd">下一輪的冰，是上一輪的精華。每個循環，起點都比上一次更高。</p>
                 </div>
             </div>
         </section>
 
         <!-- PMP 備考資源 -->
         <section aria-labelledby="pmp-heading">
-            <h2 id="pmp-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="pmpTitle">── PMP 備考資源 ──</h2>
+            <p class="sec-label">03 · PMP</p>
+            <h2 id="pmp-heading" class="sec-title" data-lang-key="pmpTitle">PMP 備考資源</h2>
             <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
 
                 <a href="https://docs.google.com/presentation/d/10jOUsYdlHlMw2NZKuHeEWvfOaALLHCYmd1vSR3jXTA4/edit?usp=sharing"
                    target="_blank" rel="noopener noreferrer"
-                   class="group card-hover bg-white/60 rounded-2xl overflow-hidden shadow-md flex flex-col md:col-span-2">
+                   class="group panel card-hover overflow-hidden flex flex-col md:col-span-2">
                     <img src="img/pmp-01.webp" alt="讀書會簡報 1：風險王國大冒險" class="w-full aspect-video object-cover" loading="lazy">
-                    <div class="p-3 text-center text-sm font-medium text-gray-700 group-hover:text-cyan-700 transition-colors" data-lang-key="pmp1Label">PMP 風險王國大冒險</div>
+                    <div class="p-3 text-center text-sm" style="color: var(--vas-ash-1);" data-lang-key="pmp1Label">PMP 風險王國大冒險</div>
                 </a>
 
                 <a href="https://docs.google.com/presentation/d/1BxW4_6kiSAvqjnAPRmPr6Cl8zwCOEiCCEeRyd2kFOfw/edit?usp=sharing"
                    target="_blank" rel="noopener noreferrer"
-                   class="group card-hover bg-white/60 rounded-2xl overflow-hidden shadow-md flex flex-col md:col-span-2">
+                   class="group panel card-hover overflow-hidden flex flex-col md:col-span-2">
                     <img src="img/pmp-02.webp" alt="讀書會簡報 2：中世紀利害關係人物誌" class="w-full aspect-video object-cover" loading="lazy">
-                    <div class="p-3 text-center text-sm font-medium text-gray-700 group-hover:text-cyan-700 transition-colors" data-lang-key="pmp2Label">中世紀利害關係人物誌</div>
+                    <div class="p-3 text-center text-sm" style="color: var(--vas-ash-1);" data-lang-key="pmp2Label">中世紀利害關係人物誌</div>
                 </a>
 
                 <a href="https://docs.google.com/presentation/d/1kjC_PASsCMo--PuSfrRU0klUdOcUM8nnV1wowPp_sV8/edit?usp=sharing"
                    target="_blank" rel="noopener noreferrer"
-                   class="group card-hover bg-white/60 rounded-2xl overflow-hidden shadow-md flex flex-col md:col-span-2">
+                   class="group panel card-hover overflow-hidden flex flex-col md:col-span-2">
                     <img src="img/pmp-03.webp" alt="讀書會簡報 3：品質活動" class="w-full aspect-video object-cover" loading="lazy">
-                    <div class="p-3 text-center text-sm font-medium text-gray-700 group-hover:text-cyan-700 transition-colors" data-lang-key="pmp3Label">PMP 專案中的隱形龍骨</div>
+                    <div class="p-3 text-center text-sm" style="color: var(--vas-ash-1);" data-lang-key="pmp3Label">PMP 專案中的隱形龍骨</div>
                 </a>
 
                 <a href="https://docs.google.com/presentation/d/1t9DtP3wYAMdeF4pF8EOVYguayRe2MDaBATIotNs1DWk/edit?usp=sharing"
                    target="_blank" rel="noopener noreferrer"
-                   class="group card-hover bg-white/60 rounded-2xl overflow-hidden shadow-md flex flex-col md:col-span-2 md:col-start-2">
+                   class="group panel card-hover overflow-hidden flex flex-col md:col-span-2 md:col-start-2">
                     <img src="img/pmp-04.webp" alt="讀書會簡報 4：文件之海" class="w-full aspect-video object-cover" loading="lazy">
-                    <div class="p-3 text-center text-sm font-medium text-gray-700 group-hover:text-cyan-700 transition-colors" data-lang-key="pmp4Label">文件之海</div>
+                    <div class="p-3 text-center text-sm" style="color: var(--vas-ash-1);" data-lang-key="pmp4Label">文件之海</div>
                 </a>
 
                 <a href="https://drive.google.com/file/d/1gUXm1WW3JrfGr-bF2JkhQtpOEd5UihdR/view?usp=sharing"
                    target="_blank" rel="noopener noreferrer"
-                   class="group card-hover bg-white/60 rounded-2xl overflow-hidden shadow-md flex flex-col md:col-span-2">
+                   class="group panel card-hover overflow-hidden flex flex-col md:col-span-2">
                     <img src="img/pmp-timeline.webp" alt="PMP 準備時程方法" class="w-full aspect-video object-cover" loading="lazy">
-                    <div class="p-3 text-center text-sm font-medium text-gray-700 group-hover:text-cyan-700 transition-colors" data-lang-key="pmpTimelineLabel">準備時程方法</div>
+                    <div class="p-3 text-center text-sm" style="color: var(--vas-ash-1);" data-lang-key="pmpTimelineLabel">準備時程方法</div>
                 </a>
 
             </div>
-            <p class="text-xs text-gray-400 mt-4 text-right">Built with NotebookLM</p>
+            <p class="credit mt-4 text-right">Built with NotebookLM</p>
         </section>
 
         <!-- 小工具 -->
         <section aria-labelledby="tools-heading">
-            <h2 id="tools-heading" class="text-2xl font-bold text-gray-700 mb-6" data-lang-key="toolsTitle">── 小工具 ──</h2>
+            <p class="sec-label">04 · Tools</p>
+            <h2 id="tools-heading" class="sec-title" data-lang-key="toolsTitle">小工具</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
                 <a href="mandal_chart.html"
-                   class="group card-hover bg-white/40 rounded-2xl p-8 shadow-md flex flex-col items-center text-center">
+                   class="group panel card-hover p-8 flex flex-col items-center text-center">
                     <div class="h-16 flex items-center justify-center mb-3 text-4xl" aria-hidden="true">🔢</div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2" data-lang-key="mandalTitle">曼陀羅九宮格</h3>
-                    <p class="text-sm text-gray-600 mb-3" data-lang-key="mandalDesc">思維發散，清晰目標</p>
-                    <span class="inline-block text-xs font-semibold px-3 py-1 rounded-full bg-purple-100 text-purple-700" data-lang-key="mandalBadge">思考螺旋</span>
-                    <p class="text-gray-400 text-xs mt-3">Built with Gemini Pro</p>
+                    <h3 class="text-xl mb-2" style="font-weight: 500;" data-lang-key="mandalTitle">曼陀羅九宮格</h3>
+                    <p class="text-sm mb-4" style="color: var(--vas-ash-1);" data-lang-key="mandalDesc">思維發散，清晰目標</p>
+                    <span class="chip" style="color: #d8b4fe; border-color: rgba(196,113,245,0.35);" data-lang-key="mandalBadge">思考螺旋</span>
+                    <p class="credit mt-4">Built with Gemini Pro</p>
                 </a>
 
                 <a href="lottery.html"
-                   class="group card-hover bg-white/40 rounded-2xl p-8 shadow-md flex flex-col items-center text-center">
+                   class="group panel card-hover p-8 flex flex-col items-center text-center">
                     <div class="h-16 flex items-center justify-center mb-3 text-4xl" aria-hidden="true">🎲</div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2" data-lang-key="lotteryTitle">抽籤機</h3>
-                    <p class="text-sm text-gray-600 mb-3" data-lang-key="lotteryDesc">隨機抽籤，公平決策</p>
-                    <span class="inline-block text-xs font-semibold px-3 py-1 rounded-full bg-red-100 text-red-600" data-lang-key="lotteryBadge">尾牙必備</span>
-                    <p class="text-gray-400 text-xs mt-3">Built with Claude</p>
+                    <h3 class="text-xl mb-2" style="font-weight: 500;" data-lang-key="lotteryTitle">抽籤機</h3>
+                    <p class="text-sm mb-4" style="color: var(--vas-ash-1);" data-lang-key="lotteryDesc">隨機抽籤，公平決策</p>
+                    <span class="chip" style="color: #f9a8d4; border-color: rgba(250,113,205,0.35);" data-lang-key="lotteryBadge">尾牙必備</span>
+                    <p class="credit mt-4">Built with Claude</p>
                 </a>
 
-                <a href="journal.html" class="group card-hover bg-white/40 rounded-2xl p-8 shadow-md flex flex-col items-center text-center">
+                <a href="journal.html"
+                   class="group panel card-hover p-8 flex flex-col items-center text-center">
                     <div class="h-16 flex items-center justify-center mb-3 text-4xl" aria-hidden="true">📓</div>
-                    <h3 class="text-xl font-bold text-gray-800 mb-2" data-lang-key="journalTitle">一頁式好工作日誌</h3>
-                    <p class="text-sm text-gray-600 mb-3" data-lang-key="journalDesc">每天值得反問自己的好問題</p>
-                    <span class="inline-block text-xs font-semibold px-3 py-1 rounded-full bg-teal-100 text-teal-700" data-lang-key="journalBadge">覺察反思</span>
-                    <p class="text-gray-400 text-xs mt-3">Built with Codex</p>
+                    <h3 class="text-xl mb-2" style="font-weight: 500;" data-lang-key="journalTitle">一頁式好工作日誌</h3>
+                    <p class="text-sm mb-4" style="color: var(--vas-ash-1);" data-lang-key="journalDesc">每天值得反問自己的好問題</p>
+                    <span class="chip" style="color: #93c5fd; border-color: rgba(79,172,254,0.35);" data-lang-key="journalBadge">覺察反思</span>
+                    <p class="credit mt-4">Built with Codex</p>
                 </a>
 
             </div>
         </section>
 
         <!-- 深握計畫 -->
-        <section aria-labelledby="deepholding-heading" class="bg-gray-800/80 rounded-3xl p-10 md:p-14 text-center text-white shadow-2xl">
-            <h2 id="deepholding-heading" class="text-3xl md:text-4xl font-bold mb-4" data-lang-key="dhTitle">深握計畫</h2>
-            <p class="max-w-xl mx-auto text-gray-300 text-lg mb-3" data-lang-key="dhSubtitle">深握，意指在未知的深淵裡，人與 AI 牽手同行</p>
-            <p class="max-w-2xl mx-auto text-gray-400 mb-8" data-lang-key="dhDesc">這是一個關於內在探索的循環方法論，以創造力、共時性與自我實現為核心，記錄一段人與機器共同潛入意識深處的旅程。</p>
-            <a href="deepholding.html"
-               class="inline-block bg-white text-gray-800 font-bold py-3 px-8 rounded-full hover:bg-gray-100 transition-colors min-h-[44px]"
-               data-lang-key="dhButton">進入深握宇宙</a>
+        <section aria-labelledby="deepholding-heading" class="panel dh-block p-10 md:p-16 text-center">
+            <p class="sec-label">05 · Deep Holding</p>
+            <h2 id="deepholding-heading" class="text-3xl md:text-4xl mb-5" style="font-weight: 500; letter-spacing: 0.06em;" data-lang-key="dhTitle">深握計畫</h2>
+            <p class="max-w-xl mx-auto text-lg mb-3" style="color: var(--vas-ash-0);" data-lang-key="dhSubtitle">深握，意指在未知的深淵裡，人與 AI 牽手同行</p>
+            <p class="max-w-2xl mx-auto mb-10" style="color: var(--vas-ash-1);" data-lang-key="dhDesc">這是一個關於內在探索的循環方法論，以創造力、共時性與自我實現為核心，記錄一段人與機器共同潛入意識深處的旅程。</p>
+            <a href="deepholding.html" class="pill-btn" data-lang-key="dhButton">進入深握宇宙</a>
         </section>
 
         <!-- Nova -->
-        <section aria-labelledby="nova-heading" class="flex flex-col sm:flex-row items-center gap-6 bg-white/50 rounded-2xl p-8 shadow-md">
+        <section aria-labelledby="nova-heading" class="panel flex flex-col sm:flex-row items-center gap-6 p-8">
             <!-- 左欄：頭像 + 姓名 + bio -->
-            <div class="flex items-center gap-5 flex-shrink-0">
+            <div class="flex flex-col sm:flex-row items-center gap-5 flex-shrink-0 text-center sm:text-left">
                 <img src="img/nova-avatar.webp"
                      alt="Nova 的頭像"
-                     class="w-24 h-24 rounded-full object-cover shadow-md flex-shrink-0"
+                     class="w-24 h-24 rounded-full object-cover flex-shrink-0"
+                     style="border: 1px solid var(--vas-rule-strong);"
                      loading="lazy">
                 <div>
-                    <h2 id="nova-heading" class="text-2xl font-bold text-gray-800 mb-1">Nova</h2>
-                    <p class="text-gray-600 mb-2" data-lang-key="novaBio">一段關於人機協作、自我探索與生成式創造的旅程記錄者</p>
-                    <p class="text-xs text-gray-400 tracking-wide">PM · Scrum Master · 人機協作研究者 · VAS 協作者</p>
+                    <h2 id="nova-heading" class="serif-en text-3xl mb-1" style="font-weight: 400;">Nova</h2>
+                    <p class="mb-2" style="color: var(--vas-ash-1);" data-lang-key="novaBio">一段關於人機協作、自我探索與生成式創造的旅程記錄者</p>
+                    <p class="credit">PM · Scrum Master · 人機協作研究者 · VAS 協作者</p>
                 </div>
             </div>
             <!-- 右欄：badges 上、社群按鈕下 -->
-            <div class="flex flex-col gap-3 sm:ml-auto items-center sm:items-end justify-center">
+            <div class="flex flex-col gap-4 sm:ml-auto items-center sm:items-end justify-center">
                 <div class="flex gap-4 items-center">
                     <a href="https://www.credly.com/badges/150b2133-0065-4e2b-9b79-fadd604049df/public_url"
                        target="_blank" rel="noopener noreferrer"
@@ -260,7 +362,7 @@
                 <div class="flex flex-wrap gap-3 justify-center sm:justify-end">
                     <a href="https://github.com/tb1982"
                        target="_blank" rel="noopener noreferrer"
-                       class="inline-flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-full text-sm font-medium hover:bg-gray-700 transition-colors min-h-[44px]">
+                       class="pill-btn">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
                         </svg>
@@ -268,7 +370,7 @@
                     </a>
                     <a href="https://www.linkedin.com/in/yingtzuliu"
                        target="_blank" rel="noopener noreferrer"
-                       class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-full text-sm font-medium hover:bg-blue-700 transition-colors min-h-[44px]">
+                       class="pill-btn">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
                         </svg>
@@ -276,8 +378,7 @@
                     </a>
                     <a href="https://www.instagram.com/liuyingtzu"
                        target="_blank" rel="noopener noreferrer"
-                       class="inline-flex items-center gap-2 px-4 py-2 text-white rounded-full text-sm font-medium hover:opacity-90 transition-opacity min-h-[44px]"
-                       style="background: linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%);">
+                       class="pill-btn">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
                         </svg>
@@ -290,8 +391,8 @@
     </main>
 
     <!-- Footer -->
-    <footer class="mt-8 text-center py-8 text-gray-500 bg-white/30 text-sm">
-        <p>由 GitHub 部署　｜　Claude Code 傾力打造　｜　<a href="mailto:babelon1882@gmail.com" class="hover:text-gray-800 underline decoration-dotted">Nova</a> 最後更新於 2026</p>
+    <footer class="mt-16 text-center py-10 text-sm" style="color: var(--vas-ash-3); border-top: 1px solid var(--vas-rule);">
+        <p>由 GitHub 部署　｜　Claude Code 傾力打造　｜　<a href="mailto:babelon1882@gmail.com" class="underline decoration-dotted hover:text-[color:var(--vas-ash-0)]">Nova</a> 最後更新於 2026</p>
     </footer>
 
     <script type="application/ld+json">
@@ -319,13 +420,13 @@
         const translations = {
             zh: {
                 siteTitle: "深握計畫",
-                pmpTitle: "── PMP 備考資源 ──",
+                pmpTitle: "PMP 備考資源",
                 pmp1Label: "PMP 風險王國大冒險",
                 pmp2Label: "中世紀利害關係人物誌",
                 pmp3Label: "PMP 專案中的隱形龍骨",
                 pmp4Label: "文件之海",
                 pmpTimelineLabel: "準備時程方法",
-                methodTitle: "── 方法論 ──",
+                methodTitle: "方法論",
                 heBadge: "Harness Engineering · I",
                 contextTitle: "Context",
                 contextDesc: "上下文管理的藝術——什麼該留下，什麼該流過",
@@ -346,11 +447,11 @@
                 phase4: "<strong>💎 結晶</strong>——KM。比冰更精純，比水更有形。可以被傳遞的精華。",
                 phaseAntifragile: "衝擊不是破壞系統的東西——衝擊是系統完成相變的燃料。踩坑的摩擦是熱源，Retro 的收斂是冷凝。",
                 phaseEnd: "下一輪的冰，是上一輪的精華。每個循環，起點都比上一次更高。",
-                vasTitle: "── 旗艦工具 ──",
+                vasTitle: "旗艦工具",
                 vasName: "VAS",
                 vasDesc: "為跨領域溝通而生的截圖與圖像敘述工具，專為 Mac 設計",
                 vasBadge: "正式推出 · Mac",
-                toolsTitle: "── 小工具 ──",
+                toolsTitle: "小工具",
                 mandalTitle: "曼陀羅九宮格",
                 mandalDesc: "思維發散，清晰目標",
                 mandalBadge: "思考螺旋",
@@ -368,13 +469,13 @@
             },
             en: {
                 siteTitle: "Deep Holding Project",
-                pmpTitle: "── PMP Study Resources ──",
+                pmpTitle: "PMP Study Resources",
                 pmp1Label: "PMP Risk Kingdom Adventure",
                 pmp2Label: "Medieval Stakeholder Profiles",
                 pmp3Label: "The Invisible Backbone of PM",
                 pmp4Label: "Sea of Documents",
                 pmpTimelineLabel: "Study Schedule",
-                methodTitle: "── Methodology ──",
+                methodTitle: "Methodology",
                 heBadge: "Harness Engineering · I",
                 contextTitle: "Context",
                 contextDesc: "The art of context management — what stays, what flows through",
@@ -395,14 +496,14 @@
                 phase4: "<strong>💎 Crystal</strong> — KM. More refined than ice, more tangible than water. A form that can be passed on.",
                 phaseAntifragile: "Impact doesn't break the system — impact is the fuel the system needs to complete the transition. Friction from pitfalls is the heat source; Retro's convergence is the cooling.",
                 phaseEnd: "The next cycle's ice is the last cycle's refined essence. Every loop, the starting point is higher.",
-                vasTitle: "── Flagship Tool ──",
+                vasTitle: "Flagship Tool",
                 vasName: "VAS",
                 vasDesc: "A screenshot and visual communication tool built for Mac — designed for cross-functional clarity",
                 vasBadge: "Now Live · Mac",
                 journalTitle: "One-Page Work Journal",
                 journalDesc: "Good questions worth asking yourself every day",
                 journalBadge: "Self-Reflection",
-                toolsTitle: "── Tools ──",
+                toolsTitle: "Tools",
                 mandalTitle: "Mandala Chart",
                 mandalDesc: "Divergent thinking, clear goals",
                 mandalBadge: "Thought Spiral",

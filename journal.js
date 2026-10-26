@@ -404,10 +404,10 @@ function loadImage(src) {
 async function drawSummaryCard(context, question, answer, x, y, width, height, palette) {
   fillRoundedRect(context, x, y, width, height, 24, palette.card, palette.border);
   context.fillStyle = palette.text;
-  context.font = "700 27px 'Noto Sans TC', 'Segoe UI', sans-serif";
+  context.font = "600 27px 'Shippori Mincho', 'Noto Serif TC', serif";
   context.fillText(question.title, x + 22, y + 40);
 
-  context.font = "500 20px 'Noto Sans TC', 'Segoe UI', sans-serif";
+  context.font = "500 20px 'Shippori Mincho', 'Noto Serif TC', serif";
   const linesUsed = drawTextBlock(context, answer.text, x + 22, y + 82, width - 44, 30, 6, palette.text);
   const imageTop = y + 82 + Math.max(linesUsed, 1) * 30 + 14;
 
@@ -455,6 +455,11 @@ async function drawSummaryCard(context, question, answer, x, y, width, height, p
 }
 
 async function renderExportCanvas() {
+  await Promise.all([
+    document.fonts.load("600 32px 'Shippori Mincho'", "日誌"),
+    document.fonts.load("500 20px 'Shippori Mincho'", "日誌"),
+    document.fonts.load("500 12px 'JetBrains Mono'")
+  ]).catch(() => {});
   const palette = getThemePalette();
   const canvas = document.createElement("canvas");
   canvas.width = 2800;
@@ -468,7 +473,7 @@ async function renderExportCanvas() {
   context.fillRect(0, 0, width, height);
 
   const gradient = context.createRadialGradient(width / 2, 80, 40, width / 2, 80, 420);
-  gradient.addColorStop(0, document.body.dataset.theme === "dark" ? "rgba(91,124,223,0.18)" : "rgba(138,156,190,0.18)");
+  gradient.addColorStop(0, document.body.dataset.theme === "dark" ? "rgba(196,113,245,0.16)" : "rgba(139,58,31,0.08)");
   gradient.addColorStop(1, "rgba(0,0,0,0)");
   context.fillStyle = gradient;
   context.fillRect(0, 0, width, height);
@@ -476,20 +481,20 @@ async function renderExportCanvas() {
   fillRoundedRect(context, 24, 24, width - 48, height - 48, 28, palette.panelStrong, palette.border);
 
   context.fillStyle = palette.muted;
-  context.font = "500 12px 'Segoe UI', sans-serif";
+  context.font = "500 12px 'JetBrains Mono', monospace";
   context.fillText("ONE-PAGE WORK JOURNAL", 52, 56);
 
   context.fillStyle = palette.text;
-  context.font = "700 32px 'Noto Sans TC', 'Segoe UI', sans-serif";
+  context.font = "600 32px 'Shippori Mincho', 'Noto Serif TC', serif";
   context.fillText("一頁式好工作日誌", 52, 92);
 
   fillRoundedRect(context, 74, 116, width - 148, 86, 20, palette.card, palette.border);
   context.fillStyle = palette.muted;
-  context.font = "500 14px 'Noto Sans TC', 'Segoe UI', sans-serif";
+  context.font = "500 14px 'Shippori Mincho', 'Noto Serif TC', serif";
   context.fillText("日期", 100, 144);
   context.fillText("名字", 330, 144);
   context.fillStyle = palette.text;
-  context.font = "600 18px 'Noto Sans TC', 'Segoe UI', sans-serif";
+  context.font = "600 18px 'Shippori Mincho', 'Noto Serif TC', serif";
   context.fillText(dateInput.value || "", 100, 174);
   context.fillText(nameInput.value || "", 330, 174);
 
@@ -499,7 +504,7 @@ async function renderExportCanvas() {
   context.arc(width - 168, 152, 7, 0, Math.PI * 2);
   context.fill();
   context.fillStyle = palette.muted;
-  context.font = "500 18px 'Segoe UI', sans-serif";
+  context.font = "500 18px 'JetBrains Mono', monospace";
   context.fillText(summaryClock.textContent, width - 154, 158);
 
   const gridX = 74;
