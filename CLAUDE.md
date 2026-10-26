@@ -135,7 +135,7 @@ Deployed via GitHub　｜　Built with Claude Code　｜　Last updated 2026 by 
 | Styling | Tailwind CSS (CDN), inline CSS3 |
 | Scripting | Vanilla JavaScript |
 | Charts | Chart.js (CDN) |
-| Fonts | Google Fonts — Noto Sans TC, Inter |
+| Fonts | Google Fonts — Shippori Mincho, Fraunces, JetBrains Mono, Noto Serif TC (VAS-aligned; see `designrule.md`) |
 | Canvas | HTML5 Canvas API (`deepholding.html`) |
 
 **No build tools. No package manager. No TypeScript. No testing framework.**

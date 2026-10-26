@@ -1,32 +1,37 @@
+/* 淺色 = VAS「思」紙墨鏽調；深色 = VAS「器」void 調（對齊 ~/vas/css/theme.css、tokens.css） */
 :root {
   color-scheme: light dark;
-  --bg: #eff4fb;
-  --bg2: #d6e1f1;
-  --panel: rgba(255, 255, 255, 0.68);
-  --panel-strong: rgba(255, 255, 255, 0.82);
-  --card: rgba(255, 255, 255, 0.6);
-  --border: rgba(97, 117, 147, 0.18);
-  --text: #203044;
-  --muted: #66768d;
-  --accent: #4f7cff;
-  --accent-soft: rgba(79, 124, 255, 0.14);
-  --shadow: 0 24px 70px rgba(52, 70, 95, 0.18);
-  --glow: 0 0 30px rgba(118, 165, 255, 0.22);
+  --serif: 'Shippori Mincho', 'Noto Serif TC', 'Fraunces', serif;
+  --mono: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
+  --bg: #faf8f3;
+  --bg2: #eae4d6;
+  --panel: rgba(250, 248, 243, 0.72);
+  --panel-strong: rgba(250, 248, 243, 0.9);
+  --card: rgba(242, 238, 228, 0.7);
+  --border: rgba(26, 24, 22, 0.12);
+  --text: rgba(26, 24, 22, 0.96);
+  --muted: rgba(26, 24, 22, 0.66);
+  --accent: #8b3a1f;
+  --accent-soft: rgba(139, 58, 31, 0.12);
+  --on-accent: #faf8f3;
+  --shadow: 0 24px 60px rgba(26, 24, 22, 0.12);
+  --glow: 0 0 24px rgba(139, 58, 31, 0.18);
 }
 
 [data-theme="dark"] {
-  --bg: #07101d;
-  --bg2: #13233c;
-  --panel: rgba(12, 19, 32, 0.68);
-  --panel-strong: rgba(14, 22, 36, 0.88);
-  --card: rgba(255, 255, 255, 0.05);
-  --border: rgba(135, 162, 232, 0.14);
-  --text: #edf2fc;
-  --muted: #97a5bb;
-  --accent: #8fb0ff;
-  --accent-soft: rgba(143, 176, 255, 0.16);
-  --shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
-  --glow: 0 0 36px rgba(143, 176, 255, 0.24);
+  --bg: #0e0b1a;
+  --bg2: #15121f;
+  --panel: rgba(21, 18, 31, 0.7);
+  --panel-strong: rgba(27, 24, 37, 0.9);
+  --card: rgba(240, 232, 220, 0.04);
+  --border: rgba(240, 232, 220, 0.1);
+  --text: rgba(240, 232, 220, 0.94);
+  --muted: rgba(240, 232, 220, 0.62);
+  --accent: #c471f5;
+  --accent-soft: rgba(196, 113, 245, 0.16);
+  --on-accent: #0e0b1a;
+  --shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+  --glow: 0 0 30px rgba(196, 113, 245, 0.3);
 }
 
 * { box-sizing: border-box; }
@@ -34,7 +39,8 @@
 html, body {
   margin: 0;
   min-height: 100%;
-  font-family: "Noto Sans TC", "Segoe UI", sans-serif;
+  font-family: var(--serif);
+  -webkit-font-smoothing: antialiased;
   background:
     radial-gradient(circle at top, color-mix(in srgb, var(--accent), transparent 82%), transparent 34%),
     linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
@@ -73,10 +79,13 @@ button, input, textarea { font: inherit; }
 .kicker, .stage-label, .summary-meta-label, .field span {
   margin: 0;
   color: var(--muted);
-  font-size: 0.76rem;
-  letter-spacing: 0.16em;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
 }
+
+.title-row h1, .floating-card h2, .summary-item h3 { font-weight: 500; letter-spacing: 0.03em; }
 
 .title-row {
   display: flex;
@@ -156,6 +165,7 @@ button, input, textarea { font: inherit; }
 }
 
 .clock {
+  font-family: var(--mono);
   font-size: 0.92rem;
   color: var(--muted);
   letter-spacing: 0.08em;
@@ -385,8 +395,8 @@ button, input, textarea { font: inherit; }
 
 .primary-action {
   border: 1px solid transparent;
-  background: color-mix(in srgb, var(--accent), transparent 24%);
-  color: white;
+  background: var(--accent);
+  color: var(--on-accent);
   box-shadow: var(--glow);
 }
 
@@ -631,8 +641,8 @@ button, input, textarea { font: inherit; }
   padding: 0 18px;
   border-radius: 999px;
   border: 1px solid var(--border);
-  background: color-mix(in srgb, var(--accent), transparent 28%);
-  color: white;
+  background: var(--accent);
+  color: var(--on-accent);
   box-shadow: var(--glow);
   cursor: pointer;
   backdrop-filter: blur(12px);

@@ -8,15 +8,22 @@ Read this before any HTML or CSS change.
 - **Tailwind CSS utility classes** are the primary styling mechanism.
 - Custom styles go in a `<style>` block inside `<head>`.
 
-### Colour & Gradients
-| Token | Value |
-|-------|-------|
-| `gradient-bg` | `#f5f7fa → #c3cfe2` |
-| Card gradients | purple-blue, pink-red, green-blue |
-| Glassmorphism | `background: rgba(255,255,255,0.2)` + `backdrop-filter: blur(10px)` |
+### Visual language — aligned with VAS (2026-10)
+`index.html` and `journal.html` follow VAS's current design (source of truth: `~/vas/css/tokens.css` dark, `~/vas/css/theme.css` light).
+`deepholding.html`, `lottery.html`, `mandal_chart.html` still use their own older styles — not yet migrated.
+
+| Token | Dark「器」(index, journal dark) | Light「思」(journal light) |
+|-------|------|-------|
+| Background | `#0e0b1a` (`--vas-void`), raised `#15121f` / `#1b1825` | paper `#faf8f3`, raised `#f2eee4` / `#eae4d6` |
+| Text | `rgba(240,232,220, .94 / .78 / .60 / .55)` (`--vas-ash-0…3`) | ink `rgba(26,24,22, .96 / .80 / .66)` |
+| Rule lines | `rgba(240,232,220, .08 / .18)` | `rgba(26,24,22, .12 / .24)` |
+| Accent | violet `#c471f5`, pink `#fa71cd`, blue `#4facfe` | rust `#8b3a1f`, gold `#a8895c` |
+
+- Surfaces: flat panels with a 1px hairline border — no drop shadows, no colourful gradient cards.
+- Section header: mono label (`01 · FLAGSHIP`) above a serif `<h2>`.
 
 ### Motion
-- Hover lift: `transform: translateY(-10px)` with box-shadow transition.
+- Hover lift: `transform: translateY(-4px)` with border-colour transition.
 - Always include reduced-motion guard on pages with CSS transitions:
 ```css
 @media (prefers-reduced-motion: reduce) {
@@ -28,7 +35,11 @@ Read this before any HTML or CSS change.
 ```
 
 ### Typography
-- Font stack: `'Inter', 'Noto Sans TC', sans-serif`
+- Serif (body + headings, zh): `'Shippori Mincho', 'Noto Serif TC', 'Fraunces', serif`
+- Serif (EN mode, wordmarks): `'Fraunces', 'Shippori Mincho', 'Noto Serif TC', serif`
+- Mono (labels, credits, clock, buttons): `'JetBrains Mono', 'SF Mono', ui-monospace, monospace`
+- Shippori Mincho loads up to weight 600 — never ask for 700 (also applies to canvas `context.font`).
+- Noto Serif TC is a fallback only: Google Fonts downloads its slices just for glyphs Shippori lacks.
 - Body text minimum: `1rem` (16px) on mobile; never below `0.875rem` for readable content.
 
 ### Orphan Prevention
